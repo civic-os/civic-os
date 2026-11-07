@@ -5230,7 +5230,13 @@
     "table_schema": "public",
     "udt_name": "time_slot",
     "udt_schema": "pg_catalog",
-    "validation_rules": []
+    "validation_rules": [
+      {
+        "message": "Choose a pickup and return time.",
+        "type": "required",
+        "value": null
+      }
+    ]
   },
   {
     "category_entity_type": null,
@@ -8194,7 +8200,13 @@
     "table_schema": "public",
     "udt_name": "time_slot",
     "udt_schema": "pg_catalog",
-    "validation_rules": []
+    "validation_rules": [
+      {
+        "message": "Choose a pickup and return time.",
+        "type": "required",
+        "value": null
+      }
+    ]
   },
   {
     "category_entity_type": null,

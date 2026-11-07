@@ -237,7 +237,7 @@ through these areas adds friction to every change, which argues for phasing.
   `depends_on_columns`. Every consumer wants all of it, unconditionally.
 - **Presentation defaults**: `show_on_list/create/edit/detail`, `sort_order`,
   `column_width`, `display_name`, `sortable`, `filterable`; at entity level
-  `show_in_sidebar`, `sort_order`. A custom app overrides or ignores these.
+  `sort_order` (the default entity order). Sidebar placement lives in the menu tree (`metadata.menu_nodes`, v0.81.0), which core interprets through `buildMenu`; `EntityPresentation.showInSidebar` was removed. A custom app overrides or ignores these.
 
 The SDK splits them into `PropertySchema` and `PropertyPresentation`, and
 exposes a **render plan** as the output of a resolver with three inputs:

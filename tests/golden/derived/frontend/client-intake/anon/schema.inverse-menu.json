@@ -15,17 +15,12 @@
       "all": [],
       "excluding": []
     },
-    "referrals_per_week": {
-      "afterExclude": [],
-      "all": [],
-      "excluding": []
-    },
     "service_categories": {
       "afterExclude": [],
       "all": [],
       "excluding": []
     }
   },
-  "management": ["referrals_per_week", "service_categories", "partners", "newsletters"],
+  "management": ["service_categories", "partners", "newsletters"],
   "menu": ["service_categories", "partners", "newsletters"]
 }

@@ -34,8 +34,6 @@ export interface SchemaEntityTable {
     is_view?: boolean,
     // Guided form membership (v0.48.0)
     guided_form_key?: string | null,
-    // Sidebar visibility (v0.48.0)
-    show_in_sidebar?: boolean,
     // Rich junction flag (v0.51.0)
     // When true, junction table has extra editable columns beyond FKs
     is_rich_junction?: boolean,

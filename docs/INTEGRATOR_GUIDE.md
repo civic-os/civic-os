@@ -42,7 +42,7 @@ Key fields:
 - `table_name` (PK) - PostgreSQL table name (from `public` schema)
 - `display_name` - Friendly name shown in menu and page titles
 - `description` - Optional description shown on List pages
-- `sort_order` - Menu ordering (lower numbers appear first)
+- `sort_order` - Default entity order (lower numbers first): Detail related sections, the MCP entity list, and entities with no sidebar menu node. Sidebar placement, nesting and visibility live in `metadata.menu_nodes` (see [Menu Configuration](#menu-configuration-v0810)); `show_in_sidebar` was removed in v0.81.0
 - `search_fields` - TEXT[] array of columns for full-text search
 - `show_on_map` - BOOLEAN - Enable map visualization on List page
 - `map_property_name` - Column name with geography data (requires `show_on_map=true`)
@@ -1043,7 +1043,7 @@ Parameters:
 - `p_table_name` TEXT - Table name
 - `p_display_name` TEXT - Friendly name (NULL = no change)
 - `p_description` TEXT - Description (NULL = no change)
-- `p_sort_order` INT - Menu ordering (NULL = no change)
+- `p_sort_order` INT - Default entity order (NULL = no change); sidebar order is set in `metadata.menu_nodes`
 - `p_search_fields` TEXT[] - Full-text search columns (NULL = no change)
 - `p_show_on_map` BOOLEAN - Enable map view (NULL = no change)
 - `p_map_property_name` TEXT - Geography column name (NULL = no change)
@@ -5372,6 +5372,84 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 ```
 
 **The `/admin/config` page.** Admins (anyone with `metadata.instance_config:update`) see it in the sidebar's Admin section. Each group is a collapsible section; each field saves on its own, one second after the last keystroke (toggles and selects at once), and shows Saving, Saved or the error. An unset field's placeholder shows the inherited environment value and its variable name, and **Reset** clears the stored value. A read-only **Deployment** section lists the values only the deployer can change (favicon, PWA, map tile server). Open it with `?returnTo=/some/path` to get a **Done** button that goes back there; only same-origin paths are accepted.
+
+### Menu Configuration (v0.81.0+)
+
+The sidebar lists your entities as a tree of headings and entity links, stored in `metadata.menu_nodes`. The tree decides which entities appear in the sidebar, in what order, under which heading, and under what label. Admins edit it at `/admin/menu`; integrators can seed it in SQL.
+
+**Rules.**
+
+- A node is a `heading` (a label with no target) or an `entity` (a link). The tree is at most three levels deep, the root being level 1.
+- Headings sit at the root or under a heading. Entity nodes sit at the root, under a heading or under another entity node.
+- An entity node's `node_key` is its table name (also its `target_key`). A heading's `node_key` is a slug matching `^[a-z][a-z0-9_]*$`, and a heading needs a `display_name`.
+- Each entity has at most one node. The target must be a table in the `public` schema or a view registered in `metadata.entities` (virtual entities qualify). Junction tables are never listed.
+- `is_hidden = TRUE` hides the node and everything under it. A hidden entity is not offered again as "unplaced".
+- An entity with no node still appears at the root, after every root node, ordered among the other unplaced entities by its `sort_order` and then its table name. A new table shows up at the end of the menu without any menu SQL; place it when you want it elsewhere.
+- Siblings order by `sort_order` (NULL counts as 0) and then `node_key`.
+- A node whose target is no longer listable (the table was dropped, or it is a junction table) is dropped and its children take its place. A heading with no visible entry under it disappears.
+- Label: the node's `display_name`, else the entity's display name. `collapsed_by_default` starts a heading or parent entity closed. The branch that holds the current page is always open, and each user's open and closed choices persist in the browser (`localStorage` key `civic-os.menu.open`).
+- A root heading renders as a section title like the sidebar's About and Admin, with its entries at the root indent. Root entities that follow a heading (usually the unplaced ones), or every root entity when there is no heading, sit under a **Data** title, so they never read as part of the heading above. Root entities placed before the first heading show untitled, under Home. Data, About and Admin collapse like headings, start open, and stay open while they hold the current page.
+- The database enforces the structural rules with a trigger on `metadata.menu_nodes`, so SQL that breaks them fails with a check violation.
+
+**Seeding the tree.** Writes to `metadata.menu_nodes` are for migrations and init scripts (the table is not exposed to API roles). Insert parents before children.
+
+```sql
+-- A heading, with two entities under it
+INSERT INTO metadata.menu_nodes (node_key, node_kind, display_name, icon, sort_order)
+VALUES ('operations', 'heading', 'Operations', 'engineering', 20);
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, parent_node_key, sort_order)
+VALUES ('work_orders', 'entity', 'work_orders', 'operations', 10),
+       ('inspections', 'entity', 'inspections', 'operations', 20);
+
+-- An entity nested under another entity (a sub-list under its parent)
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, parent_node_key, sort_order)
+VALUES ('work_order_notes', 'entity', 'work_order_notes', 'work_orders', 10);
+
+-- Hide an entity from the sidebar (its pages still work)
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, is_hidden)
+VALUES ('audit_log', 'entity', 'audit_log', TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
+
+-- A label that differs from the entity's display name, with a translation
+UPDATE metadata.menu_nodes SET display_name = 'Field Visits' WHERE node_key = 'inspections';
+
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
+('menu_node', 'operations.display_name', 'es', 'Operaciones'),
+('menu_node', 'inspections.display_name', 'es', 'Visitas de campo');
+```
+
+Menu labels translate through source type `menu_node` and key `<node_key>.display_name`. A node with no `display_name` uses the entity's name, which translates through its own `entity` key. Translation Admin picks up nodes that have a `display_name` as source type `menu_node`.
+
+**The `/admin/menu` page** (admin only, linked from Entity Management). The editor works on a draft and changes nothing for users until you press **Save menu**; **Discard changes** returns to the saved tree.
+
+- Drag rows to reorder or nest them, or use the Move up, Move down, Indent and Outdent buttons. Keyboard moves are announced to screen readers.
+- Each row has a label, icon and Collapsed by default, and an eye button that hides or shows it. A hidden row shrinks to one line (dimmed name, a Hidden badge and the row buttons). An entity row's label placeholder is the entity's display name; the editor edits the untranslated base label, so use the translations table (or Translation Admin) for other locales.
+- A **Not shown** badge marks an entity row the sidebar leaves out for you: a junction table, a table you cannot read (it still shows to users who can), or a table or view that no longer exists. These rows never block saving.
+- **Not in the menu** lists tables and views that have no row. They show at the root until placed; **Add to menu** places one. Removing a row from the tree returns it there.
+- **Add a heading** creates a root heading whose key is a slug of its label. The key never changes after that, so renaming the label later keeps its translations.
+- A live preview shows the menu as users will see it. Structural problems (depth, a heading under an entity, duplicates) are reported before save.
+- Saving calls `save_menu_tree(p_nodes jsonb)`, which replaces the whole tree in one transaction (admin only). There is no conflict check: the last save wins. A stored entity node whose table or view has since been dropped (or the view unregistered) is skipped and its children move up to its parent, so a dropped table never makes the menu unsaveable; the result lists the skipped keys in `skipped`, and the editor reloads to show the stored tree. A new node with a bad target is still rejected.
+
+Open browsers pick up a saved menu on their next navigation. Menu edits refresh only the menu, not the entity schema.
+
+**Ordering and `sort_order`.** `metadata.entities.sort_order` still means the default entity order: it orders the Detail page's related sections, the MCP server's entity list, and entities that have no menu node. Sidebar order comes from `metadata.menu_nodes.sort_order` for placed entities.
+
+**If the menu cannot load.** The sidebar shows Home, a notice and a Retry button. It never falls back to a flat entity list, because that would show entities the menu hides.
+
+**Upgrading from `show_in_sidebar` (v0.81.0).** The `metadata.entities.show_in_sidebar` column and the `p_show_in_sidebar` parameter of `upsert_entity_metadata()` are gone, and `schema_entities` no longer returns the column. The migration creates a hidden root entity node for each entity that had `show_in_sidebar = FALSE`. Visible entities get no node, so they show after the (empty) root in their `sort_order`, and an upgraded instance looks the same as before and the same as a fresh install. Install scripts that wrote the column or passed the parameter fail after the upgrade. Replace a `show_in_sidebar = FALSE` with a hidden node:
+
+```sql
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('my_table', 'entity', 'my_table', 10, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
+```
+
+Drop `p_show_in_sidebar` from `upsert_entity_metadata()` calls (the function now takes 16 parameters; named-argument calls just remove the argument). A script that sets `show_in_sidebar = TRUE` needs nothing: entities without a node already show. `add_guided_form_step()` hides step tables with a hidden node. Entities registered after the migration have no node until you place or hide them.
+
+**Rolling back.** Reverting the migration restores `show_in_sidebar` and writes a flat `sort_order` (position times 10, in the menu's top-to-bottom order). An entity is hidden if its node or any ancestor was hidden. Headings, nesting, labels, icons, collapsed flags and menu translations are lost, so export `schema_menu_nodes` first if you want them back.
+
+Not in v0.81.0: custom-page nodes (the node kind is reserved), dashboards in the menu, per-role menus, and a grouping hint for the MCP server (it addresses entities by name and ignores the menu). See `docs/notes/MENU_CONFIGURATION_DESIGN.md` for the design.
 
 ### Generated Types for Custom Apps
 

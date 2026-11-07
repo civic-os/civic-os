@@ -18,6 +18,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { EntityManagementPage } from './entity-management.page';
 import { SchemaService } from '../../services/schema.service';
 import { EntityManagementService } from '../../services/entity-management.service';
@@ -62,6 +63,7 @@ describe('EntityManagementPage', () => {
             imports: [EntityManagementPage],
             providers: [
                 provideZonelessChangeDetection(),
+                provideRouter([]),
                 provideTranslationTesting(),
                 { provide: SchemaService, useValue: mockSchemaService },
                 { provide: EntityManagementService, useValue: mockEntityManagementService }
@@ -338,8 +340,7 @@ describe('EntityManagementPage', () => {
             await advanceTime(10);
             expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith('Issue', 'Updated Issues', 'Track issues', 0, false, null, false, null, null, undefined, // enable_notes
             undefined, // supports_recurring
-            undefined, // recurring_property_name
-            true // show_in_sidebar
+            undefined // recurring_property_name
             );
             await advanceTime(5000);
         });

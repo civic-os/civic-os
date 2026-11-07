@@ -23,6 +23,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { SchemaService } from './schema.service';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../interfaces/entity';
 import { createMockEntity, createMockProperty, MOCK_PROPERTIES, MOCK_ENTITIES, expectPostgrestRequest, flushM2mMetadata } from '../testing';
+import { settle } from '../testing/await-http';
 import { provideTranslationTesting } from '../testing/translation-testing';
 import { LocaleService } from './locale.service';
 import { environment } from '../../environments/environment';
@@ -2673,6 +2674,85 @@ describe('SchemaService', () => {
             httpMock.expectOne(req => req.url.includes('schema_domain_version'))
                 .flush({ code: 'PGRST205' }, { status: 404, statusText: 'Not Found' });
             expect(await info$).toBeUndefined();
+        });
+    });
+
+    describe('getMenu()', () => {
+        const node = (key: string, o: Record<string, unknown> = {}) => ({
+            node_key: key, node_kind: 'entity', target_key: key, display_name: null, icon: null,
+            parent_node_key: null, sort_order: null, is_hidden: false, collapsed_by_default: false, ...o
+        });
+        const flushFragment = (fragment: string, body: any, status = 200) =>
+            httpMock.match(r => r.url.includes(fragment)).forEach(r =>
+                status === 200 ? r.flush(structuredClone(body)) : r.flush({ code: 'X' }, { status, statusText: 'Error' }));
+        const entities = () => [
+            { ...MOCK_ENTITIES.issue, table_name: 'a', display_name: 'A' },
+            { ...MOCK_ENTITIES.issue, table_name: 'b', display_name: 'B' },
+        ];
+        const emissions = (): { states: any[] } => {
+            const holder = { states: [] as any[] };
+            service.getMenu().subscribe(st => holder.states.push(st));
+            return holder;
+        };
+        // Requests follow one another across microtasks, so flush in rounds until the chain is quiet.
+        const flushAll = async (nodes: unknown[], nodesStatus = 200) => {
+            for (let i = 0; i < 5; i++) {
+                flushFragment('schema_entities', entities());
+                flushFragment('schema_properties', []);
+                flushFragment('schema_m2m_properties', []);
+                flushFragment('schema_menu_nodes', nodes, nodesStatus);
+                await settle();
+            }
+        };
+
+        it('starts loading, then builds the menu from entities and nodes', async () => {
+            const held = emissions();
+            expect(held.states.length).toBe(0);
+            await flushAll([node('b', { sort_order: -1 })]);
+            const last = held.states.at(-1);
+            expect(last.status).toBe('ready');
+            expect(last.entries.map((e: any) => e.key)).toEqual(['b', 'a']);
+        });
+
+        it('leaves out an entity whose node is hidden', async () => {
+            const held = emissions();
+            await flushAll([node('a', { is_hidden: true })]);
+            expect(held.states.at(-1).entries.map((e: any) => e.key)).toEqual(['b']);
+        });
+
+        it('sends one schema_menu_nodes request for many subscribers and navigations', async () => {
+            const heldA = emissions();
+            for (let i = 0; i < 6; i++) emissions();
+            const reqs = httpMock.match(r => r.url.includes('schema_menu_nodes'));
+            expect(reqs.length).toBe(1);
+            reqs[0].flush([]);
+            await flushAll([]);
+            expect(heldA.states.at(-1).status).toBe('ready');
+            // already cached: a later subscriber sends nothing
+            emissions();
+            httpMock.expectNone(r => r.url.includes('schema_menu_nodes'));
+        });
+
+        it('reports an error state, never an unfiltered entity list, when the nodes fail', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            const held = emissions();
+            await flushAll([], 500);
+            expect(held.states.at(-1)).toEqual({ status: 'error' });
+        });
+
+        it('retries through refreshMenuCache without refetching entities', async () => {
+            vi.spyOn(console, 'error').mockReturnValue(undefined);
+            const held = emissions();
+            await flushAll([], 500);
+            expect(held.states.at(-1).status).toBe('error');
+
+            service.refreshMenuCache();
+            httpMock.expectNone(r => r.url.includes('schema_entities'));
+            await settle();
+            flushFragment('schema_menu_nodes', [node('a')]);
+            await settle();
+            expect(held.states.at(-1).status).toBe('ready');
+            expect(held.states.at(-1).entries.map((e: any) => e.key)).toEqual(['a', 'b']);
         });
     });
 });

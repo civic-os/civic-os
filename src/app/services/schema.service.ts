@@ -18,15 +18,15 @@
 import { HttpClient } from '@angular/common/http';
 import { DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, combineLatest, defer, filter, map, of, tap, finalize, catchError, take } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, defer, filter, map, of, tap, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle, FilterCriteria } from '@civic-os/core';
-import { hasKeyFilters, resolveKeyFilters, SchemaClient } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle, FilterCriteria, MenuEntry, MenuNodeRow } from '@civic-os/core';
+import { buildMenu, hasKeyFilters, resolveKeyFilters, SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
 import { validatorForRule } from '../sdk/validators';
@@ -34,6 +34,18 @@ import { toLegacyError } from '../sdk/legacy-error';
 import { validationRules, inverseRelationships, getJunctionTableNamesFromProperties as coreGetJunctionTableNamesFromProperties, detectJunctionTables as coreDetectJunctionTables, enrichPropertiesWithManyToMany as coreEnrichPropertiesWithManyToMany, propsForList, propsForDetail, propsForCreate, propsForEdit, propsForFilter, getDefaultValueForProperty as coreGetDefaultValueForProperty, compareBySortOrder, getColumnSpan as coreGetColumnSpan, getRenderableColumnSpan as coreGetRenderableColumnSpan, resolvePlan, getPropertyType as coreGetPropertyType, propertyToSelectString as corePropertyToSelectString, propertyToSelectStringForEdit as corePropertyToSelectStringForEdit, propertyToSelectStringForList as corePropertyToSelectStringForList } from '@civic-os/core';
 
 export type { M2mPropertyMetadata, StatusOption, CategoryOption } from '@civic-os/core';
+
+/**
+ * The sidebar menu as the app sees it:
+ * - `loading`: the entities or menu nodes have not arrived yet.
+ * - `ready`: the built, visible tree (may be empty).
+ * - `error`: the menu nodes failed to load. The host shows a retry notice and no entity
+ *   links, because a flat entity list would expose entities a menu node hides.
+ */
+export type MenuState =
+  | { status: 'loading' }
+  | { status: 'ready'; entries: readonly MenuEntry[] }
+  | { status: 'error' };
 
 @Injectable({
   providedIn: 'root'
@@ -71,6 +83,24 @@ export class SchemaService {
       const snapshot = store.getSnapshot();
       if (snapshot !== undefined) {
         this.tables.set(snapshot);
+      }
+    });
+    inject(DestroyRef).onDestroy(unsubscribe);
+  })();
+
+  // Menu nodes (`schema_menu_nodes`): the client caches and deduplicates the request; this subject
+  // mirrors its store plus the last load failure. A cold or invalidated store keeps the previous
+  // nodes (like entities) so the sidebar does not flash while a refetch is in flight.
+  private readonly menuNodeState$ = new BehaviorSubject<MenuNodeRow[] | 'loading' | 'error'>('loading');
+  private menuLoadFailed = false;
+  private menuWanted = false;
+  private readonly menuNodesStoreSync = (() => {
+    const store = this.client.menuNodesStore;
+    const unsubscribe = store.subscribe(() => {
+      const snapshot = store.getSnapshot();
+      if (snapshot !== undefined) {
+        this.menuLoadFailed = false;
+        this.menuNodeState$.next(snapshot);
       }
     });
     inject(DestroyRef).onDestroy(unsubscribe);
@@ -186,6 +216,7 @@ export class SchemaService {
     this.client.invalidateStaticText();
     this.client.invalidateStatuses();
     this.client.invalidateCategories();
+    this.client.invalidateMenuNodes();
     // Clear processed cache (properties must be cleared so next fetch uses new locale)
     this.properties = undefined;
     this.constraintMessages = undefined;
@@ -201,6 +232,30 @@ export class SchemaService {
     // triggers a fresh fetch with the correct Accept-Language header,
     // while avoiding unnecessary form rebuilds across the app.
     this.loadEntities();
+    // Menu labels are translated server-side; refetch them only once something shows the menu.
+    if (this.menuWanted) this.loadMenuNodes();
+  }
+
+  /**
+   * Refresh only the menu nodes (the `menu` cache version changed). Entities are not refetched.
+   * Also the retry for a failed menu load.
+   */
+  public refreshMenuCache(): void {
+    this.client.invalidateMenuNodes();
+    this.menuLoadFailed = false;
+    this.loadMenuNodes();
+  }
+
+  /** Loads the menu nodes into the client (which feeds `menuNodes`); a failure sets the error state. */
+  private loadMenuNodes(): void {
+    this.cached$(() => this.client.peekMenuNodes(), () => this.client.getMenuNodes())
+      .subscribe({
+        error: err => {
+          console.error('Failed to load menu nodes:', err);
+          this.menuLoadFailed = true;
+          this.menuNodeState$.next('error');
+        }
+      });
   }
 
   /**
@@ -704,28 +759,37 @@ export class SchemaService {
   }
 
   /**
-   * Get entities for menu display (excluding junction tables).
-   * Junction tables are hidden from the menu but still accessible via direct URL.
-   *
-   * @returns Observable of entities excluding detected junction tables
+   * The sidebar menu: the non-junction entities and the cached menu nodes passed through core
+   * `buildMenu` (hidden nodes, ordering and placement are core's rules). Emits `loading` until
+   * both have arrived, `error` when the nodes fail to load (never an unfiltered entity list),
+   * then `ready`. Subscribing starts the node load if nothing is cached; core caches and shares
+   * the one in-flight request, so any number of subscribers and navigations send one request.
+   * A new emission follows a refresh ({@link refreshMenuCache}) or locale change.
    */
-  public getEntitiesForMenu(): Observable<SchemaEntityTable[]> {
-    return combineLatest([
-      this.getEntities(),
-      this.getDetectedJunctionTables()
-    ]).pipe(
-      map(([allTables, junctions]) =>
-        allTables.filter(t =>
-          !junctions.has(t.table_name) && t.show_in_sidebar !== false
-        )
-      )
+  public getMenu(): Observable<MenuState> {
+    return defer(() => {
+      this.menuWanted = true;
+      if (this.client.peekMenuNodes() === undefined && !this.menuLoadFailed) {
+        this.loadMenuNodes();
+      }
+      return combineLatest([
+        this.getEntities(),
+        this.getDetectedJunctionTables(),
+        this.menuNodeState$
+      ]);
+    }).pipe(
+      map(([allTables, junctions, nodes]): MenuState => {
+        if (nodes === 'error') return { status: 'error' };
+        if (nodes === 'loading') return { status: 'loading' };
+        const eligible = allTables.filter(t => !junctions.has(t.table_name));
+        return { status: 'ready', entries: buildMenu(eligible, nodes) };
+      })
     );
   }
 
   /**
    * Get entities for the Entity Management admin page.
-   * Excludes junction tables but includes sidebar-hidden entities
-   * so admins can toggle visibility.
+   * Excludes junction tables but includes entities the menu hides.
    */
   public getEntitiesForManagement(): Observable<SchemaEntityTable[]> {
     return combineLatest([

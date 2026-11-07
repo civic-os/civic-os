@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "land_bank",
     "color": "#ef4444",
     "description": null,
     "display_name": "Land Bank",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "private",
     "color": "#22c55e",
     "description": null,
     "display_name": "Private",

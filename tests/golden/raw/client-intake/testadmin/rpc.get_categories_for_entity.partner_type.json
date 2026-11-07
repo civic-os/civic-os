@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "organization",
     "color": "#3B82F6",
     "description": null,
     "display_name": "Organization",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "individual",
     "color": "#F59E0B",
     "description": null,
     "display_name": "Individual",

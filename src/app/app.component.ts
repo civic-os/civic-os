@@ -20,15 +20,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
 import { filter } from 'rxjs';
-import { SchemaService } from './services/schema.service';
+import { SchemaService, MenuState } from './services/schema.service';
 import { VersionService } from './services/version.service';
 import { ThemeService } from './services/theme.service';
 import { ImpersonationService } from './services/impersonation.service';
-import { Observable } from 'rxjs';
 import { OpenAPIV2 } from 'openapi-types';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SchemaEntityTable } from './interfaces/entity';
 import { AuthService } from './services/auth.service';
 import { UserManagementService } from './services/user-management.service';
 import { StaticAssetsService } from './services/static-assets.service';
@@ -47,7 +45,12 @@ import { MaintenanceBannerComponent } from './components/maintenance-banner/main
 import { PwaInstallBannerComponent } from './components/pwa-install-banner/pwa-install-banner.component';
 import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-update-toast.component';
 import { MaintenanceService } from './services/maintenance.service';
+import { SidebarMenuComponent } from './components/sidebar-menu/sidebar-menu.component';
+import { SIDEBAR_SECTION_KEYS, SidebarOpenStateService } from './components/sidebar-menu/sidebar-open-state.service';
 import { ContrastTextDirective } from './directives/contrast-text.directive';
+
+/** Route prefixes of the sidebar's Admin section links. */
+const ADMIN_SECTION_ROUTES = ['/entity-management', '/property-management', '/permissions', '/admin', '/notifications', '/system'];
 
 @Component({
     selector: 'app-root',
@@ -65,7 +68,8 @@ import { ContrastTextDirective } from './directives/contrast-text.directive';
     MaintenanceBannerComponent,
     PwaInstallBannerComponent,
     PwaUpdateToastComponent,
-    ContrastTextDirective
+    ContrastTextDirective,
+    SidebarMenuComponent
 ],
     templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
@@ -117,8 +121,30 @@ export class AppComponent implements AfterViewInit {
   private _schemaInit = this.schema.init();
   private _versionInit = this.version.init().subscribe();
 
-  // Menu items exclude detected junction tables (accessible via direct URL)
-  public menuItems$: Observable<SchemaEntityTable[] | undefined> = this.schema.getEntitiesForMenu();
+  // The built sidebar menu (junction tables excluded, hidden nodes removed). `error` shows a retry notice.
+  public menuState = toSignal(this.schema.getMenu(), { initialValue: { status: 'loading' } as MenuState });
+
+  // Visible menu entries; empty while loading or on error
+  public menuEntries = computed(() => {
+    const state = this.menuState();
+    return state.status === 'ready' ? state.entries : [];
+  });
+
+  // Router URL as a signal, for the sidebar's active link and open branch
+  public currentUrl = signal(this.router.url);
+
+  // Open state of the sidebar's collapsible sections (shared with the menu tree); a section holding the current page stays open
+  public sidebarOpen = inject(SidebarOpenStateService);
+  public readonly sectionKeys = SIDEBAR_SECTION_KEYS;
+  public aboutActive = computed(() => this.currentUrl().startsWith('/schema-editor'));
+  public adminActive = computed(() => {
+    const url = this.currentUrl();
+    return ADMIN_SECTION_ROUTES.some(prefix => url === prefix || url.startsWith(prefix + '/') || url.startsWith(prefix + '?'));
+  });
+
+  public retryMenu(): void {
+    this.schema.refreshMenuCache();
+  }
 
   // Convert entities to signal for computed checks
   private entities = toSignal(this.schema.getEntities());
@@ -223,6 +249,7 @@ export class AppComponent implements AfterViewInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.checkIfDashboardRoute(event.urlAfterRedirects);
+      this.currentUrl.set(event.urlAfterRedirects);
 
       // Static routes carry a `titleKey` in their route data. Dynamic pages
       // (list/detail/create/edit) set their own title once entity metadata resolves.

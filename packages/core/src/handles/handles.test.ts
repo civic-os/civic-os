@@ -37,7 +37,6 @@ const entity = (over: Partial<SchemaEntityTable> = {}): SchemaEntityTable =>
     update: false,
     delete: false,
     enable_notes: true,
-    show_in_sidebar: false,
     ...over,
   } as SchemaEntityTable);
 
@@ -126,7 +125,7 @@ describe('EntityHandle', () => {
     expect(h.name).toBe('issues');
     expect(h.exists).toBe(true);
     expect(h.structural).toMatchObject({ name: 'issues', displayName: 'Issues', description: 'Reported issues', searchFields: ['title'] });
-    expect(h.presentation).toEqual({ sortOrder: 3, showInSidebar: false });
+    expect(h.presentation).toEqual({ sortOrder: 3 });
     expect(h.schema).toEqual({ isView: false, isRichJunction: false });
     expect(h.can).toEqual({ insert: true, select: true, update: false, delete: false });
     expect(h.features).toMatchObject({ notes: true, map: true, mapProperty: 'location', calendar: false, payment: false, recurring: false, guidedFormKey: null });

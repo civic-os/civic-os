@@ -295,6 +295,25 @@
         },
         {
           "method": "GET",
+          "path": "/schema_menu_nodes",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_menu_nodes"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_properties",
           "query": {},
           "headers": {

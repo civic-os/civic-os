@@ -2,7 +2,7 @@
   "actionAnomalies": {},
   "actionCounts": {"probes": 4, "resolvedToSelf": 4},
   "columnAnomalies": {},
-  "columnCounts": {"probes": 123, "resolvedToSelf": 123},
+  "columnCounts": {"probes": 111, "resolvedToSelf": 111},
   "entities": {
     "newsletters": {"byDisplayName": "newsletters", "byFirstWord": "newsletters", "byPaddedDisplayName": "newsletters", "byTableName": "newsletters", "byUpperDisplayName": "newsletters", "displayName": "Newsletter"},
     "partner_service_categories": {
@@ -14,14 +14,6 @@
       "displayName": "partner_service_categories"
     },
     "partners": {"byDisplayName": "partners", "byFirstWord": "partners", "byPaddedDisplayName": "partners", "byTableName": "partners", "byUpperDisplayName": "partners", "displayName": "Partner"},
-    "referrals_per_week": {
-      "byDisplayName": "referrals_per_week",
-      "byFirstWord": "referrals_per_week",
-      "byPaddedDisplayName": "referrals_per_week",
-      "byTableName": "referrals_per_week",
-      "byUpperDisplayName": "referrals_per_week",
-      "displayName": "Referrals Per Week"
-    },
     "service_categories": {"byDisplayName": "service_categories", "byFirstWord": "service_categories", "byPaddedDisplayName": "service_categories", "byTableName": "service_categories", "byUpperDisplayName": "service_categories", "displayName": "Service Category"}
   }
 }

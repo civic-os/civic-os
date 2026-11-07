@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "block_party",
     "color": "#22c55e",
     "description": null,
     "display_name": "Block Party",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "community_fair",
     "color": "#3b82f6",
     "description": null,
     "display_name": "Community Fair",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "fundraiser",
     "color": "#f59e0b",
     "description": null,
     "display_name": "Fundraiser",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "birthday_party",
     "color": "#8b5cf6",
     "description": null,
     "display_name": "Birthday Party",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "memorial",
     "color": "#6b7280",
     "description": null,
     "display_name": "Memorial",
@@ -35,6 +40,7 @@
     "sort_order": 5
   },
   {
+    "category_key": "other",
     "color": "#94a3b8",
     "description": null,
     "display_name": "Other",

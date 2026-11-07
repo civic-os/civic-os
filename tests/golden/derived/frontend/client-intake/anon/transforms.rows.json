@@ -345,48 +345,6 @@
         }
       }
     },
-    "referrals_per_week": {
-      "createProps": [],
-      "editProps": [],
-      "rows": {
-        "empty": {
-          "createFormInput": {},
-          "editFormInput": {},
-          "outputs": {
-            "*": {
-              "control": {},
-              "createApi": {},
-              "editApi": {}
-            }
-          },
-          "rawRow": {}
-        },
-        "odd": {
-          "createFormInput": {},
-          "editFormInput": {},
-          "outputs": {
-            "*": {
-              "control": {},
-              "createApi": {},
-              "editApi": {}
-            }
-          },
-          "rawRow": {}
-        },
-        "typical": {
-          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
-          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
-          "outputs": {
-            "*": {
-              "control": {},
-              "createApi": {"extra_key": "kept"},
-              "editApi": {"extra_key": "kept"}
-            }
-          },
-          "rawRow": {}
-        }
-      }
-    },
     "service_categories": {
       "createProps": ["display_name:TextLong", "description:TextLong", "color:Color", "active:Boolean", "sort_order:IntegerNumber"],
       "editProps": ["display_name:TextLong", "description:TextLong", "color:Color", "active:Boolean", "sort_order:IntegerNumber"],

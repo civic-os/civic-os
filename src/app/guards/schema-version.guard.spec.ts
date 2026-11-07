@@ -29,7 +29,8 @@ describe('schemaVersionGuard', () => {
             refreshEntitiesCache: vi.fn().mockName("SchemaService.refreshEntitiesCache"),
             refreshPropertiesCache: vi.fn().mockName("SchemaService.refreshPropertiesCache"),
             refreshStatusesCache: vi.fn().mockName("SchemaService.refreshStatusesCache"),
-            invalidateCategoryCache: vi.fn().mockName("SchemaService.invalidateCategoryCache")
+            invalidateCategoryCache: vi.fn().mockName("SchemaService.invalidateCategoryCache"),
+            refreshMenuCache: vi.fn().mockName("SchemaService.refreshMenuCache")
         };
         mockProfileService = {
             invalidateCache: vi.fn().mockName("ProfileService.invalidateCache")
@@ -65,6 +66,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: false
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(noChanges));
@@ -93,6 +95,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(entitiesChanged));
@@ -120,6 +123,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(propertiesChanged));
@@ -147,6 +151,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(bothChanged));
@@ -174,6 +179,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(profileChanged));
@@ -201,6 +207,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: true,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(configChanged));
@@ -225,6 +232,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: true,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(statusesChanged));
@@ -246,6 +254,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: true,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(categoriesChanged));
@@ -259,6 +268,29 @@ describe('schemaVersionGuard', () => {
         expect(mockSchemaService.refreshStatusesCache).not.toHaveBeenCalled();
     });
 
+    it('should refetch only the menu when the menu version changed', async () => {
+        const menuChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: false,
+            propertiesNeedsRefresh: false,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            instanceConfigNeedsRefresh: false,
+            statusesNeedsRefresh: false,
+            categoriesNeedsRefresh: false,
+            menuNeedsRefresh: true,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(menuChanged));
+
+        const result = await TestBed.runInInjectionContext(() =>
+            firstValueFrom(schemaVersionGuard(mockRoute, mockState) as Observable<boolean>));
+
+        expect(result).toBe(true);
+        expect(mockSchemaService.refreshMenuCache).toHaveBeenCalledTimes(1);
+        expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
+        expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+    });
+
     it('should always return true to allow navigation', async () => {
         const bothChanged: CacheUpdateCheck = {
             entitiesNeedsRefresh: true,
@@ -268,6 +300,7 @@ describe('schemaVersionGuard', () => {
             instanceConfigNeedsRefresh: false,
             statusesNeedsRefresh: false,
             categoriesNeedsRefresh: false,
+            menuNeedsRefresh: false,
             hasChanges: true
         };
         mockVersionService.checkForUpdates.mockReturnValue(of(bothChanged));

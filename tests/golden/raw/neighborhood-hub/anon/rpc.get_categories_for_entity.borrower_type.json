@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "resident",
     "color": "#22c55e",
     "description": null,
     "display_name": "Resident",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "non_resident",
     "color": "#f59e0b",
     "description": null,
     "display_name": "Non-Resident",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "volunteer_group",
     "color": "#3b82f6",
     "description": null,
     "display_name": "Volunteer Group",

@@ -34,7 +34,6 @@ function makeMockClient(): PostgRESTClient {
             update: true,
             delete: false,
             sort_order: 1,
-            show_in_sidebar: true,
           },
         ],
         schema_properties: [

@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "very_helpful",
     "color": "#22C55E",
     "description": null,
     "display_name": "Very Helpful",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "somewhat_helpful",
     "color": "#F59E0B",
     "description": null,
     "display_name": "Somewhat Helpful",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "not_helpful",
     "color": "#EF4444",
     "description": null,
     "display_name": "Not Helpful",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "could_not_contact",
     "color": "#6B7280",
     "description": null,
     "display_name": "Could Not Make Contact",

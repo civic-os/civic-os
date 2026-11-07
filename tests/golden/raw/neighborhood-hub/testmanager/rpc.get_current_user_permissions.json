@@ -1,17 +1,5 @@
 [
   {
-    "permission": "read",
-    "table_name": "borrowers"
-  },
-  {
-    "permission": "update",
-    "table_name": "borrowers"
-  },
-  {
-    "permission": "read",
-    "table_name": "borrowers:notes"
-  },
-  {
     "permission": "create",
     "table_name": "building_use_requests"
   },
@@ -22,10 +10,6 @@
   {
     "permission": "read",
     "table_name": "census_block_groups"
-  },
-  {
-    "permission": "read",
-    "table_name": "checkout_instances"
   },
   {
     "permission": "create",
@@ -48,23 +32,11 @@
     "table_name": "tool_instances"
   },
   {
-    "permission": "read",
-    "table_name": "tool_instances:notes"
-  },
-  {
-    "permission": "read",
-    "table_name": "tool_reservation_checkouts"
-  },
-  {
     "permission": "create",
     "table_name": "tool_reservations"
   },
   {
     "permission": "read",
     "table_name": "tool_types"
-  },
-  {
-    "permission": "read",
-    "table_name": "training_records"
   }
 ]

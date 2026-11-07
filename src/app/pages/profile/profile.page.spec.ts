@@ -82,7 +82,7 @@ describe('ProfilePage', () => {
             getPropsForDetail: vi.fn().mockName("SchemaService.getPropsForDetail"),
             init: vi.fn().mockName("SchemaService.init"),
             getEntities: vi.fn().mockName("SchemaService.getEntities"),
-            getEntitiesForMenu: vi.fn().mockName("SchemaService.getEntitiesForMenu"),
+            getEntitiesForManagement: vi.fn().mockName("SchemaService.getEntitiesForManagement"),
             refreshEntitiesCache: vi.fn().mockName("SchemaService.refreshEntitiesCache"),
             refreshPropertiesCache: vi.fn().mockName("SchemaService.refreshPropertiesCache"),
             getPropertiesForEntity: vi.fn().mockName("SchemaService.getPropertiesForEntity"),
@@ -136,7 +136,7 @@ describe('ProfilePage', () => {
         mockNotificationService.getBulkEmailSubscriptions.mockReturnValue(of([]));
         mockNotificationService.updateBulkUnsubscribe.mockReturnValue(of({ success: true }));
         mockSchemaService.getEntities.mockReturnValue(of([]));
-        mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+        mockSchemaService.getEntitiesForManagement.mockReturnValue(of([]));
         mockSchemaService.getInverseRelationships.mockReturnValue(of([]));
         mockSchemaService.getEntityActions.mockReturnValue(of([]));
         mockProfileService.getExtensionRecord.mockReturnValue(of([]));

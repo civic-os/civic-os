@@ -26,7 +26,7 @@ import { ConfigService } from '../services/config.service';
 /**
  * Navigation guard that checks for schema cache updates before each route activation.
  * Compares database schema versions with locally cached versions and refreshes
- * only the changed caches (entities, properties, profile extensions or instance config).
+ * only the changed caches (entities, properties, menu, profile extensions or instance config).
  *
  * This enables automatic schema updates without page refresh when:
  * - Admins modify entity metadata (display names, sort order)
@@ -77,6 +77,10 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
 
       if (updateCheck.categoriesNeedsRefresh) {
         schemaService.invalidateCategoryCache();
+      }
+
+      if (updateCheck.menuNeedsRefresh) {
+        schemaService.refreshMenuCache();
       }
 
       // Allow navigation to proceed (refresh happens in background)

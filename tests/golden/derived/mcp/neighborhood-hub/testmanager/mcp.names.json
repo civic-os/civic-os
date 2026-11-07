@@ -1,6 +1,6 @@
 {
   "actionAnomalies": {},
-  "actionCounts": {"probes": 44, "resolvedToSelf": 44},
+  "actionCounts": {"probes": 48, "resolvedToSelf": 48},
   "columnAnomalies": {
     "parcels": {
       "parcel_number_formatted": {"byDisplayName": "\"Parcel Number\" -> parcel_number", "byUpperDisplayName": "\"PARCEL NUMBER\" -> parcel_number"}
@@ -49,7 +49,14 @@
       "byUpperDisplayName": "census_block_groups",
       "displayName": "Census Block Groups"
     },
-    "checkout_items": {"byDisplayName": "checkout_items", "byFirstWord": "tool_reservation_checkouts", "byPaddedDisplayName": "checkout_items", "byTableName": "checkout_items", "byUpperDisplayName": "checkout_items", "displayName": "Checkout Items"},
+    "checkout_items": {
+      "byDisplayName": "checkout_items",
+      "byFirstWord": "ERR Ambiguous entity name \"Checkout\". Did you mean one of: \"Checkout Items\" (checkout_items), \"MEK Checkout\" (mek_checkouts), \"MEK Checkout Item\" (mek_checkout_items), \"Checkouts\" (tool_reservation_checkouts)?",
+      "byPaddedDisplayName": "checkout_items",
+      "byTableName": "checkout_items",
+      "byUpperDisplayName": "checkout_items",
+      "displayName": "Checkout Items"
+    },
     "mek_checkout_items": {
       "byDisplayName": "mek_checkout_items",
       "byFirstWord": "ERR Ambiguous entity name \"MEK\". Did you mean one of: \"Equipment Items\" (mek_request_equipment_items), \"Equipment Selection\" (mek_request_equipment), \"MEK Checkout\" (mek_checkouts), \"MEK Checkout Item\" (mek_checkout_items), \"Event Kit Requests\" (mek_requests)?",
@@ -102,7 +109,7 @@
     "projects": {"byDisplayName": "projects", "byFirstWord": "projects", "byPaddedDisplayName": "projects", "byTableName": "projects", "byUpperDisplayName": "projects", "displayName": "Projects"},
     "tool_instances": {
       "byDisplayName": "tool_instances",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_instances",
       "byTableName": "tool_instances",
       "byUpperDisplayName": "tool_instances",
@@ -118,7 +125,7 @@
     },
     "tool_reservation_tool_items": {
       "byDisplayName": "tool_reservation_tool_items",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_reservation_tool_items",
       "byTableName": "tool_reservation_tool_items",
       "byUpperDisplayName": "tool_reservation_tool_items",
@@ -126,7 +133,7 @@
     },
     "tool_reservation_tools": {
       "byDisplayName": "tool_reservation_tools",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_reservation_tools",
       "byTableName": "tool_reservation_tools",
       "byUpperDisplayName": "tool_reservation_tools",
@@ -142,7 +149,7 @@
     },
     "tool_reservations": {
       "byDisplayName": "tool_reservations",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_reservations",
       "byTableName": "tool_reservations",
       "byUpperDisplayName": "tool_reservations",
@@ -150,7 +157,7 @@
     },
     "tool_types": {
       "byDisplayName": "tool_types",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Checkouts\" (tool_reservation_checkouts), \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_types",
       "byTableName": "tool_types",
       "byUpperDisplayName": "tool_types",

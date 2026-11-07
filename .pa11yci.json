@@ -58,6 +58,16 @@
       ]
     },
     {
+      "url": "http://localhost:4200/admin/menu",
+      "actions": [
+        "wait for element #username to be visible",
+        "set field #username to testadmin",
+        "set field #password to testadmin",
+        "click element #kc-login",
+        "wait for element [data-testid=menu-unplaced] to be visible"
+      ]
+    },
+    {
       "url": "http://localhost:4200/admin/users",
       "actions": [
         "wait for element #username to be visible",

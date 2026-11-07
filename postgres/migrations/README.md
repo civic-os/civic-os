@@ -476,6 +476,8 @@ The failing change's diff is printed and kept in `/tmp/stepwise/diff-*.txt`.
 
 **Fix:** correct the revert script of the change named in the failure. Never edit an already-deployed migration; if it shipped, add a new migration.
 
+**Dropped columns:** a revert can only re-add a dropped column at the end of its table (Postgres cannot reorder columns without rebuilding the table), and that position difference shows in every older step's diff too. List the column (`schema.table.column`, with the change that drops it) in `MOVED_COLUMNS` at the top of `schema-roundtrip.sh`: its position is then ignored, while its definition and `COMMENT ON COLUMN` are still compared. The revert must still restore the type, default, `NOT NULL` and comment exactly.
+
 ### Rollback Fails
 
 **Check revert script:**

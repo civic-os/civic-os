@@ -36,12 +36,6 @@
       {"column": "search_vector", "select": "search_vector", "type": "Unknown", "typeId": 0},
       {"column": "partner_service_categories_m2m", "select": "partner_service_categories_m2m:partner_service_categories!partner_id(service_categories!service_category_id(id,display_name,color))", "type": "ManyToMany", "typeId": 17}
     ],
-    "referrals_per_week": [
-      {"column": "week_start", "select": "week_start", "type": "Date", "typeId": 4},
-      {"column": "week_label", "select": "week_label", "type": "TextLong", "typeId": 2},
-      {"column": "total_referrals", "select": "total_referrals", "type": "IntegerNumber", "typeId": 8},
-      {"column": "poor_outcome_referrals", "select": "poor_outcome_referrals", "type": "IntegerNumber", "typeId": 8}
-    ],
     "service_categories": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},

@@ -70,21 +70,14 @@ WHERE dashboard_id = 4 AND sort_order = 20
 -- 2. SIDEBAR: Hide child/junction/system entities, regroup ordering
 -- ============================================================================
 
--- Hide child/junction entities
-UPDATE metadata.entities SET show_in_sidebar = false
-WHERE table_name IN (
-    'checkout_instances',     -- child of tool_reservation_checkouts
-    'project_parcels',        -- junction table (M:M)
-    'work_site_parcels'       -- junction table (M:M)
-);
-
--- Hide recurring timeslot system entities
-UPDATE metadata.entities SET show_in_sidebar = false
-WHERE table_name IN (
-    'time_slot_series_groups',
-    'time_slot_series',
-    'time_slot_instances'
-);
+-- Hide junction entities. checkout_instances (dropped by 17) and the recurring time slot
+-- objects (metadata tables, never menu entities) needed no node: the menu trigger rejects
+-- targets that are not entities.
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES
+  ('project_parcels', 'entity', 'project_parcels', NULL, TRUE),           -- junction table (M:M)
+  ('work_site_parcels', 'entity', 'work_site_parcels', NULL, TRUE)         -- junction table (M:M)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- Regroup sidebar: Tool Lending → Inventory → Building Use → Event Kits → Community
 UPDATE metadata.entities SET sort_order = 1  WHERE table_name = 'tool_reservations';

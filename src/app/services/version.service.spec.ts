@@ -286,6 +286,40 @@ describe('VersionService', () => {
             expect(result.hasChanges).toBe(true);
         });
 
+        it('should detect when only the menu changed, leaving entities alone', async () => {
+            await seedMenuVersion();
+
+            const result$ = firstValueFrom(service.checkForUpdates());
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+            req.flush([...mockVersions, { cache_name: 'menu', version: '2025-01-02T00:00:00Z' }]);
+            const result = await result$;
+            expect(result.menuNeedsRefresh).toBe(true);
+            expect(result.entitiesNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(true);
+        });
+
+        it('should flag nothing when a database has no menu row yet', async () => {
+            await seedMenuVersion();
+
+            const result$ = firstValueFrom(service.checkForUpdates());
+
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush(mockVersions);
+            const result = await result$;
+            expect(result.menuNeedsRefresh).toBe(false);
+            expect(result.hasChanges).toBe(false);
+        });
+
+        /** A second check that records the menu version, after the init in beforeEach. */
+        async function seedMenuVersion(): Promise<void> {
+            const result$ = firstValueFrom(service.checkForUpdates());
+            httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions').flush([
+                ...mockVersions,
+                { cache_name: 'menu', version: '2025-01-01T00:00:00Z' }
+            ]);
+            await result$;
+        }
+
         it('should flag nothing when a database has no statuses row yet', async () => {
             await seedKeyedVersions();
 

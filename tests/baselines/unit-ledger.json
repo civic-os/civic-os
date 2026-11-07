@@ -1,13 +1,13 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3869,
-    "passed": 3869,
+    "tests": 4247,
+    "passed": 4247,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 37633,
-    "passedWithZeroAssertions": 24
+    "assertions": 38592,
+    "passedWithZeroAssertions": 29
   },
   "leakers": [],
   "uncountedButReal": [
@@ -1017,6 +1017,13 @@
       "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Calendar range > shows the spinner and puts the range on the URL, which maps back to the same state with one request",
       "from": 7,
       "to": null
+    },
+    {
+      "at": "2026-11-06T00:43:44.382Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/services/user-management.service.spec.ts :: UserManagementService > hasUserManagementAccess() > should return false when permission denied",
+      "from": 1,
+      "to": null
     }
   ],
   "tests": {
@@ -1040,6 +1047,14 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/app.component.spec.ts :: AppComponent > Sidebar menu > renders Home and About, a retry notice and no entity links when the menu fails to load": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/app.component.spec.ts :: AppComponent > Sidebar menu > renders entity links and the Data title when the menu has no heading": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/app.component.spec.ts :: AppComponent > Theme Integration > should default settingsInitialTab to preferences": {
       "state": "passed",
       "assertions": 2
@@ -1055,6 +1070,18 @@
     "src/app/app.component.spec.ts :: AppComponent > Theme Integration > should render palette icon button for theme picker": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/app.component.spec.ts :: AppComponent > document.title follows the configured app title > should leave an unrelated title alone": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/app.component.spec.ts :: AppComponent > document.title follows the configured app title > should replace only the suffix of a page title": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/app.component.spec.ts :: AppComponent > document.title follows the configured app title > should replace the whole title when it is the bare app title": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/app.component.spec.ts :: AppComponent > isDashboardRoute detection > should set isDashboardRoute to false when on detail page": {
       "state": "passed",
@@ -1501,6 +1528,10 @@
       "assertions": 2
     },
     "src/app/components/dashboard-selector/dashboard-selector.component.spec.ts :: DashboardSelectorComponent > Pre-configured Mock Dashboards > should display MOCK_DASHBOARDS.welcome correctly": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/dashboard-selector/dashboard-selector.component.spec.ts :: DashboardSelectorComponent > Refreshed list > should show the list the service refreshes after the first load": {
       "state": "passed",
       "assertions": 3
     },
@@ -4752,6 +4783,14 @@
       "state": "passed",
       "assertions": 4
     },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Stripe Initialization > should ship no committed Stripe key, so an unconfigured instance resolves to an empty key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Stripe Initialization > should show a not-configured error and skip Stripe() when no publishable key resolves": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/components/payment-checkout/payment-checkout.component.spec.ts :: PaymentCheckoutComponent > Translations (i18n) > formats amounts for the current locale and the transaction currency": {
       "state": "passed",
       "assertions": 3
@@ -5144,6 +5183,150 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/settings-modal/settings-modal.component.spec.ts :: SettingsModalComponent analyticsConfigured > is false when Matomo is not configured at all": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/settings-modal/settings-modal.component.spec.ts :: SettingsModalComponent analyticsConfigured > is false when the instance has turned analytics off": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/settings-modal/settings-modal.component.spec.ts :: SettingsModalComponent analyticsConfigured > is true when Matomo is configured and enabled": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > emits navigated when a link is followed": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /create/child regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /edit/child/5 regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /view/child regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /view/child/5 regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /view/child?page=2 regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > gives each instance its own child-list ids (the drawer and the editor preview share a page)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > has no chevron for a leaf": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > ignores malformed stored state": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > is the list itself, with [menuStart] items first, the rest last, and only li children": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > keeps a forced-open heading open when the user closes it": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > keeps working when localStorage throws on read and write": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > lets stored state override the default": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > marks only the active link": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > opens every ancestor of a nested active entry and does not collapse it on toggle": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders a heading as details/summary with its children": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders a parent entity as a link plus a chevron button with aria wiring": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders an icon only when set": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders leaves as links to the entity view": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > collapses the Data section, remembers it, and forces it open for its active route": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > keys the trailing run as Data and an earlier titled run by its first entry": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > leaves root entities before the first heading untitled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > puts a menu without headings under one open Data section": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > titles root headings like About and Admin and lists their entries without an extra indent": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > starts headings collapsed when collapsedByDefault is set": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > stores the state when a heading is toggled": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > toggles a parent, updates aria-expanded and persists the state": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > keeps section keys apart from menu node keys": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > keeps working when localStorage throws": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > reads a forced key open and never closes it": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > reads the default until a choice is stored, then the stored choice": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > restores stored choices on creation and ignores non-boolean values": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > stores a native details toggle and ignores one that matches the state": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/components/sql-code-block/sql-code-block.component.spec.ts :: SqlCodeBlockComponent > should auto-collapse long code blocks": {
       "state": "passed",
       "assertions": 1
@@ -5524,6 +5707,38 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should merge the date range after resolving": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should not skip the retry after a failed lookup as a duplicate fetch": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should show a key filter failure after an earlier successful load": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should show a translated invalid_value failure in the page and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should show a translated not_status_or_category failure in the page and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should show a translated operator failure in the page and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should show a translated unavailable failure in the page and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > key filters > should show a translated unknown_key failure in the page and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
     "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > should check permission for correct entity key": {
       "state": "passed",
       "assertions": 1
@@ -5623,6 +5838,62 @@
     "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > should use display_name as event title": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > superseded loads > a date range change cancels the previous fetch, so its late response is dropped": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > superseded loads > a signal the schema service reads does not re-run the load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > superseded loads > auto-refresh refetches the unchanged range instead of skipping it as a duplicate": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > superseded loads > destroying the widget cancels its in-flight fetch": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > visible range > a refresh before the calendar reports a range sends nothing": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > visible range > losing the required config cancels the fetch in flight": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/calendar-widget/calendar-widget.component.spec.ts :: CalendarWidgetComponent > visible range > renders the calendar before the first fetch and fetches only the range it reports": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should make no schema request for plain filters": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should query with the resolved filters and pass only the entity properties": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should show the invalid_value failure and send no data request": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should show the not_status_or_category failure and send no data request": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should show the operator failure and send no data request": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should show the unavailable failure and send no data request": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > key filters > should show the unknown_key failure and send no data request": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should apply PostgREST filters from config": {
       "state": "passed",
@@ -5740,6 +6011,18 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > superseded loads > a re-run cancels the previous load, so its late response is dropped": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > superseded loads > a signal the schema service reads does not re-run the load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > superseded loads > destroying the widget cancels its in-flight load": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Full Navigation > should render navigation buttons as anchor tags": {
       "state": "passed",
       "assertions": 3
@@ -5836,6 +6119,70 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > builds the link from the resolved filters (ids, not keys) and the widget order": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > cannot detect overflow at the API cap, so it asks for the cap and shows no link": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > leaves the sort out of the link when the order column is hidden from the list": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > re-reads the empty and count texts when the locale translations arrive": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > requests limit + 1 rows, renders limit, and links to the list when the extra row exists": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > shows a neutral empty text without the filter hint": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > shows config.emptyMessage instead of the default text": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > shows no link when a filter cannot go in the URL, since the list would show rows the widget excludes": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > shows no link when showSeeMore is false, but still renders only limit rows": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > empty state and See more > shows no link when the extra row does not come back": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > key filters > should query with the resolved filters and pass only the entity properties": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > key filters > should show a translated invalid_value failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > key filters > should show a translated not_status_or_category failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > key filters > should show a translated operator failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > key filters > should show a translated unavailable failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > key filters > should show a translated unknown_key failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
     "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > should create": {
       "state": "passed",
       "assertions": 1
@@ -5896,6 +6243,18 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > superseded loads > a re-run cancels the previous load, so its late response is dropped": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > superseded loads > a signal the schema service reads does not re-run the load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/filtered-list-widget/filtered-list-widget.component.spec.ts :: FilteredListWidgetComponent > superseded loads > destroying the widget cancels its in-flight load": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/components/widgets/image-widget/image-widget.component.spec.ts :: ImageWidgetComponent > should check breakpoint crops correctly": {
       "state": "passed",
       "assertions": 3
@@ -5923,6 +6282,30 @@
     "src/app/components/widgets/image-widget/image-widget.component.spec.ts :: ImageWidgetComponent > should show loading state initially": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > key filters > should query with the resolved filters and pass only the entity properties": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > key filters > should show a translated invalid_value failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > key filters > should show a translated not_status_or_category failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > key filters > should show a translated operator failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > key filters > should show a translated unavailable failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > key filters > should show a translated unknown_key failure and send no data request": {
+      "state": "passed",
+      "assertions": 4
     },
     "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > should clear the entity display name when the widget has no entity_key": {
       "state": "passed",
@@ -5995,6 +6378,18 @@
     "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > should use display_name as marker name": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > superseded loads > a re-run cancels the previous load, so its late response is dropped": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > superseded loads > a signal the schema service reads does not re-run the load": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/map-widget/map-widget.component.spec.ts :: MapWidgetComponent > superseded loads > destroying the widget cancels its in-flight load": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/components/widgets/markdown-widget/markdown-widget.component.spec.ts :: MarkdownWidgetComponent > Basic Component Setup > should create": {
       "state": "passed",
@@ -6388,7 +6783,23 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should clear cached categories for every type when the categories version changed": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should clear cached statuses when the statuses version changed": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should invalidate profile cache when profile extensions version changed": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should invalidate the config cache only when the instance_config version changed": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should refetch only the menu when the menu version changed": {
       "state": "passed",
       "assertions": 4
     },
@@ -6776,6 +7187,238 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Deployment section > lists the four Tier 1 values with their env var names and a redeploy notice": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Deployment section > never renders postgrest, keycloak, s3, stripe or matomo values": {
+      "state": "passed",
+      "assertions": 9
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Deployment section > shows \"Default\" for an empty favicon and \"Uses the app title\" for an empty PWA name": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\" /admin\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"//evil.example\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"/\\\\evil.example\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"/\\t/evil.example\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"/admin\\n//evil.example\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"/ok\\\\..\\\\evil\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"\\\\\\\\evil.example\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"\\t/admin\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"admin/statuses\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"https://evil.example\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > ignores returnTo=\"javascript:alert(1)\": no button and no navigation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > is hidden without a returnTo param": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > Done button (returnTo) > navigates to a same-origin path": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > groups > has no \"Other\" group when every row is grouped": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > groups > renders one open collapse per group in API order, with the ungrouped rows last under \"Other\"": {
+      "state": "passed",
+      "assertions": 8
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > groups > renders the group icon as a decorative Material Symbol": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > groups > shows an error and no groups when the load fails": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inherited values > gives no placeholder to a set field or to an integrator-defined key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inherited values > labels the theme select's empty option with the inherited theme": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inherited values > puts \"<ENV_VAR>: <value>\" in the placeholder of an unset field": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inherited values > shows a set toggle as the DB value, without the note": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inherited values > shows an unset toggle as the inherited ENV value with an \"Inherited from\" note": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > puts a toggle inside its one label, with the name after it": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > shows the label, links the description with aria-describedby, and does not translate either": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > shows the locale format hints": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > uses a DaisyUI toggle for boolean": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > uses a select over the vetted themes only, labelled with theme names": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > uses a text input for string, locale and locale_list": {
+      "state": "passed",
+      "assertions": 8
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > uses a textarea for json": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > inputs by config_type > uses number inputs with step 1 for integer and step any for number": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > integrator defaults > labels a theme select's empty option with the default theme": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > integrator defaults > puts \"Default: <value>\" in the placeholder of an unset field with a default": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > integrator defaults > shows an unset toggle as its default with a \"Using the default\" note": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > integrator defaults > shows the default placeholder again after a reset": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > integrator defaults > shows the default read-only with a note when the value is unset": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > leaving the page > re-sends a save that was still in flight": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > leaving the page > sends an edit still inside the debounce window": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > leaving the page > sends nothing for saved, unchanged or rejected fields": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > leaving the page > sends nothing without update permission": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > reset > has a translated aria-label naming the field": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > reset > is shown only for a field whose value is not NULL": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > reset > sends NULL at once, without the debounce, and shows the inherited placeholder again": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > does not overwrite text typed while a save was in flight": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > does not save a value equal to the loaded one": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > lets a later successful save replace an error": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > makes one RPC, with the latest value, 1000 ms after the last keystroke": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > retries the same value after a failed save": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > saves a theme selection at once, and an empty selection as null": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > saves a toggle at once": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > shows saving, then saved, in a polite live region": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > shows the RPC error and keeps what the user typed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > saving > writes the normalized value the RPC returned back into the field": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > without update permission > does not save anything": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-config/admin-config.page.spec.ts :: AdminConfigPage > without update permission > shows a notice and the values read-only, with no inputs or Reset buttons": {
+      "state": "passed",
+      "assertions": 6
+    },
     "src/app/pages/admin-files/admin-files.page.spec.ts :: AdminFilesPage > All Files Mode Query Building > should build default query params": {
       "state": "passed",
       "assertions": 4
@@ -6931,6 +7574,226 @@
     "src/app/pages/admin-galleries/admin-galleries.page.spec.ts :: AdminGalleriesPage > should return route for linked galleries": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > adds a heading with a slug key, de-duplicated against existing keys": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > adds an unplaced entity at the root, last": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > announces a move into a heading": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > applies a drag-drop reorder": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > blocks saving while the draft has validation errors, naming the row": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > disables moves that are not allowed": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > discards back to the loaded state": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > edits a label and icon, keeping overrides empty as null": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > hides a row with the eye button, shrinking it to one line, and shows it again": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > ignores a blank heading label": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keeps the Add button submittable but marked disabled while the label is blank": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keyboard focus > keeps focus on the moved row: the same button, else its first enabled action": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keyboard focus > moves focus from a tray entry just added to its neighbor in the tray": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keyboard focus > moves focus to the row that took a removed row's place": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > lists unplaced entities, marking tables and views": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > loads the nodes as a draft in display order": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > moves a row and announces its place": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > previews the menu being edited": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > reloads the stored tree after a save that dropped nodes whose table no longer exists": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > removing a heading sends its entities to the tray": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > saves the whole tree through the RPC body, then refreshes the sidebar menu": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > shows an API error and stays dirty when saving fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > slugs an unusable heading label to \"heading\"": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > starts clean: Save and Discard are disabled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > toggles collapsed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > shows a retry notice when loading fails": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > shows access denied to non-admins and loads nothing": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > stays saveable with a node whose target it cannot see (junction or unreadable table)": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > describePosition > reports parent, position and sibling count": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > carries the subtree with a heading": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > ignores a drop inside its own subtree or in place": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > moves a row down the list": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > moves a row up the list, adjusting depth to fit the drop position": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > never puts a heading under an entity": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > never yields an invalid shape": {
+      "state": "passed",
+      "assertions": 25
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > headingKeyFromLabel > always matches the heading key pattern": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > headingKeyFromLabel > falls back to heading and guarantees a leading letter": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > headingKeyFromLabel > slugifies and de-duplicates": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > blocks an indent that pushes any row of the subtree past depth 3": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > has nothing to indent under without a previous sibling": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > indents an entity under an entity but not a heading": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > indents under the previous sibling, appending last, subtree included": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > outdenting a middle child moves it after the parent subtree, keeping later siblings": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > outdents the last child to just after its parent": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > outdents with its subtree and cannot outdent a root row": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > isValidShape > rejects depth jumps, depth over 3 and headings under entities": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > moveUp / moveDown > moves a row with its subtree past the next sibling": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > moveUp / moveDown > moves a row with its subtree past the previous sibling": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > moveUp / moveDown > stays within the parent and reports availability": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > assigns sort_order index x 10 among siblings and blank labels to null": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > orders siblings by sort_order then key, depth first": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > round trips a tree from the database": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > surfaces orphans and cycle members at the root": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > removeRow / appendRoot > appends at the root, last": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > removeRow / appendRoot > removes a row with its subtree": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/pages/admin-payments/admin-payments.page.spec.ts :: AdminPaymentsPage > Entity Routing > should return null for payment without entity": {
       "state": "passed",
@@ -7366,7 +8229,7 @@
     },
     "src/app/pages/admin-translations/admin-translations.page.spec.ts :: AdminTranslationsPage > Source type labels > should return human-readable labels": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
     "src/app/pages/admin-translations/admin-translations.page.spec.ts :: AdminTranslationsPage > should compute missing count": {
       "state": "passed",
@@ -7792,6 +8655,18 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Superseded loads > a route change cancels the previous load, so a late response cannot replace the new dashboard": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Superseded loads > leaving the page cancels the load in flight": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Superseded loads > the default dashboard path keeps its cancel handle when the default id arrives synchronously": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Template Rendering > should apply grid layout styles to widgets": {
       "state": "passed",
       "assertions": 2
@@ -7804,9 +8679,21 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Template Rendering > should re-run get_dashboard for the routed id when roles change and show not found if hidden": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Template Rendering > should reload the default dashboard when roles change on /": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Template Rendering > should render dashboard header with title and description": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Template Rendering > should render the error, title and retry label through the translation service": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/pages/dashboard/dashboard.page.spec.ts :: DashboardPage > Template Rendering > should render widgets grid when widgets exist": {
       "state": "passed",
@@ -7892,9 +8779,21 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > ends the series from the occurrence and navigates for this and the following occurrences": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > falls back to the RecurringService strings when a scoped delete is rejected without a message": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > forgets a failed scope when the delete is started again from the record": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > keeps the reason when retrying a failed single-occurrence delete": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > navigates after a scoped delete succeeds": {
       "state": "passed",
@@ -7909,6 +8808,18 @@
       "assertions": 2
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > opens the scope dialog for a series member": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > reopens the delete modal with the message when ending the series fails": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > retries the failed scope, not a plain delete, when Delete is pressed again in the reopened modal": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Delete > sends the plain delete from the modal when a later scope falls back": {
       "state": "passed",
       "assertions": 2
     },
@@ -8568,6 +9479,10 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/pages/list/list.page.spec.ts :: ListPage > Page size preference > still navigates with the new page size when storage is blocked and the write throws": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Page size preference > stores the preference and navigates with it on a page size change": {
       "state": "passed",
       "assertions": 2
@@ -8637,6 +9552,54 @@
       "assertions": 1
     },
     "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Component Creation > should create": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should ask for confirmation when admin does not hold the permission": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should confirm against the role captured when the warning opened, not the current selection": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should fail closed and open the warning when loading admin permissions errors": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should keep the role id a number when picked from the role selector, so the warning still fires": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should leave the permission granted when the warning is canceled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should not warn when granting a permission to the user role": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should not warn when revoking from a role other than user": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should put the checkbox back when the revoke is deferred": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should revoke after confirmation": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should revoke without a warning when admin holds the permission directly": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should surface a failed update and reload server state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/permissions/permissions.page.spec.ts :: PermissionsPage > Revoke from user role warns when admin would also lose it (issue #50) > should surface a transport error from the update": {
       "state": "passed",
       "assertions": 1
     },
@@ -8773,6 +9736,10 @@
       "assertions": 3
     },
     "src/app/pages/profile/profile.page.spec.ts :: ProfilePage > Other User Profile (/profile/:userId) > should set canEditCoreInfo to false when non-admin views other user": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/profile/profile.page.spec.ts :: ProfilePage > Other User Profile (/profile/:userId) > should set canEditCoreInfo to true for an admin who lacks the permission (issue #50)": {
       "state": "passed",
       "assertions": 1
     },
@@ -9852,6 +10819,34 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > carries resolved key filters as ids": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > leaves sort out when the widget has no order, and defaults the direction to desc": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > returns null for a null with an ordering operator or an object value": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > returns null when an in filter has items that cannot be written safely": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > turns null into an is.null test and skips filters core sends no clause for": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > writes in and not.in arrays in the parenthesized form the filter bar uses": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: listQueryParams > writes indexed filters and the sort, which filtersFromParams reads back": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/sdk/list-url.spec.ts :: listStateFromParams > counts the calendar only when both the view and the date are present": {
       "state": "passed",
       "assertions": 3
@@ -9873,6 +10868,10 @@
       "assertions": 1
     },
     "src/app/sdk/list-url.spec.ts :: listStateFromParams > reads the indexed filters until a column is missing": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/sdk/list-url.spec.ts :: storedListPageSize > defaults to 25 when storage is blocked and the read throws": {
       "state": "passed",
       "assertions": 2
     },
@@ -9967,6 +10966,30 @@
     "src/app/sdk/validators.spec.ts :: validatorForRule > maps required to Validators.required itself": {
       "state": "passed",
       "assertions": 3
+    },
+    "src/app/services/analytics.service.spec.ts :: AnalyticsService > Matomo tracker initialization (deferred mode) > does not initialize before the first response, even when ENV says enabled": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/analytics.service.spec.ts :: AnalyticsService > Matomo tracker initialization (deferred mode) > does not initialize when the flag turns on after the first load (queued views would replay)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/analytics.service.spec.ts :: AnalyticsService > Matomo tracker initialization (deferred mode) > falls back to ENV on an HTTP error and initializes once": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/analytics.service.spec.ts :: AnalyticsService > Matomo tracker initialization (deferred mode) > initializes only once across later loads and flag flips": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/analytics.service.spec.ts :: AnalyticsService > Matomo tracker initialization (deferred mode) > never initializes when a stale blob says true but the DB now says false": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/analytics.service.spec.ts :: AnalyticsService > Matomo tracker initialization (deferred mode) > never initializes when the DB response says false (no blob)": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/services/analytics.service.spec.ts :: AnalyticsService > Service Setup > should be created": {
       "state": "passed",
@@ -10296,6 +11319,286 @@
       "state": "passed",
       "assertions": 2
     },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > ENV_VAR_NAMES > maps the ten framework keys to their env vars": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > getConfig > GETs the instance_config view and returns the rows in API order": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > setValue > POSTs the RPC with p_key and p_value": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > setValue > invalidates the ConfigService cache on success": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > setValue > maps a success:false body to an error result without invalidating": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > setValue > maps an HTTP error to an error result without invalidating": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > setValue > returns the normalized value the RPC stored": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config-admin.service.spec.ts :: ConfigAdminService > setValue > sends null to clear a value": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > Keycloak triggers > does not load on Ready when anonymous": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > Keycloak triggers > ignores other Keycloak events": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > Keycloak triggers > is created without a Keycloak signal provided": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > Keycloak triggers > loads on Ready when authenticated": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > Keycloak triggers > reloads on AuthLogout so auth-only keys are dropped": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > appTitle: DB (trimmed) wins, blank falls back to ENV, then to Civic OS": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > appTitle: a blank DB title falls back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > appTitle: falls back to the built-in default when neither is set": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: accepts a three-letter code (prs, Dari)": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: accepts xx and xx-YY, rejects anything else": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: rejects \"EN\" and uses ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: rejects \"e\" and uses ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: rejects \"en-us\" and uses ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: rejects \"en_US\" and uses ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultLocale: rejects \"english\" and uses ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultTheme: a vetted DB theme wins": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultTheme: an unvetted DB theme falls back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > defaultTheme: falls back to corporate when ENV is also unset": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > mapDefaults: ENV values with an empty DB": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > mapDefaults: Infinity and NaN strings are rejected": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > mapDefaults: a non-numeric lat and a fractional zoom fall back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > mapDefaults: accepts zero and negative numbers": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > mapDefaults: keeps what the ENV helper returns when it is itself not finite": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > mapDefaults: lat, lng and zoom resolve independently": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > matomoEnabled: \"1\" is invalid and falls back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > matomoEnabled: DB true overrides an ENV false": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > matomoEnabled: defaults to true when ENV does not say": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > pwaAppName: otherwise follows the DB-resolved app title": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > pwaAppName: the ENV PWA_APP_NAME wins over the app title": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > smsConfigured: \"yes\" is invalid and falls back to the ENV boolean": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > smsConfigured: DB true/false wins over ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > smsConfigured: follows an ENV false when the DB has no value": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > stripePublishableKey: DB wins, blank falls back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > stripePublishableKey: a blank DB value falls back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > supportedLocales: a list with no usable entry falls back to ENV": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > accessors: DB, then ENV, then default > supportedLocales: splits, trims and drops empty entries": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > dbValue() and envValue() > dbValue returns the raw DB value or null": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > dbValue() and envValue() > envValue formats the ENV value the way the DB stores it": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > dbValue() and envValue() > envValue ignores the DB layer and returns null for an unknown key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > never throws when localStorage throws": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > reads a valid blob synchronously in the constructor": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > starts empty (ENV values) when there is no blob": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a corrupt blob": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a wrongly shaped blob (a bare string)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a wrongly shaped blob (a non-string value)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a wrongly shaped blob (no values key)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a wrongly shaped blob (null)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a wrongly shaped blob (values is a string)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > hydration from localStorage > throws away a wrongly shaped blob (values is an array)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > ignores a response that is not an array": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > invalidateCache() reloads": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > keeps the current values and warns once when the request fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > keeps working after a failure (the stream is not terminated)": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > latest wins: a second load() cancels the request still in flight": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > replaces values with the non-null entries and writes the blob": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > requests the view with the narrow select": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > resolves HttpClient lazily: constructing never touches it, and a failing client fails soft": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > settled > is false before any response, even with a cached blob": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > settled > is not settled by a cancelled request, only by its replacement": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > settled > is true after a successful response": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > settled > is true after an HTTP error": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/config.service.spec.ts :: ConfigService > load() > settled > stays true during and after a later load": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/services/dashboard.service.spec.ts :: DashboardService > Basic Service Setup > should be created": {
       "state": "passed",
       "assertions": 1
@@ -10323,6 +11626,26 @@
     "src/app/services/dashboard.service.spec.ts :: DashboardService > Phase 3 Methods (Not Yet Implemented) > saveWidget() > should return error response for not implemented": {
       "state": "passed",
       "assertions": 3
+    },
+    "src/app/services/dashboard.service.spec.ts :: DashboardService > Role-aware cache invalidation > should keep the newest list when an earlier response arrives late": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/dashboard.service.spec.ts :: DashboardService > Role-aware cache invalidation > should not refetch without a role change": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/dashboard.service.spec.ts :: DashboardService > Role-aware cache invalidation > should publish the refreshed list on the dashboards signal and bump roleChange": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/dashboard.service.spec.ts :: DashboardService > Role-aware cache invalidation > should refetch dashboards on login and logout": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/dashboard.service.spec.ts :: DashboardService > Role-aware cache invalidation > should refetch dashboards when impersonated roles change": {
+      "state": "passed",
+      "assertions": 1
     },
     "src/app/services/dashboard.service.spec.ts :: DashboardService > getDashboard(id) > should call RPC get_dashboard with correct parameter": {
       "state": "passed",
@@ -11848,6 +13171,46 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should expose supportedLocales as a signal driven by the config": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should fall back to a still-supported saved choice when the current one is dropped": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should keep a browser-language choice when the default changes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should keep a saved choice when the default changes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should move a user on the instance default to the new default": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should not persist an instance-default switch as a user choice": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should not switch to a default that is not in the supported list": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should re-resolve a current locale that is no longer supported": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should start on a supported locale when the configured default is unsupported": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/locale.service.spec.ts :: LocaleService > instance config changes (ConfigService) > should treat setLocale() as a user choice that a new default does not override": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/services/locale.service.spec.ts :: LocaleService > isRtl() > should return false for English": {
       "state": "passed",
       "assertions": 1
@@ -11987,6 +13350,26 @@
     "src/app/services/maintenance.service.spec.ts :: MaintenanceService > updateFromHeader > should set mode to readonly from header": {
       "state": "passed",
       "assertions": 3
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > edits the untranslated label, not the one translated for the admin's locale": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > passes through the keys a save skipped": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > posts the nodes to save_menu_tree as p_nodes": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > reads the nodes from schema_menu_nodes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > returns a readable error instead of throwing": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/services/navigation.service.spec.ts :: NavigationService > goBack() > should ignore non-NavigationEnd router events": {
       "state": "passed",
@@ -13120,6 +14503,26 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > leaves out an entity whose node is hidden": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > reports an error state, never an unfiltered entity list, when the nodes fail": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > retries through refreshMenuCache without refetching entities": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > sends one schema_menu_nodes request for many subscribers and navigations": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > starts loading, then builds the menu from entities and nodes": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/services/schema.service.spec.ts :: SchemaService > getProperties() > should cache properties on first call": {
       "state": "passed",
       "assertions": 1
@@ -13344,6 +14747,38 @@
       "state": "passed",
       "assertions": 0
     },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should emit an empty list for missing filters": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should emit plain filters synchronously, untouched and with no request": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should make one RPC for three widgets on one type, and none once cached": {
+      "state": "passed",
+      "assertions": 0
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should report a failed category load as unavailable, then recover with the signal cache filled": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should report a failed status load as unavailable, then recover with the signal cache filled": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should resolve status and category keys to ids": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should see a value added after the cache is invalidated": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > resolveWidgetFilters() > should send no lookup for bad config": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/services/static-assets.service.spec.ts :: StaticAssetsService > constants > should have 3 default breakpoints": {
       "state": "passed",
       "assertions": 2
@@ -13521,6 +14956,22 @@
       "assertions": 7
     },
     "src/app/services/theme.service.spec.ts :: ThemeService > getMapTileConfig > should return either light or dark tile config": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/theme.service.spec.ts :: ThemeService > instance default theme (ConfigService) > should apply a changed default without saving it as a user choice": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/theme.service.spec.ts :: ThemeService > instance default theme (ConfigService) > should keep the user choice when the default changes": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/theme.service.spec.ts :: ThemeService > instance default theme (ConfigService) > should start on the instance default when the user has no saved choice": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/theme.service.spec.ts :: ThemeService > instance default theme (ConfigService) > should treat a theme picked with setTheme as a user choice from then on": {
       "state": "passed",
       "assertions": 1
     },
@@ -13728,11 +15179,15 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/services/user-management.service.spec.ts :: UserManagementService > hasUserManagementAccess() > should admit an admin who lacks the permission (escape valve, issue #50)": {
+      "state": "passed",
+      "assertions": 1
+    },
     "src/app/services/user-management.service.spec.ts :: UserManagementService > hasUserManagementAccess() > should delegate to AuthService.hasPermission": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/services/user-management.service.spec.ts :: UserManagementService > hasUserManagementAccess() > should return false when permission denied": {
+    "src/app/services/user-management.service.spec.ts :: UserManagementService > hasUserManagementAccess() > should return false when permission denied and not admin": {
       "state": "passed",
       "assertions": 1
     },
@@ -13808,6 +15263,10 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when only categories changed": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when only constraint_messages changed": {
       "state": "passed",
       "assertions": 5
@@ -13816,7 +15275,23 @@
       "state": "passed",
       "assertions": 5
     },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when only statuses changed": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when only the menu changed, leaving entities alone": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when properties cache changed": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should flag nothing when a database has no menu row yet": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should flag nothing when a database has no statuses row yet": {
       "state": "passed",
       "assertions": 3
     },
@@ -13849,6 +15324,14 @@
       "assertions": 2
     },
     "src/app/services/version.service.spec.ts :: VersionService > init() > should initialize with null versions before init": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/version.service.spec.ts :: VersionService > instance_config tracking > should detect when only instance_config changed": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/services/version.service.spec.ts :: VersionService > instance_config tracking > should not flag a refresh when the row is absent (older database)": {
       "state": "passed",
       "assertions": 2
     },
@@ -14370,7 +15853,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > _synthetic/all: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > _synthetic/all: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14390,7 +15873,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14410,7 +15893,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14430,7 +15913,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14450,7 +15933,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14470,7 +15953,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14490,7 +15973,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14510,7 +15993,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14530,7 +16013,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14550,7 +16033,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14570,7 +16053,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14590,7 +16073,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14610,7 +16093,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14630,7 +16113,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14650,7 +16133,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14670,7 +16153,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14690,7 +16173,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14710,7 +16193,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14730,7 +16213,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14750,7 +16233,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14770,7 +16253,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14790,7 +16273,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14810,7 +16293,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14830,7 +16313,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14850,7 +16333,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14870,7 +16353,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14894,7 +16377,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14914,7 +16397,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14934,7 +16417,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14954,7 +16437,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14974,7 +16457,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -14994,7 +16477,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15014,7 +16497,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15034,7 +16517,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15054,7 +16537,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15074,7 +16557,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15094,7 +16577,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15114,7 +16597,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15134,7 +16617,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15154,7 +16637,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15174,7 +16657,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15194,7 +16677,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15214,7 +16697,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15234,7 +16717,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15254,7 +16737,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15274,7 +16757,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16433,6 +17916,42 @@
       "assertions": 3
     },
     "src/app/utils/date.utils.spec.ts :: toWallClockInTimeZone > renders midnight as 00, not 24": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > has a bundled English string for dashboard.filter_invalid": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > has a bundled English string for dashboard.filter_unavailable": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > has a bundled English string for dashboard.filter_unknown_key": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > leaves other errors to the widget": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > names the key for an unknown key": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > reports an empty list as unavailable": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > reports invalid_value as invalid config": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > reports not_status_or_category as invalid config": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/utils/key-filter-message.spec.ts :: keyFilterMessage > reports operator as invalid config": {
       "state": "passed",
       "assertions": 1
     },

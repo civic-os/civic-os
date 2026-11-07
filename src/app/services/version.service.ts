@@ -21,7 +21,7 @@ import { Observable, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 export interface CacheVersion {
-  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config' | 'statuses' | 'categories';
+  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions' | 'instance_config' | 'statuses' | 'categories' | 'menu';
   version: string; // ISO timestamp
 }
 
@@ -33,6 +33,7 @@ export interface CacheUpdateCheck {
   instanceConfigNeedsRefresh: boolean;
   statusesNeedsRefresh: boolean;
   categoriesNeedsRefresh: boolean;
+  menuNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -50,6 +51,7 @@ export class VersionService {
   private instanceConfigVersion: string | null = null;
   private statusesVersion: string | null = null;
   private categoriesVersion: string | null = null;
+  private menuVersion: string | null = null;
 
   /**
    * Initialize version tracking by fetching current versions from database.
@@ -80,6 +82,7 @@ export class VersionService {
           instanceConfigNeedsRefresh: false,
           statusesNeedsRefresh: false,
           categoriesNeedsRefresh: false,
+          menuNeedsRefresh: false,
           hasChanges: false
         };
 
@@ -90,6 +93,7 @@ export class VersionService {
         const dbInstanceConfigVersion = versions.find(v => v.cache_name === 'instance_config')?.version;
         const dbStatusesVersion = versions.find(v => v.cache_name === 'statuses')?.version;
         const dbCategoriesVersion = versions.find(v => v.cache_name === 'categories')?.version;
+        const dbMenuVersion = versions.find(v => v.cache_name === 'menu')?.version;
 
         // Check entities cache
         if (dbEntitiesVersion && this.entitiesVersion && dbEntitiesVersion !== this.entitiesVersion) {
@@ -133,6 +137,12 @@ export class VersionService {
           result.hasChanges = true;
         }
 
+        // Check menu cache (menu nodes only; entities are unaffected)
+        if (dbMenuVersion && this.menuVersion && dbMenuVersion !== this.menuVersion) {
+          result.menuNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
         // Update local versions after check
         this.updateLocalVersions(versions);
 
@@ -162,6 +172,7 @@ export class VersionService {
     const instanceConfigVersion = versions.find(v => v.cache_name === 'instance_config');
     const statusesVersion = versions.find(v => v.cache_name === 'statuses');
     const categoriesVersion = versions.find(v => v.cache_name === 'categories');
+    const menuVersion = versions.find(v => v.cache_name === 'menu');
 
     if (entitiesVersion) {
       this.entitiesVersion = entitiesVersion.version;
@@ -190,6 +201,10 @@ export class VersionService {
     if (categoriesVersion) {
       this.categoriesVersion = categoriesVersion.version;
     }
+
+    if (menuVersion) {
+      this.menuVersion = menuVersion.version;
+    }
   }
 
   /**
@@ -203,6 +218,7 @@ export class VersionService {
     this.instanceConfigVersion = null;
     this.statusesVersion = null;
     this.categoriesVersion = null;
+    this.menuVersion = null;
   }
 
   /**

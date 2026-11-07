@@ -283,6 +283,23 @@ ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name, sort_order = EXCLUDED.sort_order, column_width = EXCLUDED.column_width;
 ```
 
+## Sidebar Menu (v0.81.0)
+
+The sidebar is a tree in `metadata.menu_nodes`. An entity with no node still appears at the root after every root node, ordered by its `sort_order` then its table name, so a new table needs no menu SQL. There is no `show_in_sidebar` column and `upsert_entity_metadata()` has no `p_show_in_sidebar` parameter; do not write either. To hide a table from the sidebar (helper, step or admin-only tables), upsert a hidden node. To group tables, add a heading node and place entity nodes under it. Rules: at most 3 levels; an entity node's `node_key` equals its table name; a heading's `node_key` matches `^[a-z][a-z0-9_]*$` and needs a `display_name`; headings sit at the root or under a heading; one node per entity. Insert parents before children.
+```sql
+-- Hide a table from the sidebar
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, is_hidden)
+VALUES ('audit_log', 'entity', 'audit_log', TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
+
+-- Group two tables under a heading
+INSERT INTO metadata.menu_nodes (node_key, node_kind, display_name, sort_order)
+VALUES ('operations', 'heading', 'Operations', 20);
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, parent_node_key, sort_order)
+VALUES ('work_orders', 'entity', 'work_orders', 'operations', 10),
+       ('inspections', 'entity', 'inspections', 'operations', 20);
+```
+
 ## Instance Configuration Keys (v0.79.0)
 
 For an instance-wide setting (organization name, support email, a default fee) that functions, views or notification templates need, define a config key instead of hardcoding the value. Admins edit it at `/admin/config`. Insert the key with no value and, when there is a sensible one, a `default_value` (checked against `config_type` on insert). Read it with `get_config()`, which returns TEXT: the value, else the default, else NULL; cast where you need another type. Do not repeat the default in a `COALESCE` or template `or`. Never store secrets: every signed-in user can read every key, and anonymous visitors can read keys with `is_public = true`.

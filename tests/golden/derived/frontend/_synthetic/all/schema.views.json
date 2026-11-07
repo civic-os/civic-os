@@ -342,7 +342,7 @@
         ]
       }
     },
-    "syn_hidden_sidebar": {
+    "syn_hidden_menu": {
       "create": ["display_name"],
       "detail": ["id", "display_name"],
       "edit": ["display_name"],

@@ -31,10 +31,14 @@ LIMIT 12;
 
 GRANT SELECT ON referrals_per_week TO web_anon, authenticated;
 
--- Hide from sidebar — this VIEW is only consumed by the chart widget
-INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar)
-VALUES ('referrals_per_week', 'Referrals Per Week', FALSE)
-ON CONFLICT (table_name) DO UPDATE SET show_in_sidebar = FALSE;
+-- Hide from sidebar (hidden menu node) — this VIEW is only consumed by the chart widget
+INSERT INTO metadata.entities (table_name, display_name)
+VALUES ('referrals_per_week', 'Referrals Per Week')
+ON CONFLICT (table_name) DO NOTHING;
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, sort_order, is_hidden)
+VALUES ('referrals_per_week', 'entity', 'referrals_per_week', NULL, TRUE)
+ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 -- 2. Add chart widget to the ECS Intake Dashboard
 INSERT INTO metadata.dashboard_widgets (

@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "academic",
     "color": "#3B82F6",
     "description": null,
     "display_name": "Academic",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "non_profit",
     "color": "#22C55E",
     "description": null,
     "display_name": "Non-Profit",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "government",
     "color": "#8B5CF6",
     "description": null,
     "display_name": "Government",
@@ -21,6 +24,7 @@
     "sort_order": 3
   },
   {
+    "category_key": "corporate",
     "color": "#F59E0B",
     "description": null,
     "display_name": "Corporate",
@@ -28,6 +32,7 @@
     "sort_order": 4
   },
   {
+    "category_key": "foundation",
     "color": "#EC4899",
     "description": null,
     "display_name": "Foundation",

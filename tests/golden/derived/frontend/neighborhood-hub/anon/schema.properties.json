@@ -1,52 +1,5 @@
 {
   "entities": {
-    "borrowers": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "user_id", "columnSpan": 1, "defaultValue": null, "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "selectForEdit": "user_id", "selectForList": "=", "type": "User", "typeId": 11},
-      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
-      {"column": "borrower_type", "columnSpan": 1, "defaultValue": null, "select": "borrower_type:categories!borrower_type(id,display_name,color)", "selectForEdit": "borrower_type", "selectForList": "=", "type": "Category", "typeId": 23},
-      {"column": "phone", "columnSpan": 1, "defaultValue": null, "select": "phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
-      {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
-      {"column": "email", "columnSpan": 1, "defaultValue": null, "select": "email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "phone_verified", "columnSpan": 1, "defaultValue": false, "select": "phone_verified", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
-      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "street", "columnSpan": 2, "defaultValue": null, "select": "street", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "city", "columnSpan": 1, "defaultValue": null, "select": "city", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "state", "columnSpan": 1, "defaultValue": null, "select": "state", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "zip", "columnSpan": 1, "defaultValue": null, "select": "zip", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {
-        "column": "photo_id",
-        "columnSpan": 1,
-        "defaultValue": null,
-        "select": "photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
-        "selectForEdit": "=",
-        "selectForList": "=",
-        "type": "FileImage",
-        "typeId": 19
-      },
-      {
-        "column": "address_proof",
-        "columnSpan": 1,
-        "defaultValue": null,
-        "select": "address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
-        "selectForEdit": "=",
-        "selectForList": "=",
-        "type": "FileImage",
-        "typeId": 19
-      },
-      {
-        "column": "liability_waiver",
-        "columnSpan": 1,
-        "defaultValue": null,
-        "select": "liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
-        "selectForEdit": "=",
-        "selectForList": "=",
-        "type": "FileImage",
-        "typeId": 19
-      }
-    ],
     "building_use_event_details": [
       {"column": "event_title", "columnSpan": 2, "defaultValue": null, "select": "event_title", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
@@ -126,26 +79,9 @@
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "hold_harmless_accepted", "columnSpan": 1, "defaultValue": false, "select": "hold_harmless_accepted", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
-      {"column": "photo_release_accepted", "columnSpan": 1, "defaultValue": false, "select": "photo_release_accepted", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
-      {
-        "column": "building_use_request_rooms_m2m",
-        "columnSpan": 2,
-        "defaultValue": null,
-        "select": "building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name))",
-        "selectForEdit": "=",
-        "selectForList": "=",
-        "type": "ManyToMany",
-        "typeId": 17
-      }
+      {"column": "photo_release_accepted", "columnSpan": 1, "defaultValue": false, "select": "photo_release_accepted", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3}
     ],
     "building_use_rooms": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "capacity", "columnSpan": 1, "defaultValue": null, "select": "capacity", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "has_av", "columnSpan": 1, "defaultValue": false, "select": "has_av", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
-      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {
         "column": "building_use_request_rooms_m2m",
         "columnSpan": 2,
@@ -284,16 +220,6 @@
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
       {"column": "civic_os_text_search", "columnSpan": 1, "defaultValue": null, "select": "civic_os_text_search", "selectForEdit": "=", "selectForList": "=", "type": "Unknown", "typeId": 0},
       {
-        "column": "project_parcels_m2m",
-        "columnSpan": 2,
-        "defaultValue": null,
-        "select": "project_parcels_m2m:project_parcels!parcel_id(projects!project_id(id,display_name))",
-        "selectForEdit": "=",
-        "selectForList": "=",
-        "type": "ManyToMany",
-        "typeId": 17
-      },
-      {
         "column": "work_site_parcels_m2m",
         "columnSpan": 2,
         "defaultValue": null,
@@ -302,87 +228,6 @@
         "selectForList": "=",
         "type": "ManyToMany",
         "typeId": 17
-      }
-    ],
-    "project_parcels": [
-      {"column": "project_id", "columnSpan": 1, "defaultValue": null, "select": "project_id:projects!project_id(id,display_name)", "selectForEdit": "project_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "parcel_id", "columnSpan": 1, "defaultValue": null, "select": "parcel_id:parcels!parcel_id(id,display_name)", "selectForEdit": "parcel_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
-    ],
-    "projects": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {
-        "column": "photos",
-        "columnSpan": 2,
-        "defaultValue": null,
-        "select": "photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
-        "selectForEdit": "=",
-        "selectForList": "photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
-        "type": "PhotoGallery",
-        "typeId": 25
-      },
-      {
-        "column": "project_parcels_m2m",
-        "columnSpan": 2,
-        "defaultValue": null,
-        "select": "project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name))",
-        "selectForEdit": "=",
-        "selectForList": "=",
-        "type": "ManyToMany",
-        "typeId": 17
-      }
-    ],
-    "tool_instances": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "tool_type_id", "columnSpan": 1, "defaultValue": null, "select": "tool_type_id:tool_types!tool_type_id(id,display_name)", "selectForEdit": "tool_type_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "instance_number", "columnSpan": 1, "defaultValue": null, "select": "instance_number", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
-    ],
-    "tool_reservation_checkouts": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {
-        "column": "tool_reservation_id",
-        "columnSpan": 1,
-        "defaultValue": null,
-        "select": "tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name)",
-        "selectForEdit": "tool_reservation_id",
-        "selectForList": "=",
-        "type": "ForeignKeyName",
-        "typeId": 10
-      },
-      {"column": "checkout_notes", "columnSpan": 2, "defaultValue": null, "select": "checkout_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "return_notes", "columnSpan": 2, "defaultValue": null, "select": "return_notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {"column": "damage_reported", "columnSpan": 1, "defaultValue": false, "select": "damage_reported", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
-      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
-      {
-        "column": "checkout_photos",
-        "columnSpan": 2,
-        "defaultValue": null,
-        "select": "checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
-        "selectForEdit": "=",
-        "selectForList": "checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id))",
-        "type": "PhotoGallery",
-        "typeId": 25
-      },
-      {
-        "column": "return_photos",
-        "columnSpan": 2,
-        "defaultValue": null,
-        "select": "return_photos:photo_galleries!return_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
-        "selectForEdit": "=",
-        "selectForList": "return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id))",
-        "type": "PhotoGallery",
-        "typeId": 25
       }
     ],
     "tool_reservation_tool_items": [
@@ -548,19 +393,6 @@
         "typeId": 17
       }
     ],
-    "training_records": [
-      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
-      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "borrower_id", "columnSpan": 1, "defaultValue": null, "select": "borrower_id:borrowers!borrower_id(id,display_name)", "selectForEdit": "borrower_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "training_type", "columnSpan": 1, "defaultValue": null, "select": "training_type:categories!training_type(id,display_name,color)", "selectForEdit": "training_type", "selectForList": "=", "type": "Category", "typeId": 23},
-      {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
-      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
-      {"column": "date_earned", "columnSpan": 1, "defaultValue": null, "select": "date_earned", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
-      {"column": "expiry_date", "columnSpan": 1, "defaultValue": null, "select": "expiry_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
-      {"column": "trainer", "columnSpan": 1, "defaultValue": null, "select": "trainer", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "notes", "columnSpan": 2, "defaultValue": null, "select": "notes", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2}
-    ],
     "work_site_parcels": [
       {
         "column": "work_site_id",
@@ -577,26 +409,6 @@
     ]
   },
   "freshTypes": {
-    "borrowers": [
-      "address_proof:FileImage",
-      "borrower_type:Category",
-      "city:TextShort",
-      "civic_os_text_search:Unknown",
-      "created_at:DateTimeLocal",
-      "display_name:TextLong",
-      "email:Email",
-      "id:IntegerNumber",
-      "liability_waiver:FileImage",
-      "phone:Telephone",
-      "phone_verified:Boolean",
-      "photo_id:FileImage",
-      "state:TextShort",
-      "status_id:Status",
-      "street:TextShort",
-      "updated_at:DateTimeLocal",
-      "user_id:User",
-      "zip:TextShort"
-    ],
     "building_use_event_details": [
       "accessibility_needs:TextLong",
       "building_use_request_id:ForeignKeyName",
@@ -638,7 +450,6 @@
       "updated_at:DateTimeLocal",
       "website:TextShort"
     ],
-    "building_use_rooms": ["capacity:IntegerNumber", "created_at:DateTimeLocal", "description:TextLong", "display_name:TextShort", "has_av:Boolean", "id:IntegerNumber", "sort_order:IntegerNumber"],
     "census_block_groups": [
       "boundary:GeoPolygon",
       "civic_os_text_search:Unknown",
@@ -708,22 +519,6 @@
       "property_class:Category",
       "updated_at:DateTimeLocal"
     ],
-    "project_parcels": ["created_at:DateTimeLocal", "parcel_id:ForeignKeyName", "project_id:ForeignKeyName"],
-    "projects": ["created_at:DateTimeLocal", "description:TextLong", "display_name:TextShort", "id:IntegerNumber", "photos:PhotoGallery", "updated_at:DateTimeLocal"],
-    "tool_instances": ["created_at:DateTimeLocal", "display_name:TextShort", "id:IntegerNumber", "instance_number:IntegerNumber", "status_id:Status", "tool_type_id:ForeignKeyName", "updated_at:DateTimeLocal"],
-    "tool_reservation_checkouts": [
-      "checkout_notes:TextLong",
-      "checkout_photos:PhotoGallery",
-      "created_at:DateTimeLocal",
-      "damage_reported:Boolean",
-      "display_name:TextLong",
-      "id:IntegerNumber",
-      "return_notes:TextLong",
-      "return_photos:PhotoGallery",
-      "status_id:Status",
-      "tool_reservation_id:ForeignKeyName",
-      "updated_at:DateTimeLocal"
-    ],
     "tool_reservation_tool_items": ["created_at:DateTimeLocal", "quantity:IntegerNumber", "tool_reservation_tools_id:ForeignKeyName", "tool_type_id:ForeignKeyName"],
     "tool_reservation_tools": ["created_at:DateTimeLocal", "guided_form_status_id:ForeignKeyName", "id:IntegerNumber", "tool_notes:TextLong", "tool_reservation_id:ForeignKeyName", "updated_at:DateTimeLocal"],
     "tool_reservation_work_site": ["created_at:DateTimeLocal", "guided_form_status_id:ForeignKeyName", "id:IntegerNumber", "site_description:TextLong", "tool_reservation_id:ForeignKeyName", "updated_at:DateTimeLocal"],
@@ -754,19 +549,6 @@
       "inventory_module_id:Category",
       "is_qty_managed:Boolean",
       "total_quantity:IntegerNumber",
-      "updated_at:DateTimeLocal"
-    ],
-    "training_records": [
-      "borrower_id:ForeignKeyName",
-      "created_at:DateTimeLocal",
-      "date_earned:Date",
-      "display_name:TextShort",
-      "expiry_date:Date",
-      "id:IntegerNumber",
-      "notes:TextLong",
-      "status_id:Status",
-      "trainer:TextShort",
-      "training_type:Category",
       "updated_at:DateTimeLocal"
     ],
     "work_site_parcels": ["created_at:DateTimeLocal", "parcel_id:ForeignKeyName", "work_site_id:ForeignKeyName"]

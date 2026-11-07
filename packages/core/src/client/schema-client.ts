@@ -23,16 +23,19 @@
  * | `getGuidedFormSteps()`                | `getGuidedFormSteps()`                          | |
  * | `getStaticText()`                     | `getStaticText()` (adds `itemType`)             | per-entity filtering |
  * | `getEntityActions(table)`             | `getEntityActions(table)` (never cached)        | |
+ * | (new in v0.81.0)                      | `getMenuNodes()` / `peekMenuNodes()` / `menuNodesStore` (`schema_menu_nodes`) | `getMenu()` over `buildMenu` |
  * | (new in v0.77.0)                      | `getDomainVersion()` (never cached)             | |
  * | (new in v0.77.0)                      | `readDomainVersion()` (strict, for bootstrap)   | |
  * | `refreshEntitiesCache()`              | `invalidateEntities()` (the app refetches)      | the eager refetch |
  * | `refreshPropertiesCache()`            | `invalidateProperties()` (the app refetches)    | the eager refetch |
+ * | (new in v0.81.0)                      | `invalidateMenuNodes()` (the app refetches)     | the eager refetch |
  * | `refreshCache()` on locale change     | `use({ locale })`: nothing is cleared           | |
  * | VersionService + `schemaVersionGuard` | `checkVersions()` / `applyVersions(rows)`       | `profile_extensions` handling |
  *
  * Error behaviour, as today:
- * - `schema_entities` and `schema_properties`: the error rejects and is not
- *   cached; the next call retries.
+ * - `schema_entities`, `schema_properties` and `schema_menu_nodes`: the error
+ *   rejects and is not cached; the next call retries. (A menu that failed to
+ *   load must not degrade to a flat list that would reveal hidden entities.)
  * - Every other resource logged the error and cached `[]`. Here the error goes
  *   to the `onError` option (instead of `console.error`), `[]` is resolved and
  *   it stays cached until an invalidation or `clear()`.
@@ -48,6 +51,7 @@
 import type { ConstraintMessage } from '../model/api.js';
 import type { EntityAction, SchemaEntityProperty, SchemaEntityTable, StaticText } from '../model/entity.js';
 import type { GuidedFormDefinition, GuidedFormStep } from '../model/guided-form.js';
+import type { MenuNodeRow } from '../model/menu.js';
 import type { CategoryOption, M2mPropertyMetadata, StatusOption } from '../model/schema.js';
 import type { DomainVersionInfo, DomainVersionRow } from '../version/types.js';
 import type { Transport } from '../transport/types.js';
@@ -83,6 +87,8 @@ export interface CacheVersionCheck {
   profileExtensionsNeedsRefresh: boolean;
   statusesNeedsRefresh: boolean;
   categoriesNeedsRefresh: boolean;
+  /** The `menu` version changed: the menu nodes were invalidated (entities are not affected). */
+  menuNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -160,6 +166,7 @@ interface Bucket {
   identity: string;
   locale: string;
   entities: Slot<SchemaEntityTable[]>;
+  menuNodes: Slot<MenuNodeRow[]>;
   properties: Slot<SchemaEntityProperty[]>;
   m2m: Slot<M2mPropertyMetadata[]>;
   constraintMessages: Slot<ConstraintMessage[]>;
@@ -177,6 +184,7 @@ function newBucket(identity: string, locale: string): Bucket {
     identity,
     locale,
     entities: newSlot(),
+    menuNodes: newSlot(),
     properties: newSlot(),
     m2m: newSlot(),
     constraintMessages: newSlot(),
@@ -241,6 +249,7 @@ export class SchemaClient implements HandleSource {
   private readonly versions = new Map<string, string>();
   private current: Bucket;
   private readonly entities$: Store<SchemaEntityTable[] | undefined>;
+  private readonly menuNodes$: Store<MenuNodeRow[] | undefined>;
 
   constructor(options: SchemaClientOptions) {
     this.transport = options.transport;
@@ -251,6 +260,7 @@ export class SchemaClient implements HandleSource {
     }
     this.current = this.bucketFor(options.identity ?? '', options.locale ?? DEFAULT_LOCALE);
     this.entities$ = createStore<SchemaEntityTable[] | undefined>(undefined);
+    this.menuNodes$ = createStore<MenuNodeRow[] | undefined>(undefined);
   }
 
   /**
@@ -261,6 +271,15 @@ export class SchemaClient implements HandleSource {
    */
   get entitiesStore(): Store<SchemaEntityTable[] | undefined> {
     return this.entities$;
+  }
+
+  /**
+   * Loaded menu nodes of the current context; the same rules as
+   * {@link entitiesStore} (`undefined` while cold, after a context switch to an
+   * uncached context, and after {@link invalidateMenuNodes}).
+   */
+  get menuNodesStore(): Store<MenuNodeRow[] | undefined> {
+    return this.menuNodes$;
   }
 
   /** The active cache context. */
@@ -279,6 +298,7 @@ export class SchemaClient implements HandleSource {
     if (identity === this.current.identity && locale === this.current.locale) return;
     this.current = this.bucketFor(identity, locale);
     this.entities$.set(this.current.entities.value);
+    this.menuNodes$.set(this.current.menuNodes.value);
   }
 
   /** Drops every cached context (for example on sign-out). In-flight responses are discarded, not stored. */
@@ -289,6 +309,7 @@ export class SchemaClient implements HandleSource {
     this.buckets.clear();
     this.current = this.bucketFor(this.current.identity, this.current.locale);
     this.entities$.set(undefined);
+    this.menuNodes$.set(undefined);
   }
 
   // ---------------------------------------------------------------------------
@@ -303,6 +324,22 @@ export class SchemaClient implements HandleSource {
       () => this.get<SchemaEntityTable[]>(bucket, 'schema_entities'),
       value => {
         if (bucket === this.current) this.entities$.set(value);
+      },
+    );
+  }
+
+  /**
+   * `GET schema_menu_nodes`: the sidebar menu tree as flat rows (labels already
+   * translated). Errors reject and are not cached, so the host can show an
+   * error state and a later call retries.
+   */
+  getMenuNodes(): Promise<MenuNodeRow[]> {
+    const bucket = this.current;
+    return this.load(
+      bucket.menuNodes,
+      () => this.get<MenuNodeRow[]>(bucket, 'schema_menu_nodes'),
+      value => {
+        if (bucket === this.current) this.menuNodes$.set(value);
       },
     );
   }
@@ -441,6 +478,10 @@ export class SchemaClient implements HandleSource {
     return this.current.entities.value;
   }
 
+  peekMenuNodes(): MenuNodeRow[] | undefined {
+    return this.current.menuNodes.value;
+  }
+
   peekProperties(): SchemaEntityProperty[] | undefined {
     return this.current.properties.value;
   }
@@ -506,6 +547,14 @@ export class SchemaClient implements HandleSource {
     this.entities$.set(undefined);
   }
 
+  /** Forgets the menu nodes of every cached context. The caller refetches if it wants them eagerly. */
+  invalidateMenuNodes(): void {
+    for (const bucket of this.buckets.values()) {
+      resetSlot(bucket.menuNodes);
+    }
+    this.menuNodes$.set(undefined);
+  }
+
   /** Forgets properties and M:M metadata of every cached context (today's `refreshPropertiesCache`). */
   invalidateProperties(): void {
     for (const bucket of this.buckets.values()) {
@@ -567,7 +616,7 @@ export class SchemaClient implements HandleSource {
    * and invalidates what changed, as `schemaVersionGuard` does today:
    * `entities` clears the entities, `properties` clears the properties and M:M
    * metadata, `statuses` and `categories` clear those values for every entity
-   * type. A changed `constraint_messages` or `profile_extensions` is only
+   * type, `menu` clears the menu nodes (never the entities). A changed `constraint_messages` or `profile_extensions` is only
    * reported (the guard ignores the former and hands the latter to
    * ProfileService); call {@link invalidateConstraintMessages} to act on it.
    * Invalidation covers every cached context, not only the current one.
@@ -580,6 +629,7 @@ export class SchemaClient implements HandleSource {
       profileExtensionsNeedsRefresh: false,
       statusesNeedsRefresh: false,
       categoriesNeedsRefresh: false,
+      menuNeedsRefresh: false,
       hasChanges: false,
     };
     const changed = (name: string): boolean => {
@@ -594,18 +644,21 @@ export class SchemaClient implements HandleSource {
     result.profileExtensionsNeedsRefresh = changed('profile_extensions');
     result.statusesNeedsRefresh = changed('statuses');
     result.categoriesNeedsRefresh = changed('categories');
+    result.menuNeedsRefresh = changed('menu');
     result.hasChanges =
       result.entitiesNeedsRefresh ||
       result.propertiesNeedsRefresh ||
       result.constraintMessagesNeedsRefresh ||
       result.profileExtensionsNeedsRefresh ||
       result.statusesNeedsRefresh ||
-      result.categoriesNeedsRefresh;
+      result.categoriesNeedsRefresh ||
+      result.menuNeedsRefresh;
 
     if (result.entitiesNeedsRefresh) this.invalidateEntities();
     if (result.propertiesNeedsRefresh) this.invalidateProperties();
     if (result.statusesNeedsRefresh) this.invalidateStatuses();
     if (result.categoriesNeedsRefresh) this.invalidateCategories();
+    if (result.menuNeedsRefresh) this.invalidateMenuNodes();
     return result;
   }
 
@@ -715,6 +768,7 @@ function invalidateKeyed<T>(buckets: Map<string, Bucket>, pick: (b: Bucket) => M
 
 function resetBucket(bucket: Bucket): void {
   resetSlot(bucket.entities);
+  resetSlot(bucket.menuNodes);
   resetSlot(bucket.properties);
   resetSlot(bucket.m2m);
   resetSlot(bucket.constraintMessages);

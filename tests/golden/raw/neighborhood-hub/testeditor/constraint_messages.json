@@ -88,5 +88,17 @@
     "constraint_name": "mek_requests_return_date_required_wfcheck",
     "error_message": "Return date is required",
     "table_name": "mek_requests"
+  },
+  {
+    "column_name": "timeslot",
+    "constraint_name": "mek_requests_timeslot_required_wfcheck",
+    "error_message": "Choose a pickup and return time.",
+    "table_name": "mek_requests"
+  },
+  {
+    "column_name": "timeslot",
+    "constraint_name": "tool_reservations_timeslot_required_wfcheck",
+    "error_message": "Choose a pickup and return time.",
+    "table_name": "tool_reservations"
   }
 ]

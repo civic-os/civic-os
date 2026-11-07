@@ -85,22 +85,6 @@
   },
   {
     "permission": "create",
-    "table_name": "checkout_instances"
-  },
-  {
-    "permission": "delete",
-    "table_name": "checkout_instances"
-  },
-  {
-    "permission": "read",
-    "table_name": "checkout_instances"
-  },
-  {
-    "permission": "update",
-    "table_name": "checkout_instances"
-  },
-  {
-    "permission": "create",
     "table_name": "checkout_items"
   },
   {
@@ -254,6 +238,10 @@
   {
     "permission": "update",
     "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.instance_config"
   },
   {
     "permission": "create",

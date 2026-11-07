@@ -36,7 +36,7 @@ RBAC permissions are stored in `metadata.permissions` and `metadata.permission_r
 
 **Users without RBAC permissions are not locked out.** Ownership RLS policies (Layer 3) give users control over records they created — they can see, edit, and delete their own records without any RBAC grants beyond what's needed for the frontend to render.
 
-**Sidebar visibility** is controlled independently by `metadata.entities.show_in_sidebar`, not by `read` permission.
+**Sidebar visibility** is controlled independently by the menu tree (`metadata.menu_nodes`, since v0.81.0; `is_hidden` hides a node and its subtree), not by `read` permission.
 
 ### Layer 3: RLS (Row-Level Security)
 
@@ -94,7 +94,7 @@ gf_rbac_delete:   has_permission(table, 'delete')    -- blanket delete
 
 | User Action | `user` role | `admin` role |
 |-------------|-------------|--------------|
-| See entity in sidebar | Yes (`show_in_sidebar`) | Yes (`show_in_sidebar`) |
+| See entity in sidebar | Yes (menu node not hidden) | Yes (menu node not hidden) |
 | See list page data table | Yes (always renders) | Yes (always renders) |
 | Which rows visible | All (RBAC SELECT via `read`) | All (RBAC SELECT via `read`) |
 | Create new record | Yes (`create` + INSERT policy) | Yes |
@@ -196,7 +196,7 @@ A VIEW runs with its owner's rights by default, and Civic OS views are owned by 
 
 ### Don't confuse sidebar visibility with RBAC permissions
 
-Sidebar visibility is controlled by `metadata.entities.show_in_sidebar`. RBAC permissions control data access, not navigation. A table can be visible in the sidebar without granting any RBAC permissions (users would see only their own records via ownership RLS).
+Sidebar visibility is controlled by the menu tree in `metadata.menu_nodes` (`is_hidden`; entities without a node show at the root). RBAC permissions control data access, not navigation. A table can be visible in the sidebar without granting any RBAC permissions (users would see only their own records via ownership RLS).
 
 ## Implementation Details
 

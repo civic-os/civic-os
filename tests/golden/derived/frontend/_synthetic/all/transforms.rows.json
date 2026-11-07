@@ -927,7 +927,7 @@
         }
       }
     },
-    "syn_hidden_sidebar": {
+    "syn_hidden_menu": {
       "createProps": ["display_name:TextLong"],
       "editProps": ["display_name:TextLong"],
       "rows": {

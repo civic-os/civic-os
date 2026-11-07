@@ -1,68 +1,17 @@
 {
   "conditions": [
     {
-      "condition": {"field": "status_id", "operator": "eq", "value": 30},
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "approved"},
       "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"status_id\":\"30\"}": "status_id is \"30\", expected 30",
-        "{\"status_id\":31}": "status_id is 31, expected 30",
-        "{\"status_id\":null}": "status_id is null, expected 30",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":31}}": "status_id is 31, expected 30",
-        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 30",
-        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 30",
-        "{}": "status_id is null, expected 30"
+        "<null data>": "status_id.status_key is null, expected \"approved\"",
+        "<undefined data>": "status_id.status_key is null, expected \"approved\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"approved\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"approved\"",
+        "{\"status_id\":{\"status_key\":\"approved_x\"}}": "status_id.status_key is \"approved_x\", expected \"approved\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"approved\"",
+        "{}": "status_id.status_key is null, expected \"approved\""
       },
-      "usedBy": ["mek_requests.approve:enabled_condition", "mek_requests.approve:visibility_condition", "mek_requests.deny_request:enabled_condition", "mek_requests.deny_request:visibility_condition"]
-    },
-    {
-      "condition": {"field": "status_id", "operator": "eq", "value": 31},
-      "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"status_id\":\"31\"}": "status_id is \"31\", expected 31",
-        "{\"status_id\":32}": "status_id is 32, expected 31",
-        "{\"status_id\":null}": "status_id is null, expected 31",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":32}}": "status_id is 32, expected 31",
-        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 31",
-        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 31",
-        "{}": "status_id is null, expected 31"
-      },
-      "usedBy": ["mek_requests.check_out:enabled_condition", "mek_requests.check_out:visibility_condition"]
-    },
-    {
-      "condition": {"field": "status_id", "operator": "eq", "value": 33},
-      "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"status_id\":\"33\"}": "status_id is \"33\", expected 33",
-        "{\"status_id\":34}": "status_id is 34, expected 33",
-        "{\"status_id\":null}": "status_id is null, expected 33",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":34}}": "status_id is 34, expected 33",
-        "{\"status_id\":{\"id\":null}}": "status_id is null, expected 33",
-        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, expected 33",
-        "{}": "status_id is null, expected 33"
-      },
-      "usedBy": ["mek_requests.complete:enabled_condition", "mek_requests.complete:visibility_condition"]
-    },
-    {
-      "condition": {
-        "field": "status_id",
-        "operator": "in",
-        "value": [30, 31]
-      },
-      "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"status_id\":\"30\"}": "status_id is \"30\", must be one of [30,31]",
-        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [30,31]",
-        "{\"status_id\":null}": "status_id is null, must be one of [30,31]",
-        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [30,31]",
-        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [30,31]",
-        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [30,31]",
-        "{}": "status_id is null, must be one of [30,31]"
-      },
-      "usedBy": ["mek_requests.cancel:enabled_condition", "mek_requests.cancel:visibility_condition"]
+      "usedBy": ["building_use_requests.complete:enabled_condition", "building_use_requests.complete:visibility_condition", "mek_requests.check_out:enabled_condition", "mek_requests.check_out:visibility_condition"]
     },
     {
       "condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"},
@@ -88,7 +37,16 @@
         "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"pending\"",
         "{}": "status_id.status_key is null, expected \"pending\""
       },
-      "usedBy": ["building_use_requests.approve_request:enabled_condition", "building_use_requests.approve_request:visibility_condition", "building_use_requests.deny_request:enabled_condition", "building_use_requests.deny_request:visibility_condition"]
+      "usedBy": [
+        "building_use_requests.approve_request:enabled_condition",
+        "building_use_requests.approve_request:visibility_condition",
+        "building_use_requests.deny_request:enabled_condition",
+        "building_use_requests.deny_request:visibility_condition",
+        "mek_requests.approve:enabled_condition",
+        "mek_requests.approve:visibility_condition",
+        "mek_requests.deny_request:enabled_condition",
+        "mek_requests.deny_request:visibility_condition"
+      ]
     },
     {
       "condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
@@ -117,81 +75,101 @@
       ]
     },
     {
-      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+      "condition": {"field": "status_id.status_key", "operator": "eq", "value": "returned"},
       "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"workflow_status_id\":\"12\"}": "workflow_status_id is \"12\", expected 12",
-        "{\"workflow_status_id\":13}": "workflow_status_id is 13, expected 12",
-        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 12",
-        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":13}}": "workflow_status_id is 13, expected 12",
-        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is null, expected 12",
-        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 12",
-        "{}": "workflow_status_id is null, expected 12"
+        "<null data>": "status_id.status_key is null, expected \"returned\"",
+        "<undefined data>": "status_id.status_key is null, expected \"returned\"",
+        "{\"status_id\":3}": "status_id.status_key is null, expected \"returned\"",
+        "{\"status_id\":null}": "status_id.status_key is null, expected \"returned\"",
+        "{\"status_id\":{\"status_key\":\"returned_x\"}}": "status_id.status_key is \"returned_x\", expected \"returned\"",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, expected \"returned\"",
+        "{}": "status_id.status_key is null, expected \"returned\""
       },
-      "usedBy": ["tool_reservations.approve:enabled_condition", "tool_reservations.approve:visibility_condition", "tool_reservations.deny:enabled_condition", "tool_reservations.deny:visibility_condition"]
+      "usedBy": ["mek_requests.complete:enabled_condition", "mek_requests.complete:visibility_condition"]
     },
     {
-      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 13},
+      "condition": {
+        "field": "status_id.status_key",
+        "operator": "in",
+        "value": ["pending", "approved"]
+      },
       "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"workflow_status_id\":\"13\"}": "workflow_status_id is \"13\", expected 13",
-        "{\"workflow_status_id\":14}": "workflow_status_id is 14, expected 13",
-        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 13",
-        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":14}}": "workflow_status_id is 14, expected 13",
-        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is null, expected 13",
-        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 13",
-        "{}": "workflow_status_id is null, expected 13"
+        "<null data>": "status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "<undefined data>": "status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{\"status_id\":3}": "status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{\"status_id\":null}": "status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{\"status_id\":{\"status_key\":\"__not_in__\"}}": "status_id.status_key is \"__not_in__\", must be one of [\"pending\",\"approved\"]",
+        "{\"status_id\":{\"status_key\":null}}": "status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{}": "status_id.status_key is null, must be one of [\"pending\",\"approved\"]"
+      },
+      "usedBy": ["building_use_requests.cancel:enabled_condition", "building_use_requests.cancel:visibility_condition", "mek_requests.cancel:enabled_condition", "mek_requests.cancel:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "approved"},
+      "failures": {
+        "<null data>": "workflow_status_id.status_key is null, expected \"approved\"",
+        "<undefined data>": "workflow_status_id.status_key is null, expected \"approved\"",
+        "{\"workflow_status_id\":3}": "workflow_status_id.status_key is null, expected \"approved\"",
+        "{\"workflow_status_id\":null}": "workflow_status_id.status_key is null, expected \"approved\"",
+        "{\"workflow_status_id\":{\"status_key\":\"approved_x\"}}": "workflow_status_id.status_key is \"approved_x\", expected \"approved\"",
+        "{\"workflow_status_id\":{\"status_key\":null}}": "workflow_status_id.status_key is null, expected \"approved\"",
+        "{}": "workflow_status_id.status_key is null, expected \"approved\""
       },
       "usedBy": ["tool_reservations.check_out:enabled_condition", "tool_reservations.check_out:visibility_condition"]
     },
     {
-      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 14},
+      "condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "checked_out"},
       "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"workflow_status_id\":\"14\"}": "workflow_status_id is \"14\", expected 14",
-        "{\"workflow_status_id\":15}": "workflow_status_id is 15, expected 14",
-        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 14",
-        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":15}}": "workflow_status_id is 15, expected 14",
-        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is null, expected 14",
-        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 14",
-        "{}": "workflow_status_id is null, expected 14"
+        "<null data>": "workflow_status_id.status_key is null, expected \"checked_out\"",
+        "<undefined data>": "workflow_status_id.status_key is null, expected \"checked_out\"",
+        "{\"workflow_status_id\":3}": "workflow_status_id.status_key is null, expected \"checked_out\"",
+        "{\"workflow_status_id\":null}": "workflow_status_id.status_key is null, expected \"checked_out\"",
+        "{\"workflow_status_id\":{\"status_key\":\"checked_out_x\"}}": "workflow_status_id.status_key is \"checked_out_x\", expected \"checked_out\"",
+        "{\"workflow_status_id\":{\"status_key\":null}}": "workflow_status_id.status_key is null, expected \"checked_out\"",
+        "{}": "workflow_status_id.status_key is null, expected \"checked_out\""
       },
       "usedBy": ["tool_reservations.mark_returned:enabled_condition", "tool_reservations.mark_returned:visibility_condition"]
     },
     {
-      "condition": {"field": "workflow_status_id", "operator": "eq", "value": 15},
+      "condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "pending"},
       "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"workflow_status_id\":\"15\"}": "workflow_status_id is \"15\", expected 15",
-        "{\"workflow_status_id\":16}": "workflow_status_id is 16, expected 15",
-        "{\"workflow_status_id\":null}": "workflow_status_id is null, expected 15",
-        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":16}}": "workflow_status_id is 16, expected 15",
-        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is null, expected 15",
-        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, expected 15",
-        "{}": "workflow_status_id is null, expected 15"
+        "<null data>": "workflow_status_id.status_key is null, expected \"pending\"",
+        "<undefined data>": "workflow_status_id.status_key is null, expected \"pending\"",
+        "{\"workflow_status_id\":3}": "workflow_status_id.status_key is null, expected \"pending\"",
+        "{\"workflow_status_id\":null}": "workflow_status_id.status_key is null, expected \"pending\"",
+        "{\"workflow_status_id\":{\"status_key\":\"pending_x\"}}": "workflow_status_id.status_key is \"pending_x\", expected \"pending\"",
+        "{\"workflow_status_id\":{\"status_key\":null}}": "workflow_status_id.status_key is null, expected \"pending\"",
+        "{}": "workflow_status_id.status_key is null, expected \"pending\""
+      },
+      "usedBy": ["tool_reservations.approve:enabled_condition", "tool_reservations.approve:visibility_condition", "tool_reservations.deny:enabled_condition", "tool_reservations.deny:visibility_condition"]
+    },
+    {
+      "condition": {"field": "workflow_status_id.status_key", "operator": "eq", "value": "returned"},
+      "failures": {
+        "<null data>": "workflow_status_id.status_key is null, expected \"returned\"",
+        "<undefined data>": "workflow_status_id.status_key is null, expected \"returned\"",
+        "{\"workflow_status_id\":3}": "workflow_status_id.status_key is null, expected \"returned\"",
+        "{\"workflow_status_id\":null}": "workflow_status_id.status_key is null, expected \"returned\"",
+        "{\"workflow_status_id\":{\"status_key\":\"returned_x\"}}": "workflow_status_id.status_key is \"returned_x\", expected \"returned\"",
+        "{\"workflow_status_id\":{\"status_key\":null}}": "workflow_status_id.status_key is null, expected \"returned\"",
+        "{}": "workflow_status_id.status_key is null, expected \"returned\""
       },
       "usedBy": ["tool_reservations.complete:enabled_condition", "tool_reservations.complete:visibility_condition"]
     },
     {
       "condition": {
-        "field": "workflow_status_id",
+        "field": "workflow_status_id.status_key",
         "operator": "in",
-        "value": [12, 13]
+        "value": ["pending", "approved"]
       },
       "failures": {
-        "<null data>": "__throws:TypeError__",
-        "<undefined data>": "__throws:TypeError__",
-        "{\"workflow_status_id\":\"12\"}": "workflow_status_id is \"12\", must be one of [12,13]",
-        "{\"workflow_status_id\":\"__not_in__\"}": "workflow_status_id is \"__not_in__\", must be one of [12,13]",
-        "{\"workflow_status_id\":null}": "workflow_status_id is null, must be one of [12,13]",
-        "{\"workflow_status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "workflow_status_id is \"__not_in__\", must be one of [12,13]",
-        "{\"workflow_status_id\":{\"id\":null}}": "workflow_status_id is null, must be one of [12,13]",
-        "{\"workflow_status_id\":{\"other\":1}}": "workflow_status_id is {\"other\":1}, must be one of [12,13]",
-        "{}": "workflow_status_id is null, must be one of [12,13]"
+        "<null data>": "workflow_status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "<undefined data>": "workflow_status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{\"workflow_status_id\":3}": "workflow_status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{\"workflow_status_id\":null}": "workflow_status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{\"workflow_status_id\":{\"status_key\":\"__not_in__\"}}": "workflow_status_id.status_key is \"__not_in__\", must be one of [\"pending\",\"approved\"]",
+        "{\"workflow_status_id\":{\"status_key\":null}}": "workflow_status_id.status_key is null, must be one of [\"pending\",\"approved\"]",
+        "{}": "workflow_status_id.status_key is null, must be one of [\"pending\",\"approved\"]"
       },
       "usedBy": ["tool_reservations.cancel:enabled_condition", "tool_reservations.cancel:visibility_condition"]
     }

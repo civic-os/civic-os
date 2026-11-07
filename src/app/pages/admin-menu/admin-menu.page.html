@@ -1,0 +1,222 @@
+<!-- Sidebar Menu Editor -->
+<div class="p-4 md:p-6 max-w-6xl mx-auto">
+  <h1 class="text-3xl font-bold mb-2">{{ 'admin_menu.title' | translate }}</h1>
+
+  @if (!isAdmin()) {
+    <div class="alert alert-error" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+      <span>{{ 'admin_menu.access_denied' | translate }}</span>
+    </div>
+  } @else {
+    <p class="text-base-content/60 mb-6">{{ 'admin_menu.intro' | translate }}</p>
+
+    @if (loading()) {
+      <div class="flex justify-center items-center min-h-[400px]">
+        <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
+      </div>
+    } @else if (loadError()) {
+      <div class="alert alert-error mb-4" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>{{ 'admin_menu.load_error' | translate }}</span>
+        <button type="button" class="btn btn-sm" (click)="load()">{{ 'nav.menu_retry' | translate }}</button>
+      </div>
+    } @else {
+      <!-- Status -->
+      @if (saved()) {
+        <div class="alert alert-success mb-4" role="status">
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          <span>{{ 'admin_menu.saved' | translate }}</span>
+        </div>
+      }
+      @if (saveError()) {
+        <div class="alert alert-error mb-4" role="alert">
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+          <span>{{ saveError() }}</span>
+        </div>
+      }
+      @if (issues().length > 0) {
+        <div class="alert alert-warning mb-4" role="alert" data-testid="menu-issues">
+          <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+          <ul class="list-disc ps-5">
+            @for (issue of issues(); track $index) {
+              <li>{{ 'admin_menu.error.' + issue.code | translate:{ name: issue.name } }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <button type="button" class="btn btn-primary" data-testid="menu-save"
+                [disabled]="!dirty() || issues().length > 0 || saving()" (click)="save()">
+          @if (saving()) {
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+            {{ 'admin_menu.saving' | translate }}
+          } @else {
+            {{ 'admin_menu.save' | translate }}
+          }
+        </button>
+        <button type="button" class="btn" data-testid="menu-discard"
+                [disabled]="!dirty() || saving()" (click)="discard()">
+          {{ 'admin_menu.discard' | translate }}
+        </button>
+        @if (dirty()) {
+          <span class="text-sm text-base-content/70">{{ 'admin_menu.unsaved' | translate }}</span>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 flex flex-col gap-6">
+          <!-- Tree -->
+          <section aria-labelledby="menu-layout-title">
+            <h2 id="menu-layout-title" class="text-xl font-semibold mb-2">{{ 'admin_menu.layout' | translate }}</h2>
+            <p class="sr-only" role="status" aria-live="polite" data-testid="menu-announcement">{{ announcement() }}</p>
+
+            @if (rows().length === 0) {
+              <p class="text-base-content/60">{{ 'admin_menu.empty' | translate }}</p>
+            }
+
+            <div class="space-y-2 not-prose" cdkDropList (cdkDropListDropped)="onDrop($event)">
+              @for (row of rows(); track row.key; let i = $index) {
+                <!-- A hidden row shrinks to one line: dimmed name, Hidden badge and the row actions -->
+                <div class="card bg-base-200 shadow-sm" cdkDrag [attr.data-row-key]="row.key"
+                     [style.margin-inline-start.rem]="(row.depth - 1) * 1.5">
+                  <div class="card-body gap-2" [class.p-3]="!row.hidden" [class.px-3]="row.hidden" [class.py-1]="row.hidden">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="cursor-move shrink-0" cdkDragHandle>
+                        <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                      </span>
+                      @if (row.icon) {
+                        <span class="material-symbols-outlined" aria-hidden="true">{{ row.icon }}</span>
+                      }
+                      <span [class]="row.hidden ? 'font-semibold text-base-content/70' : 'font-semibold'">{{ rowName(row.key) }}</span>
+                      @if (row.kind === 'heading') {
+                        <span class="badge badge-ghost badge-sm">{{ 'admin_menu.heading_badge' | translate }}</span>
+                      }
+                      @if (row.hidden) {
+                        <span class="badge badge-ghost badge-sm">{{ 'admin_menu.hidden' | translate }}</span>
+                      }
+                      @if (notShown(row)) {
+                        <span class="badge badge-outline badge-sm" data-testid="menu-not-shown"
+                              [attr.aria-describedby]="'menu-not-shown-help-' + row.key">{{ 'admin_menu.not_shown' | translate }}</span>
+                        <span class="sr-only" [id]="'menu-not-shown-help-' + row.key">{{ 'admin_menu.not_shown_help' | translate }}</span>
+                      }
+                      <span class="flex items-center gap-1 ms-auto">
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="visibility"
+                                (click)="toggleHidden(row.key)"
+                                [attr.aria-label]="(row.hidden ? 'a11y.admin_menu.show' : 'a11y.admin_menu.hide') | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ row.hidden ? 'visibility_off' : 'visibility' }}</span>
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="up"
+                                [disabled]="!canMoveUp(i)" (click)="moveUp(i)"
+                                [attr.aria-label]="'a11y.move_up' | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="down"
+                                [disabled]="!canMoveDown(i)" (click)="moveDown(i)"
+                                [attr.aria-label]="'a11y.move_down' | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                        </button>
+                        <!-- Outdent before indent: the arrows point the way the row moves (both mirror in RTL) -->
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="outdent"
+                                [disabled]="!canOutdent(i)" (click)="outdent(i)"
+                                [attr.aria-label]="'a11y.admin_menu.outdent' | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm rtl:-scale-x-100" aria-hidden="true">format_indent_decrease</span>
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-xs px-1" data-action="indent"
+                                [disabled]="!canIndent(i)" (click)="indent(i)"
+                                [attr.aria-label]="'a11y.admin_menu.indent' | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm rtl:-scale-x-100" aria-hidden="true">format_indent_increase</span>
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-xs px-1 text-error" data-action="remove"
+                                (click)="remove(i)"
+                                [attr.aria-label]="'a11y.admin_menu.remove' | translate:{ name: rowName(row.key) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
+                        </button>
+                      </span>
+                    </div>
+
+                    @if (notShown(row) && !row.hidden) {
+                      <p class="text-xs text-base-content/70" aria-hidden="true">{{ 'admin_menu.not_shown_help' | translate }}</p>
+                    }
+                    @if (!row.hidden) {
+                      <div class="flex flex-wrap items-end gap-3">
+                        <div class="flex flex-col">
+                          <label class="text-xs font-semibold" [attr.for]="'menu-label-' + row.key">{{ 'admin_menu.label' | translate }}</label>
+                          <input type="text" class="input input-bordered input-sm w-48" [id]="'menu-label-' + row.key"
+                                 [value]="row.label ?? ''"
+                                 [placeholder]="row.kind === 'heading' ? ('admin_menu.heading_label' | translate) : entityName(row)"
+                                 (input)="onLabelInput(row.key, $event)" />
+                        </div>
+                        <div class="flex flex-col">
+                          <label class="text-xs font-semibold" [attr.for]="'menu-icon-' + row.key">{{ 'admin_menu.icon' | translate }}</label>
+                          <span class="flex items-center gap-1">
+                            <input type="text" class="input input-bordered input-sm w-40" [id]="'menu-icon-' + row.key"
+                                   [value]="row.icon ?? ''" [placeholder]="'admin_menu.icon_placeholder' | translate"
+                                   (input)="onIconInput(row.key, $event)" />
+                            <span class="material-symbols-outlined w-6" aria-hidden="true">{{ row.icon }}</span>
+                          </span>
+                        </div>
+                        @if (row.kind === 'heading' || hasChildren(i)) {
+                          <label class="label cursor-pointer gap-2" [attr.for]="'menu-collapsed-' + row.key">
+                            <input type="checkbox" class="checkbox checkbox-sm" [id]="'menu-collapsed-' + row.key"
+                                   [checked]="row.collapsed" (change)="onCheck(row.key, 'collapsed', $event)" />
+                            <span class="text-sm">{{ 'admin_menu.collapsed' | translate }}</span>
+                          </label>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Add heading -->
+          <section aria-labelledby="menu-add-heading-title">
+            <h2 id="menu-add-heading-title" class="text-xl font-semibold mb-2">{{ 'admin_menu.add_heading' | translate }}</h2>
+            <form class="flex flex-wrap items-end gap-2" (submit)="$event.preventDefault(); addHeading()">
+              <div class="flex flex-col">
+                <label class="text-xs font-semibold" for="menu-new-heading">{{ 'admin_menu.heading_label' | translate }}</label>
+                <input id="menu-new-heading" type="text" class="input input-bordered input-sm w-64" required
+                       [value]="newHeadingLabel()" (input)="onHeadingInput($event)" />
+              </div>
+              <!-- Styled disabled, never [disabled]: Enter in the field submits through this button, and a
+                   disabled attribute not yet cleared by the next render would swallow it. addHeading() ignores blanks. -->
+              <button type="submit" class="btn btn-sm btn-primary"
+                      [class.btn-disabled]="newHeadingLabel().trim() === ''"
+                      [attr.aria-disabled]="newHeadingLabel().trim() === '' ? 'true' : null">
+                {{ 'admin_menu.add' | translate }}
+              </button>
+            </form>
+          </section>
+
+          <!-- Unplaced tray -->
+          <section aria-labelledby="menu-unplaced-title">
+            <h2 id="menu-unplaced-title" class="text-xl font-semibold mb-1">{{ 'admin_menu.unplaced' | translate }}</h2>
+            <p class="text-sm text-base-content/60 mb-2">{{ 'admin_menu.unplaced_help' | translate }}</p>
+            @if (unplaced().length === 0) {
+              <p class="text-base-content/60">{{ 'admin_menu.unplaced_empty' | translate }}</p>
+            }
+            <ul class="space-y-2" data-testid="menu-unplaced">
+              @for (entity of unplaced(); track entity.table_name) {
+                <li class="flex items-center gap-2 bg-base-200 rounded-box px-3 py-2" [attr.data-unplaced-key]="entity.table_name">
+                  <span class="font-semibold">{{ entity.display_name }}</span>
+                  <span class="badge badge-ghost badge-sm">{{ (entity.is_view ? 'admin_menu.view' : 'admin_menu.table') | translate }}</span>
+                  <button type="button" class="btn btn-sm ms-auto" (click)="addEntity(entity)">
+                    {{ 'admin_menu.add_to_menu' | translate }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        </div>
+
+        <!-- Preview -->
+        <aside aria-labelledby="menu-preview-title" class="not-prose">
+          <h2 id="menu-preview-title" class="text-xl font-semibold mb-2">{{ 'admin_menu.preview' | translate }}</h2>
+          <ul appSidebarMenu class="menu bg-base-200 rounded-box w-full" data-testid="menu-preview" [entries]="preview()"></ul>
+        </aside>
+      </div>
+    }
+  }
+</div>

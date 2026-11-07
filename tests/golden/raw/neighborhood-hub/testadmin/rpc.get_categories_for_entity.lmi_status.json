@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "lmi_qualified",
     "color": "#22c55e",
     "description": null,
     "display_name": "LMI Qualified",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "not_lmi",
     "color": "#ef4444",
     "description": null,
     "display_name": "Not LMI",

@@ -20,7 +20,7 @@ const ENTITY_DEFAULTS: Row = {
   calendar_color_property: null, calendar_property_name: null, delete: true, description: null, enable_notes: false,
   fulltext_search_column: null, guided_form_key: null, insert: true, is_rich_junction: false, is_view: false,
   map_color_property: null, map_property_name: null, payment_capture_mode: null, payment_initiation_rpc: null,
-  recurring_property_name: null, search_fields: null, select: true, show_calendar: false, show_in_sidebar: true,
+  recurring_property_name: null, search_fields: null, select: true, show_calendar: false,
   show_map: false, sort_order: 0, substring_search_column: null, supports_recurring: false, update: true,
 };
 
@@ -226,8 +226,8 @@ function build() {
   props.push(idProp('syn_nodn_dead_end'));
   addEntity('syn_jn_dead_end', {}, false);
   props.push(fk('syn_jn_dead_end', 'left_id', 'syn_left'), fk('syn_jn_dead_end', 'dead_id', 'syn_nodn_dead_end'));
-  // junction hidden from sidebar via flag only, entity listed in menu check
-  addEntity('syn_hidden_sidebar', { show_in_sidebar: false }, true);
+  // entity hidden from the sidebar by a hidden menu node (see syntheticVariant's schema_menu_nodes); still listed for management
+  addEntity('syn_hidden_menu', {}, true);
   addEntity('syn_view_summary', { is_view: true, insert: false, update: false, delete: false }, false);
   props.push(prop('syn_view_summary', 'display_name', { udt_name: 'text' }), prop('syn_view_summary', 'total', { udt_name: 'int4' }));
 
@@ -281,6 +281,9 @@ export function syntheticVariant(): Variant {
     inline: {
       schema_entities: entities, schema_properties: props, schema_m2m_properties: m2m, static_text: staticText,
       constraint_messages: [], schema_entity_actions: [],
+      schema_menu_nodes: [
+        { node_key: 'syn_hidden_menu', node_kind: 'entity', target_key: 'syn_hidden_menu', display_name: null, icon: null, parent_node_key: null, sort_order: null, is_hidden: true, collapsed_by_default: false },
+      ],
     },
   };
 }

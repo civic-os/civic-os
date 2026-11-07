@@ -1,5 +1,6 @@
 [
   {
+    "category_key": "internal",
     "color": "#3b82f6",
     "description": null,
     "display_name": "Internal",
@@ -7,6 +8,7 @@
     "sort_order": 1
   },
   {
+    "category_key": "external",
     "color": "#22c55e",
     "description": null,
     "display_name": "External",
@@ -14,6 +16,7 @@
     "sort_order": 2
   },
   {
+    "category_key": "other",
     "color": "#6b7280",
     "description": null,
     "display_name": "Other",

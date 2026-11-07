@@ -1,6 +1,6 @@
 {
   "actionAnomalies": {},
-  "actionCounts": {"probes": 44, "resolvedToSelf": 44},
+  "actionCounts": {"probes": 48, "resolvedToSelf": 48},
   "columnAnomalies": {
     "parcels": {
       "parcel_number_formatted": {"byDisplayName": "\"Parcel Number\" -> parcel_number", "byUpperDisplayName": "\"PARCEL NUMBER\" -> parcel_number"}

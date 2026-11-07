@@ -512,6 +512,7 @@ describe('SchemaClient version refresh', () => {
   async function warm(client: SchemaClient) {
     await Promise.all([
       client.getEntities(),
+      client.getMenuNodes(),
       client.getProperties(),
       client.getM2mMetadata(),
       client.getConstraintMessages(),
@@ -526,6 +527,7 @@ describe('SchemaClient version refresh', () => {
   function peeks(client: SchemaClient) {
     return {
       entities: client.peekEntities() !== undefined,
+      menuNodes: client.peekMenuNodes() !== undefined,
       properties: client.peekProperties() !== undefined,
       m2m: client.peekM2mMetadata() !== undefined,
       constraintMessages: client.peekConstraintMessages() !== undefined,
@@ -539,6 +541,7 @@ describe('SchemaClient version refresh', () => {
 
   const ALL_WARM = {
     entities: true,
+    menuNodes: true,
     properties: true,
     m2m: true,
     constraintMessages: true,
@@ -560,6 +563,7 @@ describe('SchemaClient version refresh', () => {
       profileExtensionsNeedsRefresh: false,
       statusesNeedsRefresh: false,
       categoriesNeedsRefresh: false,
+      menuNeedsRefresh: false,
       hasChanges: false,
     });
     expect(client.getKnownVersions()).toEqual({ entities: 'e1', properties: 'p1', constraint_messages: 'c1', profile_extensions: 'p1' });
@@ -900,6 +904,172 @@ describe('SchemaClient per-resource invalidators', () => {
     client.use({ locale: 'en' });
     await client.getStatuses('a');
     expect(requests).toHaveLength(4);
+  });
+});
+
+describe('SchemaClient menu nodes', () => {
+  const NODE = {
+    node_key: 'issues',
+    node_kind: 'entity',
+    target_key: 'issues',
+    display_name: null,
+    icon: null,
+    parent_node_key: null,
+    sort_order: 1,
+    is_hidden: false,
+    collapsed_by_default: false,
+  };
+
+  it('GETs schema_menu_nodes, with Accept-Language only for a non-default locale', async () => {
+    const { transport, requests } = autoTransport(() => reply(200, [NODE]));
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await expect(client.getMenuNodes()).resolves.toEqual([NODE]);
+    expect(requests[0]).toMatchObject({ method: 'GET', url: API + 'schema_menu_nodes' });
+    expect(requests[0].headers).toBeUndefined();
+    client.use({ locale: 'es' });
+    await client.getMenuNodes();
+    expect(requests[1].headers).toEqual({ 'Accept-Language': 'es' });
+  });
+
+  it('issues the request synchronously and shares one in-flight request', async () => {
+    const { transport, pending } = manualTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const a = client.getMenuNodes();
+    const b = client.getMenuNodes();
+    expect(pending).toHaveLength(1);
+    pending[0].resolve(reply(200, [NODE]));
+    await expect(Promise.all([a, b])).resolves.toEqual([[NODE], [NODE]]);
+  });
+
+  it('caches after the first load and exposes it through peek and the store', async () => {
+    const { transport, requests } = autoTransport(() => reply(200, [NODE]));
+    const client = new SchemaClient({ transport, apiUrl: API });
+    expect(client.peekMenuNodes()).toBeUndefined();
+    expect(client.menuNodesStore.getSnapshot()).toBeUndefined();
+    await client.getMenuNodes();
+    await client.getMenuNodes();
+    expect(requests).toHaveLength(1);
+    expect(client.peekMenuNodes()).toEqual([NODE]);
+    expect(client.menuNodesStore.getSnapshot()).toEqual([NODE]);
+  });
+
+  it('caches per context bucket and the store follows the switch', async () => {
+    const { transport, requests } = autoTransport(req => reply(200, req.headers ? [{ ...NODE, display_name: 'Problemas' }] : [NODE]));
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await client.getMenuNodes();
+    client.use({ locale: 'es' });
+    expect(client.peekMenuNodes()).toBeUndefined();
+    expect(client.menuNodesStore.getSnapshot()).toBeUndefined();
+    await client.getMenuNodes();
+    expect(client.menuNodesStore.getSnapshot()?.[0].display_name).toBe('Problemas');
+    client.use({ locale: 'en' });
+    expect(client.menuNodesStore.getSnapshot()?.[0].display_name).toBeNull();
+    client.use({ identity: 'u1' });
+    await client.getMenuNodes();
+    client.use({ identity: '' });
+    await client.getMenuNodes();
+    expect(requests).toHaveLength(3);
+  });
+
+  it('an error rejects, is not cached, and the next call retries', async () => {
+    let fail = true;
+    const onError = vi.fn();
+    const { transport, requests } = autoTransport(() => (fail ? reply(500, { message: 'boom' }) : reply(200, [NODE])));
+    const client = new SchemaClient({ transport, apiUrl: API, onError });
+    await expect(client.getMenuNodes()).rejects.toBeInstanceOf(DataClientError);
+    expect(client.peekMenuNodes()).toBeUndefined();
+    expect(onError).not.toHaveBeenCalled();
+    fail = false;
+    await expect(client.getMenuNodes()).resolves.toEqual([NODE]);
+    expect(requests).toHaveLength(2);
+  });
+
+  it('a transport failure rejects and is not cached', async () => {
+    const { transport } = autoTransport(() => {
+      throw new TransportError('network', 'down');
+    });
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await expect(client.getMenuNodes()).rejects.toBeDefined();
+    await expect(client.getMenuNodes()).rejects.toBeDefined();
+    expect(client.peekMenuNodes()).toBeUndefined();
+  });
+
+  it('invalidateMenuNodes clears every context, the store, and abandons a response in flight', async () => {
+    const { transport, pending } = manualTransport();
+    const client = new SchemaClient({ transport, apiUrl: API });
+    const first = client.getMenuNodes();
+    pending[0].resolve(reply(200, [NODE]));
+    await first;
+    client.use({ locale: 'es' });
+    const second = client.getMenuNodes();
+    pending[1].resolve(reply(200, [NODE]));
+    await second;
+    client.invalidateMenuNodes();
+    expect(client.peekMenuNodes()).toBeUndefined();
+    client.use({ locale: 'en' });
+    expect(client.peekMenuNodes()).toBeUndefined();
+    expect(client.menuNodesStore.getSnapshot()).toBeUndefined();
+
+    const stale = client.getMenuNodes();
+    client.invalidateMenuNodes();
+    pending[2].resolve(reply(200, [NODE]));
+    await stale;
+    expect(client.peekMenuNodes()).toBeUndefined();
+    void client.getMenuNodes();
+    expect(pending).toHaveLength(4);
+  });
+
+  it('clear() drops the menu nodes too', async () => {
+    const { transport } = autoTransport(() => reply(200, [NODE]));
+    const client = new SchemaClient({ transport, apiUrl: API });
+    await client.getMenuNodes();
+    client.clear();
+    expect(client.peekMenuNodes()).toBeUndefined();
+    expect(client.menuNodesStore.getSnapshot()).toBeUndefined();
+  });
+
+  describe('version tracking', () => {
+    const rows = (entities: string, menu?: string) => [
+      { cache_name: 'entities', version: entities },
+      ...(menu ? [{ cache_name: 'menu', version: menu }] : []),
+    ];
+
+    it('records the first menu version without a change', () => {
+      const { transport } = autoTransport();
+      const client = new SchemaClient({ transport, apiUrl: API });
+      expect(client.applyVersions(rows('e1', 'm1'))).toMatchObject({ menuNeedsRefresh: false, hasChanges: false });
+      expect(client.getKnownVersions()).toEqual({ entities: 'e1', menu: 'm1' });
+    });
+
+    it('a changed menu version invalidates only the menu nodes', async () => {
+      const { transport } = autoTransport(() => reply(200, []));
+      const client = new SchemaClient({ transport, apiUrl: API });
+      client.applyVersions(rows('e1', 'm1'));
+      await Promise.all([client.getEntities(), client.getMenuNodes(), client.getProperties()]);
+      const result = client.applyVersions(rows('e1', 'm2'));
+      expect(result).toMatchObject({ menuNeedsRefresh: true, entitiesNeedsRefresh: false, hasChanges: true });
+      expect(client.peekMenuNodes()).toBeUndefined();
+      expect(client.peekEntities()).toBeDefined();
+      expect(client.peekProperties()).toBeDefined();
+    });
+
+    it('a changed entities version leaves the menu nodes cached', async () => {
+      const { transport } = autoTransport(() => reply(200, []));
+      const client = new SchemaClient({ transport, apiUrl: API });
+      client.applyVersions(rows('e1', 'm1'));
+      await Promise.all([client.getEntities(), client.getMenuNodes()]);
+      const result = client.applyVersions(rows('e2', 'm1'));
+      expect(result).toMatchObject({ entitiesNeedsRefresh: true, menuNeedsRefresh: false });
+      expect(client.peekEntities()).toBeUndefined();
+      expect(client.peekMenuNodes()).toBeDefined();
+    });
+
+    it('an instance without a menu row (pre-v0.81.0) never flags a menu change', () => {
+      const { transport } = autoTransport();
+      const client = new SchemaClient({ transport, apiUrl: API });
+      client.applyVersions(rows('e1'));
+      expect(client.applyVersions(rows('e1')).menuNeedsRefresh).toBe(false);
+    });
   });
 });
 

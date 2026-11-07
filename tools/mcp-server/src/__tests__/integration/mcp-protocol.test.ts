@@ -50,7 +50,6 @@ const MOCK_ENTITIES: SchemaEntity[] = [
     update: true,
     delete: false,
     sort_order: 1,
-    show_in_sidebar: true,
   },
 ];
 

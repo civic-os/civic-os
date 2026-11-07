@@ -190,9 +190,7 @@ Set display properties and feature flags for an entity.
 | `display_name` | string | no | Custom display name |
 | `description` | string | no | Entity description |
 | `icon` | string | no | Icon name |
-| `sort_order` | integer | no | Sidebar position |
-| `show_in_sidebar` | boolean | no | Sidebar visibility |
-| `entity_group` | string | no | Sidebar group heading |
+| `sort_order` | integer | no | Default entity order (Detail related sections, unplaced menu entities) |
 | `show_calendar` | boolean | no | Enable calendar view |
 | `calendar_property_name` | string | no | TimeSlot column for calendar |
 | `calendar_color_property` | string | no | Column providing event color |
@@ -207,6 +205,8 @@ Set display properties and feature flags for an entity.
 | `rationale` | string | no | If provided, creates an ADR |
 
 **Validates**: entity exists; referenced columns exist and are correct types (TimeSlot for calendar, GeoPoint for map, tsvector for fulltext_search).
+
+**Sidebar placement is not an entity setting.** An earlier draft of this tool had flat `show_in_sidebar` and `entity_group` parameters. Since v0.81.0 the sidebar is a tree in `metadata.menu_nodes` (headings, nesting to three levels, hidden nodes, translated labels). If an instance management tool arranges the menu, it should be its own operation over that tree (`save_menu_tree` or node upserts), not parameters here. See `docs/notes/MENU_CONFIGURATION_DESIGN.md`.
 
 #### `configure_property`
 
