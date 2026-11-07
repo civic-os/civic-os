@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -127,13 +127,12 @@ export class PermissionsService {
     );
   }
 
+  /**
+   * Whether the caller is an admin. Errors propagate: a failed check is not a "no", and the
+   * permissions page shows it as one only by mistake (issue #85).
+   */
   isAdmin(): Observable<boolean> {
-    return this.http.post<boolean>(
-      getPostgrestUrl() + 'rpc/is_admin',
-      {}
-    ).pipe(
-      catchError(() => of(false))
-    );
+    return this.http.post<boolean>(getPostgrestUrl() + 'rpc/is_admin', {});
   }
 
   createRole(displayName: string, description?: string): Observable<ApiResponse & { roleId?: number }> {
