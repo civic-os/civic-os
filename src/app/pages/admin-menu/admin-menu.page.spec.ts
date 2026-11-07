@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, map, of, throwError } from 'rxjs';
 import type { MenuNodeRow } from '@civic-os/core';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { AdminMenuPage } from './admin-menu.page';
@@ -50,8 +50,11 @@ describe('AdminMenuPage', () => {
   let saveTree: ReturnType<typeof vi.fn>;
   let refreshMenuCache: ReturnType<typeof vi.fn>;
 
-  async function create(options: { admin?: boolean; nodes?: Observable<MenuNodeRow[]> } = {}) {
-    getNodes = vi.fn().mockReturnValue(options.nodes ?? of(NODES));
+  /** getNodes' reply: the nodes at a menu version. */
+  const snapshot = (nodes: Observable<MenuNodeRow[]>, version = 'v1') => nodes.pipe(map(n => ({ nodes: n, version })));
+
+  async function create(options: { admin?: boolean; permissions?: string[]; nodes?: Observable<MenuNodeRow[]> } = {}) {
+    getNodes = vi.fn().mockReturnValue(snapshot(options.nodes ?? of(NODES)));
     saveTree = vi.fn().mockReturnValue(of<SaveMenuResult>({ success: true }));
     refreshMenuCache = vi.fn();
     await TestBed.configureTestingModule({
@@ -62,7 +65,13 @@ describe('AdminMenuPage', () => {
         provideRouter([]),
         { provide: MenuAdminService, useValue: { getNodes, saveTree } },
         { provide: SchemaService, useValue: { getEntitiesForManagement: () => of(ENTITIES), refreshMenuCache } },
-        { provide: AuthService, useValue: { isAdmin: () => options.admin ?? true } },
+        {
+          provide: AuthService,
+          useValue: {
+            isAdmin: () => options.admin ?? true,
+            hasPermission: (table: string, permission: string) => (options.permissions ?? []).includes(`${table}:${permission}`)
+          }
+        },
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(AdminMenuPage);
@@ -269,6 +278,7 @@ describe('AdminMenuPage', () => {
       expect(body.map(n => [n.node_key, n.parent_node_key, n.sort_order])).toEqual([
         ['intake', null, 0], ['referrals', 'intake', 0], ['issues', null, 10],
       ]);
+      expect(saveTree.mock.calls[0][1]).toBe('v1');
       expect(refreshMenuCache).toHaveBeenCalledTimes(1);
       expect(el.textContent).toContain('Menu saved.');
       expect(saveButton().disabled).toBe(true);
@@ -278,13 +288,66 @@ describe('AdminMenuPage', () => {
       saveTree.mockReturnValue(of<SaveMenuResult>({ success: true, skipped: ['referrals'] }));
       button('issues', 'down').click();
       await flush();
-      getNodes.mockReturnValue(of([NODES[0], node('intake', { node_kind: 'heading', target_key: null, display_name: 'Intake', sort_order: 10 })]));
+      getNodes.mockReturnValue(snapshot(of([NODES[0], node('intake', { node_kind: 'heading', target_key: null, display_name: 'Intake', sort_order: 10 })])));
       saveButton().click();
       await flush();
       expect(getNodes).toHaveBeenCalledTimes(2);
       expect(component.rows().map(r => r.key)).toEqual(['issues', 'intake']);
       expect(component.dirty()).toBe(false);
       expect(el.textContent).toContain('Menu saved.');
+    });
+
+    it('sends the version each save returned with the next save', async () => {
+      saveTree.mockReturnValue(of<SaveMenuResult>({ success: true, version: 'v2' }));
+      button('issues', 'down').click();
+      await flush();
+      saveButton().click();
+      await flush();
+      button('issues', 'up').click();
+      await flush();
+      saveButton().click();
+      await flush();
+      expect(saveTree.mock.calls.map(c => c[1])).toEqual(['v1', 'v2']);
+    });
+
+    describe('when someone else saved first', () => {
+      const conflictAlert = () => el.querySelector('[data-testid="menu-conflict"]') as HTMLElement | null;
+      const reloadButton = () => el.querySelector('[data-testid="menu-reload"]') as HTMLButtonElement | null;
+
+      beforeEach(async () => {
+        saveTree.mockReturnValue(of<SaveMenuResult>({ success: false, conflict: true }));
+        button('issues', 'down').click();
+        await flush();
+        saveButton().click();
+        await flush();
+      });
+
+      it('keeps the draft, says why in an alert that takes focus, and offers Reload beside Discard', () => {
+        expect(conflictAlert()!.getAttribute('role')).toBe('alert');
+        expect(conflictAlert()!.textContent).toContain('Someone else changed the menu');
+        expect(document.activeElement).toBe(conflictAlert());
+        expect(discardButton().nextElementSibling).toBe(reloadButton());
+        expect(component.dirty()).toBe(true);
+        expect(saveButton().disabled).toBe(true);
+        expect(refreshMenuCache).not.toHaveBeenCalled();
+      });
+
+      it('Reload drops the draft and loads the stored tree at its new version', async () => {
+        getNodes.mockReturnValue(snapshot(of([NODES[1], NODES[2]]), 'v9'));
+        saveTree.mockReturnValue(of<SaveMenuResult>({ success: true }));
+        reloadButton()!.click();
+        await flush();
+        expect(getNodes).toHaveBeenCalledTimes(2);
+        expect(draft()).toEqual(['1:intake', '2:referrals']);
+        expect(component.dirty()).toBe(false);
+        expect(conflictAlert()).toBeNull();
+        expect(reloadButton()).toBeNull();
+        (el.querySelector('[data-unplaced-key="notes"] button') as HTMLButtonElement).click();
+        await flush();
+        saveButton().click();
+        await flush();
+        expect(saveTree.mock.calls[1][1]).toBe('v9');
+      });
     });
 
     it('shows an API error and stays dirty when saving fails', async () => {
@@ -356,8 +419,14 @@ describe('AdminMenuPage', () => {
     expect(el.textContent).toContain('could not be loaded');
   });
 
-  it('shows access denied to non-admins and loads nothing', async () => {
-    await create({ admin: false });
+  it('opens for a non-admin granted metadata.menu_nodes:update', async () => {
+    await create({ admin: false, permissions: ['metadata.menu_nodes:update'] });
+    expect(getNodes).toHaveBeenCalledTimes(1);
+    expect(el.querySelector('[data-testid="menu-save"]')).toBeTruthy();
+  });
+
+  it('shows access denied to users without the menu permission and loads nothing', async () => {
+    await create({ admin: false, permissions: ['metadata.translations:update'] });
     expect(el.querySelector('[role="alert"]')!.textContent).toContain('Admin access required');
     expect(getNodes).not.toHaveBeenCalled();
     expect(el.querySelector('[data-testid="menu-save"]')).toBeNull();

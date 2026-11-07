@@ -661,6 +661,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'admin_menu.saving': 'Saving...',
   'admin_menu.discard': 'Discard changes',
   'admin_menu.saved': 'Menu saved.',
+  'admin_menu.conflict': 'Someone else changed the menu after you opened it, so your changes were not saved. Reload to see the current menu (your unsaved changes will be lost).',
+  'admin_menu.reload': 'Reload menu',
   'admin_menu.unsaved': 'You have unsaved changes.',
   'admin_menu.error.duplicate-key': '"{{name}}" appears more than once.',
   'admin_menu.error.heading-key': 'The key of heading "{{name}}" must start with a lowercase letter and use only lowercase letters, digits and underscores.',

@@ -723,5 +723,40 @@ describe('AppComponent', () => {
             expect(nav.textContent).toContain('Data');
             expect(nav.querySelector('[role="alert"]')).toBeNull();
         });
+
+        describe('menu editor link', () => {
+            async function sidebarFor(admin: boolean, permissions: string[]) {
+                mockAuthService.isAdmin.mockReturnValue(admin);
+                mockAuthService.hasPermission.mockImplementation(
+                    (table: string, permission: string) => permissions.includes(`${table}:${permission}`));
+                const fixture = TestBed.createComponent(AppComponent);
+                fixture.detectChanges();
+                flushStartup(200);
+                await settle();
+                fixture.detectChanges();
+                return {
+                    component: fixture.componentInstance,
+                    link: (fixture.nativeElement as HTMLElement).querySelector('a[href="/admin/menu"]')
+                };
+            }
+
+            it('shows for admins', async () => {
+                const { component, link } = await sidebarFor(true, []);
+                expect(link).toBeTruthy();
+                expect(component.hasMenuAdminPermission()).toBe(true);
+            });
+
+            it('shows for a role granted metadata.menu_nodes:update, with the Admin section', async () => {
+                const { component, link } = await sidebarFor(false, ['metadata.menu_nodes:update']);
+                expect(link).toBeTruthy();
+                expect(component.showAdminSection()).toBe(true);
+            });
+
+            it('is absent for a plain user', async () => {
+                const { component, link } = await sidebarFor(false, []);
+                expect(link).toBeNull();
+                expect(component.showAdminSection()).toBe(false);
+            });
+        });
     });
 });
