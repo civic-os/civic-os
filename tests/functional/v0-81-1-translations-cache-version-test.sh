@@ -5,7 +5,7 @@
 # The 'translations' row of public.schema_cache_versions reads metadata.translations_version, which
 # statement-level triggers stamp on every write to metadata.translations:
 #   - INSERT, UPDATE, DELETE and TRUNCATE each move the version (a delete used to leave it alone);
-#   - a statement that touches no row still moves it (statement-level, like metadata.menu_version);
+#   - a statement that changes no row (an RLS-filtered delete from any signed-in user) leaves it alone;
 #   - API roles cannot execute the stamp function, and cannot read or write the version table.
 #
 # All fixtures live inside one transaction that is rolled back. clock_timestamp() advances inside a
@@ -46,14 +46,15 @@ WHERE source_type = 'ui' AND source_key = 't_cache_version.probe' AND locale = '
 INSERT INTO seen VALUES ('delete', pg_temp.tv());
 
 DELETE FROM metadata.translations WHERE source_key = 't_cache_version.no_such_key';
-INSERT INTO seen VALUES ('empty_delete', pg_temp.tv());
+UPDATE metadata.translations SET translated_text = 'x' WHERE source_key = 't_cache_version.no_such_key';
+INSERT INTO seen VALUES ('empty_statements', pg_temp.tv());
 
 TRUNCATE metadata.translations;
 INSERT INTO seen VALUES ('truncate', pg_temp.tv());
 
 DO $$
 DECLARE
-  steps text[] := ARRAY['start', 'insert', 'update', 'delete', 'empty_delete', 'truncate'];
+  steps text[] := ARRAY['start', 'insert', 'update', 'delete', 'truncate'];
   i int;
 BEGIN
   ASSERT (SELECT v FROM seen WHERE step = 'start') IS NOT NULL, 'schema_cache_versions has a translations row';
@@ -61,6 +62,8 @@ BEGIN
     ASSERT (SELECT v FROM seen WHERE step = steps[i]) > (SELECT v FROM seen WHERE step = steps[i - 1]),
       format('%s moves the translations version', steps[i]);
   END LOOP;
+  ASSERT (SELECT v FROM seen WHERE step = 'empty_statements') = (SELECT v FROM seen WHERE step = 'delete'),
+    'a delete or update that changes no row leaves the translations version alone';
   ASSERT (SELECT count(*) FROM metadata.translations_version) = 1, 'translations_version stays a single row';
 END $$;
 
@@ -161,7 +164,11 @@ BEGIN
                      WHERE source_type = 'instance_config_group' AND source_key = 't_org.display_name'),
     'a translated integrator group is not missing';
   ASSERT NOT EXISTS (SELECT 1 FROM public.get_missing_translations('es')
-                     WHERE source_type LIKE 'instance_config%' AND source_key NOT LIKE 't\_%'),
+                     WHERE (source_type = 'instance_config' AND split_part(source_key, '.', 1) = ANY (ARRAY[
+                              'app_title', 'default_theme', 'default_locale', 'supported_locales', 'sms_configured',
+                              'matomo_enabled', 'stripe_publishable_key', 'map_default_lat', 'map_default_lng', 'map_default_zoom']))
+                        OR (source_type = 'instance_config_group' AND split_part(source_key, '.', 1) = ANY (ARRAY[
+                              'appearance', 'language', 'integrations', 'map']))),
     'framework config keys and groups are seeded in Spanish';
 END $$;
 

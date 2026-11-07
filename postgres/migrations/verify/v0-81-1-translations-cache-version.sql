@@ -11,13 +11,10 @@ BEGIN
   IF to_regprocedure('metadata.translations_stamp_version()') IS NULL THEN
     RAISE EXCEPTION 'metadata.translations_stamp_version() is missing';
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = 'metadata.translations'::regclass
-                 AND tgname = 'translations_stamp_version' AND NOT tgisinternal) THEN
-    RAISE EXCEPTION 'trigger translations_stamp_version is missing';
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = 'metadata.translations'::regclass
-                 AND tgname = 'translations_stamp_version_truncate' AND NOT tgisinternal) THEN
-    RAISE EXCEPTION 'trigger translations_stamp_version_truncate is missing';
+  IF (SELECT count(*) FROM pg_trigger WHERE tgrelid = 'metadata.translations'::regclass AND NOT tgisinternal
+      AND tgname IN ('translations_stamp_version_insert', 'translations_stamp_version_update',
+                     'translations_stamp_version_delete', 'translations_stamp_version_truncate')) <> 4 THEN
+    RAISE EXCEPTION 'one of the four translations_stamp_version triggers is missing';
   END IF;
   IF has_function_privilege('authenticated', 'metadata.translations_stamp_version()', 'EXECUTE') THEN
     RAISE EXCEPTION 'authenticated must not execute translations_stamp_version';

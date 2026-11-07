@@ -65,7 +65,9 @@ COMMENT ON VIEW public.schema_cache_versions IS
      statuses, and menu.';
 
 DROP TRIGGER IF EXISTS translations_stamp_version_truncate ON metadata.translations;
-DROP TRIGGER IF EXISTS translations_stamp_version ON metadata.translations;
+DROP TRIGGER IF EXISTS translations_stamp_version_delete ON metadata.translations;
+DROP TRIGGER IF EXISTS translations_stamp_version_update ON metadata.translations;
+DROP TRIGGER IF EXISTS translations_stamp_version_insert ON metadata.translations;
 DROP FUNCTION IF EXISTS metadata.translations_stamp_version();
 DROP TABLE IF EXISTS metadata.translations_version;
 

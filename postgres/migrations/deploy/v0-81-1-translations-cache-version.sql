@@ -11,7 +11,10 @@
 --
 -- MAX(updated_at) never moved on a delete, so an admin reverting a label to its default left open
 -- browsers on the old text. Same pattern as metadata.menu_version (v0.81.0): statement-level triggers
--- stamp a singleton row on INSERT, UPDATE, DELETE and TRUNCATE.
+-- stamp a singleton row on INSERT, UPDATE, DELETE and TRUNCATE. Unlike menu_version, a statement that
+-- changes no row does not stamp: every signed-in user holds DELETE on public.translations and RLS
+-- filters it to nothing, so an empty statement would let any user force a cache refresh in every
+-- open browser. The INSERT, UPDATE and DELETE triggers read a transition table to tell.
 --
 -- Framework migration: no schema decision (ADR) is recorded.
 
@@ -44,6 +47,13 @@ SECURITY DEFINER
 SET search_path = metadata, pg_catalog
 AS $$
 BEGIN
+  -- changed_rows is the statement's transition table; the TRUNCATE trigger has none.
+  -- Nested IF: plpgsql plans the inner query only when it is reached.
+  IF TG_OP <> 'TRUNCATE' THEN
+    IF NOT EXISTS (SELECT 1 FROM changed_rows) THEN
+      RETURN NULL;
+    END IF;
+  END IF;
   INSERT INTO metadata.translations_version (singleton, changed_at) VALUES (TRUE, clock_timestamp())
   ON CONFLICT (singleton) DO UPDATE SET changed_at = EXCLUDED.changed_at;
   RETURN NULL;
@@ -51,10 +61,25 @@ END;
 $$;
 
 COMMENT ON FUNCTION metadata.translations_stamp_version() IS
-    'Statement-level AFTER trigger of metadata.translations: stamps metadata.translations_version, so deletes (single row, all rows, truncate) move the translations cache version. Added in v0.81.1.';
+    'Statement-level AFTER trigger of metadata.translations: stamps metadata.translations_version when a statement changed at least one row, or on truncate, so deletes move the translations cache version too. Added in v0.81.1.';
 
-CREATE TRIGGER translations_stamp_version
-    AFTER INSERT OR UPDATE OR DELETE ON metadata.translations
+-- One trigger per event: a transition table belongs to a single-event trigger here, and all three
+-- name it changed_rows so one function serves them.
+CREATE TRIGGER translations_stamp_version_insert
+    AFTER INSERT ON metadata.translations
+    REFERENCING NEW TABLE AS changed_rows
+    FOR EACH STATEMENT
+    EXECUTE FUNCTION metadata.translations_stamp_version();
+
+CREATE TRIGGER translations_stamp_version_update
+    AFTER UPDATE ON metadata.translations
+    REFERENCING NEW TABLE AS changed_rows
+    FOR EACH STATEMENT
+    EXECUTE FUNCTION metadata.translations_stamp_version();
+
+CREATE TRIGGER translations_stamp_version_delete
+    AFTER DELETE ON metadata.translations
+    REFERENCING OLD TABLE AS changed_rows
     FOR EACH STATEMENT
     EXECUTE FUNCTION metadata.translations_stamp_version();
 
