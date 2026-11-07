@@ -32,7 +32,7 @@
     "node_key": "client_current_consents",
     "node_kind": "entity",
     "parent_node_key": null,
-    "sort_order": 36,
+    "sort_order": null,
     "target_key": "client_current_consents"
   },
   {
@@ -65,22 +65,10 @@
     "display_name": null,
     "icon": null,
     "is_hidden": true,
-    "node_key": "consent_reminder_log",
-    "node_kind": "entity",
-    "parent_node_key": null,
-    "sort_order": null,
-    "target_key": "consent_reminder_log"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": true,
     "node_key": "consents_expiring_soon",
     "node_kind": "entity",
     "parent_node_key": null,
-    "sort_order": 37,
+    "sort_order": null,
     "target_key": "consents_expiring_soon"
   },
   {

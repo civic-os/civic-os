@@ -144,6 +144,10 @@
     "table_name": "metadata.instance_config"
   },
   {
+    "permission": "update",
+    "table_name": "metadata.menu_nodes"
+  },
+  {
     "permission": "create",
     "table_name": "metadata.status_transitions"
   },

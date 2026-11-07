@@ -1545,6 +1545,11 @@
     "translated_text": "Contraído de forma predeterminada"
   },
   {
+    "source_key": "admin_menu.conflict",
+    "source_type": "ui",
+    "translated_text": "Otra persona cambió el menú después de que usted lo abrió, por lo que sus cambios no se guardaron. Vuelva a cargarlo para ver el menú actual (se perderán sus cambios sin guardar)."
+  },
+  {
     "source_key": "admin_menu.discard",
     "source_type": "ui",
     "translated_text": "Descartar cambios"
@@ -1668,6 +1673,11 @@
     "source_key": "admin_menu.preview",
     "source_type": "ui",
     "translated_text": "Vista previa"
+  },
+  {
+    "source_key": "admin_menu.reload",
+    "source_type": "ui",
+    "translated_text": "Volver a cargar el menú"
   },
   {
     "source_key": "admin_menu.save",

@@ -9,7 +9,7 @@
 import { defineQuery as defineCoreQuery } from '@civic-os/core';
 
 export const DOMAIN_VERSION = '0.0.0' as const;
-export const FRAMEWORK_VERSION = '0.81.1' as const;
+export const FRAMEWORK_VERSION = '0.81.2' as const;
 export const SCHEMA_HASH = 'sha256:782135e5ab020ad223b0813ddf72a07c8cc76a30022800f6a5247d49b2bf2a28' as const;
 
 export interface Database {
