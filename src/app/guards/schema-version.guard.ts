@@ -33,7 +33,8 @@ import { DashboardService } from '../services/dashboard.service';
  * A changed `translations` version (v0.81.1: it moves on every insert, update, delete or
  * truncate of metadata.translations) makes every translated cache stale: UI strings, the
  * locale-dependent schema metadata (entities, properties, constraint messages, static text,
- * statuses, categories, menu nodes), guided form steps and dashboards. It drops all of them,
+ * statuses, categories, menu nodes), guided form steps, dashboards and profile extensions
+ * (instance config is fetched without its labels, so it is left alone). It drops all of them,
  * the same set the translations admin drops in its own tab, and skips the narrower
  * schema refreshes, which `SchemaService.refreshCache()` already covers, so one navigation
  * sends one round of requests.
@@ -86,7 +87,8 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
         schemaService.refreshPropertiesCache();
       }
 
-      if (updateCheck.profileExtensionsNeedsRefresh) {
+      // Profile extension labels are translated too (metadata.t('entity', ...) in their view)
+      if (updateCheck.profileExtensionsNeedsRefresh || translationsChanged) {
         profileService.invalidateCache();
       }
 

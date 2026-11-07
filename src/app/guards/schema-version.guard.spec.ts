@@ -339,6 +339,9 @@ describe('schemaVersionGuard', () => {
         expect(mockSchemaService.refreshCache).toHaveBeenCalledTimes(1);
         expect(mockSchemaService.invalidateGuidedFormCache).toHaveBeenCalledTimes(1);
         expect(mockDashboardService.refreshCache).toHaveBeenCalledTimes(1);
+        // profile extension labels are translated through metadata.t('entity', ...)
+        expect(mockProfileService.invalidateCache).toHaveBeenCalledTimes(1);
+        expect(mockConfigService.invalidateCache).not.toHaveBeenCalled();
         // refreshCache() covers these; calling them too would send a second round of requests
         expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
         expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
