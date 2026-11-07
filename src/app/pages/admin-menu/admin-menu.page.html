@@ -180,7 +180,11 @@
                 <input id="menu-new-heading" type="text" class="input input-bordered input-sm w-64" required
                        [value]="newHeadingLabel()" (input)="onHeadingInput($event)" />
               </div>
-              <button type="submit" class="btn btn-sm btn-primary" [disabled]="newHeadingLabel().trim() === ''">
+              <!-- Styled disabled, never [disabled]: Enter in the field submits through this button, and a
+                   disabled attribute not yet cleared by the next render would swallow it. addHeading() ignores blanks. -->
+              <button type="submit" class="btn btn-sm btn-primary"
+                      [class.btn-disabled]="newHeadingLabel().trim() === ''"
+                      [attr.aria-disabled]="newHeadingLabel().trim() === '' ? 'true' : null">
                 {{ 'admin_menu.add' | translate }}
               </button>
             </form>

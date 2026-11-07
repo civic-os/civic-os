@@ -1,12 +1,12 @@
 {
   "version": 1,
   "totals": {
-    "tests": 4144,
-    "passed": 4144,
+    "tests": 4247,
+    "passed": 4247,
     "failed": 0,
     "skipped": 0,
     "todo": 0,
-    "assertions": 38255,
+    "assertions": 38592,
     "passedWithZeroAssertions": 29
   },
   "leakers": [],
@@ -1046,6 +1046,14 @@
     "src/app/app.component.spec.ts :: AppComponent > Profile Menu Integration > should show Login link when not authenticated": {
       "state": "passed",
       "assertions": 1
+    },
+    "src/app/app.component.spec.ts :: AppComponent > Sidebar menu > renders Home and About, a retry notice and no entity links when the menu fails to load": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/app.component.spec.ts :: AppComponent > Sidebar menu > renders entity links and the Data title when the menu has no heading": {
+      "state": "passed",
+      "assertions": 3
     },
     "src/app/app.component.spec.ts :: AppComponent > Theme Integration > should default settingsInitialTab to preferences": {
       "state": "passed",
@@ -5187,6 +5195,138 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > emits navigated when a link is followed": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /create/child regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /edit/child/5 regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /view/child regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /view/child/5 regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > forces the active branch open for /view/child?page=2 regardless of stored state": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > gives each instance its own child-list ids (the drawer and the editor preview share a page)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > has no chevron for a leaf": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > ignores malformed stored state": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > is the list itself, with [menuStart] items first, the rest last, and only li children": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > keeps a forced-open heading open when the user closes it": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > keeps working when localStorage throws on read and write": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > lets stored state override the default": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > marks only the active link": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > opens every ancestor of a nested active entry and does not collapse it on toggle": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders a heading as details/summary with its children": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders a parent entity as a link plus a chevron button with aria wiring": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders an icon only when set": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > renders leaves as links to the entity view": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > collapses the Data section, remembers it, and forces it open for its active route": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > keys the trailing run as Data and an earlier titled run by its first entry": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > leaves root entities before the first heading untitled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > puts a menu without headings under one open Data section": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > root sections > titles root headings like About and Admin and lists their entries without an extra indent": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > starts headings collapsed when collapsedByDefault is set": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > stores the state when a heading is toggled": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/sidebar-menu/sidebar-menu.component.spec.ts :: SidebarMenuComponent > toggles a parent, updates aria-expanded and persists the state": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > keeps section keys apart from menu node keys": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > keeps working when localStorage throws": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > reads a forced key open and never closes it": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > reads the default until a choice is stored, then the stored choice": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > restores stored choices on creation and ignores non-boolean values": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/sidebar-menu/sidebar-open-state.service.spec.ts :: SidebarOpenStateService > stores a native details toggle and ignores one that matches the state": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/components/sql-code-block/sql-code-block.component.spec.ts :: SqlCodeBlockComponent > should auto-collapse long code blocks": {
       "state": "passed",
       "assertions": 1
@@ -6659,6 +6799,10 @@
       "state": "passed",
       "assertions": 4
     },
+    "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should refetch only the menu when the menu version changed": {
+      "state": "passed",
+      "assertions": 4
+    },
     "src/app/guards/schema-version.guard.spec.ts :: schemaVersionGuard > should refresh both caches when both versions changed": {
       "state": "passed",
       "assertions": 4
@@ -7431,6 +7575,226 @@
       "state": "passed",
       "assertions": 1
     },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > adds a heading with a slug key, de-duplicated against existing keys": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > adds an unplaced entity at the root, last": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > announces a move into a heading": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > applies a drag-drop reorder": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > blocks saving while the draft has validation errors, naming the row": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > disables moves that are not allowed": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > discards back to the loaded state": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > edits a label and icon, keeping overrides empty as null": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > hides a row with the eye button, shrinking it to one line, and shows it again": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > ignores a blank heading label": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keeps the Add button submittable but marked disabled while the label is blank": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keyboard focus > keeps focus on the moved row: the same button, else its first enabled action": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keyboard focus > moves focus from a tray entry just added to its neighbor in the tray": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > keyboard focus > moves focus to the row that took a removed row's place": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > lists unplaced entities, marking tables and views": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > loads the nodes as a draft in display order": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > moves a row and announces its place": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > previews the menu being edited": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > reloads the stored tree after a save that dropped nodes whose table no longer exists": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > removing a heading sends its entities to the tray": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > saves the whole tree through the RPC body, then refreshes the sidebar menu": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > shows an API error and stays dirty when saving fails": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > slugs an unusable heading label to \"heading\"": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > starts clean: Save and Discard are disabled": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > admin > toggles collapsed": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > shows a retry notice when loading fails": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > shows access denied to non-admins and loads nothing": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.page.spec.ts :: AdminMenuPage > stays saveable with a node whose target it cannot see (junction or unreadable table)": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > describePosition > reports parent, position and sibling count": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > carries the subtree with a heading": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > ignores a drop inside its own subtree or in place": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > moves a row down the list": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > moves a row up the list, adjusting depth to fit the drop position": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > never puts a heading under an entity": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > dropReorder > never yields an invalid shape": {
+      "state": "passed",
+      "assertions": 25
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > headingKeyFromLabel > always matches the heading key pattern": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > headingKeyFromLabel > falls back to heading and guarantees a leading letter": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > headingKeyFromLabel > slugifies and de-duplicates": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > blocks an indent that pushes any row of the subtree past depth 3": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > has nothing to indent under without a previous sibling": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > indents an entity under an entity but not a heading": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > indents under the previous sibling, appending last, subtree included": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > outdenting a middle child moves it after the parent subtree, keeping later siblings": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > outdents the last child to just after its parent": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > indent / outdent > outdents with its subtree and cannot outdent a root row": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > isValidShape > rejects depth jumps, depth over 3 and headings under entities": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > moveUp / moveDown > moves a row with its subtree past the next sibling": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > moveUp / moveDown > moves a row with its subtree past the previous sibling": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > moveUp / moveDown > stays within the parent and reports availability": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > assigns sort_order index x 10 among siblings and blank labels to null": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > orders siblings by sort_order then key, depth first": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > round trips a tree from the database": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > nodesToRows / rowsToNodes > surfaces orphans and cycle members at the root": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > removeRow / appendRoot > appends at the root, last": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/pages/admin-menu/admin-menu.tree.spec.ts :: admin-menu tree > removeRow / appendRoot > removes a row with its subtree": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/pages/admin-payments/admin-payments.page.spec.ts :: AdminPaymentsPage > Entity Routing > should return null for payment without entity": {
       "state": "passed",
       "assertions": 1
@@ -7865,7 +8229,7 @@
     },
     "src/app/pages/admin-translations/admin-translations.page.spec.ts :: AdminTranslationsPage > Source type labels > should return human-readable labels": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
     "src/app/pages/admin-translations/admin-translations.page.spec.ts :: AdminTranslationsPage > should compute missing count": {
       "state": "passed",
@@ -12987,6 +13351,26 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > edits the untranslated label, not the one translated for the admin's locale": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > passes through the keys a save skipped": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > posts the nodes to save_menu_tree as p_nodes": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > reads the nodes from schema_menu_nodes": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/menu-admin.service.spec.ts :: MenuAdminService > returns a readable error instead of throwing": {
+      "state": "passed",
+      "assertions": 2
+    },
     "src/app/services/navigation.service.spec.ts :: NavigationService > goBack() > should ignore non-NavigationEnd router events": {
       "state": "passed",
       "assertions": 2
@@ -14119,6 +14503,26 @@
       "state": "passed",
       "assertions": 3
     },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > leaves out an entity whose node is hidden": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > reports an error state, never an unfiltered entity list, when the nodes fail": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > retries through refreshMenuCache without refetching entities": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > sends one schema_menu_nodes request for many subscribers and navigations": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/services/schema.service.spec.ts :: SchemaService > getMenu() > starts loading, then builds the menu from entities and nodes": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/services/schema.service.spec.ts :: SchemaService > getProperties() > should cache properties on first call": {
       "state": "passed",
       "assertions": 1
@@ -14875,9 +15279,17 @@
       "state": "passed",
       "assertions": 4
     },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when only the menu changed, leaving entities alone": {
+      "state": "passed",
+      "assertions": 3
+    },
     "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should detect when properties cache changed": {
       "state": "passed",
       "assertions": 3
+    },
+    "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should flag nothing when a database has no menu row yet": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/services/version.service.spec.ts :: VersionService > checkForUpdates() > should flag nothing when a database has no statuses row yet": {
       "state": "passed",
@@ -15441,7 +15853,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > _synthetic/all: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > _synthetic/all: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15461,7 +15873,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15481,7 +15893,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15501,7 +15913,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15521,7 +15933,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15541,7 +15953,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > broader-impacts/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15561,7 +15973,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15581,7 +15993,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15601,7 +16013,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15621,7 +16033,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15641,7 +16053,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > client-intake/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15661,7 +16073,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15681,7 +16093,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15701,7 +16113,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15721,7 +16133,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15741,7 +16153,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > community-center/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15761,7 +16173,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15781,7 +16193,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15801,7 +16213,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15821,7 +16233,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15841,7 +16253,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > mottpark/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15861,7 +16273,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15881,7 +16293,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15901,7 +16313,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15921,7 +16333,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15941,7 +16353,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > neighborhood-hub/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15965,7 +16377,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -15985,7 +16397,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16005,7 +16417,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16025,7 +16437,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16045,7 +16457,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16065,7 +16477,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16085,7 +16497,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16105,7 +16517,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16125,7 +16537,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser.es: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser.es: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16145,7 +16557,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > pothole/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16165,7 +16577,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16185,7 +16597,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16205,7 +16617,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16225,7 +16637,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16245,7 +16657,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > staff-portal/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16265,7 +16677,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/anon: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/anon: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16285,7 +16697,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testadmin: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testadmin: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16305,7 +16717,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testeditor: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testeditor: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16325,7 +16737,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testmanager: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testmanager: junctions, M:M enrichment, parent hops": {
       "state": "passed",
@@ -16345,7 +16757,7 @@
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testuser: inverse relationships and menus": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/testing/golden/schema.golden.spec.ts :: golden: SchemaService interpretation > storymap/testuser: junctions, M:M enrichment, parent hops": {
       "state": "passed",

@@ -38,7 +38,7 @@ import { ContrastTextDirective } from '../../directives/contrast-text.directive'
 const SOURCE_TYPES = [
   'ui', 'entity', 'property', 'status', 'category',
   'action', 'action_param', 'guided_form_step', 'static_text',
-  'dashboard'
+  'dashboard', 'menu_node'
 ];
 
 @Component({
@@ -518,7 +518,8 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
       'guided_form_step': 'Form Step',
       'static_text': 'Static Text',
       'dashboard': 'Dashboard',
-      'widget_config': 'Dashboard'
+      'widget_config': 'Dashboard',
+      'menu_node': 'Menu'
     };
     return labels[type] || type;
   }

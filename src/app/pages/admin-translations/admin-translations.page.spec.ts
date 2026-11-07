@@ -377,6 +377,7 @@ describe('AdminTranslationsPage', () => {
             expect(component.sourceTypeLabel('ui')).toBe('UI');
             expect(component.sourceTypeLabel('entity')).toBe('Entity');
             expect(component.sourceTypeLabel('widget_config')).toBe('Dashboard');
+            expect(component.sourceTypeLabel('menu_node')).toBe('Menu');
         });
 
         it('should fall back to raw type for unknown types', () => {

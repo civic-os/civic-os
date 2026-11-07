@@ -129,6 +129,20 @@ describe('AdminMenuPage', () => {
       expect(input.value).toBe('');
     });
 
+    it('keeps the Add button submittable but marked disabled while the label is blank', async () => {
+      const input = el.querySelector('#menu-new-heading') as HTMLInputElement;
+      const add = input.form!.querySelector('button[type="submit"]') as HTMLButtonElement;
+      // Never the disabled attribute: implicit submission (Enter) would be lost before the next render
+      expect(add.disabled).toBe(false);
+      expect(add.getAttribute('aria-disabled')).toBe('true');
+      (input.form as HTMLFormElement).dispatchEvent(new Event('submit'));
+      await flush();
+      expect(draft()).toEqual(['1:issues', '1:intake', '2:referrals']);
+      typeInto(input, 'Intake');
+      expect(add.getAttribute('aria-disabled')).toBeNull();
+      expect(add.classList.contains('btn-disabled')).toBe(false);
+    });
+
     it('slugs an unusable heading label to "heading"', async () => {
       component.newHeadingLabel.set('???');
       component.addHeading();
@@ -157,6 +171,43 @@ describe('AdminMenuPage', () => {
       expect(draft()).toEqual(['1:intake', '2:referrals', '2:issues']);
       expect(el.querySelector('[data-testid="menu-announcement"]')!.textContent)
         .toBe('Issues moved into Intake, position 2 of 2');
+    });
+
+    describe('keyboard focus', () => {
+      const active = () => document.activeElement as HTMLElement;
+
+      it('keeps focus on the moved row: the same button, else its first enabled action', async () => {
+        button('issues', 'down').focus();
+        button('issues', 'down').click();
+        await flush();
+        // Last at the root now, so Move down is disabled: focus falls back to the row's first enabled action
+        expect(button('issues', 'down').disabled).toBe(true);
+        expect(active()).toBe(button('issues', 'visibility'));
+        button('issues', 'indent').focus();
+        button('issues', 'indent').click();
+        await flush();
+        expect(draft()).toEqual(['1:intake', '2:referrals', '2:issues']);
+        expect(button('issues', 'indent').disabled).toBe(false);
+        expect(active()).toBe(button('issues', 'indent'));
+      });
+
+      it('moves focus to the row that took a removed row\'s place', async () => {
+        button('intake', 'remove').focus();
+        button('intake', 'remove').click();
+        await flush();
+        expect(active()).toBe(button('issues', 'remove'));
+      });
+
+      it('moves focus from a tray entry just added to its neighbor in the tray', async () => {
+        const tray = () => Array.from(el.querySelectorAll<HTMLElement>('[data-unplaced-key]')).map(e => e.dataset['unplacedKey']);
+        const before = tray();
+        const added = before[0]!;
+        const addButton = el.querySelector(`[data-unplaced-key="${added}"] button`) as HTMLButtonElement;
+        addButton.focus();
+        addButton.click();
+        await flush();
+        expect(active()).toBe(el.querySelector(`[data-unplaced-key="${before[1]}"] button`));
+      });
     });
 
     it('disables moves that are not allowed', () => {

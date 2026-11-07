@@ -15,7 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, effect, inject, signal, untracked
+} from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { forkJoin, take } from 'rxjs';
 import { buildMenu, validateMenuTree } from '@civic-os/core';
@@ -53,6 +55,8 @@ export class AdminMenuPage {
   private schema = inject(SchemaService);
   private translation = inject(TranslationService);
   protected auth = inject(AuthService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
 
   protected readonly isAdmin = computed(() => this.auth.isAdmin());
 
@@ -169,10 +173,30 @@ export class AdminMenuPage {
     if (key !== undefined) this.announceMove(key);
   }
 
-  moveUp(index: number): void { this.apply(moveUp(this.rows(), index), this.rows()[index].key); }
-  moveDown(index: number): void { this.apply(moveDown(this.rows(), index), this.rows()[index].key); }
-  indent(index: number): void { this.apply(indent(this.rows(), index), this.rows()[index].key); }
-  outdent(index: number): void { this.apply(outdent(this.rows(), index), this.rows()[index].key); }
+  moveUp(index: number): void { this.move(index, moveUp, 'up'); }
+  moveDown(index: number): void { this.move(index, moveDown, 'down'); }
+  indent(index: number): void { this.move(index, indent, 'indent'); }
+  outdent(index: number): void { this.move(index, outdent, 'outdent'); }
+
+  private move(index: number, op: (rows: DraftRow[], index: number) => DraftRow[], action: string): void {
+    const key = this.rows()[index].key;
+    this.apply(op(this.rows(), index), key);
+    this.restoreFocus(() => this.rowAction(key, action) ?? this.rowAction(key));
+  }
+
+  /**
+   * The keyed @for re-inserts a moved row's element and drops a removed one, which blurs the button a
+   * keyboard user just pressed. After the next render, focus goes to `pick()` (if it finds an element).
+   */
+  private restoreFocus(pick: () => HTMLElement | null | undefined): void {
+    afterNextRender({ read: () => pick()?.focus() }, { injector: this.injector });
+  }
+
+  /** A row's enabled action button: the named one, or the first enabled one when no name is given. */
+  private rowAction(key: string, action?: string): HTMLButtonElement | null {
+    const sel = `[data-row-key="${CSS.escape(key)}"] button[data-action${action ? `="${action}"` : ''}]:not(:disabled)`;
+    return this.host.nativeElement.querySelector<HTMLButtonElement>(sel);
+  }
 
   onDrop(event: CdkDragDrop<DraftRow[]>): void {
     if (event.previousIndex === event.currentIndex) return;
@@ -184,6 +208,11 @@ export class AdminMenuPage {
     const name = this.rowName(this.rows()[index].key);
     this.apply(removeRow(this.rows(), index), undefined);
     this.announcement.set(this.translation.get('a11y.admin_menu.removed', { name }));
+    // The row that took its place, else the new last row, else the entity it went back to in the tray
+    const rows = this.rows();
+    const next = rows[Math.min(index, rows.length - 1)]?.key;
+    this.restoreFocus(() => (next !== undefined ? this.rowAction(next, 'remove') : null)
+      ?? this.host.nativeElement.querySelector<HTMLElement>('[data-unplaced-key] button'));
   }
 
   update(key: string, patch: Partial<Pick<DraftRow, 'label' | 'icon' | 'hidden' | 'collapsed'>>): void {
@@ -192,6 +221,9 @@ export class AdminMenuPage {
   }
 
   addEntity(table: SchemaEntityTable): void {
+    const tray = this.unplaced();
+    const at = tray.findIndex(e => e.table_name === table.table_name);
+    const next = (tray[at + 1] ?? tray[at - 1])?.table_name;
     this.apply(
       appendRoot(this.rows(), {
         key: table.table_name, kind: 'entity', targetKey: table.table_name,
@@ -200,6 +232,10 @@ export class AdminMenuPage {
       undefined
     );
     this.announcement.set(this.translation.get('a11y.admin_menu.added', { name: table.display_name }));
+    // The tray button just pressed is gone: its neighbor in the tray, else the new heading field
+    this.restoreFocus(() => (next !== undefined
+      ? this.host.nativeElement.querySelector<HTMLElement>(`[data-unplaced-key="${CSS.escape(next)}"] button`)
+      : null) ?? this.host.nativeElement.querySelector<HTMLElement>('#menu-new-heading'));
   }
 
   /** Adds a heading at the root, last. Its key is an immutable slug of the label. */
