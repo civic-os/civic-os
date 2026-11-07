@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { from, of, throwError } from 'rxjs';
+import { defer, from, of, throwError } from 'rxjs';
 import { PermissionsPage } from './permissions.page';
 import { PermissionsService } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
@@ -74,6 +74,40 @@ describe('PermissionsPage', () => {
     describe('Component Creation', () => {
         it('should create', () => {
             expect(component).toBeTruthy();
+        });
+    });
+
+    describe('Admin check (issue #85)', () => {
+        function render(isAdmin$: ReturnType<PermissionsService['isAdmin']>) {
+            mockPermissionsService.isAdmin.mockReturnValue(isAdmin$);
+            const f = TestBed.createComponent(PermissionsPage);
+            f.detectChanges();
+            return f;
+        }
+
+        it('shows the verify-failed state, not access required, when the check errors', () => {
+            const f = render(throwError(() => new Error('401')));
+            expect(f.componentInstance.error()).toBe('Failed to verify admin access');
+            expect(f.nativeElement.textContent).toContain('Failed to verify admin access');
+            expect(f.nativeElement.querySelector('[data-testid=permissions-matrix]')).toBeNull();
+        });
+
+        it('shows access required when the caller is not an admin', () => {
+            const f = render(of(false));
+            expect(f.componentInstance.error()).toBe('Admin access required');
+            expect(f.nativeElement.querySelector('[data-testid=permissions-matrix]')).toBeNull();
+        });
+
+        it('renders the matrix for an admin', () => {
+            const f = render(of(true));
+            expect(f.componentInstance.error()).toBeUndefined();
+            expect(f.nativeElement.querySelector('[data-testid=permissions-matrix]')).not.toBeNull();
+        });
+
+        it('sends one is_admin request per load', () => {
+            let requests = 0;
+            render(defer(() => { requests++; return of(true); }));
+            expect(requests).toBe(1);
         });
     });
 
@@ -246,7 +280,8 @@ describe('PermissionsPage', () => {
             component.togglePermission('issues', 'read', true);
 
             expect(component.pendingRevoke()).toBeUndefined();
-            expect(mockPermissionsService.getRolePermissions).not.toHaveBeenCalled();
+            // No admin (role 1) lookup: the only call is the post-save reload of role 2
+            expect(mockPermissionsService.getRolePermissions.mock.calls).toEqual([[2]]);
             expect(mockPermissionsService.setRolePermission).toHaveBeenCalledWith(2, 'issues', 'read', false);
         });
 

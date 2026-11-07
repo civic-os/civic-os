@@ -167,16 +167,18 @@ jobs:
 
       - name: Seed the record used by detail/edit URLs
         # civic_os_users is empty until someone logs in, and the seed runs
-        # before pa11y's first login - so seed the user row too.
+        # before pa11y's first login - so seed the user row too. The issue has a
+        # location so list, detail and edit render a map marker for the scan (#84).
         run: |
           docker compose -f docker/ci-a11y/docker-compose.yml exec -T postgres \
             psql -U postgres -d civic_os_db -v ON_ERROR_STOP=1 -c \
             "INSERT INTO metadata.civic_os_users (id, display_name)
              VALUES ('00000000-0000-0000-0000-000000000001', 'CI Seed User')
              ON CONFLICT DO NOTHING;
-             INSERT INTO public.\"Issue\" (id, display_name, description, created_user)
+             INSERT INTO public.\"Issue\" (id, display_name, description, created_user, location)
              VALUES (1, 'CI seed issue', 'Seeded for accessibility scanning',
-                     '00000000-0000-0000-0000-000000000001')
+                     '00000000-0000-0000-0000-000000000001',
+                     postgis.ST_GeogFromText('SRID=4326;POINT(-83.05 42.33)'))
              ON CONFLICT DO NOTHING;"
 
       - name: Serve build and run pa11y gate
