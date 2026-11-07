@@ -163,7 +163,7 @@ See `docs/development/TESTING.md` for comprehensive testing guidelines, best pra
 
 **Functional tests** (`tests/functional/`): Bash scripts that test migrations, RLS policies, and PostgREST integration against a live database. Key rules: never modify schema in test scripts (use migrations), create dummy files for uploads, and clean up FK references before deleting records. See `docs/notes/ADMIN_PAGE_PITFALLS.md` (Functional Testing section).
 
-**Nightly full-stack run** (`.github/workflows/nightly.yml`): integrity suites plus the full-stack functional tests on pothole and community-center, `--compare` on four examples and the async leak probe, every night; failures land in one `nightly-failure` issue. Core's coverage thresholds (97/95/99/98) fail `test:packages`. See `docs/development/TESTING.md` (Nightly full-stack run, Coverage Guidelines).
+**Nightly full-stack run** (`.github/workflows/nightly.yml`): integrity suites plus the full-stack functional tests on pothole and community-center, `--compare` on four examples, the async leak probe and the raw golden capture check (`capture-all.sh --check`) on all 8 examples, every night; failures land in one `nightly-failure` issue. Core's coverage thresholds (97/95/99/98) fail `test:packages`. See `docs/development/TESTING.md` (Nightly full-stack run, Coverage Guidelines).
 
 **⚠️ MANDATORY**: Run `npm run test:headless` before staging/committing — see Git Commit Guidelines below.
 
