@@ -433,7 +433,8 @@ test('09 list URL state, chips and page size', async ({ harness }) => {
     await page.goto('/view/Issue?f0_col=severity_level&f0_op=gte&f0_val=4&page=1');
     await expect(page.getByText('Severity (≥ 4)', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
-    await page.getByRole('navigation', { name: 'Sidebar' }).getByRole('link', { name: 'WorkPackage', exact: true }).click();
+    // The menu node labels the WorkPackage entity "Work Packages" (examples/pothole/init-scripts/17_menu_layout.sql).
+    await page.getByRole('navigation', { name: 'Sidebar' }).getByRole('link', { name: 'Work Packages', exact: true }).click();
     await expect(page).toHaveURL(/\/view\/WorkPackage$/);
     await expect(listRow(page, WP_NAME)).toBeVisible();
     await expect(page.getByText('Active filters:')).toHaveCount(0);

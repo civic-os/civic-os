@@ -9,6 +9,9 @@ name: Nightly
 #              after integrity, so a bad-data night spends no compare minutes;
 #              then the view security guard on that example's database
 #   leaks      the async leak probe over three app test runs
+#   golden     the raw golden capture check (capture-all.sh --check) on all
+#              eight examples: a fresh boot whose metadata contract must match
+#              tests/golden/raw byte for byte
 #   report     one tracking issue (label nightly-failure) for every failing
 #              night, closed by the next green one (scripts/nightly-report.mjs)
 #
@@ -203,9 +206,58 @@ jobs:
       - name: Run the app tests three times and report async leaks
         run: npm run test:leaks -- --runs 3
 
+  golden:
+    name: Raw golden check (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - pothole
+          - community-center
+          - staff-portal
+          - neighborhood-hub
+          - client-intake
+          - mottpark
+          - broader-impacts
+          - storymap
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      EXAMPLE: ${{ matrix.example }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Capture the metadata contract and diff it against tests/golden/raw
+        # KEEP_UP=1 keeps the stack for the log dump below; the teardown step removes it.
+        # The DIFF lines above the error name each file that changed.
+        run: |
+          if ! KEEP_UP=1 bash scripts/golden/capture-all.sh --check "$EXAMPLE"; then
+            echo "::error title=Raw goldens differ::$EXAMPLE: a fresh capture does not match tests/golden/raw. If the change is intended, recapture with scripts/golden/capture-all.sh $EXAMPLE and commit the fixtures"
+            exit 1
+          fi
+
+      - name: Dump stack logs on failure
+        if: failure()
+        run: docker compose -p "sdk-$EXAMPLE" -f "examples/$EXAMPLE/docker-compose.yml" logs --tail 300
+
+      - name: Tear down the stack
+        if: always()
+        run: docker compose -p "sdk-$EXAMPLE" -f "examples/$EXAMPLE/docker-compose.yml" down -v || true
+
   report:
     name: Tracking issue
-    needs: [integrity, compare, leaks]
+    needs: [integrity, compare, leaks, golden]
     # The issue tracks main's nights: a PR run, a dispatch on another branch
     # and a cancelled run neither open nor close it. A job that failed or timed
     # out still reports.

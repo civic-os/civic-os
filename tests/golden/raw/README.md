@@ -8,6 +8,8 @@ Endpoint fixtures use the dotted name of the call: `schema_entities` (frontend q
 
 ## Regenerating (explicit, never on test runs)
 
+The nightly workflow runs `capture-all.sh --check` on every example (`golden` job, see `docs/development/TESTING.md`, Nightly full-stack run). A migration, example init script or translation change that alters what these endpoints return must recapture the affected examples, and `ROLE_VARIANCE.md`, in the same PR, or the next night fails.
+
 ```bash
 # one example, one stack at a time (postgres + postgrest + keycloak only), isolated compose project sdk-<example>
 scripts/golden/capture-all.sh pothole

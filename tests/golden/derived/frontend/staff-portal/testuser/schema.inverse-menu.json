@@ -168,5 +168,5 @@
     }
   },
   "management": ["sites", "staff_members", "document_requirements", "staff_documents", "time_entries", "time_off_requests", "incident_reports", "reimbursements", "offboarding_feedback", "staff_tasks", "staff_directory", "staff_roles"],
-  "menu": ["sites", "staff_members", "document_requirements", "staff_documents", "time_entries", "time_off_requests", "incident_reports", "reimbursements", "offboarding_feedback", "staff_tasks", "staff_directory", "staff_roles"]
+  "menu": ["staff_tasks", "time_entries", "time_off_requests", "reimbursements", "incident_reports", "staff_directory", "staff_members", "staff_documents", "offboarding_feedback", "sites", "staff_roles", "document_requirements"]
 }

@@ -33,5 +33,5 @@
     }
   },
   "management": ["public_calendar_events", "reservation_requests", "holiday_rules", "reservation_payment_types"],
-  "menu": ["public_calendar_events", "reservation_requests", "holiday_rules", "reservation_payment_types"]
+  "menu": ["reservation_requests", "public_calendar_events", "holiday_rules", "reservation_payment_types"]
 }

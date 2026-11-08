@@ -130,5 +130,5 @@
     }
   },
   "management": ["building_use_event_details", "mek_checkouts", "mek_request_equipment", "tool_reservations", "tool_reservation_tools", "tool_reservation_work_site", "tool_types", "building_use_requests", "mek_requests", "parcels", "census_block_groups"],
-  "menu": ["building_use_event_details", "mek_checkouts", "mek_request_equipment", "tool_reservations", "tool_reservation_tools", "tool_reservation_work_site", "tool_types", "building_use_requests", "mek_requests", "parcels", "census_block_groups"]
+  "menu": ["tool_reservations", "tool_types", "building_use_requests", "mek_requests", "parcels", "census_block_groups"]
 }

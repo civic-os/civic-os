@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-07T16:10:19.489Z",
+  "capturedAt": "2026-11-07T20:25:32.253Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -115,10 +115,16 @@
       "file": "schema_domain_version",
       "method": "GET",
       "path": "schema_domain_version"
+    },
+    {
+      "consumer": "core schema-client getMenuNodes() (frontend schema.service menu) + core buildMenu (v0.81.0)",
+      "file": "schema_menu_nodes",
+      "method": "GET",
+      "path": "schema_menu_nodes"
     }
   ],
   "example": "staff-portal",
-  "examplesTreeHash": "6c8c90a1b2f6e311c666b5e2bba208787efb26fa",
+  "examplesTreeHash": "663e51f77900dad5e677e07ffffa4a687d63bb0b",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "categories": [
@@ -133,7 +139,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "6bdd84d65c555b2b39b1ab293f34c26a34682ce5",
+  "migrationsTreeHash": "e8f0df103cd980e4142abda9b982cd08a6408d87",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
@@ -286,6 +292,14 @@
         "column_name"
       ]
     },
+    "schema_menu_nodes": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "node_key"
+      ]
+    },
     "schema_properties": {
       "note": "no defined order from server or consumer; sorted by tieKeys",
       "orderSource": "natural-key",
@@ -375,6 +389,7 @@
         "schema_guided_form_steps.json",
         "schema_guided_forms.json",
         "schema_m2m_properties.json",
+        "schema_menu_nodes.json",
         "schema_properties.json",
         "schema_properties.mcp.json",
         "static_text.json",
@@ -421,6 +436,7 @@
         "schema_guided_form_steps": 200,
         "schema_guided_forms": 200,
         "schema_m2m_properties": 200,
+        "schema_menu_nodes": 200,
         "schema_properties": 200,
         "schema_properties.mcp": 200,
         "static_text": 200,
@@ -464,6 +480,7 @@
         "schema_guided_form_steps.json",
         "schema_guided_forms.json",
         "schema_m2m_properties.json",
+        "schema_menu_nodes.json",
         "schema_properties.json",
         "schema_properties.mcp.json",
         "static_text.json",
@@ -511,6 +528,7 @@
         "schema_guided_form_steps": 200,
         "schema_guided_forms": 200,
         "schema_m2m_properties": 200,
+        "schema_menu_nodes": 200,
         "schema_properties": 200,
         "schema_properties.mcp": 200,
         "static_text": 200,
@@ -554,6 +572,7 @@
         "schema_guided_form_steps.json",
         "schema_guided_forms.json",
         "schema_m2m_properties.json",
+        "schema_menu_nodes.json",
         "schema_properties.json",
         "schema_properties.mcp.json",
         "static_text.json",
@@ -601,6 +620,7 @@
         "schema_guided_form_steps": 200,
         "schema_guided_forms": 200,
         "schema_m2m_properties": 200,
+        "schema_menu_nodes": 200,
         "schema_properties": 200,
         "schema_properties.mcp": 200,
         "static_text": 200,
@@ -644,6 +664,7 @@
         "schema_guided_form_steps.json",
         "schema_guided_forms.json",
         "schema_m2m_properties.json",
+        "schema_menu_nodes.json",
         "schema_properties.json",
         "schema_properties.mcp.json",
         "static_text.json",
@@ -691,6 +712,7 @@
         "schema_guided_form_steps": 200,
         "schema_guided_forms": 200,
         "schema_m2m_properties": 200,
+        "schema_menu_nodes": 200,
         "schema_properties": 200,
         "schema_properties.mcp": 200,
         "static_text": 200,
@@ -734,6 +756,7 @@
         "schema_guided_form_steps.json",
         "schema_guided_forms.json",
         "schema_m2m_properties.json",
+        "schema_menu_nodes.json",
         "schema_properties.json",
         "schema_properties.mcp.json",
         "static_text.json",
@@ -781,6 +804,7 @@
         "schema_guided_form_steps": 200,
         "schema_guided_forms": 200,
         "schema_m2m_properties": 200,
+        "schema_menu_nodes": 200,
         "schema_properties": 200,
         "schema_properties.mcp": 200,
         "static_text": 200,
