@@ -870,6 +870,11 @@
     "translated_text": "Cargando"
   },
   {
+    "source_key": "a11y.location_map",
+    "source_type": "ui",
+    "translated_text": "Mapa de ubicación"
+  },
+  {
     "source_key": "a11y.longitude",
     "source_type": "ui",
     "translated_text": "Longitud"
@@ -892,7 +897,7 @@
   {
     "source_key": "a11y.map_keyboard_instructions",
     "source_type": "ui",
-    "translated_text": "Mapa de ubicación. Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar."
+    "translated_text": "Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar."
   },
   {
     "source_key": "a11y.map_location_marker",
