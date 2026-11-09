@@ -19,12 +19,14 @@ import type { Mock } from "vitest";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import L from 'leaflet';
 import { provideTranslationTesting } from '../../testing/translation-testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
 import { ThemeService } from '../../services/theme.service';
 import { BehaviorSubject } from 'rxjs';
 import { settleLazyComponents } from '../../testing/lazy-components';
 import { advanceTime, runFakeTimeUntil, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { TranslationService } from '../../services/translation.service';
+import { EN_TRANSLATIONS } from '../../i18n/en.translations';
 
 // Mock factory functions for Leaflet objects
 function createMockMap(): any {
@@ -1055,5 +1057,228 @@ describe('GeoPointMapComponent', () => {
                 expect(marker.getElement()!.getAttribute('aria-label')).toBe('Unnamed location');
             });
         });
+    });
+});
+
+// Issue #98: the map writes its accessible names imperatively (Leaflet options and
+// attributes, cluster icons), outside any template, so they have to be re-translated
+// when the interface language changes. These specs switch the locale live through
+// writable `locale` and `version` signals, the way TranslationService does.
+describe('GeoPointMapComponent live locale switch', () => {
+    useFakeTimeInEachTest();
+
+    const ES: Record<string, string> = {
+        'a11y.unnamed_map_marker': 'Ubicación sin nombre',
+        'a11y.map_cluster_count': '{{count}} {{entity}}',
+        'a11y.map_cluster_count_generic': '{{count}} ubicaciones',
+        'a11y.map_location_marker': 'Ubicación',
+        'a11y.map_drag_marker': 'Arrastre para fijar la ubicación'
+    };
+
+    let component: GeoPointMapComponent;
+    let fixture: ComponentFixture<GeoPointMapComponent>;
+    let locale: WritableSignal<string>;
+    let version: WritableSignal<number>;
+    let host: HTMLDivElement;
+
+    /** What TranslationService does once the new locale's strings have loaded. */
+    function switchLocale(code: string): void {
+        locale.set(code);
+        version.update(v => v + 1);
+        fixture.detectChanges();
+    }
+
+    beforeEach(async () => {
+        locale = signal('en');
+        version = signal(1);
+        const translationService = {
+            version,
+            loading: signal(false),
+            get: (key: string, params?: Record<string, string | number>): string => {
+                const text = (locale() === 'es' ? ES[key] : undefined) ?? EN_TRANSLATIONS[key] ?? key;
+                return text.replace(/\{\{(\w+)\}\}/g, (match: string, name: string) =>
+                    params?.[name] !== undefined ? String(params[name]) : match);
+            },
+            clearCache: () => {}
+        };
+
+        await TestBed.configureTestingModule({
+            imports: [GeoPointMapComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting(),
+                { provide: TranslationService, useValue: translationService }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(GeoPointMapComponent);
+        component = fixture.componentInstance;
+
+        // A real Leaflet map on a detached-size host, so marker elements exist. The
+        // component's own map setup is stubbed so it cannot replace this one.
+        vi.spyOn(component as any, 'initializeMap').mockReturnValue(undefined);
+        host = document.createElement('div');
+        host.style.width = '200px';
+        host.style.height = '200px';
+        document.body.appendChild(host);
+        component['map'] = L.map(host, { center: [43, -83.5], zoom: 13, maxZoom: 18 });
+    });
+
+    afterEach(() => {
+        fixture.destroy();
+        host.remove();
+    });
+
+    function listIcon(id: number): HTMLImageElement {
+        return component['markerMap'].get(id)!.getElement() as HTMLImageElement;
+    }
+
+    it('re-translates the edit marker alt and title in place', () => {
+        fixture.componentRef.setInput('mode', 'edit');
+        fixture.detectChanges();
+        component['createMarker'](43, -83.5);
+        const marker = component['marker']!;
+        const icon = marker.getElement()!;
+
+        switchLocale('es');
+
+        expect(component['marker']).toBe(marker);
+        expect(marker.getElement()).toBe(icon);
+        expect(icon.getAttribute('alt')).toBe('Arrastre para fijar la ubicación');
+        expect(icon.getAttribute('title')).toBe('Arrastre para fijar la ubicación');
+        expect(marker.options.alt).toBe('Arrastre para fijar la ubicación');
+    });
+
+    it('re-translates the display marker alt and keeps it without a title', () => {
+        fixture.componentRef.setInput('mode', 'display');
+        fixture.detectChanges();
+        component['createMarker'](43, -83.5);
+
+        switchLocale('es');
+
+        const icon = component['marker']!.getElement()!;
+        expect(icon.getAttribute('alt')).toBe('Ubicación');
+        expect(icon.hasAttribute('title')).toBe(false);
+    });
+
+    it('re-translates an unnamed list marker and leaves record names alone', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([
+            { id: 1, name: '', wkt: 'POINT(-83.5 43.0)' },
+            { id: 2, name: 'Community Center', wkt: 'POINT(-83.6 43.1)' }
+        ]);
+        const map = component['map'];
+        const unnamed = component['markerMap'].get(1)!;
+
+        switchLocale('es');
+
+        expect(component['map']).toBe(map);
+        expect(component['markerMap'].get(1)).toBe(unnamed);
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('alt')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('title')).toBe('Ubicación sin nombre');
+        expect(unnamed.getTooltip()!.getContent()).toBe('Ubicación sin nombre');
+        expect(listIcon(2).getAttribute('aria-label')).toBe('Community Center');
+        expect(listIcon(2).getAttribute('alt')).toBe('Community Center');
+    });
+
+    it('names a list marker in the new language when a cluster re-adds it', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([{ id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }]);
+        const marker = component['markerMap'].get(1)!;
+
+        switchLocale('es');
+        marker.remove();
+        marker.addTo(component['map']!);
+
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('alt')).toBe('Ubicación sin nombre');
+    });
+
+    it('keeps the new language when a list marker is highlighted', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([{ id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }]);
+
+        switchLocale('es');
+        component['markerMap'].get(1)!.setIcon(component['getHighlightedIcon']());
+
+        expect(listIcon(1).getAttribute('alt')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+    });
+
+    it('waits for the new strings: a locale change alone does not relabel', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([{ id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }]);
+
+        locale.set('es');
+        fixture.detectChanges();
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Unnamed location');
+
+        version.update(v => v + 1);
+        fixture.detectChanges();
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+    });
+
+    describe('cluster icons', () => {
+        beforeEach(async () => {
+            await import('leaflet.markercluster');
+            fixture.componentRef.setInput('enableClustering', true);
+            fixture.componentRef.setInput('entityDisplayName', 'Issues');
+            fixture.detectChanges();
+            component['updateMultiMarkers']([
+                { id: 1, name: 'A', wkt: 'POINT(-83.5 43.0)' },
+                { id: 2, name: 'B', wkt: 'POINT(-83.5001 43.0001)' }
+            ]);
+        });
+
+        function renderedClusterLabels(): (string | null)[] {
+            return Array.from(host.querySelectorAll('.marker-cluster [role="img"]'))
+                .map(el => el.getAttribute('aria-label'));
+        }
+
+        it('relabels the rendered cluster in place', () => {
+            expect(renderedClusterLabels()).toEqual(['2 Issues']);
+
+            fixture.componentRef.setInput('entityDisplayName', 'Problemas');
+            switchLocale('es');
+
+            expect(renderedClusterLabels()).toEqual(['2 Problemas']);
+        });
+
+        it('rebuilds every cluster icon after a locale switch', () => {
+            const group = component['markerClusterGroup']!;
+            const refresh = vi.spyOn(group, 'refreshClusters');
+
+            switchLocale('es');
+
+            expect(component['markerClusterGroup']).toBe(group);
+            expect(refresh).toHaveBeenCalled();
+        });
+
+        it('rebuilds cluster icons when the entity display name changes', () => {
+            const refresh = vi.spyOn(component['markerClusterGroup']!, 'refreshClusters');
+
+            fixture.componentRef.setInput('entityDisplayName', 'Problemas');
+            fixture.detectChanges();
+
+            expect(refresh).toHaveBeenCalled();
+            const icon = component['buildClusterIcon']({ getChildCount: () => 3 } as any);
+            expect((icon.options.html as HTMLElement).getAttribute('aria-label')).toBe('3 Problemas');
+        });
+
+        it('labels a cluster in the new language', () => {
+            fixture.componentRef.setInput('entityDisplayName', '');
+            switchLocale('es');
+
+            const icon = component['buildClusterIcon']({ getChildCount: () => 3 } as any);
+            expect((icon.options.html as HTMLElement).getAttribute('aria-label')).toBe('3 ubicaciones');
+        });
+    });
+
+    it('does nothing before the map exists', () => {
+        component['map']!.remove();
+        component['map'] = undefined;
+
+        expect(() => switchLocale('es')).not.toThrow();
     });
 });

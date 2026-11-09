@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject, signal } from '@angular/core';
+import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject, signal, untracked } from '@angular/core';
 // Use default import (not namespace) so leaflet.markercluster can extend the L object
 import L from 'leaflet';
 // Note: leaflet.markercluster is loaded dynamically in ngAfterViewInit to avoid race conditions
@@ -71,6 +71,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   private map?: L.Map;
   private marker?: L.Marker; // For single-marker mode
   private markerMap = new Map<number, L.Marker>(); // For multi-marker mode
+  private markerNames = new Map<number, string>(); // Record display names by marker id, '' when unnamed
   private markerClusterGroup?: L.MarkerClusterGroup; // For clustered multi-marker mode
   private allMarkersBounds?: L.LatLngBounds; // Store bounds for reset after hover
   private currentLat?: number;
@@ -126,6 +127,18 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
         });
         this.pendingFrames.push(frameId);
       }
+    });
+
+    // Re-label markers and cluster icons when the interface language changes. Leaflet
+    // copies alt and title into the DOM when it builds an icon, and markercluster rebuilds
+    // a cluster icon only when the cluster re-renders, so after a live locale switch screen
+    // readers would keep announcing the old language. `version` bumps once the new
+    // locale's strings have loaded, which tracking `locale` alone would not wait for. The
+    // entity name feeds the cluster labels and is translated with the schema.
+    effect(() => {
+      this.translationService.version();
+      this.entityDisplayName();
+      untracked(() => this.relabelMarkers());
     });
   }
 
@@ -321,7 +334,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       // pointer-only, with the coordinate inputs and Use My Location as the keyboard path
       // (WCAG 2.1.1) and click-to-place covering dragging (2.5.7). So both are plain named
       // images with no tab stop. `interactive` stays on in edit mode because dragging needs it.
-      const label = this.translationService.get(isDraggable ? 'a11y.map_drag_marker' : 'a11y.map_location_marker');
+      const label = this.singleMarkerLabel();
       this.marker = L.marker([lat, lng], {
         draggable: isDraggable,
         interactive: isDraggable,
@@ -338,6 +351,60 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
         });
       }
     }
+  }
+
+  // ============= Accessible Names =============
+
+  /** The single marker's name: "Drag to set location" on the edit map, "Location" on display. */
+  private singleMarkerLabel(): string {
+    return this.translationService.get(this.mode() === 'edit' ? 'a11y.map_drag_marker' : 'a11y.map_location_marker');
+  }
+
+  /** A list marker's name: the record's display name, or a translated fallback. */
+  private markerLabel(name: string): string {
+    return name || this.translationService.get('a11y.unnamed_map_marker');
+  }
+
+  /**
+   * Writes a marker's name into its options, which Leaflet reads whenever it builds the
+   * icon element (on add, on a cluster re-add, on setIcon), and onto the current element.
+   * An empty title is removed, as Leaflet never sets one.
+   */
+  private applyMarkerLabel(marker: L.Marker, alt: string, title: string): void {
+    marker.options.alt = alt;
+    marker.options.title = title;
+    const icon = marker.getElement();
+    if (!icon) return;
+    icon.setAttribute('alt', alt);
+    if (title) {
+      icon.setAttribute('title', title);
+    } else {
+      icon.removeAttribute('title');
+    }
+  }
+
+  /**
+   * Re-translates every marker and cluster name in place, without rebuilding the map,
+   * so a live locale switch reaches assistive technology. Record names are data and stay
+   * as they are; only the translated labels change.
+   */
+  private relabelMarkers(): void {
+    if (!this.map) return;
+
+    if (this.marker) {
+      const label = this.singleMarkerLabel();
+      this.applyMarkerLabel(this.marker, label, this.mode() === 'edit' ? label : '');
+    }
+
+    this.markerMap.forEach((marker, id) => {
+      const label = this.markerLabel(this.markerNames.get(id) ?? '');
+      this.applyMarkerLabel(marker, label, label);
+      marker.getElement()?.setAttribute('aria-label', label);
+      marker.setTooltipContent(label);
+    });
+
+    // Runs iconCreateFunction (buildClusterIcon) again for every cluster.
+    this.markerClusterGroup?.refreshClusters();
   }
 
   private setLocation(lat: number, lng: number) {
@@ -437,6 +504,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     // Clear existing markers
     this.markerMap.forEach(marker => marker.remove());
     this.markerMap.clear();
+    this.markerNames.clear();
 
     // Clear existing cluster group if present
     if (this.markerClusterGroup) {
@@ -492,15 +560,17 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       // aria-labelledby, not from alt or title, so the record's display name also goes
       // on aria-label. `alt` replaces Leaflet's bare "Marker"; `title` is the native
       // hover tooltip.
-      const markerName = markerData.name || this.translationService.get('a11y.unnamed_map_marker');
+      const recordName = markerData.name ?? '';
+      const markerName = this.markerLabel(recordName);
       const marker = L.marker(latLng, {
         icon: this.getLeafletIcon(),
         title: markerName,
         alt: markerName
       });
       // Leaflet creates the icon element on add, and a cluster group adds and removes
-      // markers as they come into view, so the label is set on every add.
-      marker.on('add', () => marker.getElement()?.setAttribute('aria-label', markerName));
+      // markers as they come into view, so the label is set on every add, translated at
+      // that moment so a marker re-added after a locale switch speaks the new language.
+      marker.on('add', () => marker.getElement()?.setAttribute('aria-label', this.markerLabel(recordName)));
 
       // Add click handler
       marker.on('click', () => {
@@ -521,6 +591,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       }
 
       this.markerMap.set(markerData.id, marker);
+      this.markerNames.set(markerData.id, recordName);
     });
 
     // Add cluster group to map if clustering enabled
