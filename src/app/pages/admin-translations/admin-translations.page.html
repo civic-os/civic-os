@@ -1,21 +1,21 @@
 <!-- Translation Administration Page -->
 <div class="p-4 md:p-6 max-w-6xl mx-auto">
-  <h1 class="text-3xl font-bold mb-2">Translation Management</h1>
-  <p class="text-base-content/60 mb-6">Manage translations for all supported languages.</p>
+  <h1 class="text-3xl font-bold mb-2">{{ 'admin_translations.title' | translate }}</h1>
+  <p class="text-base-content/60 mb-6">{{ 'admin_translations.intro' | translate }}</p>
 
   <!-- Coverage Stats -->
   @if (!loading() && coverageStats().total > 0) {
     <div class="stats stats-horizontal shadow mb-4 w-full">
       <div class="stat">
-        <div class="stat-title">Translated</div>
+        <div class="stat-title">{{ 'admin_translations.translated' | translate }}</div>
         <div class="stat-value text-success text-2xl">{{ coverageStats().translated }}</div>
       </div>
       <div class="stat">
-        <div class="stat-title">Missing</div>
+        <div class="stat-title">{{ 'admin_translations.missing' | translate }}</div>
         <div class="stat-value text-warning text-2xl">{{ coverageStats().missing }}</div>
       </div>
       <div class="stat">
-        <div class="stat-title">Coverage</div>
+        <div class="stat-title">{{ 'admin_translations.coverage' | translate }}</div>
         <div class="stat-value text-2xl">{{ coverageStats().percentage }}%</div>
       </div>
     </div>
@@ -47,7 +47,7 @@
   <div class="flex flex-wrap gap-3 items-end mb-4">
     <!-- Locale Selector -->
     <div class="form-control min-w-[160px]">
-      <label class="label" for="translation-locale-select"><span class="font-semibold">Language</span></label>
+      <label class="label" for="translation-locale-select"><span class="font-semibold">{{ 'admin_translations.language' | translate }}</span></label>
       <select #localeSelect
               id="translation-locale-select"
               class="select select-bordered w-full"
@@ -62,12 +62,12 @@
 
     <!-- Source Type Filter -->
     <div class="form-control min-w-[160px]">
-      <label class="label" for="translation-source-type-select"><span class="font-semibold">Source Type</span></label>
+      <label class="label" for="translation-source-type-select"><span class="font-semibold">{{ 'admin_translations.source_type' | translate }}</span></label>
       <select #sourceTypeSelect
               id="translation-source-type-select"
               class="select select-bordered w-full"
               (change)="onSourceTypeChange(sourceTypeSelect.value)">
-        <option value="" [selected]="selectedSourceType() === ''">All</option>
+        <option value="" [selected]="selectedSourceType() === ''">{{ 'admin_translations.all_types' | translate }}</option>
         @for (type of sourceTypes; track type) {
           <option [value]="type" [selected]="selectedSourceType() === type">
             {{ sourceTypeLabel(type) }}
@@ -78,11 +78,11 @@
 
     <!-- Search -->
     <div class="form-control flex-1 min-w-[200px]">
-      <label class="label" for="translation-search"><span class="font-semibold">Search</span></label>
+      <label class="label" for="translation-search"><span class="font-semibold">{{ 'admin_translations.search' | translate }}</span></label>
       <input type="text"
              id="translation-search"
              class="input input-bordered w-full"
-             placeholder="Search by key or text..."
+             [placeholder]="'admin_translations.search_placeholder' | translate"
              [value]="searchQuery()"
              (input)="onSearchInput($any($event.target).value)">
     </div>
@@ -92,16 +92,16 @@
       <button type="button" class="btn btn-outline btn-sm"
               (click)="exportTranslations()"
               [disabled]="loading() || filteredTranslations().length === 0"
-              title="Export translations to Excel">
+              [title]="'admin_translations.export_tooltip' | translate">
         <span class="material-symbols-outlined text-sm" aria-hidden="true">download</span>
-        Export
+        {{ 'action.export' | translate }}
       </button>
       <button type="button" class="btn btn-outline btn-sm"
               (click)="openImportModal()"
               [disabled]="loading()"
-              title="Import translations from Excel">
+              [title]="'admin_translations.import_tooltip' | translate">
         <span class="material-symbols-outlined text-sm" aria-hidden="true">upload</span>
-        Import
+        {{ 'action.import' | translate }}
       </button>
     </div>
   </div>
@@ -112,13 +112,13 @@
             class="tab"
             [class.tab-active]="activeTab() === 'translations'"
             (click)="switchTab('translations')">
-      Translations
+      {{ 'admin_translations.tab_translations' | translate }}
     </button>
     <button type="button" role="tab"
             class="tab"
             [class.tab-active]="activeTab() === 'missing'"
             (click)="switchTab('missing')">
-      Missing
+      {{ 'admin_translations.missing' | translate }}
       @if (missingCount() > 0) {
         <span appContrastText class="badge badge-warning badge-sm ms-2">{{ missingCount() }}</span>
       }
@@ -136,21 +136,21 @@
       @if (filteredTranslations().length === 0) {
         <div class="alert alert-info">
           <span class="material-symbols-outlined" aria-hidden="true">info</span>
-          <span>No translations found for the selected filters.</span>
+          <span>{{ 'admin_translations.empty_translations' | translate }}</span>
         </div>
       } @else {
         <div class="text-sm text-base-content/60 mb-2">
-          {{ filteredTranslations().length }} translation{{ filteredTranslations().length === 1 ? '' : 's' }}
+          {{ (filteredTranslations().length === 1 ? 'admin_translations.count_one' : 'admin_translations.count_other') | translate:{ count: filteredTranslations().length } }}
         </div>
         <div class="overflow-x-auto">
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th class="w-28">Type</th>
-                <th>Source Key</th>
-                <th>English Default</th>
-                <th>Translated Text</th>
-                <th class="w-20">Actions</th>
+                <th class="w-28">{{ 'admin_translations.col_type' | translate }}</th>
+                <th>{{ 'admin_translations.source_key' | translate }}</th>
+                <th>{{ 'admin_translations.english_default' | translate }}</th>
+                <th>{{ 'admin_translations.translated_text' | translate }}</th>
+                <th class="w-20">{{ 'admin_translations.col_actions' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -170,10 +170,10 @@
                   </td>
                   <td>
                     <div class="flex gap-1">
-                      <button type="button" class="btn btn-ghost btn-sm" (click)="openEditModal(t)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="openEditModal(t)" [title]="'action.edit' | translate" [attr.aria-label]="'action.edit' | translate">
                         <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       </button>
-                      <button type="button" class="btn btn-ghost btn-sm text-error" (click)="openDeleteModal(t)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                      <button type="button" class="btn btn-ghost btn-sm text-error" (click)="openDeleteModal(t)" [title]="'action.delete' | translate" [attr.aria-label]="'action.delete' | translate">
                         <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                       </button>
                     </div>
@@ -192,26 +192,26 @@
         @if (searchQuery() || selectedSourceType()) {
           <div class="alert alert-info">
             <span class="material-symbols-outlined" aria-hidden="true">info</span>
-            <span>No missing translations found for the selected filters.</span>
+            <span>{{ 'admin_translations.empty_missing' | translate }}</span>
           </div>
         } @else {
           <div class="alert alert-success">
             <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-            <span>All translations are complete for this language!</span>
+            <span>{{ 'admin_translations.all_complete' | translate }}</span>
           </div>
         }
       } @else {
         <div class="text-sm text-base-content/60 mb-2">
-          {{ filteredMissing().length }} missing translation{{ filteredMissing().length === 1 ? '' : 's' }}
+          {{ (filteredMissing().length === 1 ? 'admin_translations.missing_count_one' : 'admin_translations.missing_count_other') | translate:{ count: filteredMissing().length } }}
         </div>
         <div class="overflow-x-auto">
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th class="w-28">Type</th>
-                <th>Source Key</th>
-                <th>English Default</th>
-                <th class="w-20">Action</th>
+                <th class="w-28">{{ 'admin_translations.col_type' | translate }}</th>
+                <th>{{ 'admin_translations.source_key' | translate }}</th>
+                <th>{{ 'admin_translations.english_default' | translate }}</th>
+                <th class="w-20">{{ 'admin_translations.col_action' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -227,7 +227,7 @@
                     <div class="whitespace-pre-line line-clamp-3">{{ m.default_text }}</div>
                   </td>
                   <td>
-                    <button type="button" class="btn btn-primary btn-sm" (click)="openCreateFromMissing(m)" title="Add Translation" [attr.aria-label]="'a11y.add_translation' | translate">
+                    <button type="button" class="btn btn-primary btn-sm" (click)="openCreateFromMissing(m)" [title]="'a11y.add_translation' | translate" [attr.aria-label]="'a11y.add_translation' | translate">
                       <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
                     </button>
                   </td>
@@ -244,7 +244,7 @@
 <!-- Edit/Create Translation Modal -->
 <cos-modal [isOpen]="showEditModal()" (closed)="closeEditModal()" [label]="(editingTranslation() ? 'a11y.edit_translation' : 'a11y.add_translation') | translate">
   <h3 class="font-bold text-lg mb-4">
-    {{ editingTranslation() ? 'Edit Translation' : 'Add Translation' }}
+    {{ (editingTranslation() ? 'a11y.edit_translation' : 'a11y.add_translation') | translate }}
   </h3>
 
   @if (editError()) {
@@ -256,7 +256,7 @@
 
   <!-- Source Type (read-only) -->
   <div class="form-control mb-4">
-    <label class="label" for="translation-edit-source-type"><span class="font-semibold">Source Type</span></label>
+    <label class="label" for="translation-edit-source-type"><span class="font-semibold">{{ 'admin_translations.source_type' | translate }}</span></label>
     <input type="text"
            id="translation-edit-source-type"
            class="input input-bordered w-full"
@@ -266,7 +266,7 @@
 
   <!-- Source Key (read-only) -->
   <div class="form-control mb-4">
-    <label class="label" for="translation-source-key"><span class="font-semibold">Source Key</span></label>
+    <label class="label" for="translation-source-key"><span class="font-semibold">{{ 'admin_translations.source_key' | translate }}</span></label>
     <input type="text"
            id="translation-source-key"
            class="input input-bordered w-full font-mono text-sm"
@@ -276,33 +276,33 @@
 
   <!-- English Default -->
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">English Default</span></div>
+    <div class="label"><span class="font-semibold">{{ 'admin_translations.english_default' | translate }}</span></div>
     @if (editForm().defaultText) {
       <div class="bg-base-200 rounded-lg p-3 text-sm whitespace-pre-line max-h-48 overflow-y-auto">{{ editForm().defaultText }}</div>
     } @else {
-      <div class="bg-base-200 rounded-lg p-3 text-sm italic text-base-content/50">No English default found</div>
+      <div class="bg-base-200 rounded-lg p-3 text-sm italic text-base-content/50">{{ 'admin_translations.no_default' | translate }}</div>
     }
   </div>
 
   <!-- Translated Text (editable) -->
   <div class="form-control mb-4">
-    <label class="label" for="translation-text"><span class="font-semibold">Translation</span></label>
+    <label class="label" for="translation-text"><span class="font-semibold">{{ 'admin_translations.translation' | translate }}</span></label>
     <textarea id="translation-text"
               class="textarea textarea-bordered w-full"
               rows="3"
               [value]="editForm().translatedText"
               (input)="updateTranslatedText($any($event.target).value)"
-              placeholder="Enter translated text..."></textarea>
+              [placeholder]="'admin_translations.translation_placeholder' | translate"></textarea>
   </div>
 
   <div class="cos-modal-action">
-    <button type="button" class="btn" (click)="closeEditModal()" [disabled]="editSaving()">Cancel</button>
+    <button type="button" class="btn" (click)="closeEditModal()" [disabled]="editSaving()">{{ 'action.cancel' | translate }}</button>
     <button type="button" class="btn btn-primary" (click)="submitEdit()" [disabled]="editSaving()">
       @if (editSaving()) {
         <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-        Saving...
+        {{ 'state.saving' | translate }}
       } @else {
-        {{ editingTranslation() ? 'Update' : 'Create' }}
+        {{ (editingTranslation() ? 'action.update' : 'action.create') | translate }}
       }
     </button>
   </div>
@@ -310,19 +310,19 @@
 
 <!-- Delete Confirmation Modal -->
 <cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteModal()" size="sm" [label]="'a11y.delete_translation' | translate">
-  <h3 class="font-bold text-lg mb-4">Delete Translation</h3>
-  <p>Are you sure you want to delete the translation for:</p>
+  <h3 class="font-bold text-lg mb-4">{{ 'a11y.delete_translation' | translate }}</h3>
+  <p>{{ 'admin_translations.delete_confirm' | translate }}</p>
   <p class="mt-2"><code class="bg-base-200 px-1 rounded text-sm">{{ deletingTranslation()?.source_key }}</code></p>
-  <p class="text-sm text-base-content/60 mt-2">This will revert to the English default for this key.</p>
+  <p class="text-sm text-base-content/60 mt-2">{{ 'admin_translations.delete_note' | translate }}</p>
 
   <div class="cos-modal-action">
-    <button type="button" class="btn" (click)="closeDeleteModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button type="button" class="btn" (click)="closeDeleteModal()" [disabled]="deleteLoading()">{{ 'action.cancel' | translate }}</button>
     <button type="button" class="btn btn-error" (click)="submitDelete()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
         <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-        Deleting...
+        {{ 'state.deleting' | translate }}
       } @else {
-        Delete
+        {{ 'action.delete' | translate }}
       }
     </button>
   </div>
@@ -331,7 +331,7 @@
 <!-- Import Modal -->
 @if (showImportModal()) {
   <app-import-modal
-    [customImport]="translationImportConfig"
+    [customImport]="translationImportConfig()"
     (importSuccess)="onImportSuccess($event)"
     (close)="showImportModal.set(false)">
   </app-import-modal>

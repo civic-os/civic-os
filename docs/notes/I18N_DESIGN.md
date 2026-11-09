@@ -297,6 +297,8 @@ Widget config is JSONB — not a simple text column. The `metadata.translate_wid
 
 The function uses `jsonb_set()` to replace specific paths in the JSONB, preserving all other config properties. Short-circuits for English locale (zero overhead).
 
+**Keep `get_translation_defaults()` in step.** The admin page's English defaults, Missing tab and coverage come from `get_translation_defaults()` (and `get_missing_translations()` built on it), which has its own branch per path. A path added here without one translates, but never shows in the admin. `emptyMessage` shipped that way in v0.80.2 and got its branch in v0.81.3 (#96); the branch uses the same `jsonb_typeof(...) = 'string'` guard, so the two functions agree on which values count.
+
 ### Dashboard Source Key Conventions
 
 | Source Type | Key Pattern | Example |
@@ -401,7 +403,7 @@ Every feature that adds user-visible strings must ship with i18n support. This c
 
 1. **Add English keys** to `src/app/i18n/en.translations.ts` using dot-notation namespace (e.g., `sidebar.translations`, `form.new_field`)
 2. **Use `{{ key | translate }}` pipe** in templates instead of hardcoded English text
-3. **Seed `en`, `es`, and `ar` rows** in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports). The Spanish and Arabic rows are needed so the feature translates in both LTR and RTL languages.
+3. **Seed all six core locales** (`en`, `es`, `fr`, `de`, `ar`, `ps`) in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports), and the others so the feature translates in every shipped language, LTR and RTL. Each `en` row must match `en.translations.ts`. Generating the TypeScript block and the seed from one key table, as v0.81.3 did for `admin_translations.*`, keeps them equal.
 4. **Use `ON CONFLICT DO NOTHING`** on seed INSERTs to make migrations re-runnable
 
 ### Instance Metadata (new translatable metadata types)

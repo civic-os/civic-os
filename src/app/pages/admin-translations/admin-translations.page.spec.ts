@@ -19,12 +19,20 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, BehaviorSubject } from 'rxjs';
-import { AdminTranslationsPage } from './admin-translations.page';
+import { utils, WorkBook } from 'xlsx';
+import { AdminTranslationsPage, EXCEL_HEADERS, LABELED_SOURCE_TYPES } from './admin-translations.page';
+import { EN_TRANSLATIONS } from '../../i18n/en.translations';
 import { TranslationAdminService, Translation, MissingTranslation } from '../../services/translation-admin.service';
 import { TranslationService } from '../../services/translation.service';
 import { SchemaService } from '../../services/schema.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { LocaleService } from '../../services/locale.service';
+
+/** English lookup with {{param}} interpolation, as TranslationService resolves an en key */
+function enGet(key: string, params?: Record<string, string | number>): string {
+    const text = EN_TRANSLATIONS[key] ?? key;
+    return params ? text.replace(/\{\{(\w+)\}\}/g, (m, k) => (params[k] !== undefined ? String(params[k]) : m)) : text;
+}
 
 describe('AdminTranslationsPage', () => {
     let component: AdminTranslationsPage;
@@ -75,7 +83,7 @@ describe('AdminTranslationsPage', () => {
             version: signal(1),
             loading: signal(false)
         };
-        mockTranslation.get.mockImplementation((key: string) => key);
+        mockTranslation.get.mockImplementation(enGet);
         mockSchema = {
             refreshCache: vi.fn().mockName("SchemaService.refreshCache"),
             invalidateGuidedFormCache: vi.fn().mockName("SchemaService.invalidateGuidedFormCache")
@@ -225,7 +233,7 @@ describe('AdminTranslationsPage', () => {
         it('should validate translated text is required', () => {
             component.openCreateFromMissing(mockMissing[0]);
             component.submitEdit();
-            expect(component.editError()).toContain('required');
+            expect(component.editError()).toBe('Translation text is required');
         });
 
         it('should submit edit and refresh caches', () => {
@@ -313,6 +321,79 @@ describe('AdminTranslationsPage', () => {
             expect(filename).toMatch(/^translations_es_\d{4}-\d{2}-\d{2}\.xlsx$/);
         });
 
+        it('should write English headers matching the import column names, and translated hints and sheet name', () => {
+            const spy = vi.spyOn(component as any, 'saveExcelFile').mockReturnValue(undefined);
+            mockTranslation.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                key === 'admin_translations.sheet_translations' ? 'Traducciones'
+                    : key.startsWith('admin_translations.') ? `es:${key}` : enGet(key, params));
+            component.exportTranslations();
+            const [workbook] = vi.mocked(spy).mock.lastCall! as [WorkBook, string];
+            const sheetName = workbook.SheetNames[0];
+            expect(sheetName).toBe('Traducciones');
+            const [hints, headers, firstRow] = utils.sheet_to_json<string[]>(workbook.Sheets[sheetName], { header: 1 });
+            expect(headers).toEqual(Object.values(EXCEL_HEADERS));
+            expect(firstRow).toEqual(['ui', 'nav.home', 'Home', 'Inicio']);
+            expect(headers).toEqual(expect.arrayContaining(component.translationImportConfig().columns.map(c => c.name)));
+            expect(hints).toEqual([
+                'es:admin_translations.hint_do_not_edit',
+                'es:admin_translations.hint_do_not_edit',
+                'es:admin_translations.hint_reference',
+                'es:admin_translations.hint_edit'
+            ]);
+        });
+
+        it('should write the template with the same English headers and translated hints', () => {
+            const spy = vi.spyOn(component as any, 'saveExcelFile').mockReturnValue(undefined);
+            component.translationImportConfig().generateTemplate!();
+            const [workbook, filename] = vi.mocked(spy).mock.lastCall! as [WorkBook, string];
+            expect(filename).toMatch(/^translation_template_es_\d{4}-\d{2}-\d{2}\.xlsx$/);
+            expect(workbook.SheetNames).toEqual(['Import Data']);
+            const [hints, headers] = utils.sheet_to_json<string[]>(workbook.Sheets['Import Data'], { header: 1 });
+            expect(headers).toEqual(Object.values(EXCEL_HEADERS));
+            expect(hints[3]).toBe('Enter translation here');
+        });
+
+        it('should strip characters Excel rejects from a translated sheet name, and cap it at 31', () => {
+            const spy = vi.spyOn(component as any, 'saveExcelFile').mockReturnValue(undefined);
+            mockTranslation.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                key === 'admin_translations.sheet_translations' ? 'Trad: [es] / a very long sheet name indeed' : enGet(key, params));
+            component.exportTranslations();
+            const name = (vi.mocked(spy).mock.lastCall![0] as WorkBook).SheetNames[0];
+            expect(name).toBe('Trad es  a very long sheet name');
+            expect(name.length).toBeLessThanOrEqual(31);
+
+            mockTranslation.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                key === 'admin_translations.sheet_translations' ? ':/?' : enGet(key, params));
+            component.exportTranslations();
+            expect((vi.mocked(spy).mock.lastCall![0] as WorkBook).SheetNames[0]).toBe('Translations');
+
+            mockTranslation.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                key === 'admin_translations.sheet_translations' ? " 'Trad' " : enGet(key, params));
+            component.exportTranslations();
+            expect((vi.mocked(spy).mock.lastCall![0] as WorkBook).SheetNames[0]).toBe('Trad');
+
+            mockTranslation.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                key === 'admin_translations.sheet_translations' ? 'HISTORY' : enGet(key, params));
+            component.exportTranslations();
+            expect((vi.mocked(spy).mock.lastCall![0] as WorkBook).SheetNames[0]).toBe('Translations');
+        });
+
+        it('should export a file the importer reads back by its English column names', () => {
+            const spy = vi.spyOn(component as any, 'saveExcelFile').mockReturnValue(undefined);
+            component.exportTranslations();
+            const [workbook] = vi.mocked(spy).mock.lastCall! as [WorkBook, string];
+            // As ImportExportService.parseExcelFile reads it: skip row 1, key rows by row 2
+            const parsed = utils.sheet_to_json<Record<string, string>>(workbook.Sheets[workbook.SheetNames[0]], { range: 1 });
+            const names = component.translationImportConfig().columns.map(c => c.name);
+            expect(parsed).toHaveLength(mockTranslations.length);
+            expect(parsed[0]).toEqual(expect.objectContaining({
+                [EXCEL_HEADERS.sourceType]: 'ui', [EXCEL_HEADERS.sourceKey]: 'nav.home', [EXCEL_HEADERS.translatedText]: 'Inicio'
+            }));
+            for (const name of names) {
+                expect(Object.keys(parsed[0])).toContain(name);
+            }
+        });
+
         it('should not export when no translations', () => {
             const spy = vi.spyOn(component as any, 'saveExcelFile').mockReturnValue(undefined);
             component.translations.set([]);
@@ -323,9 +404,10 @@ describe('AdminTranslationsPage', () => {
 
     describe('Import', () => {
         it('should have import config with 3 columns and optional Translated Text', () => {
-            expect(component.translationImportConfig.columns.length).toBe(3);
-            expect(component.translationImportConfig.title).toBe('Import Translations');
-            const translatedTextCol = component.translationImportConfig.columns.find(c => c.key === 'translated_text');
+            expect(component.translationImportConfig().columns.length).toBe(3);
+            expect(component.translationImportConfig().title).toBe('Import Translations');
+            expect(component.translationImportConfig().itemLabel).toBe('translations');
+            const translatedTextCol = component.translationImportConfig().columns.find(c => c.key === 'translated_text');
             expect(translatedTextCol?.required).toBe(false);
         });
 
@@ -335,7 +417,7 @@ describe('AdminTranslationsPage', () => {
                 { source_type: 'ui', source_key: 'nav.settings', translated_text: null },
                 { source_type: 'ui', source_key: 'nav.about', translated_text: '' }
             ];
-            const filtered = component.translationImportConfig.preFilter!(rows);
+            const filtered = component.translationImportConfig().preFilter!(rows);
             expect(filtered.length).toBe(1);
             expect(filtered[0]['source_key']).toBe('nav.home');
         });
@@ -345,7 +427,7 @@ describe('AdminTranslationsPage', () => {
             const rows = [
                 { source_type: 'ui', source_key: 'nav.home', translated_text: 'Inicio' }
             ];
-            component.translationImportConfig.submit(rows).subscribe();
+            component.translationImportConfig().submit(rows).subscribe();
             expect(mockTranslationAdmin.upsertTranslations).toHaveBeenCalledWith([{
                     source_type: 'ui',
                     source_key: 'nav.home',
@@ -367,7 +449,7 @@ describe('AdminTranslationsPage', () => {
             component.onImportSuccess(5);
 
             expect(component.showImportModal()).toBe(false);
-            expect(component.successMessage()).toContain('5 translations imported');
+            expect(component.successMessage()).toBe('5 translations imported successfully.');
             expect(mockTranslation.clearCache).toHaveBeenCalled();
             expect(mockSchema.refreshCache).toHaveBeenCalled();
             expect(mockSchema.invalidateGuidedFormCache).toHaveBeenCalled();
@@ -385,9 +467,61 @@ describe('AdminTranslationsPage', () => {
             expect(component.sourceTypeLabel('instance_config_group')).toBe('Configuration');
         });
 
+        it('should have an English label for every labeled source type, and every filter type is labeled', () => {
+            for (const type of LABELED_SOURCE_TYPES) {
+                expect(EN_TRANSLATIONS[`admin_translations.source_type.${type}`], type).toBeTruthy();
+            }
+            expect(LABELED_SOURCE_TYPES).toEqual(expect.arrayContaining(component.sourceTypes));
+        });
+
+        it('should label a source type in the UI language', () => {
+            mockTranslation.get.mockImplementation((key: string) =>
+                key === 'admin_translations.source_type.dashboard' ? 'Panel' : key);
+            expect(component.sourceTypeLabel('dashboard')).toBe('Panel');
+        });
+
+        it('should rebuild the import title and item label when the language changes', () => {
+            expect(component.translationImportConfig().title).toBe('Import Translations');
+            mockTranslation.get.mockImplementation((key: string) =>
+                ({ 'admin_translations.import_title': 'Importar traducciones', 'admin_translations.import_item_label': 'traducciones' })[key] ?? key);
+            mockTranslation.version.set(2);
+            expect(component.translationImportConfig().title).toBe('Importar traducciones');
+            expect(component.translationImportConfig().itemLabel).toBe('traducciones');
+            expect(component.translationImportConfig().columns.map(c => c.name))
+                .toEqual([EXCEL_HEADERS.sourceType, EXCEL_HEADERS.sourceKey, EXCEL_HEADERS.translatedText]);
+        });
+
         it('should offer Configuration in the filter, once', () => {
             expect(component.sourceTypes.filter(t => t === 'instance_config')).toHaveLength(1);
             expect(component.sourceTypes).not.toContain('instance_config_group');
+        });
+    });
+
+    describe('Rendered chrome', () => {
+        const el = () => fixture.nativeElement as HTMLElement;
+
+        it('should render its chrome through the translation service', async () => {
+            mockTranslation.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                key.startsWith('admin_translations.') ? `es:${key}${params ? JSON.stringify(params) : ''}` : enGet(key, params));
+            mockTranslation.version.set(2);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(el().querySelector('h1')?.textContent?.trim()).toBe('es:admin_translations.title');
+            expect(el().querySelector('#translation-search')?.getAttribute('placeholder'))
+                .toBe('es:admin_translations.search_placeholder');
+            const headers = Array.from(el().querySelectorAll('th')).map(th => th.textContent?.trim());
+            expect(headers).toContain('es:admin_translations.source_key');
+            expect(el().textContent).toContain('es:admin_translations.count_other{"count":3}');
+            expect(el().textContent).not.toContain('Translation Management');
+        });
+
+        it('should use the singular count key for one row', async () => {
+            component.searchQuery.set('nav');
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(el().textContent).toContain('1 translation');
+            expect(el().textContent).not.toContain('1 translations');
         });
     });
 
