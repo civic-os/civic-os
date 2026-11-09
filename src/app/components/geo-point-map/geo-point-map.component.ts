@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject, signal } from '@angular/core';
+import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject, signal, untracked } from '@angular/core';
 // Use default import (not namespace) so leaflet.markercluster can extend the L object
 import L from 'leaflet';
 // Note: leaflet.markercluster is loaded dynamically in ngAfterViewInit to avoid race conditions
@@ -71,6 +71,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   private map?: L.Map;
   private marker?: L.Marker; // For single-marker mode
   private markerMap = new Map<number, L.Marker>(); // For multi-marker mode
+  private markerNames = new Map<number, string>(); // Record display names by marker id, '' when unnamed
   private markerClusterGroup?: L.MarkerClusterGroup; // For clustered multi-marker mode
   private allMarkersBounds?: L.LatLngBounds; // Store bounds for reset after hover
   private currentLat?: number;
@@ -89,6 +90,16 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   public lngValue = signal<string>('');
   // Guards setLocation() from overwriting the inputs while the user is typing in them
   private syncingFromInputs = false;
+
+  // Spoken confirmation after "Use map center", read by the sr-only role="status" region
+  public locationAnnouncement = signal<string>('');
+  // True while the edit map has focus from the keyboard; shows the center crosshair
+  public mapKeyboardFocus = signal(false);
+  // The page's last input: a key press (true) or a pointer press (false)
+  private lastInputWasKeyboard = false;
+  private readonly onDocumentKeydown = () => { this.lastInputWasKeyboard = true; };
+  private readonly onDocumentPointerdown = () => { this.lastInputWasKeyboard = false; };
+  private announcementTimer?: number;
 
   private themeService = inject(ThemeService);
   private configService = inject(ConfigService);
@@ -127,6 +138,18 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
         this.pendingFrames.push(frameId);
       }
     });
+
+    // Re-label markers and cluster icons when the interface language changes. Leaflet
+    // copies alt and title into the DOM when it builds an icon, and markercluster rebuilds
+    // a cluster icon only when the cluster re-renders, so after a live locale switch screen
+    // readers would keep announcing the old language. `version` bumps once the new
+    // locale's strings have loaded, which tracking `locale` alone would not wait for. The
+    // entity name feeds the cluster labels and is translated with the schema.
+    effect(() => {
+      this.translationService.version();
+      this.entityDisplayName();
+      untracked(() => this.relabelMarkers());
+    });
   }
 
   async ngAfterViewInit() {
@@ -145,6 +168,11 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     // Cancel pending animations to prevent errors when destroying during tests
     this.pendingAnimations.forEach(id => clearTimeout(id));
     this.pendingAnimations = [];
+    if (this.announcementTimer !== undefined) {
+      clearTimeout(this.announcementTimer);
+    }
+    document.removeEventListener('keydown', this.onDocumentKeydown, true);
+    document.removeEventListener('pointerdown', this.onDocumentPointerdown, true);
 
     // Cancel pending animation frames to prevent errors when destroying during tests
     this.pendingFrames.forEach(id => cancelAnimationFrame(id));
@@ -262,6 +290,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       this.map.on('click', (e: L.LeafletMouseEvent) => {
         this.setLocation(e.latlng.lat, e.latlng.lng);
       });
+      this.trackKeyboardFocus(this.map.getContainer());
     }
 
     // Initialize multi-marker mode if markers are present
@@ -321,7 +350,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       // pointer-only, with the coordinate inputs and Use My Location as the keyboard path
       // (WCAG 2.1.1) and click-to-place covering dragging (2.5.7). So both are plain named
       // images with no tab stop. `interactive` stays on in edit mode because dragging needs it.
-      const label = this.translationService.get(isDraggable ? 'a11y.map_drag_marker' : 'a11y.map_location_marker');
+      const label = this.singleMarkerLabel();
       this.marker = L.marker([lat, lng], {
         draggable: isDraggable,
         interactive: isDraggable,
@@ -340,9 +369,98 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Keeps `mapKeyboardFocus` true while the edit map has focus from the keyboard, so the
+   * crosshair shows for keyboard users and not after a click. `:focus-visible` can't tell
+   * the two apart here: Leaflet focuses the container from script on mousedown, and
+   * Chrome matches script focus as focus-visible depending on what had focus before. The
+   * zoom buttons also refocus the map from script on click.
+   *
+   * So a focus counts as keyboard focus when the page's last input was a key press, as the
+   * focus-visible polyfill decides. The document listeners run in the capture phase, so
+   * Leaflet's stopPropagation on controls and markers can't hide a press from them, and a
+   * window refocus keeps the modality it had. A key pressed on the map, other than Tab or
+   * a modifier, then counts as keyboard use, so a user who clicks and then pans with the
+   * arrows sees the crosshair.
+   */
+  private trackKeyboardFocus(container: HTMLElement): void {
+    document.addEventListener('keydown', this.onDocumentKeydown, true);
+    document.addEventListener('pointerdown', this.onDocumentPointerdown, true);
+    L.DomEvent.on(container, 'pointerdown', () => this.mapKeyboardFocus.set(false));
+    L.DomEvent.on(container, 'focus', () => this.mapKeyboardFocus.set(this.lastInputWasKeyboard));
+    L.DomEvent.on(container, 'keydown', (e) => {
+      const key = (e as KeyboardEvent).key;
+      if (e.target === container && !GeoPointMapComponent.NON_NAVIGATION_KEYS.has(key)) {
+        this.mapKeyboardFocus.set(true);
+      }
+    });
+    L.DomEvent.on(container, 'blur', () => this.mapKeyboardFocus.set(false));
+  }
+
+  // ============= Accessible Names =============
+
+  /** The single marker's name: "Drag to set location" on the edit map, "Location" on display. */
+  private singleMarkerLabel(): string {
+    return this.translationService.get(this.mode() === 'edit' ? 'a11y.map_drag_marker' : 'a11y.map_location_marker');
+  }
+
+  /** A list marker's name: the record's display name, or a translated fallback. */
+  private markerLabel(name: string): string {
+    return name || this.translationService.get('a11y.unnamed_map_marker');
+  }
+
+  /**
+   * Writes a marker's name into its options, which Leaflet reads whenever it builds the
+   * icon element (on add, on a cluster re-add, on setIcon), and onto the current element.
+   * An empty title is removed, as Leaflet never sets one.
+   */
+  private applyMarkerLabel(marker: L.Marker, alt: string, title: string): void {
+    marker.options.alt = alt;
+    marker.options.title = title;
+    const icon = marker.getElement();
+    if (!icon) return;
+    icon.setAttribute('alt', alt);
+    if (title) {
+      icon.setAttribute('title', title);
+    } else {
+      icon.removeAttribute('title');
+    }
+  }
+
+  /**
+   * Re-translates every marker and cluster name in place, without rebuilding the map,
+   * so a live locale switch reaches assistive technology. Record names are data and stay
+   * as they are; only the translated labels change.
+   */
+  private relabelMarkers(): void {
+    if (!this.map) return;
+
+    if (this.marker) {
+      const label = this.singleMarkerLabel();
+      this.applyMarkerLabel(this.marker, label, this.mode() === 'edit' ? label : '');
+    }
+
+    this.markerMap.forEach((marker, id) => {
+      const label = this.markerLabel(this.markerNames.get(id) ?? '');
+      this.applyMarkerLabel(marker, label, label);
+      marker.getElement()?.setAttribute('aria-label', label);
+      marker.setTooltipContent(label);
+    });
+
+    // Runs iconCreateFunction (buildClusterIcon) again for every visible cluster. A group
+    // not on the map has no cluster tree yet (built in onAdd), and builds its icons later.
+    if (this.markerClusterGroup && this.map.hasLayer(this.markerClusterGroup)) {
+      this.markerClusterGroup.refreshClusters();
+    }
+  }
+
   private setLocation(lat: number, lng: number) {
     this.currentLat = lat;
     this.currentLng = lng;
+
+    // A click, drag or typed coordinates make "Location set to …" stale; useMapCenter()
+    // announces again after this returns.
+    this.clearAnnouncement();
 
     // Keep the coordinate fallback inputs in sync (map click, marker drag,
     // Use My Location) — but not while the change originated from the inputs,
@@ -387,6 +505,56 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Places the marker at the map's center: the keyboard path to pick a spot on the map.
+   * Keyboard users pan with the arrow keys (the edit map sets `keyboard: true`) under
+   * the focus crosshair, then press the button. It goes through setLocation(), the path
+   * a click, a drag or the coordinate inputs take, so the EWKT contract is unchanged.
+   * `wrapLatLng` brings a center panned past the antimeridian back within ±180.
+   */
+  public useMapCenter(): void {
+    if (!this.map) return;
+    const center = this.map.wrapLatLng(this.map.getCenter());
+    this.setLocation(center.lat, center.lng);
+    this.announce(this.translationService.get('a11y.map_location_set', {
+      lat: this.roundCoordinate(center.lat),
+      lng: this.roundCoordinate(center.lng)
+    }));
+  }
+
+  /**
+   * Speaks a message through the status region. Screen readers skip a region whose text
+   * did not change, which is what pressing the button twice without panning produces,
+   * so the region is emptied first and filled again a moment later.
+   */
+  private announce(message: string): void {
+    this.clearAnnouncement();
+    this.announcementTimer = window.setTimeout(() => {
+      this.announcementTimer = undefined;
+      this.locationAnnouncement.set(message);
+    }, GeoPointMapComponent.ANNOUNCE_DELAY_MS);
+  }
+
+  /** Empties the status region and drops a pending announcement. */
+  private clearAnnouncement(): void {
+    if (this.announcementTimer !== undefined) {
+      clearTimeout(this.announcementTimer);
+      this.announcementTimer = undefined;
+    }
+    this.locationAnnouncement.set('');
+  }
+
+  /** Delay between emptying and refilling the status region, long enough for screen readers. */
+  private static readonly ANNOUNCE_DELAY_MS = 100;
+
+  /** Keys that leave the map or only modify, so they are not keyboard use of the map. */
+  private static readonly NON_NAVIGATION_KEYS = new Set(['Tab', 'Shift', 'Control', 'Alt', 'Meta']);
+
+  /** Rounds to 6 decimals, the precision of the coordinate inputs (about 0.1 m). */
+  private roundCoordinate(value: number): number {
+    return Math.round(value * 1e6) / 1e6;
+  }
+
   // ============= Coordinate Fallback Inputs (Accessibility) =============
   // Keyboard-accessible alternative to clicking the map (WCAG 2.1.1).
   // These inputs reuse setLocation() — the same code path as map click,
@@ -397,8 +565,8 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
    * matching the inputs' step of 0.000001).
    */
   private updateCoordinateInputs(lat: number, lng: number): void {
-    this.latValue.set(String(Math.round(lat * 1e6) / 1e6));
-    this.lngValue.set(String(Math.round(lng * 1e6) / 1e6));
+    this.latValue.set(String(this.roundCoordinate(lat)));
+    this.lngValue.set(String(this.roundCoordinate(lng)));
   }
 
   /**
@@ -437,6 +605,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     // Clear existing markers
     this.markerMap.forEach(marker => marker.remove());
     this.markerMap.clear();
+    this.markerNames.clear();
 
     // Clear existing cluster group if present
     if (this.markerClusterGroup) {
@@ -492,15 +661,17 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       // aria-labelledby, not from alt or title, so the record's display name also goes
       // on aria-label. `alt` replaces Leaflet's bare "Marker"; `title` is the native
       // hover tooltip.
-      const markerName = markerData.name || this.translationService.get('a11y.unnamed_map_marker');
+      const recordName = markerData.name ?? '';
+      const markerName = this.markerLabel(recordName);
       const marker = L.marker(latLng, {
         icon: this.getLeafletIcon(),
         title: markerName,
         alt: markerName
       });
       // Leaflet creates the icon element on add, and a cluster group adds and removes
-      // markers as they come into view, so the label is set on every add.
-      marker.on('add', () => marker.getElement()?.setAttribute('aria-label', markerName));
+      // markers as they come into view, so the label is set on every add, translated at
+      // that moment so a marker re-added after a locale switch speaks the new language.
+      marker.on('add', () => marker.getElement()?.setAttribute('aria-label', this.markerLabel(recordName)));
 
       // Add click handler
       marker.on('click', () => {
@@ -521,6 +692,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       }
 
       this.markerMap.set(markerData.id, marker);
+      this.markerNames.set(markerData.id, recordName);
     });
 
     // Add cluster group to map if clustering enabled

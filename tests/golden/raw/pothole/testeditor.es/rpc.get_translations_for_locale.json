@@ -870,6 +870,11 @@
     "translated_text": "Cargando"
   },
   {
+    "source_key": "a11y.location_map",
+    "source_type": "ui",
+    "translated_text": "Mapa de ubicación"
+  },
+  {
     "source_key": "a11y.longitude",
     "source_type": "ui",
     "translated_text": "Longitud"
@@ -890,9 +895,19 @@
     "translated_text": "Arrastre para fijar la ubicación"
   },
   {
+    "source_key": "a11y.map_keyboard_instructions",
+    "source_type": "ui",
+    "translated_text": "Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar."
+  },
+  {
     "source_key": "a11y.map_location_marker",
     "source_type": "ui",
     "translated_text": "Ubicación"
+  },
+  {
+    "source_key": "a11y.map_location_set",
+    "source_type": "ui",
+    "translated_text": "Ubicación fijada en {{lat}}, {{lng}}"
   },
   {
     "source_key": "a11y.markdown_editor",
@@ -1143,6 +1158,11 @@
     "source_key": "a11y.unnamed_map_marker",
     "source_type": "ui",
     "translated_text": "Ubicación sin nombre"
+  },
+  {
+    "source_key": "a11y.use_map_center",
+    "source_type": "ui",
+    "translated_text": "Usar el centro del mapa"
   },
   {
     "source_key": "a11y.use_my_location",

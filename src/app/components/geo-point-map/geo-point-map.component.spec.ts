@@ -19,12 +19,14 @@ import type { Mock } from "vitest";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import L from 'leaflet';
 import { provideTranslationTesting } from '../../testing/translation-testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
 import { ThemeService } from '../../services/theme.service';
 import { BehaviorSubject } from 'rxjs';
 import { settleLazyComponents } from '../../testing/lazy-components';
 import { advanceTime, runFakeTimeUntil, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { TranslationService } from '../../services/translation.service';
+import { EN_TRANSLATIONS } from '../../i18n/en.translations';
 
 // Mock factory functions for Leaflet objects
 function createMockMap(): any {
@@ -1054,6 +1056,544 @@ describe('GeoPointMapComponent', () => {
 
                 expect(marker.getElement()!.getAttribute('aria-label')).toBe('Unnamed location');
             });
+        });
+    });
+});
+
+// Issue #98: the map writes its accessible names imperatively (Leaflet options and
+// attributes, cluster icons), outside any template, so they have to be re-translated
+// when the interface language changes. These specs switch the locale live through
+// writable `locale` and `version` signals, the way TranslationService does.
+describe('GeoPointMapComponent live locale switch', () => {
+    useFakeTimeInEachTest();
+
+    const ES: Record<string, string> = {
+        'a11y.unnamed_map_marker': 'Ubicación sin nombre',
+        'a11y.map_cluster_count': '{{count}} {{entity}}',
+        'a11y.map_cluster_count_generic': '{{count}} ubicaciones',
+        'a11y.map_location_marker': 'Ubicación',
+        'a11y.map_drag_marker': 'Arrastre para fijar la ubicación'
+    };
+
+    let component: GeoPointMapComponent;
+    let fixture: ComponentFixture<GeoPointMapComponent>;
+    let locale: WritableSignal<string>;
+    let version: WritableSignal<number>;
+    let host: HTMLDivElement;
+
+    /** What TranslationService does once the new locale's strings have loaded. */
+    function switchLocale(code: string): void {
+        locale.set(code);
+        version.update(v => v + 1);
+        fixture.detectChanges();
+    }
+
+    beforeEach(async () => {
+        locale = signal('en');
+        version = signal(1);
+        const translationService = {
+            version,
+            loading: signal(false),
+            get: (key: string, params?: Record<string, string | number>): string => {
+                const text = (locale() === 'es' ? ES[key] : undefined) ?? EN_TRANSLATIONS[key] ?? key;
+                return text.replace(/\{\{(\w+)\}\}/g, (match: string, name: string) =>
+                    params?.[name] !== undefined ? String(params[name]) : match);
+            },
+            clearCache: () => {}
+        };
+
+        await TestBed.configureTestingModule({
+            imports: [GeoPointMapComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting(),
+                { provide: TranslationService, useValue: translationService }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(GeoPointMapComponent);
+        component = fixture.componentInstance;
+
+        // A real Leaflet map on a detached-size host, so marker elements exist. The
+        // component's own map setup is stubbed so it cannot replace this one.
+        vi.spyOn(component as any, 'initializeMap').mockReturnValue(undefined);
+        host = document.createElement('div');
+        host.style.width = '200px';
+        host.style.height = '200px';
+        document.body.appendChild(host);
+        component['map'] = L.map(host, { center: [43, -83.5], zoom: 13, maxZoom: 18 });
+    });
+
+    afterEach(() => {
+        fixture.destroy();
+        host.remove();
+    });
+
+    function listIcon(id: number): HTMLImageElement {
+        return component['markerMap'].get(id)!.getElement() as HTMLImageElement;
+    }
+
+    it('re-translates the edit marker alt and title in place', () => {
+        fixture.componentRef.setInput('mode', 'edit');
+        fixture.detectChanges();
+        component['createMarker'](43, -83.5);
+        const marker = component['marker']!;
+        const icon = marker.getElement()!;
+
+        switchLocale('es');
+
+        expect(component['marker']).toBe(marker);
+        expect(marker.getElement()).toBe(icon);
+        expect(icon.getAttribute('alt')).toBe('Arrastre para fijar la ubicación');
+        expect(icon.getAttribute('title')).toBe('Arrastre para fijar la ubicación');
+        expect(marker.options.alt).toBe('Arrastre para fijar la ubicación');
+    });
+
+    it('re-translates the display marker alt and keeps it without a title', () => {
+        fixture.componentRef.setInput('mode', 'display');
+        fixture.detectChanges();
+        component['createMarker'](43, -83.5);
+
+        switchLocale('es');
+
+        const icon = component['marker']!.getElement()!;
+        expect(icon.getAttribute('alt')).toBe('Ubicación');
+        expect(icon.hasAttribute('title')).toBe(false);
+    });
+
+    it('re-translates an unnamed list marker and leaves record names alone', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([
+            { id: 1, name: '', wkt: 'POINT(-83.5 43.0)' },
+            { id: 2, name: 'Community Center', wkt: 'POINT(-83.6 43.1)' }
+        ]);
+        const map = component['map'];
+        const unnamed = component['markerMap'].get(1)!;
+
+        switchLocale('es');
+
+        expect(component['map']).toBe(map);
+        expect(component['markerMap'].get(1)).toBe(unnamed);
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('alt')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('title')).toBe('Ubicación sin nombre');
+        expect(unnamed.getTooltip()!.getContent()).toBe('Ubicación sin nombre');
+        expect(listIcon(2).getAttribute('aria-label')).toBe('Community Center');
+        expect(listIcon(2).getAttribute('alt')).toBe('Community Center');
+    });
+
+    it('names a list marker in the new language when a cluster re-adds it', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([{ id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }]);
+        const marker = component['markerMap'].get(1)!;
+
+        switchLocale('es');
+        marker.remove();
+        marker.addTo(component['map']!);
+
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('alt')).toBe('Ubicación sin nombre');
+    });
+
+    it('keeps the new language when a list marker is highlighted', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([{ id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }]);
+
+        switchLocale('es');
+        component['markerMap'].get(1)!.setIcon(component['getHighlightedIcon']());
+
+        expect(listIcon(1).getAttribute('alt')).toBe('Ubicación sin nombre');
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+    });
+
+    it('waits for the new strings: a locale change alone does not relabel', () => {
+        fixture.detectChanges();
+        component['updateMultiMarkers']([{ id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }]);
+
+        locale.set('es');
+        fixture.detectChanges();
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Unnamed location');
+
+        version.update(v => v + 1);
+        fixture.detectChanges();
+        expect(listIcon(1).getAttribute('aria-label')).toBe('Ubicación sin nombre');
+    });
+
+    describe('cluster icons', () => {
+        beforeEach(async () => {
+            await import('leaflet.markercluster');
+            fixture.componentRef.setInput('enableClustering', true);
+            fixture.componentRef.setInput('entityDisplayName', 'Issues');
+            fixture.detectChanges();
+            component['updateMultiMarkers']([
+                { id: 1, name: 'A', wkt: 'POINT(-83.5 43.0)' },
+                { id: 2, name: 'B', wkt: 'POINT(-83.5001 43.0001)' }
+            ]);
+        });
+
+        function renderedClusterLabels(): (string | null)[] {
+            return Array.from(host.querySelectorAll('.marker-cluster [role="img"]'))
+                .map(el => el.getAttribute('aria-label'));
+        }
+
+        it('relabels the rendered cluster in place', () => {
+            expect(renderedClusterLabels()).toEqual(['2 Issues']);
+
+            fixture.componentRef.setInput('entityDisplayName', 'Problemas');
+            switchLocale('es');
+
+            expect(renderedClusterLabels()).toEqual(['2 Problemas']);
+        });
+
+        it('rebuilds every cluster icon after a locale switch', () => {
+            const group = component['markerClusterGroup']!;
+            const refresh = vi.spyOn(group, 'refreshClusters');
+
+            switchLocale('es');
+
+            expect(component['markerClusterGroup']).toBe(group);
+            expect(refresh).toHaveBeenCalled();
+        });
+
+        it('rebuilds cluster icons when the entity display name changes', () => {
+            const refresh = vi.spyOn(component['markerClusterGroup']!, 'refreshClusters');
+
+            fixture.componentRef.setInput('entityDisplayName', 'Problemas');
+            fixture.detectChanges();
+
+            expect(refresh).toHaveBeenCalled();
+            const icon = component['buildClusterIcon']({ getChildCount: () => 3 } as any);
+            expect((icon.options.html as HTMLElement).getAttribute('aria-label')).toBe('3 Problemas');
+        });
+
+        // refreshClusters() reads _topClusterLevel, which the group builds only in onAdd.
+        it('skips the cluster refresh for a group not on the map', () => {
+            component['markerClusterGroup'] = (L as any).markerClusterGroup();
+
+            expect(() => switchLocale('es')).not.toThrow();
+        });
+
+        it('labels a cluster in the new language', () => {
+            fixture.componentRef.setInput('entityDisplayName', '');
+            switchLocale('es');
+
+            const icon = component['buildClusterIcon']({ getChildCount: () => 3 } as any);
+            expect((icon.options.html as HTMLElement).getAttribute('aria-label')).toBe('3 ubicaciones');
+        });
+    });
+
+    it('does nothing before the map exists', () => {
+        component['map']!.remove();
+        component['map'] = undefined;
+
+        expect(() => switchLocale('es')).not.toThrow();
+    });
+});
+
+// Issue #99: a keyboard user pans the edit map with the arrow keys under a focus
+// crosshair, then presses "Use map center" to set the location there.
+describe('GeoPointMapComponent Use map center', () => {
+    useFakeTimeInEachTest();
+
+    let component: GeoPointMapComponent;
+    let fixture: ComponentFixture<GeoPointMapComponent>;
+    let host: HTMLDivElement;
+
+    async function render(mode: 'edit' | 'display'): Promise<void> {
+        await TestBed.configureTestingModule({
+            imports: [GeoPointMapComponent],
+            providers: [provideZonelessChangeDetection(), provideTranslationTesting()]
+        }).compileComponents();
+        fixture = TestBed.createComponent(GeoPointMapComponent);
+        component = fixture.componentInstance;
+        vi.spyOn(component as any, 'initializeMap').mockReturnValue(undefined);
+        fixture.componentRef.setInput('mode', mode);
+        fixture.detectChanges();
+
+        host = document.createElement('div');
+        host.style.width = '200px';
+        host.style.height = '200px';
+        document.body.appendChild(host);
+        component['map'] = L.map(host, { center: [43, -83.5], zoom: 13, maxZoom: 18 });
+    }
+
+    afterEach(() => {
+        fixture.destroy();
+        host.remove();
+    });
+
+    function centerOn(lat: number, lng: number): void {
+        vi.spyOn(component['map']!, 'getCenter').mockReturnValue(L.latLng(lat, lng));
+    }
+
+    function query<T extends Element>(selector: string): T | null {
+        return fixture.nativeElement.querySelector(selector);
+    }
+
+    function statusText(): string {
+        fixture.detectChanges();
+        return query<HTMLElement>('[role="status"]')!.textContent!.trim();
+    }
+
+    describe('in edit mode', () => {
+        beforeEach(() => render('edit'));
+
+        it('sets the location to the map center through the usual EWKT value', () => {
+            centerOn(43.0125, -83.6875);
+            const values: string[] = [];
+            component.valueChange.subscribe(v => values.push(v));
+
+            component.useMapCenter();
+
+            expect(values).toEqual(['SRID=4326;POINT(-83.6875 43.0125)']);
+            expect(component['marker']!.getLatLng()).toEqual(L.latLng(43.0125, -83.6875));
+        });
+
+        it('fills the coordinate inputs with the center, rounded to 6 decimals', () => {
+            centerOn(43.01234567, -83.65432189);
+
+            component.useMapCenter();
+
+            expect(component.latValue()).toBe('43.012346');
+            expect(component.lngValue()).toBe('-83.654322');
+        });
+
+        it('wraps a center panned past the antimeridian back within ±180', () => {
+            centerOn(43, 190);
+            const values: string[] = [];
+            component.valueChange.subscribe(v => values.push(v));
+
+            component.useMapCenter();
+
+            expect(values).toEqual(['SRID=4326;POINT(-170 43)']);
+        });
+
+        it('announces the location it set', async () => {
+            centerOn(43.01234567, -83.65432189);
+
+            component.useMapCenter();
+            await advanceTime(100);
+
+            expect(statusText()).toBe('Location set to 43.012346, -83.654322');
+        });
+
+        it('empties and refills the status region when pressed twice without panning', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            await advanceTime(100);
+            expect(statusText()).toBe('Location set to 43.0125, -83.6875');
+
+            component.useMapCenter();
+            expect(statusText()).toBe('');
+
+            await advanceTime(100);
+            expect(statusText()).toBe('Location set to 43.0125, -83.6875');
+        });
+
+        it('announces only the last of two quick presses', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            centerOn(44, -84);
+            component.useMapCenter();
+            await advanceTime(100);
+
+            expect(statusText()).toBe('Location set to 44, -84');
+        });
+
+        it('clears the announcement when the location then changes another way', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            await advanceTime(100);
+
+            component['setLocation'](44, -84);
+            await advanceTime(100);
+
+            expect(statusText()).toBe('');
+        });
+
+        it('keeps no finished announcement timers', async () => {
+            const before = component['pendingAnimations'].length;
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            component.useMapCenter();
+            await advanceTime(100);
+
+            expect(component['pendingAnimations'].length).toBe(before);
+        });
+
+        it('drops a pending announcement when the map is destroyed', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            fixture.destroy();
+            await advanceTime(100);
+
+            expect(component.locationAnnouncement()).toBe('');
+        });
+
+        it('renders the button, the status region and the crosshair', () => {
+            const button = query<HTMLButtonElement>('button.use-center-btn')!;
+            expect(button.textContent).toContain('Use map center');
+            expect(query('[role="status"]')).not.toBeNull();
+
+            const crosshair = query<SVGElement>('svg.map-crosshair')!;
+            expect(crosshair.getAttribute('aria-hidden')).toBe('true');
+        });
+
+        it('calls useMapCenter when the button is pressed', () => {
+            const spy = vi.spyOn(component, 'useMapCenter');
+            query<HTMLButtonElement>('button.use-center-btn')!.click();
+            expect(spy).toHaveBeenCalled();
+        });
+
+        // A short name keeps landmark menus readable; the description is read on focus.
+        it('names the map a region and describes how the arrow keys pan it', () => {
+            const map = query<HTMLElement>(`#${component.mapId}`)!;
+            expect(map.getAttribute('role')).toBe('region');
+            expect(map.getAttribute('aria-label')).toBe('Location map');
+
+            const description = query<HTMLElement>(`#${map.getAttribute('aria-describedby')}`)!;
+            expect(description.textContent!.trim())
+                .toBe('Use the arrow keys to move the map, plus and minus to zoom.');
+            expect(map.contains(description)).toBe(false);
+        });
+
+        it('does nothing before the map exists', () => {
+            component['map']!.remove();
+            component['map'] = undefined;
+            const values: string[] = [];
+            component.valueChange.subscribe(v => values.push(v));
+
+            component.useMapCenter();
+
+            expect(values).toEqual([]);
+        });
+
+        // initializeMap is stubbed here, so the specs attach the focus tracking to the
+        // test map's container themselves.
+        describe('crosshair on keyboard focus', () => {
+            let container: HTMLElement;
+
+            function frameShowsCrosshair(): boolean {
+                fixture.detectChanges();
+                return query('.map-frame')!.classList.contains('keyboard-focus');
+            }
+
+            beforeEach(() => {
+                container = component['map']!.getContainer();
+                container.tabIndex = 0;
+                component['trackKeyboardFocus'](container);
+            });
+
+            // A browser dispatches a key or pointer press through the document before
+            // its target; these helpers do the same.
+            function pressKey(key: string, target: EventTarget = document.body): void {
+                target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+            }
+
+            function pointerPress(target: EventTarget = container): void {
+                target.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+            }
+
+            it('shows when the map gets focus from the keyboard', () => {
+                pressKey('Tab');
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            it('stays hidden when a pointer press gives the map focus', () => {
+                pointerPress();
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('shows once a key is pressed on a map focused by a click', () => {
+                pointerPress();
+                container.focus();
+                pressKey('ArrowRight', container);
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            it('does not count Tab or a modifier key on the map as keyboard use', () => {
+                pointerPress();
+                container.focus();
+                for (const key of ['Tab', 'Shift', 'Control', 'Alt', 'Meta']) {
+                    pressKey(key, container);
+                }
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('hides again on a pointer press while focused', () => {
+                pressKey('Tab');
+                container.focus();
+                pointerPress();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('hides when the map loses focus', () => {
+                pressKey('Tab');
+                container.focus();
+                container.blur();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('treats the next keyboard focus as keyboard after a click and blur', () => {
+                pointerPress();
+                container.focus();
+                container.blur();
+                pressKey('Tab');
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            // Leaflet's zoom buttons stop the press from reaching the map, then focus the
+            // map from script on click.
+            it('stays hidden when a zoom button click refocuses the map', () => {
+                const zoomButton = document.createElement('a');
+                container.appendChild(zoomButton);
+                L.DomEvent.disableClickPropagation(zoomButton);
+                pointerPress(zoomButton);
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('shows when a keyboard user returns to the map after a zoom button click', () => {
+                const zoomButton = document.createElement('a');
+                container.appendChild(zoomButton);
+                pointerPress(zoomButton);
+                pressKey('Tab');
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            it('stays hidden when the window refocuses a map focused by a click', () => {
+                pointerPress();
+                container.focus();
+                container.blur();
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('stops listening to the document when destroyed', () => {
+                fixture.destroy();
+                pressKey('Tab');
+                expect(component['lastInputWasKeyboard']).toBe(false);
+            });
+        });
+    });
+
+    describe('in display mode', () => {
+        beforeEach(() => render('display'));
+
+        it('renders no center button, status region or crosshair, and no region role', () => {
+            expect(query('button.use-center-btn')).toBeNull();
+            expect(query('[role="status"]')).toBeNull();
+            expect(query('svg.map-crosshair')).toBeNull();
+
+            const map = query<HTMLElement>(`#${component.mapId}`)!;
+            expect(map.hasAttribute('role')).toBe(false);
+            expect(map.hasAttribute('aria-label')).toBe(false);
+            expect(map.hasAttribute('aria-describedby')).toBe(false);
+            expect(query(`#${component.mapId}-instructions`)).toBeNull();
         });
     });
 });

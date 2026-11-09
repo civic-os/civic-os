@@ -1,11 +1,32 @@
 <div class="map-wrapper not-prose">
-  <div [id]="mapId"
-       class="leaflet-map"
-       [class.display-mode]="mode() === 'display'"
-       [class.edit-mode]="mode() === 'edit'"
+  <!-- The frame carries the map's width so the crosshair centers on the map. -->
+  <div class="map-frame"
+       [class.keyboard-focus]="mapKeyboardFocus()"
        [style.width]="width()"
-       [style.height]="height()"
        [style.max-width]="maxWidth() || null">
+    <!-- On the edit map, Leaflet's keyboard handler makes the container a tab stop. The
+         region gets a short name for landmark menus, and a description, read on focus,
+         that tells keyboard users the arrow keys pan it. -->
+    <div [id]="mapId"
+         class="leaflet-map"
+         [class.display-mode]="mode() === 'display'"
+         [class.edit-mode]="mode() === 'edit'"
+         [attr.role]="mode() === 'edit' ? 'region' : null"
+         [attr.aria-label]="mode() === 'edit' ? ('a11y.location_map' | translate) : null"
+         [attr.aria-describedby]="mode() === 'edit' ? mapId + '-instructions' : null"
+         [style.height]="height()">
+    </div>
+
+    @if (mode() === 'edit') {
+      <!-- Marks the point "Use map center" will set. Shown while the map has keyboard
+           focus (mapKeyboardFocus) or the button is hovered or focused (see the CSS). -->
+      <svg class="map-crosshair" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <path class="map-crosshair-halo" d="M16 2v10M16 20v10M2 16h10M20 16h10" />
+        <path class="map-crosshair-line" d="M16 2v10M16 20v10M2 16h10M20 16h10" />
+        <circle class="map-crosshair-halo" cx="16" cy="16" r="2" />
+        <circle class="map-crosshair-line" cx="16" cy="16" r="2" />
+      </svg>
+    }
   </div>
 
   <!-- Floating reset button (only in multi-marker mode when a marker is highlighted) -->
@@ -25,7 +46,13 @@
         <span class="material-symbols-outlined text-sm" aria-hidden="true">my_location</span>
         {{ 'a11y.use_my_location' | translate }}
       </button>
+      <button type="button" class="btn btn-sm btn-primary use-center-btn" (click)="useMapCenter()">
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">center_focus_strong</span>
+        {{ 'a11y.use_map_center' | translate }}
+      </button>
     </div>
+    <div class="sr-only" role="status">{{ locationAnnouncement() }}</div>
+    <span class="sr-only" [id]="mapId + '-instructions'">{{ 'a11y.map_keyboard_instructions' | translate }}</span>
 
     <!-- Keyboard-accessible coordinate fallback (a11y decision D4): typing valid
          decimal coordinates places the marker via the same path as a map click -->
