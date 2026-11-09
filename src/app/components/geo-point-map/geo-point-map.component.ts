@@ -91,6 +91,10 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   // Guards setLocation() from overwriting the inputs while the user is typing in them
   private syncingFromInputs = false;
 
+  // Spoken confirmation after "Use map center", read by the sr-only role="status" region
+  public locationAnnouncement = signal<string>('');
+  private announcementTimer?: number;
+
   private themeService = inject(ThemeService);
   private configService = inject(ConfigService);
   private translationService = inject(TranslationService);
@@ -454,6 +458,48 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Places the marker at the map's center: the keyboard path to pick a spot on the map.
+   * Keyboard users pan with the arrow keys (the edit map sets `keyboard: true`) under
+   * the focus crosshair, then press the button. It goes through setLocation(), the path
+   * a click, a drag or the coordinate inputs take, so the EWKT contract is unchanged.
+   * `wrapLatLng` brings a center panned past the antimeridian back within ±180.
+   */
+  public useMapCenter(): void {
+    if (!this.map) return;
+    const center = this.map.wrapLatLng(this.map.getCenter());
+    this.setLocation(center.lat, center.lng);
+    this.announce(this.translationService.get('a11y.map_location_set', {
+      lat: this.roundCoordinate(center.lat),
+      lng: this.roundCoordinate(center.lng)
+    }));
+  }
+
+  /**
+   * Speaks a message through the status region. Screen readers skip a region whose text
+   * did not change, which is what pressing the button twice without panning produces,
+   * so the region is emptied first and filled again a moment later.
+   */
+  private announce(message: string): void {
+    if (this.announcementTimer !== undefined) {
+      clearTimeout(this.announcementTimer);
+    }
+    this.locationAnnouncement.set('');
+    this.announcementTimer = window.setTimeout(() => {
+      this.announcementTimer = undefined;
+      this.locationAnnouncement.set(message);
+    }, GeoPointMapComponent.ANNOUNCE_DELAY_MS);
+    this.pendingAnimations.push(this.announcementTimer);
+  }
+
+  /** Delay between emptying and refilling the status region, long enough for screen readers. */
+  private static readonly ANNOUNCE_DELAY_MS = 100;
+
+  /** Rounds to 6 decimals, the precision of the coordinate inputs (about 0.1 m). */
+  private roundCoordinate(value: number): number {
+    return Math.round(value * 1e6) / 1e6;
+  }
+
   // ============= Coordinate Fallback Inputs (Accessibility) =============
   // Keyboard-accessible alternative to clicking the map (WCAG 2.1.1).
   // These inputs reuse setLocation() — the same code path as map click,
@@ -464,8 +510,8 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
    * matching the inputs' step of 0.000001).
    */
   private updateCoordinateInputs(lat: number, lng: number): void {
-    this.latValue.set(String(Math.round(lat * 1e6) / 1e6));
-    this.lngValue.set(String(Math.round(lng * 1e6) / 1e6));
+    this.latValue.set(String(this.roundCoordinate(lat)));
+    this.lngValue.set(String(this.roundCoordinate(lng)));
   }
 
   /**

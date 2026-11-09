@@ -1282,3 +1282,171 @@ describe('GeoPointMapComponent live locale switch', () => {
         expect(() => switchLocale('es')).not.toThrow();
     });
 });
+
+// Issue #99: a keyboard user pans the edit map with the arrow keys under a focus
+// crosshair, then presses "Use map center" to set the location there.
+describe('GeoPointMapComponent Use map center', () => {
+    useFakeTimeInEachTest();
+
+    let component: GeoPointMapComponent;
+    let fixture: ComponentFixture<GeoPointMapComponent>;
+    let host: HTMLDivElement;
+
+    async function render(mode: 'edit' | 'display'): Promise<void> {
+        await TestBed.configureTestingModule({
+            imports: [GeoPointMapComponent],
+            providers: [provideZonelessChangeDetection(), provideTranslationTesting()]
+        }).compileComponents();
+        fixture = TestBed.createComponent(GeoPointMapComponent);
+        component = fixture.componentInstance;
+        vi.spyOn(component as any, 'initializeMap').mockReturnValue(undefined);
+        fixture.componentRef.setInput('mode', mode);
+        fixture.detectChanges();
+
+        host = document.createElement('div');
+        host.style.width = '200px';
+        host.style.height = '200px';
+        document.body.appendChild(host);
+        component['map'] = L.map(host, { center: [43, -83.5], zoom: 13, maxZoom: 18 });
+    }
+
+    afterEach(() => {
+        fixture.destroy();
+        host.remove();
+    });
+
+    function centerOn(lat: number, lng: number): void {
+        vi.spyOn(component['map']!, 'getCenter').mockReturnValue(L.latLng(lat, lng));
+    }
+
+    function query<T extends Element>(selector: string): T | null {
+        return fixture.nativeElement.querySelector(selector);
+    }
+
+    function statusText(): string {
+        fixture.detectChanges();
+        return query<HTMLElement>('[role="status"]')!.textContent!.trim();
+    }
+
+    describe('in edit mode', () => {
+        beforeEach(() => render('edit'));
+
+        it('sets the location to the map center through the usual EWKT value', () => {
+            centerOn(43.0125, -83.6875);
+            const values: string[] = [];
+            component.valueChange.subscribe(v => values.push(v));
+
+            component.useMapCenter();
+
+            expect(values).toEqual(['SRID=4326;POINT(-83.6875 43.0125)']);
+            expect(component['marker']!.getLatLng()).toEqual(L.latLng(43.0125, -83.6875));
+        });
+
+        it('fills the coordinate inputs with the center, rounded to 6 decimals', () => {
+            centerOn(43.01234567, -83.65432189);
+
+            component.useMapCenter();
+
+            expect(component.latValue()).toBe('43.012346');
+            expect(component.lngValue()).toBe('-83.654322');
+        });
+
+        it('wraps a center panned past the antimeridian back within ±180', () => {
+            centerOn(43, 190);
+            const values: string[] = [];
+            component.valueChange.subscribe(v => values.push(v));
+
+            component.useMapCenter();
+
+            expect(values).toEqual(['SRID=4326;POINT(-170 43)']);
+        });
+
+        it('announces the location it set', async () => {
+            centerOn(43.01234567, -83.65432189);
+
+            component.useMapCenter();
+            await advanceTime(100);
+
+            expect(statusText()).toBe('Location set to 43.012346, -83.654322');
+        });
+
+        it('empties and refills the status region when pressed twice without panning', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            await advanceTime(100);
+            expect(statusText()).toBe('Location set to 43.0125, -83.6875');
+
+            component.useMapCenter();
+            expect(statusText()).toBe('');
+
+            await advanceTime(100);
+            expect(statusText()).toBe('Location set to 43.0125, -83.6875');
+        });
+
+        it('announces only the last of two quick presses', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            centerOn(44, -84);
+            component.useMapCenter();
+            await advanceTime(100);
+
+            expect(statusText()).toBe('Location set to 44, -84');
+        });
+
+        it('drops a pending announcement when the map is destroyed', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            fixture.destroy();
+            await advanceTime(100);
+
+            expect(component.locationAnnouncement()).toBe('');
+        });
+
+        it('renders the button, the status region and the crosshair', () => {
+            const button = query<HTMLButtonElement>('button.use-center-btn')!;
+            expect(button.textContent).toContain('Use map center');
+            expect(query('[role="status"]')).not.toBeNull();
+
+            const crosshair = query<SVGElement>('svg.map-crosshair')!;
+            expect(crosshair.getAttribute('aria-hidden')).toBe('true');
+        });
+
+        it('calls useMapCenter when the button is pressed', () => {
+            const spy = vi.spyOn(component, 'useMapCenter');
+            query<HTMLButtonElement>('button.use-center-btn')!.click();
+            expect(spy).toHaveBeenCalled();
+        });
+
+        it('names the map a region that says the arrow keys pan it', () => {
+            const map = query<HTMLElement>(`#${component.mapId}`)!;
+            expect(map.getAttribute('role')).toBe('region');
+            expect(map.getAttribute('aria-label'))
+                .toBe('Location map. Use the arrow keys to move the map, plus and minus to zoom.');
+        });
+
+        it('does nothing before the map exists', () => {
+            component['map']!.remove();
+            component['map'] = undefined;
+            const values: string[] = [];
+            component.valueChange.subscribe(v => values.push(v));
+
+            component.useMapCenter();
+
+            expect(values).toEqual([]);
+        });
+    });
+
+    describe('in display mode', () => {
+        beforeEach(() => render('display'));
+
+        it('renders no center button, status region or crosshair, and no region role', () => {
+            expect(query('button.use-center-btn')).toBeNull();
+            expect(query('[role="status"]')).toBeNull();
+            expect(query('svg.map-crosshair')).toBeNull();
+
+            const map = query<HTMLElement>(`#${component.mapId}`)!;
+            expect(map.hasAttribute('role')).toBe(false);
+            expect(map.hasAttribute('aria-label')).toBe(false);
+        });
+    });
+});

@@ -3,7 +3,13 @@
   position: relative;
 }
 
+/* Holds the map and the crosshair; carries the map's width (the map fills it) */
+.map-frame {
+  position: relative;
+}
+
 .leaflet-map {
+  width: 100%;
   border-radius: 0.5rem;
   position: relative;
   overflow: hidden;
@@ -37,4 +43,39 @@
 .map-reset-button:hover {
   background-color: #f4f4f4;
   border-color: rgba(0, 0, 0, 0.3);
+}
+
+/* "Use map center" target. Hidden until the map has keyboard focus (a mouse click
+   focuses the container too, but does not match :focus-visible) or the button is
+   hovered or focused. A sibling above the map's stacking context, so it draws over
+   tiles and markers; it is small and centered, clear of the corner controls, and
+   ignores the pointer. Centered with inset and auto margins, so it needs no physical
+   direction and stays centered in RTL. */
+.map-crosshair {
+  display: none;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 32px;
+  height: 32px;
+  z-index: 2;
+  pointer-events: none;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.map-frame:has(.leaflet-container:focus-visible) .map-crosshair,
+.map-wrapper:has(.use-center-btn:is(:hover, :focus-visible)) .map-crosshair {
+  display: block;
+}
+
+/* Two tones, so the crosshair reads on light tiles, dark tiles and imagery */
+.map-crosshair-halo {
+  stroke: white;
+  stroke-width: 4;
+}
+
+.map-crosshair-line {
+  stroke: black;
+  stroke-width: 2;
 }
