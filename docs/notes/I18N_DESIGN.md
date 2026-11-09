@@ -297,6 +297,8 @@ Widget config is JSONB — not a simple text column. The `metadata.translate_wid
 
 The function uses `jsonb_set()` to replace specific paths in the JSONB, preserving all other config properties. Short-circuits for English locale (zero overhead).
 
+**Keep `get_translation_defaults()` in step.** The admin page's English defaults, Missing tab and coverage come from `get_translation_defaults()` (and `get_missing_translations()` built on it), which has its own branch per path. A path added here without one translates, but never shows in the admin. `emptyMessage` shipped that way in v0.80.2 and got its branch in v0.81.3 (#96); the branch uses the same `jsonb_typeof(...) = 'string'` guard, so the two functions agree on which values count.
+
 ### Dashboard Source Key Conventions
 
 | Source Type | Key Pattern | Example |

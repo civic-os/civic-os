@@ -132,6 +132,7 @@ jobs:
           ./tests/functional/v0-77-0-domain-version-test.sh
           ./tests/functional/v0-79-0-instance-config-test.sh
           ./tests/functional/v0-80-0-widget-key-filters-test.sh
+          ./tests/functional/v0-81-3-widget-empty-message-defaults-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 

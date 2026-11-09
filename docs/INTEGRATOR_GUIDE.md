@@ -809,7 +809,7 @@ Filtered List widget:
 }
 ```
 
-**Empty state and "See more"** (v0.80.2): `emptyMessage` replaces the default "Nothing to show" (translatable through `metadata.translate_widget_config()`), for example `"emptyMessage": "No requests awaiting approval"`. When more rows match than `limit`, the widget shows a "See more" link to the entity's list page with the same filters, and the same sort when `orderBy` is a column the list shows (the default `id` usually is not); `"showSeeMore": false` hides it. A widget with an `in` filter whose items contain a comma, quote or parenthesis shows no link, since the list could not apply that filter. See `docs/development/DASHBOARD_WIDGETS.md` (Empty State and "See more").
+**Empty state and "See more"** (v0.80.2): `emptyMessage` replaces the default "Nothing to show" (translatable through `metadata.translate_widget_config()`; since v0.81.3 it appears at `/admin/translations` under the Dashboard source type, with its English default and a Missing entry until translated), for example `"emptyMessage": "No requests awaiting approval"`. When more rows match than `limit`, the widget shows a "See more" link to the entity's list page with the same filters, and the same sort when `orderBy` is a column the list shows (the default `id` usually is not); `"showSeeMore": false` hides it. A widget with an `in` filter whose items contain a comma, quote or parenthesis shows no link, since the list could not apply that filter. See `docs/development/DASHBOARD_WIDGETS.md` (Empty State and "See more").
 
 **Filter operators**: `eq` (equals), `neq` (not equals), `lt` (less than), `lte` (less than or equal), `gt` (greater than), `gte` (greater than or equal), `in` (in array), `is` (null check), `like` (pattern match), `ov` (overlaps for ranges)
 
@@ -6316,7 +6316,7 @@ Dashboard content is served via RPC functions (not VIEWs), so Phase 3 modifies `
 | `dashboard` | `dashboard.{id}.widget.{widget_id}.title` | `dashboard.1.widget.3.title` |
 | `widget_config` | `dashboard.{id}.widget.{widget_id}.{path}` | `dashboard.1.widget.5.content` |
 
-**Widget config JSONB translation**: Only four widget types have translatable text in config — `markdown` (content), `nav_buttons` (header, description, buttons[].text), `dashboard_navigation` (backward.text, forward.text, chips[].text), and `filtered_list` (emptyMessage, v0.80.2). Other widget types pass through unchanged. The `metadata.translate_widget_config()` helper handles this automatically.
+**Widget config JSONB translation**: Only four widget types have translatable text in config — `markdown` (content), `nav_buttons` (header, description, buttons[].text), `dashboard_navigation` (backward.text, forward.text, chips[].text), and `filtered_list` (emptyMessage, v0.80.2). Other widget types pass through unchanged. The `metadata.translate_widget_config()` helper handles this automatically. Each of these paths is also listed by `get_translation_defaults()`, so it shows at `/admin/translations` with its English default (the `emptyMessage` since v0.81.3). A value that is not a string, such as a JSON `null`, is neither translated nor listed.
 
 **Adding dashboard translations:**
 ```sql
