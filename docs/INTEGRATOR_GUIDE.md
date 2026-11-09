@@ -6335,6 +6335,8 @@ Admins can manage translations at `/admin/translations` without writing SQL. The
 - **Source type filter**: Narrow by type (UI, Entity, Status, Dashboard, Configuration, etc.). Dashboard covers dashboards and widget text; Configuration (v0.81.1) covers instance config key and group labels
 - **Search**: Filter by key or translation text
 - **Missing tab**: Shows English keys without translations for the selected locale — click "Add" to translate
+- **Excel export and import**: Export writes the filtered translations, and the import template lists the missing keys. Row 1 holds a hint per column, row 2 the column headers, row 3 on the data. The hints and sheet names follow the UI language; the column headers (`Source Type`, `Source Key`, `English Default`, `Translated Text`) stay English in every language, so a file exported in one language imports in any other (v0.81.3)
+- **Translated chrome** (v0.81.3): the page's own titles, labels, messages and source type names follow the user's language in the six core locales
 - **Live preview**: Changes apply immediately to the running UI (no page reload needed). Since v0.81.1 every other open browser shows an added, edited or deleted translation on its next navigation, also with no reload. Translations written in SQL reach open browsers the same way
 
 **When to use the admin UI vs SQL:**

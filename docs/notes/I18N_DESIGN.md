@@ -403,7 +403,7 @@ Every feature that adds user-visible strings must ship with i18n support. This c
 
 1. **Add English keys** to `src/app/i18n/en.translations.ts` using dot-notation namespace (e.g., `sidebar.translations`, `form.new_field`)
 2. **Use `{{ key | translate }}` pipe** in templates instead of hardcoded English text
-3. **Seed `en`, `es`, and `ar` rows** in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports). The Spanish and Arabic rows are needed so the feature translates in both LTR and RTL languages.
+3. **Seed all six core locales** (`en`, `es`, `fr`, `de`, `ar`, `ps`) in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports), and the others so the feature translates in every shipped language, LTR and RTL. Each `en` row must match `en.translations.ts`. Generating the TypeScript block and the seed from one key table, as v0.81.3 did for `admin_translations.*`, keeps them equal.
 4. **Use `ON CONFLICT DO NOTHING`** on seed INSERTs to make migrations re-runnable
 
 ### Instance Metadata (new translatable metadata types)

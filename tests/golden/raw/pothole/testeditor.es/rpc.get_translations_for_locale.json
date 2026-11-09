@@ -1730,6 +1730,316 @@
     "translated_text": "Vista"
   },
   {
+    "source_key": "admin_translations.all_complete",
+    "source_type": "ui",
+    "translated_text": "¡Todas las traducciones de este idioma están completas!"
+  },
+  {
+    "source_key": "admin_translations.all_types",
+    "source_type": "ui",
+    "translated_text": "Todos"
+  },
+  {
+    "source_key": "admin_translations.col_action",
+    "source_type": "ui",
+    "translated_text": "Acción"
+  },
+  {
+    "source_key": "admin_translations.col_actions",
+    "source_type": "ui",
+    "translated_text": "Acciones"
+  },
+  {
+    "source_key": "admin_translations.col_type",
+    "source_type": "ui",
+    "translated_text": "Tipo"
+  },
+  {
+    "source_key": "admin_translations.count_one",
+    "source_type": "ui",
+    "translated_text": "{{count}} traducción"
+  },
+  {
+    "source_key": "admin_translations.count_other",
+    "source_type": "ui",
+    "translated_text": "{{count}} traducciones"
+  },
+  {
+    "source_key": "admin_translations.coverage",
+    "source_type": "ui",
+    "translated_text": "Cobertura"
+  },
+  {
+    "source_key": "admin_translations.created",
+    "source_type": "ui",
+    "translated_text": "Traducción creada"
+  },
+  {
+    "source_key": "admin_translations.delete_confirm",
+    "source_type": "ui",
+    "translated_text": "¿Está seguro de que desea eliminar la traducción de:"
+  },
+  {
+    "source_key": "admin_translations.delete_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo eliminar la traducción"
+  },
+  {
+    "source_key": "admin_translations.delete_note",
+    "source_type": "ui",
+    "translated_text": "Esta clave volverá al texto predeterminado en inglés."
+  },
+  {
+    "source_key": "admin_translations.deleted",
+    "source_type": "ui",
+    "translated_text": "Traducción eliminada"
+  },
+  {
+    "source_key": "admin_translations.empty_missing",
+    "source_type": "ui",
+    "translated_text": "No se encontraron traducciones faltantes para los filtros seleccionados."
+  },
+  {
+    "source_key": "admin_translations.empty_translations",
+    "source_type": "ui",
+    "translated_text": "No se encontraron traducciones para los filtros seleccionados."
+  },
+  {
+    "source_key": "admin_translations.english_default",
+    "source_type": "ui",
+    "translated_text": "Texto predeterminado en inglés"
+  },
+  {
+    "source_key": "admin_translations.export_tooltip",
+    "source_type": "ui",
+    "translated_text": "Exportar traducciones a Excel"
+  },
+  {
+    "source_key": "admin_translations.hint_do_not_edit",
+    "source_type": "ui",
+    "translated_text": "No editar"
+  },
+  {
+    "source_key": "admin_translations.hint_edit",
+    "source_type": "ui",
+    "translated_text": "Edite las traducciones aquí"
+  },
+  {
+    "source_key": "admin_translations.hint_enter",
+    "source_type": "ui",
+    "translated_text": "Escriba la traducción aquí"
+  },
+  {
+    "source_key": "admin_translations.hint_reference",
+    "source_type": "ui",
+    "translated_text": "Solo referencia (se ignora al importar)"
+  },
+  {
+    "source_key": "admin_translations.import_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudieron importar las traducciones"
+  },
+  {
+    "source_key": "admin_translations.import_item_label",
+    "source_type": "ui",
+    "translated_text": "traducciones"
+  },
+  {
+    "source_key": "admin_translations.import_title",
+    "source_type": "ui",
+    "translated_text": "Importar traducciones"
+  },
+  {
+    "source_key": "admin_translations.import_tooltip",
+    "source_type": "ui",
+    "translated_text": "Importar traducciones desde Excel"
+  },
+  {
+    "source_key": "admin_translations.imported_one",
+    "source_type": "ui",
+    "translated_text": "{{count}} traducción importada correctamente."
+  },
+  {
+    "source_key": "admin_translations.imported_other",
+    "source_type": "ui",
+    "translated_text": "{{count}} traducciones importadas correctamente."
+  },
+  {
+    "source_key": "admin_translations.intro",
+    "source_type": "ui",
+    "translated_text": "Administre las traducciones de todos los idiomas compatibles."
+  },
+  {
+    "source_key": "admin_translations.language",
+    "source_type": "ui",
+    "translated_text": "Idioma"
+  },
+  {
+    "source_key": "admin_translations.missing",
+    "source_type": "ui",
+    "translated_text": "Faltantes"
+  },
+  {
+    "source_key": "admin_translations.missing_count_one",
+    "source_type": "ui",
+    "translated_text": "{{count}} traducción faltante"
+  },
+  {
+    "source_key": "admin_translations.missing_count_other",
+    "source_type": "ui",
+    "translated_text": "{{count}} traducciones faltantes"
+  },
+  {
+    "source_key": "admin_translations.no_default",
+    "source_type": "ui",
+    "translated_text": "No se encontró texto predeterminado en inglés"
+  },
+  {
+    "source_key": "admin_translations.save_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo guardar la traducción"
+  },
+  {
+    "source_key": "admin_translations.search",
+    "source_type": "ui",
+    "translated_text": "Buscar"
+  },
+  {
+    "source_key": "admin_translations.search_placeholder",
+    "source_type": "ui",
+    "translated_text": "Buscar por clave o texto..."
+  },
+  {
+    "source_key": "admin_translations.sheet_import_data",
+    "source_type": "ui",
+    "translated_text": "Datos de importación"
+  },
+  {
+    "source_key": "admin_translations.sheet_translations",
+    "source_type": "ui",
+    "translated_text": "Traducciones"
+  },
+  {
+    "source_key": "admin_translations.source_key",
+    "source_type": "ui",
+    "translated_text": "Clave de origen"
+  },
+  {
+    "source_key": "admin_translations.source_type",
+    "source_type": "ui",
+    "translated_text": "Tipo de origen"
+  },
+  {
+    "source_key": "admin_translations.source_type.action",
+    "source_type": "ui",
+    "translated_text": "Acción"
+  },
+  {
+    "source_key": "admin_translations.source_type.action_param",
+    "source_type": "ui",
+    "translated_text": "Parámetro"
+  },
+  {
+    "source_key": "admin_translations.source_type.category",
+    "source_type": "ui",
+    "translated_text": "Categoría"
+  },
+  {
+    "source_key": "admin_translations.source_type.dashboard",
+    "source_type": "ui",
+    "translated_text": "Panel"
+  },
+  {
+    "source_key": "admin_translations.source_type.entity",
+    "source_type": "ui",
+    "translated_text": "Entidad"
+  },
+  {
+    "source_key": "admin_translations.source_type.guided_form_step",
+    "source_type": "ui",
+    "translated_text": "Paso del formulario"
+  },
+  {
+    "source_key": "admin_translations.source_type.instance_config",
+    "source_type": "ui",
+    "translated_text": "Configuración"
+  },
+  {
+    "source_key": "admin_translations.source_type.instance_config_group",
+    "source_type": "ui",
+    "translated_text": "Configuración"
+  },
+  {
+    "source_key": "admin_translations.source_type.menu_node",
+    "source_type": "ui",
+    "translated_text": "Menú"
+  },
+  {
+    "source_key": "admin_translations.source_type.property",
+    "source_type": "ui",
+    "translated_text": "Propiedad"
+  },
+  {
+    "source_key": "admin_translations.source_type.static_text",
+    "source_type": "ui",
+    "translated_text": "Texto estático"
+  },
+  {
+    "source_key": "admin_translations.source_type.status",
+    "source_type": "ui",
+    "translated_text": "Estado"
+  },
+  {
+    "source_key": "admin_translations.source_type.ui",
+    "source_type": "ui",
+    "translated_text": "Interfaz"
+  },
+  {
+    "source_key": "admin_translations.source_type.widget_config",
+    "source_type": "ui",
+    "translated_text": "Panel"
+  },
+  {
+    "source_key": "admin_translations.tab_translations",
+    "source_type": "ui",
+    "translated_text": "Traducciones"
+  },
+  {
+    "source_key": "admin_translations.text_required",
+    "source_type": "ui",
+    "translated_text": "El texto de la traducción es obligatorio"
+  },
+  {
+    "source_key": "admin_translations.title",
+    "source_type": "ui",
+    "translated_text": "Gestión de traducciones"
+  },
+  {
+    "source_key": "admin_translations.translated",
+    "source_type": "ui",
+    "translated_text": "Traducidas"
+  },
+  {
+    "source_key": "admin_translations.translated_text",
+    "source_type": "ui",
+    "translated_text": "Texto traducido"
+  },
+  {
+    "source_key": "admin_translations.translation",
+    "source_type": "ui",
+    "translated_text": "Traducción"
+  },
+  {
+    "source_key": "admin_translations.translation_placeholder",
+    "source_type": "ui",
+    "translated_text": "Escriba el texto traducido..."
+  },
+  {
+    "source_key": "admin_translations.updated",
+    "source_type": "ui",
+    "translated_text": "Traducción actualizada"
+  },
+  {
     "source_key": "auth.about",
     "source_type": "ui",
     "translated_text": "Acerca de {{appTitle}}"

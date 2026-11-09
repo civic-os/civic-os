@@ -21,7 +21,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, Subscription, debounceTime } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { utils, writeFileXLSX, WorkBook } from 'xlsx';
+import { utils, writeFileXLSX, WorkBook, WorkSheet } from 'xlsx';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
@@ -41,6 +41,20 @@ const SOURCE_TYPES = [
   'action', 'action_param', 'guided_form_step', 'static_text',
   'dashboard', 'menu_node', 'instance_config'
 ];
+
+/** Every stored source type the page labels, each with an `admin_translations.source_type.<type>` key. */
+export const LABELED_SOURCE_TYPES = [
+  ...SOURCE_TYPES, 'widget_config', 'instance_config_group'
+];
+
+/** Excel column headers, shared by export, template and import. They stay English in every locale: the
+ * importer matches headers by exact text, so a file exported in one language imports in any other. */
+export const EXCEL_HEADERS = {
+  sourceType: 'Source Type',
+  sourceKey: 'Source Key',
+  englishDefault: 'English Default',
+  translatedText: 'Translated Text'
+} as const;
 
 @Component({
   selector: 'app-admin-translations',
@@ -141,22 +155,27 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
   // Import modal
   showImportModal = signal(false);
 
-  translationImportConfig: CustomImportConfig = {
-    title: 'Import Translations',
-    itemLabel: 'translations',
-    columns: [
-      { name: 'Source Type', key: 'source_type', required: true, type: 'text' },
-      { name: 'Source Key', key: 'source_key', required: true, type: 'text' },
-      { name: 'Translated Text', key: 'translated_text', required: false, type: 'text' }
-    ],
-    preFilter: (rows: Record<string, any>[]) => rows.filter(r => r['translated_text']),
-    submit: (validRows: Record<string, any>[]): Observable<CustomImportResult> => {
-      return this.submitTranslationImport(validRows);
-    },
-    generateTemplate: () => {
-      this.generateImportTemplate();
-    }
-  };
+  // Rebuilt on a language change (version()), so the modal's title and item label follow the UI language.
+  // Column names are the English Excel headers (EXCEL_HEADERS).
+  translationImportConfig = computed<CustomImportConfig>(() => {
+    this.translationService.version();
+    return {
+      title: this.t('import_title'),
+      itemLabel: this.t('import_item_label'),
+      columns: [
+        { name: EXCEL_HEADERS.sourceType, key: 'source_type', required: true, type: 'text' },
+        { name: EXCEL_HEADERS.sourceKey, key: 'source_key', required: true, type: 'text' },
+        { name: EXCEL_HEADERS.translatedText, key: 'translated_text', required: false, type: 'text' }
+      ],
+      preFilter: (rows: Record<string, any>[]) => rows.filter(r => r['translated_text']),
+      submit: (validRows: Record<string, any>[]): Observable<CustomImportResult> => {
+        return this.submitTranslationImport(validRows);
+      },
+      generateTemplate: () => {
+        this.generateImportTemplate();
+      }
+    };
+  });
 
   // ── Lifecycle ────────────────────────────────
 
@@ -303,7 +322,7 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
   submitEdit() {
     const form = this.editForm();
     if (!form.translatedText.trim()) {
-      this.editError.set('Translation text is required');
+      this.editError.set(this.t('text_required'));
       return;
     }
 
@@ -322,15 +341,15 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
         this.editSaving.set(false);
         if (response.success) {
           this.showEditModal.set(false);
-          this.successMessage.set(this.editingTranslation() ? 'Translation updated' : 'Translation created');
+          this.successMessage.set(this.t(this.editingTranslation() ? 'updated' : 'created'));
           this.refreshAfterSave();
         } else {
-          this.editError.set(response.error?.humanMessage || 'Failed to save translation');
+          this.editError.set(response.error?.humanMessage || this.t('save_failed'));
         }
       },
       error: () => {
         this.editSaving.set(false);
-        this.editError.set('Failed to save translation');
+        this.editError.set(this.t('save_failed'));
       }
     });
   }
@@ -358,17 +377,17 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
         if (response.success) {
           this.showDeleteModal.set(false);
           this.deletingTranslation.set(null);
-          this.successMessage.set('Translation deleted');
+          this.successMessage.set(this.t('deleted'));
           this.refreshAfterSave();
         } else {
           this.showDeleteModal.set(false);
-          this.error.set(response.error?.humanMessage || 'Failed to delete translation');
+          this.error.set(response.error?.humanMessage || this.t('delete_failed'));
         }
       },
       error: () => {
         this.deleteLoading.set(false);
         this.showDeleteModal.set(false);
-        this.error.set('Failed to delete translation');
+        this.error.set(this.t('delete_failed'));
       }
     });
   }
@@ -399,24 +418,16 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
     if (translations.length === 0) return;
 
     const defaultsMap = this.defaults();
-    const headers = ['Source Type', 'Source Key', 'English Default', 'Translated Text'];
-    const hints = {
-      'Source Type': 'Do not edit',
-      'Source Key': 'Do not edit',
-      'English Default': 'Reference only (ignored on import)',
-      'Translated Text': 'Edit translations here'
-    };
     const rows = translations.map(t => ({
-      'Source Type': t.source_type,
-      'Source Key': t.source_key,
-      'English Default': defaultsMap.get(`${t.source_type}:${t.source_key}`) ?? '',
-      'Translated Text': t.translated_text
+      [EXCEL_HEADERS.sourceType]: t.source_type,
+      [EXCEL_HEADERS.sourceKey]: t.source_key,
+      [EXCEL_HEADERS.englishDefault]: defaultsMap.get(`${t.source_type}:${t.source_key}`) ?? '',
+      [EXCEL_HEADERS.translatedText]: t.translated_text
     }));
 
-    // Row 1 = hints, Row 2 = headers, Row 3+ = data (matches parseExcelFile range:1 convention)
-    const worksheet = utils.json_to_sheet([hints, ...rows], { header: headers, skipHeader: false });
+    const worksheet = this.excelSheet('hint_edit', rows);
     const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, 'Translations');
+    utils.book_append_sheet(workbook, worksheet, this.sheetName('sheet_translations', 'Translations'));
 
     const date = new Date().toISOString().slice(0, 10);
     const filename = `translations_${this.selectedLocale()}_${date}.xlsx`;
@@ -434,7 +445,7 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
 
   onImportSuccess(count: number): void {
     this.showImportModal.set(false);
-    this.successMessage.set(`${count} translation${count === 1 ? '' : 's'} imported successfully.`);
+    this.successMessage.set(this.t(count === 1 ? 'imported_one' : 'imported_other', { count }));
     this.refreshAfterSave();
   }
 
@@ -454,7 +465,7 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
         errorCount: response.success ? 0 : payload.length,
         errors: response.success ? [] : [{
           index: 1,
-          error: response.error?.humanMessage || 'Failed to import translations'
+          error: response.error?.humanMessage || this.t('import_failed')
         }]
       }))
     );
@@ -463,30 +474,21 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
   private generateImportTemplate(): void {
     const missing = this.missingTranslations();
 
-    // Row 1 = hints, Row 2 = headers, Row 3+ = data
-    // (matches the entity import convention — parseExcelFile uses range:1 to skip hints)
-    const headers = ['Source Type', 'Source Key', 'English Default', 'Translated Text'];
-    const hints = {
-      'Source Type': 'Do not edit',
-      'Source Key': 'Do not edit',
-      'English Default': 'Reference only (ignored on import)',
-      'Translated Text': 'Enter translation here'
-    };
 
     // Include English Default inline for translator context — the import
     // parser only reads columns defined in translationImportConfig.columns,
     // so "English Default" is naturally ignored on upload.
     const dataRows = missing.map(m => ({
-      'Source Type': m.source_type,
-      'Source Key': m.source_key,
-      'English Default': m.default_text,
-      'Translated Text': ''
+      [EXCEL_HEADERS.sourceType]: m.source_type,
+      [EXCEL_HEADERS.sourceKey]: m.source_key,
+      [EXCEL_HEADERS.englishDefault]: m.default_text,
+      [EXCEL_HEADERS.translatedText]: ''
     }));
 
-    const dataSheet = utils.json_to_sheet([hints, ...dataRows], { header: headers, skipHeader: false });
+    const dataSheet = this.excelSheet('hint_enter', dataRows);
 
     const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, dataSheet, 'Import Data');
+    utils.book_append_sheet(workbook, dataSheet, this.sheetName('sheet_import_data', 'Import Data'));
 
     const date = new Date().toISOString().slice(0, 10);
     this.saveExcelFile(workbook, `translation_template_${this.selectedLocale()}_${date}.xlsx`);
@@ -507,24 +509,40 @@ export class AdminTranslationsPage implements OnInit, OnDestroy {
     return this.defaults().get(`${sourceType}:${sourceKey}`) ?? '';
   }
 
-  /** Human-readable source type label */
+  /** Source type label in the UI language. Reads version() so a template call re-renders on a language
+   * change; an unknown type shows as itself. */
   sourceTypeLabel(type: string): string {
-    const labels: Record<string, string> = {
-      'ui': 'UI',
-      'entity': 'Entity',
-      'property': 'Property',
-      'status': 'Status',
-      'category': 'Category',
-      'action': 'Action',
-      'action_param': 'Param',
-      'guided_form_step': 'Form Step',
-      'static_text': 'Static Text',
-      'dashboard': 'Dashboard',
-      'widget_config': 'Dashboard',
-      'menu_node': 'Menu',
-      'instance_config': 'Configuration',
-      'instance_config_group': 'Configuration'
+    this.translationService.version();
+    return LABELED_SOURCE_TYPES.includes(type) ? this.t('source_type.' + type) : type;
+  }
+
+  /** An `admin_translations.` string in the UI language */
+  private t(key: string, params?: Record<string, string | number>): string {
+    return this.translationService.get('admin_translations.' + key, params);
+  }
+
+  /** A translated sheet name Excel accepts: no []:*?/\ and at most 31 characters, else the English name.
+   * An admin can edit the translation, so it is not trusted to fit. */
+  private sheetName(key: string, english: string): string {
+    // Excel's sheet name rules: at most 31 characters, none of []:*?/\, no leading or trailing apostrophe,
+    // and not the reserved name History. Admins can edit these translations, so fall back to English.
+    const name = this.t(key).replace(/[[\]:*?/\\]/g, '').trim().slice(0, 31).replace(/^[\s']+|[\s']+$/g, '');
+    return name && name.toLowerCase() !== 'history' ? name : english;
+  }
+
+  /**
+   * An Excel sheet the importer reads back: row 1 holds a hint per column in the UI language, row 2 the
+   * English headers, row 3 on the data (parseExcelFile skips row 1 and keys rows by row 2).
+   */
+  private excelSheet(translatedTextHint: 'hint_edit' | 'hint_enter', rows: Record<string, string>[]): WorkSheet {
+    const headers: string[] = Object.values(EXCEL_HEADERS);
+    const hints = {
+      [EXCEL_HEADERS.sourceType]: this.t('hint_do_not_edit'),
+      [EXCEL_HEADERS.sourceKey]: this.t('hint_do_not_edit'),
+      [EXCEL_HEADERS.englishDefault]: this.t('hint_reference'),
+      [EXCEL_HEADERS.translatedText]: this.t(translatedTextHint)
     };
-    return labels[type] || type;
+    const headerRow = Object.fromEntries(headers.map(h => [h, h]));
+    return utils.json_to_sheet([hints, headerRow, ...rows], { header: headers, skipHeader: true });
   }
 }
