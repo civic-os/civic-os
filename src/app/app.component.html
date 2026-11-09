@@ -207,8 +207,8 @@
               </a>
             </li>
           }
-          <!-- Sidebar Menu editor (admin-only) -->
-          @if (auth.isAdmin()) {
+          <!-- Sidebar Menu editor (permission-based) -->
+          @if (hasMenuAdminPermission()) {
             <li>
               <a routerLink="/admin/menu" (click)="drawerOpen = false"
                  [class.menu-active]="isRouteActive('/admin/menu')"

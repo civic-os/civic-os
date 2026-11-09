@@ -190,6 +190,8 @@ INSERT INTO metadata.menu_nodes (node_key, node_kind, display_name, sort_order) 
 INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, parent_node_key, sort_order) VALUES ('mt_a', 'entity', 'mt_a', 'mt_h1', 10);
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text)
 VALUES ('menu_node', 'mt_h1.display_name', 'es', 'Encabezado uno');
+-- Since v0.81.2 callers read only the nodes of entities they can see (v0-81-2-menu-access-test.sh).
+GRANT SELECT ON public.mt_a TO web_anon, authenticated;
 
 -- anonymous
 SET LOCAL SESSION AUTHORIZATION authenticator;
@@ -233,10 +235,11 @@ BEGIN
     PERFORM public.save_menu_tree('[]'::jsonb);
     ASSERT false, 'non-admin save_menu_tree must be denied';
   EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+  -- Denied either way: v0.81.0 grants no UPDATE (42501); since v0.81.2 the update policy filters every row.
   BEGIN
     UPDATE metadata.menu_nodes SET is_hidden = TRUE WHERE node_key = 'mt_a';
-    ASSERT false, 'non-admin direct update must be denied';
   EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+  ASSERT NOT (SELECT is_hidden FROM metadata.menu_nodes WHERE node_key = 'mt_a'), 'non-admin direct update must change nothing';
   ASSERT (SELECT count(*) FROM metadata.menu_nodes WHERE node_key IN ('mt_h1', 'mt_a')) = 2, 'a denied save changed nothing';
 END $$;
 RESET ROLE;
@@ -472,8 +475,11 @@ BEGIN
   ASSERT (SELECT count(*) FROM pg_proc WHERE proname = 'upsert_entity_metadata') = 1, 'exactly one upsert_entity_metadata overload';
   ASSERT NOT has_function_privilege('web_anon', 'public.upsert_entity_metadata(name,text,text,integer,text[],boolean,text,boolean,text,text,boolean,boolean,text,text,name,name)', 'EXECUTE'),
     'upsert_entity_metadata is not executable by anon';
-  ASSERT NOT has_function_privilege('web_anon', 'public.save_menu_tree(jsonb)', 'EXECUTE'), 'save_menu_tree is not executable by anon';
-  ASSERT has_function_privilege('authenticated', 'public.save_menu_tree(jsonb)', 'EXECUTE'), 'save_menu_tree is executable by authenticated';
+  -- By name: v0.81.2 replaces save_menu_tree(jsonb) with save_menu_tree(jsonb, timestamptz).
+  ASSERT NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'save_menu_tree' AND pronamespace = 'public'::regnamespace
+                     AND has_function_privilege('web_anon', oid, 'EXECUTE')), 'save_menu_tree is not executable by anon';
+  ASSERT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'save_menu_tree' AND pronamespace = 'public'::regnamespace
+                 AND has_function_privilege('authenticated', oid, 'EXECUTE')), 'save_menu_tree is executable by authenticated';
 END $$;
 
 ROLLBACK;

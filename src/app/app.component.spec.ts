@@ -49,6 +49,7 @@ describe('AppComponent', () => {
             authenticated: vi.fn().mockName("AuthService.authenticated"),
             hasPermission: vi.fn().mockName("AuthService.hasPermission"),
             isRealAdmin: vi.fn().mockName("AuthService.isRealAdmin"),
+            permissionsLoaded: signal(true),
             userRoles: []
         };
         mockAuthService.authenticated.mockReturnValue(false);
@@ -722,6 +723,53 @@ describe('AppComponent', () => {
             expect(nav.querySelector('a[href="/view/issue"]')).toBeTruthy();
             expect(nav.textContent).toContain('Data');
             expect(nav.querySelector('[role="alert"]')).toBeNull();
+        });
+
+        describe('menu editor link', () => {
+            async function sidebarFor(admin: boolean, permissions: string[]) {
+                mockAuthService.isAdmin.mockReturnValue(admin);
+                mockAuthService.hasPermission.mockImplementation(
+                    (table: string, permission: string) => permissions.includes(`${table}:${permission}`));
+                const fixture = TestBed.createComponent(AppComponent);
+                fixture.detectChanges();
+                flushStartup(200);
+                await settle();
+                fixture.detectChanges();
+                return {
+                    component: fixture.componentInstance,
+                    link: (fixture.nativeElement as HTMLElement).querySelector('a[href="/admin/menu"]')
+                };
+            }
+
+            it('shows for admins', async () => {
+                const { component, link } = await sidebarFor(true, []);
+                expect(link).toBeTruthy();
+                expect(component.hasMenuAdminPermission()).toBe(true);
+            });
+
+            it('shows for a role granted metadata.menu_nodes:update, with the Admin section', async () => {
+                const { component, link } = await sidebarFor(false, ['metadata.menu_nodes:update']);
+                expect(link).toBeTruthy();
+                expect(component.showAdminSection()).toBe(true);
+            });
+
+            it('is absent for a plain user', async () => {
+                const { component, link } = await sidebarFor(false, []);
+                expect(link).toBeNull();
+                expect(component.showAdminSection()).toBe(false);
+            });
+
+            it('appears when the permissions load after the first render', async () => {
+                const granted: string[] = [];
+                mockAuthService.permissionsLoaded.set(false);
+                const { component } = await sidebarFor(false, granted);
+                expect(component.hasMenuAdminPermission()).toBe(false);
+
+                granted.push('metadata.menu_nodes:update');
+                mockAuthService.permissionsLoaded.set(true);
+                expect(component.hasMenuAdminPermission()).toBe(true);
+                expect(component.showAdminSection()).toBe(true);
+            });
         });
     });
 });

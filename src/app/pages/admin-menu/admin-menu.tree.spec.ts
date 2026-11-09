@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { MenuNodeRow } from '@civic-os/core';
+import { MAX_MENU_DEPTH, MENU_HEADING_KEY, type MenuNodeRow } from '@civic-os/core';
 import {
   DraftRow, appendRoot, canIndent, canMoveDown, canMoveUp, canOutdent, describePosition, dropReorder,
   headingKeyFromLabel, indent, isValidShape, moveDown, moveUp, nodesToRows, outdent, removeRow, rowsToNodes,
@@ -199,6 +199,12 @@ describe('admin-menu tree', () => {
       expect(isValidShape([e('a', 2)])).toBe(false);
       expect(isValidShape([h('g'), e('a', 2), e('b', 3)])).toBe(true);
     });
+
+    it('follows core\'s depth cap', () => {
+      const chain = Array.from({ length: MAX_MENU_DEPTH + 1 }, (_, i) => e(`n${i}`, i + 1));
+      expect(isValidShape(chain.slice(0, MAX_MENU_DEPTH))).toBe(true);
+      expect(isValidShape(chain)).toBe(false);
+    });
   });
 
   describe('describePosition', () => {
@@ -226,7 +232,7 @@ describe('admin-menu tree', () => {
 
     it('always matches the heading key pattern', () => {
       for (const label of ['A', 'a b c', '___', 'x'.repeat(100), '9']) {
-        expect(headingKeyFromLabel(label, new Set())).toMatch(/^[a-z][a-z0-9_]*$/);
+        expect(headingKeyFromLabel(label, new Set())).toMatch(MENU_HEADING_KEY);
       }
     });
   });

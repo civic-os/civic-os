@@ -58,13 +58,23 @@ export class AdminMenuPage {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private injector = inject(Injector);
 
-  protected readonly isAdmin = computed(() => this.auth.isAdmin());
+  /**
+   * Admins, and roles granted metadata.menu_nodes:update (the database checks the same rule). hasPermission()
+   * reads its cache untracked, so permissionsLoaded() is what re-runs this when the page opens before they load.
+   */
+  protected readonly canManage = computed(() =>
+    this.auth.isAdmin() || (this.auth.permissionsLoaded() && this.auth.hasPermission('metadata.menu_nodes', 'update'))
+  );
 
   loading = signal(true);
   loadError = signal(false);
   saving = signal(false);
   saveError = signal<string | undefined>(undefined);
   saved = signal(false);
+  /** Someone else saved the menu after this draft was loaded: the draft can only be reloaded or kept. */
+  conflict = signal(false);
+  /** The menu version the draft is based on, sent with the save. */
+  private version = signal<string | null>(null);
 
   /** The draft: flattened rows in display order. */
   rows = signal<DraftRow[]>([]);
@@ -103,7 +113,7 @@ export class AdminMenuPage {
 
   constructor() {
     effect(() => {
-      if (this.isAdmin() && !this.loaded) {
+      if (this.canManage() && !this.loaded) {
         this.loaded = true;
         untracked(() => this.load());
       }
@@ -115,8 +125,11 @@ export class AdminMenuPage {
     this.loading.set(true);
     this.loadError.set(false);
     forkJoin([this.menuAdmin.getNodes(), this.schema.getEntitiesForManagement().pipe(take(1))]).subscribe({
-      next: ([nodes, entities]) => {
+      next: ([{ nodes, version }, entities]) => {
         const rows = nodesToRows(nodes);
+        this.version.set(version);
+        this.conflict.set(false);
+        this.saveError.set(undefined);
         this.entities.set(entities);
         this.rows.set(rows);
         this.baseline.set(rows);
@@ -269,24 +282,34 @@ export class AdminMenuPage {
   // ── Save / discard ──────────────────────────────
 
   save(): void {
-    if (!this.dirty() || this.issues().length > 0 || this.saving()) return;
+    if (!this.dirty() || this.issues().length > 0 || this.saving() || this.conflict()) return;
     this.saving.set(true);
     this.saveError.set(undefined);
     this.saved.set(false);
     const rows = this.rows();
-    this.menuAdmin.saveTree(rowsToNodes(rows)).subscribe(result => {
+    this.menuAdmin.saveTree(rowsToNodes(rows), this.version()).subscribe(result => {
       this.saving.set(false);
       if (result.success) {
+        if (result.version !== undefined) this.version.set(result.version);
         this.baseline.set(rows);
         this.saved.set(true);
         this.schema.refreshMenuCache();
         // The save dropped nodes whose table no longer exists (and lifted their children): reload, so
         // the draft shows what was stored rather than what was sent.
         if (result.skipped?.length) this.load(true);
+      } else if (result.conflict) {
+        this.conflict.set(true);
+        this.restoreFocus(() => this.host.nativeElement.querySelector<HTMLElement>('[data-testid="menu-conflict"]'));
       } else {
         this.saveError.set(result.error ?? 'Failed to save the menu');
       }
     });
+  }
+
+  /** After a conflict: load the stored tree, dropping the draft. */
+  reload(): void {
+    this.announcement.set('');
+    this.load();
   }
 
   discard(): void {

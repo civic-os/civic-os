@@ -25,10 +25,30 @@ import type { MenuEntry, MenuNodeRow } from '../model/menu.js';
 /** The slice of an entity the menu needs: the caller's eligible (non-junction) entities. */
 type MenuEntity = Pick<SchemaEntityTable, 'table_name' | 'display_name' | 'sort_order'>;
 
-/** Deepest allowed nesting, the root level being 1. Mirrors the database trigger. */
-const MAX_DEPTH = 3;
+/**
+ * Deepest allowed nesting, the root level being 1. Mirrors the database trigger.
+ *
+ * @consumer app
+ */
+export const MAX_MENU_DEPTH = 3;
 
-const HEADING_KEY = /^[a-z][a-z0-9_]*$/;
+/**
+ * The shape of a heading key, `^[a-z][a-z0-9_]*$`. Mirrors the database trigger.
+ *
+ * @consumer app
+ */
+export const MENU_HEADING_KEY = /^[a-z][a-z0-9_]*$/;
+
+/**
+ * Whether a node of `kind` may sit under a parent of `parentKind` (`null` for
+ * the root): a heading sits at the root or under a heading; an entity node sits
+ * anywhere. Mirrors the database trigger; depth is checked separately.
+ *
+ * @consumer app
+ */
+export function menuPlacementAllowed(kind: MenuNodeRow['node_kind'], parentKind: MenuNodeRow['node_kind'] | null): boolean {
+  return kind !== 'heading' || parentKind === null || parentKind === 'heading';
+}
 
 function codePointCompare(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -239,7 +259,7 @@ export function validateMenuTree(
     seenKeys.add(n.node_key);
 
     if (n.node_kind === 'heading') {
-      if (!HEADING_KEY.test(n.node_key)) add('heading-key', n.node_key);
+      if (!MENU_HEADING_KEY.test(n.node_key)) add('heading-key', n.node_key);
       if (n.display_name == null || n.display_name.trim() === '') add('heading-label', n.node_key);
       if (n.target_key != null) add('heading-target', n.node_key);
     } else {
@@ -255,7 +275,7 @@ export function validateMenuTree(
     if (parentKey != null) {
       const parent = byKey.get(parentKey);
       if (!parent) add('unknown-parent', n.node_key);
-      else if (n.node_kind === 'heading' && parent.node_kind === 'entity') add('parent-kind', n.node_key);
+      else if (!menuPlacementAllowed(n.node_kind, parent.node_kind)) add('parent-kind', n.node_key);
     }
 
     // Depth and cycle: walk up while parents resolve
@@ -273,7 +293,7 @@ export function validateMenuTree(
       cursor = cursor.parent_node_key != null ? byKey.get(cursor.parent_node_key) : undefined;
     }
     if (cyclic) add('cycle', n.node_key);
-    else if (depth > MAX_DEPTH) add('depth', n.node_key);
+    else if (depth > MAX_MENU_DEPTH) add('depth', n.node_key);
   }
   return errors;
 }

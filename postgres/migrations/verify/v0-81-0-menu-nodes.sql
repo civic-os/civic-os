@@ -41,14 +41,50 @@ BEGIN
     RAISE EXCEPTION 'upsert_entity_metadata still takes p_show_in_sidebar';
   END IF;
 
-  IF NOT has_function_privilege('authenticated', 'public.save_menu_tree(jsonb)', 'EXECUTE') THEN
-    RAISE EXCEPTION 'authenticated cannot execute save_menu_tree';
+  -- Checks below hold both right after this change and once later changes are deployed (v0.81.2 makes
+  -- save_menu_tree invoker with a second parameter, gates the view by RLS and grants authenticated
+  -- writes), so they match functions by name and check security properties, not exact shapes.
+  IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE oid::regprocedure::text LIKE 'save_menu_tree(%'
+                 AND pronamespace = 'public'::regnamespace) THEN
+    RAISE EXCEPTION 'public.save_menu_tree is missing';
   END IF;
-  IF has_function_privilege('web_anon', 'public.save_menu_tree(jsonb)', 'EXECUTE') THEN
-    RAISE EXCEPTION 'web_anon must not execute save_menu_tree';
+  IF EXISTS (SELECT 1 FROM pg_proc p WHERE p.proname = 'save_menu_tree' AND p.pronamespace = 'public'::regnamespace
+             AND (NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+                  OR has_function_privilege('web_anon', p.oid, 'EXECUTE')
+                  OR has_function_privilege('public', p.oid, 'EXECUTE'))) THEN
+    RAISE EXCEPTION 'save_menu_tree must be executable by authenticated only (not web_anon, not PUBLIC)';
   END IF;
-  IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = 'public.save_menu_tree(jsonb)'::regprocedure) THEN
-    RAISE EXCEPTION 'save_menu_tree must be SECURITY DEFINER';
+  -- The v0.81.0 signature, while it exists, is the definer one with the admin guard.
+  -- to_regprocedure in both places: a '...'::regprocedure cast is folded at plan time and fails once the
+  -- signature is gone, whatever the IS NOT NULL guard says.
+  IF EXISTS (SELECT 1 FROM pg_proc WHERE oid = to_regprocedure('public.save_menu_tree(jsonb)') AND NOT prosecdef) THEN
+    RAISE EXCEPTION 'save_menu_tree(jsonb) must be SECURITY DEFINER';
+  END IF;
+
+  IF has_table_privilege('web_anon', 'metadata.menu_nodes', 'INSERT,UPDATE,DELETE,TRUNCATE') THEN
+    RAISE EXCEPTION 'web_anon must not write metadata.menu_nodes';
+  END IF;
+  IF NOT has_table_privilege('web_anon', 'metadata.menu_nodes', 'SELECT')
+     OR NOT has_table_privilege('authenticated', 'metadata.menu_nodes', 'SELECT') THEN
+    RAISE EXCEPTION 'metadata.menu_nodes must grant SELECT to web_anon and authenticated';
+  END IF;
+  IF NOT has_table_privilege('web_anon', 'public.schema_menu_nodes', 'SELECT')
+     OR NOT has_table_privilege('authenticated', 'public.schema_menu_nodes', 'SELECT') THEN
+    RAISE EXCEPTION 'public.schema_menu_nodes must grant SELECT to web_anon and authenticated';
+  END IF;
+
+  -- The views this change dropped and recreated around schema_entities kept their grants and options.
+  IF NOT has_table_privilege('web_anon', 'public.schema_entities', 'SELECT')
+     OR NOT has_table_privilege('authenticated', 'public.schema_entities', 'SELECT')
+     OR NOT has_table_privilege('web_anon', 'public.schema_properties', 'SELECT')
+     OR NOT has_table_privilege('authenticated', 'public.schema_properties', 'SELECT')
+     OR NOT has_table_privilege('web_anon', 'public.schema_entity_dependencies', 'SELECT')
+     OR NOT has_table_privilege('authenticated', 'public.schema_entity_dependencies', 'SELECT') THEN
+    RAISE EXCEPTION 'schema_entities, schema_properties and schema_entity_dependencies must grant SELECT to web_anon and authenticated';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_class WHERE oid = 'public.schema_entity_dependencies'::regclass
+                 AND reloptions @> ARRAY['security_invoker=true']) THEN
+    RAISE EXCEPTION 'public.schema_entity_dependencies lost security_invoker';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM public.schema_cache_versions WHERE cache_name = 'menu') THEN

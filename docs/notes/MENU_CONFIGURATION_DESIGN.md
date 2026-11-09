@@ -1,6 +1,6 @@
 # Menu Configuration Design
 
-**Status**: Built (v0.81.0)
+**Status**: Built (v0.81.0); per-caller reads, a menu permission and stale-save rejection added in v0.81.2 (see Amendment)
 **Created**: 2026-11-05
 
 **Related docs**:
@@ -83,13 +83,13 @@ Entity Management lost its sidebar toggle and links here.
 
 ## Write path
 
-`public.save_menu_tree(p_nodes jsonb)` is `SECURITY DEFINER`, admin only (`is_admin()`), `PUBLIC` execute revoked. It rejects non-array input, rejects nodes with an unknown parent or on a cycle before writing, deletes every row, then inserts parents before children (ordered by depth), so the validation trigger sees each node with its real parent. Everything runs in one transaction, so a failed save leaves the old tree. It returns the node count, the skipped keys and the new menu version. An empty array empties the menu, after which every entity shows at the root.
+As built in v0.81.0, `public.save_menu_tree(p_nodes jsonb)` was `SECURITY DEFINER`, admin only (`is_admin()`), `PUBLIC` execute revoked; v0.81.2 changed the signature, security and guard (see Amendment). It rejects non-array input, rejects nodes with an unknown parent or on a cycle before writing, deletes every row, then inserts parents before children (ordered by depth), so the validation trigger sees each node with its real parent. Everything runs in one transaction, so a failed save leaves the old tree. It returns the node count, the skipped keys and the new menu version. An empty array empties the menu, after which every entity shows at the root.
 
 **Dropped targets on save.** The editor sends every row back, including a node whose table was dropped after it was placed; re-inserting it would fail the trigger, so one dropped table would make the menu unsaveable. `save_menu_tree` therefore skips an input entity node when a node with the same key and target is already stored and the target is no longer in `schema_entities`, and gives its children their nearest kept ancestor as parent (the rendering rule). The stored-node condition keeps the trigger strict for everything new: a node first added with a bad target still raises, and so does sending the skipped node again after the save removed it. The trigger itself stays strict for direct inserts. A child lifted past a hidden skipped node is stored hidden, because the sidebar hid that subtree before the table was dropped (`buildMenu` checks `is_hidden` before the target).
 
 **Heading keys and table names share `node_key`.** An entity node's key is its table name, and a heading's key is a slug, so a heading can hold a key that a later table takes. `add_guided_form_step` hides only an *entity* node for its step table and refuses (returns `success = false`) when a heading owns that key, rather than hiding the heading; an editor save that places a new table named like a heading fails on the primary key until the heading is replaced under another key.
 
-`metadata.menu_nodes` itself grants SELECT only (policy: everyone reads). Integrators write it from migrations and init scripts, which run as a database role.
+In v0.81.0 `metadata.menu_nodes` granted SELECT only (policy: everyone reads); v0.81.2 replaced that policy and granted writes to `authenticated` under policies (see Amendment). Integrators write it from migrations and init scripts, which run as a database role.
 
 ## Decisions and tradeoffs
 
@@ -99,9 +99,9 @@ Entity Management lost its sidebar toggle and links here.
 
 **`sort_order` keeps its meaning on `metadata.entities`.** It is the default entity order: Detail related sections, MCP `list_entities`, and the position of unplaced entities. Menu order is a different concern and has its own column. Reusing one column for both would make dragging in the menu editor reorder unrelated screens.
 
-**A definer bridge view.** `schema_menu_nodes` is `SECURITY DEFINER` on purpose and is on the view-security allowlist: the menu is public wayfinding data (anonymous users see a menu), the base table's policy is already "everyone reads", and the view adds translation through `metadata.t()`. It exposes no data the table does not.
+**A definer bridge view (v0.81.0, reversed in v0.81.2).** `schema_menu_nodes` was `SECURITY DEFINER` and on the view-security allowlist, on the reasoning that the menu is public wayfinding data. That was wrong: hidden nodes carry heading labels and the names of tables a caller cannot read (`schema_entities` filters by grants, so those names are otherwise private). See Amendment.
 
-**Whole-tree save.** One RPC call replaces the tree, instead of per-node writes. Reordering touches many `sort_order` values and moves subtrees, and node-by-node edits can pass through states the trigger rejects (for example, a child briefly deeper than three levels). A single transaction avoids partial menus. The cost is no conflict detection: two admins saving concurrently, the last save wins.
+**Whole-tree save.** One RPC call replaces the tree, instead of per-node writes. Reordering touches many `sort_order` values and moves subtrees, and node-by-node edits can pass through states the trigger rejects (for example, a child briefly deeper than three levels). A single transaction avoids partial menus. The cost in v0.81.0 was no conflict detection (the last save won); v0.81.2 adds a version check (see Amendment).
 
 **Depth cap of 3.** A deeper menu is hard to scan in a drawer, and the cap keeps the structure shallow. The cap is enforced in the trigger and mirrored in core, so it can be raised in one place later.
 
@@ -115,9 +115,50 @@ Entity Management lost its sidebar toggle and links here.
 
 **Core owns the rules.** `buildMenu` and `validateMenuTree` live in `@civic-os/core` so the generic app, the editor and future clients interpret the tree the same way. The app holds only binding and presentation.
 
+## Amendment: per-caller reads, menu permission and stale saves (v0.81.2)
+
+Migration `v0-81-2-menu-access` resolves five v0.81.0 follow-ups (#75, #86, #87, #94, #95).
+
+### Reads filtered per caller (#94)
+
+`schema_menu_nodes` was a definer view over a `USING (true)` policy, so an anonymous caller read hidden nodes, heading labels and table names it cannot see in `schema_entities`. The view is now `security_invoker`, and the `menu_nodes_select` policy admits a row when either holds:
+
+- `metadata.can_read_full_menu()`: `is_admin()`, `metadata.menu_nodes:update` or `metadata.translations:update`. Translators need hidden labels because `get_translation_defaults()` is invoker and reads the table. Full readers get stored parents, and `buildMenu` filters their sidebar on the client as before.
+- The node is in `metadata.menu_visible_tree(targets)`, where `targets` is the caller's `schema_entities` table names. The function walks the tree from the roots with the rules of `buildMenu`: a hidden node ends its branch, an entity node outside `targets` is dropped and its effective parent is carried down to its children, and headings left with no kept entity below are dropped. The view returns the effective parent for these callers through a `LEFT JOIN` on the same function. One `buildMenu` rule is not repeated: the app also drops junction tables, which it detects from foreign keys, so a node targeting a junction table the caller can read (or a heading holding only such nodes) still reaches the client and `buildMenu` drops it there. Its label names a table the caller already reads, so the rule stays client-side rather than duplicating junction detection in SQL.
+
+**Why the targets are an argument.** `menu_visible_tree` is `SECURITY DEFINER` so it sees every row. Inside it, `information_schema` (and so `schema_entities`) would check the owner's privileges, not the caller's. The policy computes the list as the caller in an uncorrelated subquery (one evaluation per statement) and passes it in.
+
+**Stubs for hidden entities.** `buildMenu` counts an entity as placed when any row targets it, hidden or not; an entity without a row is listed at the root as unplaced. Dropping every hidden row would therefore show guided-form step tables and entities carried over from `show_in_sidebar = false` to exactly the users who should not see them. So for an entity node inside a hidden subtree whose target is in `targets`, the walk keeps a stub: `node_key`, `node_kind`, `target_key`, `is_hidden = true`, every other column NULL. The stub names a table the caller already reads in `schema_entities`, so it leaks nothing. Hidden headings and hidden entity nodes outside `targets` are still dropped. `v0-81-2-menu-access-test.sh` checks, for each non-full caller, that `buildMenu` over the filtered rows equals `buildMenu` over all rows with that caller's entities.
+
+### Menu permission
+
+`metadata.menu_nodes:update` is seeded and mapped to admin, as `metadata.instance_config:update` is in v0.79.0. `metadata.can_manage_menu()` is `is_admin() OR has_permission('metadata.menu_nodes', 'update')`: the explicit `is_admin()` is the escape valve of `docs/development/PERMISSIONS_MODEL.md`, since `has_permission()` has no admin bypass. The insert, update and delete policies (`TO authenticated`) use it, and `authenticated` holds the table grants they need; `metadata` is not exposed by PostgREST, so those grants are reachable only from invoker SQL. The frontend gates the page and the Admin link with the same expression.
+
+### Invoker save, version check and lock (#86)
+
+`save_menu_tree(p_nodes jsonb, p_expected_version timestamptz DEFAULT NULL)` replaces the one-argument signature, which is dropped so PostgREST resolves one function. It is `SECURITY INVOKER`, so the write policies gate it; an up-front `can_manage_menu()` check gives a clear `42501`. It takes `pg_advisory_xact_lock(hashtext('civic_os.menu_tree'))` first, so concurrent saves queue instead of failing on the primary key, and then compares `p_expected_version` with `metadata.menu_version.changed_at` (granted SELECT to `authenticated` only, since anonymous callers never save). A mismatch raises `PT409` with a hint naming the stored version, which PostgREST returns as HTTP 409. `NULL` skips the check, for scripts and for a browser still running the previous app during a deploy.
+
+The editor reads the `menu` row of `schema_cache_versions` before the nodes, so a save between the two reads can only cause a needless conflict, never a missed one. The service maps only `code === 'PT409'` to a conflict: PostgREST also answers 409 for unique and foreign key violations, which stay errors. On conflict the page shows a `role="alert"` message, moves focus to it, disables Save (a retry with the same version can only conflict again) and offers Reload beside Discard.
+
+### Target eligibility without `schema_entities` (#95)
+
+The validation trigger and the save evaluated `schema_entities` once per node. `metadata.menu_target_eligible(name)` applies the same eligibility rule (a public table, or a registered public view that is not `schema_%` or one of the excluded views) as index lookups on `pg_class` and `metadata.entities`, without privileges, as the definer paths always did. Because it restates the rule, `v0-81-2-menu-access-test.sh` compares it with superuser `schema_entities` for every relation in `public`, fixture views, a materialized view and a partitioned table included; a change to either side fails that test.
+
+Making the save invoker exposed two more costs. Every per-node `INSERT` evaluated the insert policy, and every read inside the trigger applied the select policy (193 policy checks in a 100-node save). So `menu_nodes_validate()` became `SECURITY DEFINER` (its parent, depth and cycle checks must see every row anyway, whoever writes), and the save inserts the tree in one `INSERT ... SELECT ... ORDER BY depth`: `BEFORE ROW` triggers see the rows the same statement inserted earlier, and the parent foreign key is checked at the end of the statement. A 100-node save on neighborhood-hub went from a median of 138 to 208 ms (v0.81.1, two runs) to 88 to 114 ms, with 4 policy checks.
+
+### Placement rules exported from core (#75)
+
+`@civic-os/core` exports `MAX_MENU_DEPTH`, `MENU_HEADING_KEY` and `menuPlacementAllowed(kind, parentKind)`, which `validateMenuTree` uses; the editor's tree operations call them instead of keeping copies.
+
+### Verify scripts (#87)
+
+`verify/v0-81-0-menu-nodes.sql` now checks grants, but only properties that hold both right after v0.81.0 and once v0.81.2 is deployed, because `sqitch verify` runs every script against the current state. Functions are matched by name and checked for security properties, and a signature that may be gone is looked up with `to_regprocedure()`: a `'...'::regprocedure` literal is folded at plan time and fails even behind an existence guard.
+
 ## Revert
 
 The revert script restores `metadata.entities.show_in_sidebar` and the previous `schema_entities`, dependents, `upsert_entity_metadata` (17 parameters), `add_guided_form_step`, `schema_cache_versions` and `get_translation_defaults`, then drops the menu objects. It is lossy by design. Every eligible entity (those with a node and the unplaced ones that follow the root nodes) gets `sort_order = rank * 10`, where rank is its position in the depth-first menu order (a hidden root entity node has no place in the menu, so it ranks with the unplaced entities by its entity `sort_order`, keeping the general entity order), and `show_in_sidebar = FALSE` when its node or any ancestor is hidden. Entities without a `metadata.entities` row get one. Headings, nesting, labels, icons, collapsed flags and menu translations are lost; export `schema_menu_nodes` first.
+
+Reverting v0.81.2 (`sqitch revert --to v0-81-1-instance-config-translation-defaults`) restores the v0.81.0 select policy, definer view, trigger function and `save_menu_tree(jsonb)`, and drops the new functions, policies, grants and permission rows. Menu data is untouched.
 
 ## Out of scope and future
 
@@ -125,5 +166,4 @@ The revert script restores `metadata.entities.show_in_sidebar` and the previous 
 - **Dashboards in the menu.** Not designed.
 - **Per-role menus.** One tree for everyone; hiding is global. Role-specific visibility would need its own model (compare dashboard role visibility).
 - **MCP grouping hint.** Not done.
-- **Conflict detection on save.** A version check against `menu_version` could reject a stale save.
 - **Plural names.** Set a node label per entity; there is no automatic pluralization.

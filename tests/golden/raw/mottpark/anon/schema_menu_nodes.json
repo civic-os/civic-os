@@ -12,18 +12,6 @@
     "target_key": "holiday_rules"
   },
   {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
-    "node_key": "manager_events",
-    "node_kind": "entity",
-    "parent_node_key": "managers",
-    "sort_order": 10,
-    "target_key": "manager_events"
-  },
-  {
     "base_display_name": "Managers",
     "collapsed_by_default": true,
     "display_name": "Managers",
@@ -46,18 +34,6 @@
     "parent_node_key": "reservations",
     "sort_order": 20,
     "target_key": "public_calendar_events"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
-    "node_key": "reservation_payments",
-    "node_kind": "entity",
-    "parent_node_key": "reservation_requests",
-    "sort_order": 10,
-    "target_key": "reservation_payments"
   },
   {
     "base_display_name": null,

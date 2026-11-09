@@ -1,17 +1,5 @@
 [
   {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
-    "node_key": "borrowers",
-    "node_kind": "entity",
-    "parent_node_key": "tool_lending",
-    "sort_order": 20,
-    "target_key": "borrowers"
-  },
-  {
     "base_display_name": "Building Use",
     "collapsed_by_default": false,
     "display_name": "Building Use",
@@ -65,35 +53,11 @@
     "display_name": null,
     "icon": null,
     "is_hidden": false,
-    "node_key": "building_use_rooms",
-    "node_kind": "entity",
-    "parent_node_key": "building_use",
-    "sort_order": 20,
-    "target_key": "building_use_rooms"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
     "node_key": "census_block_groups",
     "node_kind": "entity",
     "parent_node_key": "community_data",
     "sort_order": 30,
     "target_key": "census_block_groups"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": true,
-    "node_key": "checkout_items",
-    "node_kind": "entity",
-    "parent_node_key": null,
-    "sort_order": null,
-    "target_key": "checkout_items"
   },
   {
     "base_display_name": "Community Data",
@@ -130,18 +94,6 @@
     "parent_node_key": null,
     "sort_order": 20,
     "target_key": null
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": true,
-    "node_key": "mek_checkout_items",
-    "node_kind": "entity",
-    "parent_node_key": null,
-    "sort_order": null,
-    "target_key": "mek_checkout_items"
   },
   {
     "base_display_name": null,
@@ -204,42 +156,6 @@
     "target_key": "parcels"
   },
   {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": true,
-    "node_key": "project_parcels",
-    "node_kind": "entity",
-    "parent_node_key": null,
-    "sort_order": null,
-    "target_key": "project_parcels"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
-    "node_key": "projects",
-    "node_kind": "entity",
-    "parent_node_key": "community_data",
-    "sort_order": 10,
-    "target_key": "projects"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
-    "node_key": "tool_instances",
-    "node_kind": "entity",
-    "parent_node_key": "tool_types",
-    "sort_order": 10,
-    "target_key": "tool_instances"
-  },
-  {
     "base_display_name": "Tool Lending",
     "collapsed_by_default": false,
     "display_name": "Tool Lending",
@@ -250,18 +166,6 @@
     "parent_node_key": null,
     "sort_order": 10,
     "target_key": null
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": true,
-    "node_key": "tool_reservation_checkouts",
-    "node_kind": "entity",
-    "parent_node_key": null,
-    "sort_order": null,
-    "target_key": "tool_reservation_checkouts"
   },
   {
     "base_display_name": null,
@@ -284,7 +188,7 @@
     "node_key": "tool_reservation_tools",
     "node_kind": "entity",
     "parent_node_key": null,
-    "sort_order": 5,
+    "sort_order": null,
     "target_key": "tool_reservation_tools"
   },
   {
@@ -296,7 +200,7 @@
     "node_key": "tool_reservation_work_site",
     "node_kind": "entity",
     "parent_node_key": null,
-    "sort_order": 5,
+    "sort_order": null,
     "target_key": "tool_reservation_work_site"
   },
   {
@@ -322,18 +226,6 @@
     "parent_node_key": "inventory",
     "sort_order": 10,
     "target_key": "tool_types"
-  },
-  {
-    "base_display_name": null,
-    "collapsed_by_default": false,
-    "display_name": null,
-    "icon": null,
-    "is_hidden": false,
-    "node_key": "training_records",
-    "node_kind": "entity",
-    "parent_node_key": "tool_lending",
-    "sort_order": 30,
-    "target_key": "training_records"
   },
   {
     "base_display_name": null,
