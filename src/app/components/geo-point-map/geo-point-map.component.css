@@ -45,9 +45,9 @@
   border-color: rgba(0, 0, 0, 0.3);
 }
 
-/* "Use map center" target. Hidden until the map has keyboard focus (a mouse click
-   focuses the container too, but does not match :focus-visible) or the button is
-   hovered or focused. A sibling above the map's stacking context, so it draws over
+/* "Use map center" target. Hidden until the map has keyboard focus (.keyboard-focus,
+   set by the component, since Leaflet's script focus on mousedown can match
+   :focus-visible after a click) or the button is hovered or focused. A sibling above the map's stacking context, so it draws over
    tiles and markers; it is small and centered, clear of the corner controls, and
    ignores the pointer. Centered with inset and auto margins, so it needs no physical
    direction and stays centered in RTL. */
@@ -64,7 +64,7 @@
   stroke-linecap: round;
 }
 
-.map-frame:has(.leaflet-container:focus-visible) .map-crosshair,
+.map-frame.keyboard-focus .map-crosshair,
 .map-wrapper:has(.use-center-btn:is(:hover, :focus-visible)) .map-crosshair {
   display: block;
 }

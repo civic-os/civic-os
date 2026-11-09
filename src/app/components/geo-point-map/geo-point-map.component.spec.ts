@@ -1434,6 +1434,61 @@ describe('GeoPointMapComponent Use map center', () => {
 
             expect(values).toEqual([]);
         });
+
+        // initializeMap is stubbed here, so the specs attach the focus tracking to the
+        // test map's container themselves.
+        describe('crosshair on keyboard focus', () => {
+            let container: HTMLElement;
+
+            function frameShowsCrosshair(): boolean {
+                fixture.detectChanges();
+                return query('.map-frame')!.classList.contains('keyboard-focus');
+            }
+
+            beforeEach(() => {
+                container = component['map']!.getContainer();
+                container.tabIndex = 0;
+                component['trackKeyboardFocus'](container);
+            });
+
+            it('shows when the map gets focus from the keyboard', () => {
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            it('stays hidden when a pointer press gives the map focus', () => {
+                container.dispatchEvent(new Event('pointerdown'));
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('shows once a key is pressed on a map focused by a click', () => {
+                container.dispatchEvent(new Event('pointerdown'));
+                container.focus();
+                container.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            it('hides again on a pointer press while focused', () => {
+                container.focus();
+                container.dispatchEvent(new Event('pointerdown'));
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('hides when the map loses focus', () => {
+                container.focus();
+                container.blur();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('treats the next keyboard focus as keyboard after a click and blur', () => {
+                container.dispatchEvent(new Event('pointerdown'));
+                container.focus();
+                container.blur();
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+        });
     });
 
     describe('in display mode', () => {

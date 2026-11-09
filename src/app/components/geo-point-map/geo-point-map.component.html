@@ -1,6 +1,7 @@
 <div class="map-wrapper not-prose">
   <!-- The frame carries the map's width so the crosshair centers on the map. -->
   <div class="map-frame"
+       [class.keyboard-focus]="mapKeyboardFocus()"
        [style.width]="width()"
        [style.max-width]="maxWidth() || null">
     <!-- On the edit map, Leaflet's keyboard handler makes the container a tab stop;
@@ -16,7 +17,7 @@
 
     @if (mode() === 'edit') {
       <!-- Marks the point "Use map center" will set. Shown while the map has keyboard
-           focus or the button is hovered or focused (see the CSS). -->
+           focus (mapKeyboardFocus) or the button is hovered or focused (see the CSS). -->
       <svg class="map-crosshair" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
         <path class="map-crosshair-halo" d="M16 2v10M16 20v10M2 16h10M20 16h10" />
         <path class="map-crosshair-line" d="M16 2v10M16 20v10M2 16h10M20 16h10" />

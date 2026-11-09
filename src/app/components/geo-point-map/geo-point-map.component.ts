@@ -93,6 +93,9 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
 
   // Spoken confirmation after "Use map center", read by the sr-only role="status" region
   public locationAnnouncement = signal<string>('');
+  // True while the edit map has focus from the keyboard; shows the center crosshair
+  public mapKeyboardFocus = signal(false);
+  private focusFromPointer = false;
   private announcementTimer?: number;
 
   private themeService = inject(ThemeService);
@@ -279,6 +282,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       this.map.on('click', (e: L.LeafletMouseEvent) => {
         this.setLocation(e.latlng.lat, e.latlng.lng);
       });
+      this.trackKeyboardFocus(this.map.getContainer());
     }
 
     // Initialize multi-marker mode if markers are present
@@ -355,6 +359,33 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
         });
       }
     }
+  }
+
+  /**
+   * Keeps `mapKeyboardFocus` true while the edit map has focus from the keyboard, so the
+   * crosshair shows for keyboard users and not after a click. `:focus-visible` can't tell
+   * the two apart here: Leaflet focuses the container from script on mousedown, and
+   * Chrome matches script focus as focus-visible depending on what had focus before. A
+   * pointer press marks the focus that follows as a pointer focus. Any key pressed on the
+   * map then counts as keyboard use, so a user who clicks and then pans with the arrows
+   * sees the crosshair too.
+   */
+  private trackKeyboardFocus(container: HTMLElement): void {
+    L.DomEvent.on(container, 'pointerdown', () => {
+      this.focusFromPointer = true;
+      this.mapKeyboardFocus.set(false);
+    });
+    L.DomEvent.on(container, 'focus', () => {
+      this.mapKeyboardFocus.set(!this.focusFromPointer);
+      this.focusFromPointer = false;
+    });
+    L.DomEvent.on(container, 'keydown', (e) => {
+      if (e.target === container) this.mapKeyboardFocus.set(true);
+    });
+    L.DomEvent.on(container, 'blur', () => {
+      this.focusFromPointer = false;
+      this.mapKeyboardFocus.set(false);
+    });
   }
 
   // ============= Accessible Names =============
