@@ -167,6 +167,7 @@ Signal-based service following the `ThemeService` pattern:
 - Caches in `Map<string, string>` per locale
 - `get(key, params?)` — lookup with `{{param}}` interpolation
 - `version: Signal<number>` — increments on each fetch to trigger pipe re-evaluation
+- Strings written outside a template (DOM attributes, third-party library options, such as Leaflet marker and cluster names) must be re-applied in an `effect()` that reads `version()`, not `locale()`: `version` moves only once the new locale's strings have loaded, while `locale` moves before. `GeoPointMapComponent.relabelMarkers()` is the reference (v0.81.4)
 
 ### TranslatePipe (`src/app/pipes/translate.pipe.ts`)
 

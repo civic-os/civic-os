@@ -461,11 +461,15 @@ Leaflet's default marker (`keyboard: true`) is an `img` with `role="button"`, `t
 | Edit | Create and Edit pages | `draggable: true`, `keyboard: false` | `alt` and `title` = `a11y.map_drag_marker` ("Drag to set location") | Not a tab stop; drag is pointer-only |
 | List | List page map (`show_map`) | `keyboard: true` (default) | `aria-label` = record name (`a11y.unnamed_map_marker` fallback), set on every `add` | Enter fires click and selects the record |
 
-**Edit marker.** Dragging is mouse and touch only. The keyboard path is the coordinate inputs and Use My Location (WCAG 2.1.1). Click-to-place is the single-pointer alternative to dragging (2.5.7). A focusable marker that ignores Enter would be an empty tab stop, so it has none.
+**Edit marker.** Dragging is mouse and touch only. The keyboard paths are Use map center, the coordinate inputs and Use My Location (WCAG 2.1.1). Click-to-place is the single-pointer alternative to dragging (2.5.7). A focusable marker that ignores Enter would be an empty tab stop, so it has none.
+
+**Use map center (v0.81.4, issue #99).** The coordinate inputs meet 2.1.1, but few residents know their coordinates. So the edit map is the tab stop instead of the marker: Leaflet's `keyboard: true` pans with the arrow keys and zooms with plus and minus, and the container is a `role="region"` named by `a11y.map_keyboard_instructions`, which says so. A centered, `aria-hidden` crosshair shows while the container matches `:focus-visible` (a mouse click focuses it too, but does not match) or while the button is hovered or focused, so mouse users see it only when it means something. The button calls `setLocation()` with `map.wrapLatLng(map.getCenter())`, the path a click takes, and an `sr-only` `role="status"` region speaks `a11y.map_location_set`. Pressing twice without panning produces the same text, which screen readers skip, so the region is emptied and refilled 100 ms later.
+
+**Labels follow the language (v0.81.4, issue #98).** Marker and cluster names are written imperatively (Leaflet options and attributes, cluster icons), outside any template, so the translate pipe never re-runs them. An effect on `translationService.version()` and `entityDisplayName()` re-translates them in place: the single marker's `alt`/`title`, each list marker's `alt`/`title`/`aria-label` and tooltip, and every cluster icon through `refreshClusters()`. The options change too, since Leaflet reads them again on a cluster re-add or `setIcon()`. Record names are data and stay as they are.
 
 **List markers.** Leaflet creates the icon element when a marker is added, and a cluster group adds and removes markers as they scroll into view, so the `aria-label` is set in an `add` handler, not once. `setIcon()` reuses the element, so highlighting keeps the label.
 
-**New marker kinds** follow the same rule. If a marker does something on Enter, keep `keyboard: true` and give it an `aria-label`. If it doesn't, set `keyboard: false` and name it with `alt`. Translate the name (`a11y.` keys; non-English strings are seeded by a core migration, as `v0-81-1-map-marker-translations` does).
+**New marker kinds** follow the same rule. If a marker does something on Enter, keep `keyboard: true` and give it an `aria-label`. If it doesn't, set `keyboard: false` and name it with `alt`. Translate the name (`a11y.` keys; non-English strings are seeded by a core migration, as `v0-81-1-map-marker-translations` does), and set it through the component's label helpers so `relabelMarkers()` re-translates it.
 
 ---
 

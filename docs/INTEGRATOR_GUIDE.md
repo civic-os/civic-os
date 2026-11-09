@@ -1396,6 +1396,10 @@ Polygon colors are resolved from a Category column on the same entity. The `reso
 
 **Accessibility (coordinate entry fallback)**: Both geo types provide a keyboard-accessible alternative to mouse interaction on Create/Edit forms. GeoPoint renders labeled decimal Latitude/Longitude inputs below the map, two-way synced with the marker. GeoPolygon offers a collapsible "Edit coordinates" textarea (one `lat, lng` pair per line, ring auto-closed, validated on Apply) synced with the drawn polygon.
 
+**Accessibility (Use map center, v0.81.4)**: The GeoPoint picker also has a keyboard path that needs no coordinates. The edit map is a tab stop whose name says the arrow keys pan it and plus and minus zoom. While it has keyboard focus, a crosshair marks its center. The "Use map center" button next to "Use my location" places the marker there, fills the Latitude/Longitude inputs, and a screen reader announces "Location set to <lat>, <lng>". Hovering or focusing the button also shows the crosshair. Nothing needs configuring: the value is the same EWKT a click or drag produces.
+
+Map marker and cluster names (the unnamed-marker fallback, "15 Issues", "Drag to set location") follow a language switch in place, without reloading the map (v0.81.4).
+
 **Data Format (GeoPoint)**:
 - Insert/Update: EWKT `"SRID=4326;POINT(lng lat)"`
 - Read: WKT `"POINT(lng lat)"` (via computed field)
