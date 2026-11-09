@@ -95,7 +95,10 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   public locationAnnouncement = signal<string>('');
   // True while the edit map has focus from the keyboard; shows the center crosshair
   public mapKeyboardFocus = signal(false);
-  private focusFromPointer = false;
+  // The page's last input: a key press (true) or a pointer press (false)
+  private lastInputWasKeyboard = false;
+  private readonly onDocumentKeydown = () => { this.lastInputWasKeyboard = true; };
+  private readonly onDocumentPointerdown = () => { this.lastInputWasKeyboard = false; };
   private announcementTimer?: number;
 
   private themeService = inject(ThemeService);
@@ -165,6 +168,11 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     // Cancel pending animations to prevent errors when destroying during tests
     this.pendingAnimations.forEach(id => clearTimeout(id));
     this.pendingAnimations = [];
+    if (this.announcementTimer !== undefined) {
+      clearTimeout(this.announcementTimer);
+    }
+    document.removeEventListener('keydown', this.onDocumentKeydown, true);
+    document.removeEventListener('pointerdown', this.onDocumentPointerdown, true);
 
     // Cancel pending animation frames to prevent errors when destroying during tests
     this.pendingFrames.forEach(id => cancelAnimationFrame(id));
@@ -365,27 +373,28 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
    * Keeps `mapKeyboardFocus` true while the edit map has focus from the keyboard, so the
    * crosshair shows for keyboard users and not after a click. `:focus-visible` can't tell
    * the two apart here: Leaflet focuses the container from script on mousedown, and
-   * Chrome matches script focus as focus-visible depending on what had focus before. A
-   * pointer press marks the focus that follows as a pointer focus. Any key pressed on the
-   * map then counts as keyboard use, so a user who clicks and then pans with the arrows
-   * sees the crosshair too.
+   * Chrome matches script focus as focus-visible depending on what had focus before. The
+   * zoom buttons also refocus the map from script on click.
+   *
+   * So a focus counts as keyboard focus when the page's last input was a key press, as the
+   * focus-visible polyfill decides. The document listeners run in the capture phase, so
+   * Leaflet's stopPropagation on controls and markers can't hide a press from them, and a
+   * window refocus keeps the modality it had. A key pressed on the map, other than Tab or
+   * a modifier, then counts as keyboard use, so a user who clicks and then pans with the
+   * arrows sees the crosshair.
    */
   private trackKeyboardFocus(container: HTMLElement): void {
-    L.DomEvent.on(container, 'pointerdown', () => {
-      this.focusFromPointer = true;
-      this.mapKeyboardFocus.set(false);
-    });
-    L.DomEvent.on(container, 'focus', () => {
-      this.mapKeyboardFocus.set(!this.focusFromPointer);
-      this.focusFromPointer = false;
-    });
+    document.addEventListener('keydown', this.onDocumentKeydown, true);
+    document.addEventListener('pointerdown', this.onDocumentPointerdown, true);
+    L.DomEvent.on(container, 'pointerdown', () => this.mapKeyboardFocus.set(false));
+    L.DomEvent.on(container, 'focus', () => this.mapKeyboardFocus.set(this.lastInputWasKeyboard));
     L.DomEvent.on(container, 'keydown', (e) => {
-      if (e.target === container) this.mapKeyboardFocus.set(true);
+      const key = (e as KeyboardEvent).key;
+      if (e.target === container && !GeoPointMapComponent.NON_NAVIGATION_KEYS.has(key)) {
+        this.mapKeyboardFocus.set(true);
+      }
     });
-    L.DomEvent.on(container, 'blur', () => {
-      this.focusFromPointer = false;
-      this.mapKeyboardFocus.set(false);
-    });
+    L.DomEvent.on(container, 'blur', () => this.mapKeyboardFocus.set(false));
   }
 
   // ============= Accessible Names =============
@@ -438,13 +447,20 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       marker.setTooltipContent(label);
     });
 
-    // Runs iconCreateFunction (buildClusterIcon) again for every cluster.
-    this.markerClusterGroup?.refreshClusters();
+    // Runs iconCreateFunction (buildClusterIcon) again for every visible cluster. A group
+    // not on the map has no cluster tree yet (built in onAdd), and builds its icons later.
+    if (this.markerClusterGroup && this.map.hasLayer(this.markerClusterGroup)) {
+      this.markerClusterGroup.refreshClusters();
+    }
   }
 
   private setLocation(lat: number, lng: number) {
     this.currentLat = lat;
     this.currentLng = lng;
+
+    // A click, drag or typed coordinates make "Location set to …" stale; useMapCenter()
+    // announces again after this returns.
+    this.clearAnnouncement();
 
     // Keep the coordinate fallback inputs in sync (map click, marker drag,
     // Use My Location) — but not while the change originated from the inputs,
@@ -512,19 +528,27 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
    * so the region is emptied first and filled again a moment later.
    */
   private announce(message: string): void {
-    if (this.announcementTimer !== undefined) {
-      clearTimeout(this.announcementTimer);
-    }
-    this.locationAnnouncement.set('');
+    this.clearAnnouncement();
     this.announcementTimer = window.setTimeout(() => {
       this.announcementTimer = undefined;
       this.locationAnnouncement.set(message);
     }, GeoPointMapComponent.ANNOUNCE_DELAY_MS);
-    this.pendingAnimations.push(this.announcementTimer);
+  }
+
+  /** Empties the status region and drops a pending announcement. */
+  private clearAnnouncement(): void {
+    if (this.announcementTimer !== undefined) {
+      clearTimeout(this.announcementTimer);
+      this.announcementTimer = undefined;
+    }
+    this.locationAnnouncement.set('');
   }
 
   /** Delay between emptying and refilling the status region, long enough for screen readers. */
   private static readonly ANNOUNCE_DELAY_MS = 100;
+
+  /** Keys that leave the map or only modify, so they are not keyboard use of the map. */
+  private static readonly NON_NAVIGATION_KEYS = new Set(['Tab', 'Shift', 'Control', 'Alt', 'Meta']);
 
   /** Rounds to 6 decimals, the precision of the coordinate inputs (about 0.1 m). */
   private roundCoordinate(value: number): number {

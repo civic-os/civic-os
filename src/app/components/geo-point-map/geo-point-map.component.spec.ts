@@ -1266,6 +1266,13 @@ describe('GeoPointMapComponent live locale switch', () => {
             expect((icon.options.html as HTMLElement).getAttribute('aria-label')).toBe('3 Problemas');
         });
 
+        // refreshClusters() reads _topClusterLevel, which the group builds only in onAdd.
+        it('skips the cluster refresh for a group not on the map', () => {
+            component['markerClusterGroup'] = (L as any).markerClusterGroup();
+
+            expect(() => switchLocale('es')).not.toThrow();
+        });
+
         it('labels a cluster in the new language', () => {
             fixture.componentRef.setInput('entityDisplayName', '');
             switchLocale('es');
@@ -1393,6 +1400,27 @@ describe('GeoPointMapComponent Use map center', () => {
             expect(statusText()).toBe('Location set to 44, -84');
         });
 
+        it('clears the announcement when the location then changes another way', async () => {
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            await advanceTime(100);
+
+            component['setLocation'](44, -84);
+            await advanceTime(100);
+
+            expect(statusText()).toBe('');
+        });
+
+        it('keeps no finished announcement timers', async () => {
+            const before = component['pendingAnimations'].length;
+            centerOn(43.0125, -83.6875);
+            component.useMapCenter();
+            component.useMapCenter();
+            await advanceTime(100);
+
+            expect(component['pendingAnimations'].length).toBe(before);
+        });
+
         it('drops a pending announcement when the map is destroyed', async () => {
             centerOn(43.0125, -83.6875);
             component.useMapCenter();
@@ -1451,42 +1479,99 @@ describe('GeoPointMapComponent Use map center', () => {
                 component['trackKeyboardFocus'](container);
             });
 
+            // A browser dispatches a key or pointer press through the document before
+            // its target; these helpers do the same.
+            function pressKey(key: string, target: EventTarget = document.body): void {
+                target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+            }
+
+            function pointerPress(target: EventTarget = container): void {
+                target.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+            }
+
             it('shows when the map gets focus from the keyboard', () => {
+                pressKey('Tab');
                 container.focus();
                 expect(frameShowsCrosshair()).toBe(true);
             });
 
             it('stays hidden when a pointer press gives the map focus', () => {
-                container.dispatchEvent(new Event('pointerdown'));
+                pointerPress();
                 container.focus();
                 expect(frameShowsCrosshair()).toBe(false);
             });
 
             it('shows once a key is pressed on a map focused by a click', () => {
-                container.dispatchEvent(new Event('pointerdown'));
+                pointerPress();
                 container.focus();
-                container.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+                pressKey('ArrowRight', container);
                 expect(frameShowsCrosshair()).toBe(true);
             });
 
-            it('hides again on a pointer press while focused', () => {
+            it('does not count Tab or a modifier key on the map as keyboard use', () => {
+                pointerPress();
                 container.focus();
-                container.dispatchEvent(new Event('pointerdown'));
+                for (const key of ['Tab', 'Shift', 'Control', 'Alt', 'Meta']) {
+                    pressKey(key, container);
+                }
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('hides again on a pointer press while focused', () => {
+                pressKey('Tab');
+                container.focus();
+                pointerPress();
                 expect(frameShowsCrosshair()).toBe(false);
             });
 
             it('hides when the map loses focus', () => {
+                pressKey('Tab');
                 container.focus();
                 container.blur();
                 expect(frameShowsCrosshair()).toBe(false);
             });
 
             it('treats the next keyboard focus as keyboard after a click and blur', () => {
-                container.dispatchEvent(new Event('pointerdown'));
+                pointerPress();
+                container.focus();
+                container.blur();
+                pressKey('Tab');
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            // Leaflet's zoom buttons stop the press from reaching the map, then focus the
+            // map from script on click.
+            it('stays hidden when a zoom button click refocuses the map', () => {
+                const zoomButton = document.createElement('a');
+                container.appendChild(zoomButton);
+                L.DomEvent.disableClickPropagation(zoomButton);
+                pointerPress(zoomButton);
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('shows when a keyboard user returns to the map after a zoom button click', () => {
+                const zoomButton = document.createElement('a');
+                container.appendChild(zoomButton);
+                pointerPress(zoomButton);
+                pressKey('Tab');
+                container.focus();
+                expect(frameShowsCrosshair()).toBe(true);
+            });
+
+            it('stays hidden when the window refocuses a map focused by a click', () => {
+                pointerPress();
                 container.focus();
                 container.blur();
                 container.focus();
-                expect(frameShowsCrosshair()).toBe(true);
+                expect(frameShowsCrosshair()).toBe(false);
+            });
+
+            it('stops listening to the document when destroyed', () => {
+                fixture.destroy();
+                pressKey('Tab');
+                expect(component['lastInputWasKeyboard']).toBe(false);
             });
         });
     });
