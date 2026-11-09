@@ -1445,11 +1445,16 @@ describe('GeoPointMapComponent Use map center', () => {
             expect(spy).toHaveBeenCalled();
         });
 
-        it('names the map a region that says the arrow keys pan it', () => {
+        // A short name keeps landmark menus readable; the description is read on focus.
+        it('names the map a region and describes how the arrow keys pan it', () => {
             const map = query<HTMLElement>(`#${component.mapId}`)!;
             expect(map.getAttribute('role')).toBe('region');
-            expect(map.getAttribute('aria-label'))
-                .toBe('Location map. Use the arrow keys to move the map, plus and minus to zoom.');
+            expect(map.getAttribute('aria-label')).toBe('Location map');
+
+            const description = query<HTMLElement>(`#${map.getAttribute('aria-describedby')}`)!;
+            expect(description.textContent!.trim())
+                .toBe('Use the arrow keys to move the map, plus and minus to zoom.');
+            expect(map.contains(description)).toBe(false);
         });
 
         it('does nothing before the map exists', () => {
@@ -1587,6 +1592,8 @@ describe('GeoPointMapComponent Use map center', () => {
             const map = query<HTMLElement>(`#${component.mapId}`)!;
             expect(map.hasAttribute('role')).toBe(false);
             expect(map.hasAttribute('aria-label')).toBe(false);
+            expect(map.hasAttribute('aria-describedby')).toBe(false);
+            expect(query(`#${component.mapId}-instructions`)).toBeNull();
         });
     });
 });

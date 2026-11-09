@@ -4,14 +4,16 @@
        [class.keyboard-focus]="mapKeyboardFocus()"
        [style.width]="width()"
        [style.max-width]="maxWidth() || null">
-    <!-- On the edit map, Leaflet's keyboard handler makes the container a tab stop;
-         the region name tells keyboard users that the arrow keys pan it. -->
+    <!-- On the edit map, Leaflet's keyboard handler makes the container a tab stop. The
+         region gets a short name for landmark menus, and a description, read on focus,
+         that tells keyboard users the arrow keys pan it. -->
     <div [id]="mapId"
          class="leaflet-map"
          [class.display-mode]="mode() === 'display'"
          [class.edit-mode]="mode() === 'edit'"
          [attr.role]="mode() === 'edit' ? 'region' : null"
-         [attr.aria-label]="mode() === 'edit' ? ('a11y.map_keyboard_instructions' | translate) : null"
+         [attr.aria-label]="mode() === 'edit' ? ('a11y.location_map' | translate) : null"
+         [attr.aria-describedby]="mode() === 'edit' ? mapId + '-instructions' : null"
          [style.height]="height()">
     </div>
 
@@ -50,6 +52,7 @@
       </button>
     </div>
     <div class="sr-only" role="status">{{ locationAnnouncement() }}</div>
+    <span class="sr-only" [id]="mapId + '-instructions'">{{ 'a11y.map_keyboard_instructions' | translate }}</span>
 
     <!-- Keyboard-accessible coordinate fallback (a11y decision D4): typing valid
          decimal coordinates places the marker via the same path as a map click -->

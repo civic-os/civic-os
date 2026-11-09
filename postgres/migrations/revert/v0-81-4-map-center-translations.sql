@@ -20,12 +20,18 @@ USING (VALUES
   ('a11y.map_location_set', 'de', 'Standort auf {{lat}}, {{lng}} gesetzt'),
   ('a11y.map_location_set', 'ar', 'تم تحديد الموقع عند {{lat}}، {{lng}}'),
   ('a11y.map_location_set', 'ps', 'موقعیت په {{lat}}، {{lng}} وټاکل شو'),
-  ('a11y.map_keyboard_instructions', 'en', 'Location map. Use the arrow keys to move the map, plus and minus to zoom.'),
-  ('a11y.map_keyboard_instructions', 'es', 'Mapa de ubicación. Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar.'),
-  ('a11y.map_keyboard_instructions', 'fr', 'Carte de l''emplacement. Utilisez les flèches pour déplacer la carte, plus et moins pour zoomer.'),
-  ('a11y.map_keyboard_instructions', 'de', 'Standortkarte. Mit den Pfeiltasten verschieben Sie die Karte, mit Plus und Minus zoomen Sie.'),
-  ('a11y.map_keyboard_instructions', 'ar', 'خريطة الموقع. استخدم مفاتيح الأسهم لتحريك الخريطة، ومفتاحي الزائد والناقص للتكبير والتصغير.'),
-  ('a11y.map_keyboard_instructions', 'ps', 'د موقعیت نقشه. د نقشې د خوځولو لپاره د غشو تڼۍ، او د لوییدو او کوچنیدو لپاره جمع او منفي وکاروئ.')
+  ('a11y.location_map', 'en', 'Location map'),
+  ('a11y.location_map', 'es', 'Mapa de ubicación'),
+  ('a11y.location_map', 'fr', 'Carte de l''emplacement'),
+  ('a11y.location_map', 'de', 'Standortkarte'),
+  ('a11y.location_map', 'ar', 'خريطة الموقع'),
+  ('a11y.location_map', 'ps', 'د موقعیت نقشه'),
+  ('a11y.map_keyboard_instructions', 'en', 'Use the arrow keys to move the map, plus and minus to zoom.'),
+  ('a11y.map_keyboard_instructions', 'es', 'Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar.'),
+  ('a11y.map_keyboard_instructions', 'fr', 'Utilisez les flèches pour déplacer la carte, plus et moins pour zoomer.'),
+  ('a11y.map_keyboard_instructions', 'de', 'Mit den Pfeiltasten verschieben Sie die Karte, mit Plus und Minus zoomen Sie.'),
+  ('a11y.map_keyboard_instructions', 'ar', 'استخدم مفاتيح الأسهم لتحريك الخريطة، ومفتاحي الزائد والناقص للتكبير والتصغير.'),
+  ('a11y.map_keyboard_instructions', 'ps', 'د نقشې د خوځولو لپاره د غشو تڼۍ، او د لوییدو او کوچنیدو لپاره جمع او منفي وکاروئ.')
 ) AS seeded(source_key, locale, translated_text)
 WHERE t.source_type = 'ui'
   AND t.source_key = seeded.source_key

@@ -2,9 +2,10 @@
 -- Requires: v0-81-3-translations-admin-translations
 --
 -- v0.81.4 -- Keyboard path for the location picker (issue #99): the "Use map center" button,
--- its spoken confirmation ("Location set to <lat>, <lng>") and the edit map's region name, which
--- says the arrow keys pan the map. Seeds the six core locales (en for get_translation_defaults(),
--- plus es/fr/de/ar/ps). Instance-agnostic UI strings only: no schema change, no instance content.
+-- its spoken confirmation ("Location set to <lat>, <lng>"), the edit map's region name and its
+-- description, which says the arrow keys pan the map. Seeds the six core locales (en for
+-- get_translation_defaults(), plus es/fr/de/ar/ps). Instance-agnostic UI strings only: no schema
+-- change, no instance content.
 
 BEGIN;
 
@@ -21,12 +22,18 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 ('ui', 'a11y.map_location_set', 'de', 'Standort auf {{lat}}, {{lng}} gesetzt'),
 ('ui', 'a11y.map_location_set', 'ar', 'تم تحديد الموقع عند {{lat}}، {{lng}}'),
 ('ui', 'a11y.map_location_set', 'ps', 'موقعیت په {{lat}}، {{lng}} وټاکل شو'),
-('ui', 'a11y.map_keyboard_instructions', 'en', 'Location map. Use the arrow keys to move the map, plus and minus to zoom.'),
-('ui', 'a11y.map_keyboard_instructions', 'es', 'Mapa de ubicación. Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar.'),
-('ui', 'a11y.map_keyboard_instructions', 'fr', 'Carte de l''emplacement. Utilisez les flèches pour déplacer la carte, plus et moins pour zoomer.'),
-('ui', 'a11y.map_keyboard_instructions', 'de', 'Standortkarte. Mit den Pfeiltasten verschieben Sie die Karte, mit Plus und Minus zoomen Sie.'),
-('ui', 'a11y.map_keyboard_instructions', 'ar', 'خريطة الموقع. استخدم مفاتيح الأسهم لتحريك الخريطة، ومفتاحي الزائد والناقص للتكبير والتصغير.'),
-('ui', 'a11y.map_keyboard_instructions', 'ps', 'د موقعیت نقشه. د نقشې د خوځولو لپاره د غشو تڼۍ، او د لوییدو او کوچنیدو لپاره جمع او منفي وکاروئ.')
+('ui', 'a11y.location_map', 'en', 'Location map'),
+('ui', 'a11y.location_map', 'es', 'Mapa de ubicación'),
+('ui', 'a11y.location_map', 'fr', 'Carte de l''emplacement'),
+('ui', 'a11y.location_map', 'de', 'Standortkarte'),
+('ui', 'a11y.location_map', 'ar', 'خريطة الموقع'),
+('ui', 'a11y.location_map', 'ps', 'د موقعیت نقشه'),
+('ui', 'a11y.map_keyboard_instructions', 'en', 'Use the arrow keys to move the map, plus and minus to zoom.'),
+('ui', 'a11y.map_keyboard_instructions', 'es', 'Use las flechas para mover el mapa y las teclas más y menos para acercar o alejar.'),
+('ui', 'a11y.map_keyboard_instructions', 'fr', 'Utilisez les flèches pour déplacer la carte, plus et moins pour zoomer.'),
+('ui', 'a11y.map_keyboard_instructions', 'de', 'Mit den Pfeiltasten verschieben Sie die Karte, mit Plus und Minus zoomen Sie.'),
+('ui', 'a11y.map_keyboard_instructions', 'ar', 'استخدم مفاتيح الأسهم لتحريك الخريطة، ومفتاحي الزائد والناقص للتكبير والتصغير.'),
+('ui', 'a11y.map_keyboard_instructions', 'ps', 'د نقشې د خوځولو لپاره د غشو تڼۍ، او د لوییدو او کوچنیدو لپاره جمع او منفي وکاروئ.')
 ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
 COMMIT;
