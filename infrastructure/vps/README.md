@@ -236,6 +236,14 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT TO civic_os_mcp_readonly;
 
 Use this role's connection string in your MCP server configuration. The role has **read-only** access — it cannot insert, update, or delete data.
 
+Read-only grants do not stop a login role from creating temporary tables, which is enough to exploit CVE-2026-6460: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`. Since v0.81.4 the migrations revoke it on the Civic OS database. As a superuser, revoke it on the other databases the role can connect to (the v0.81.4 deploy prints a notice naming them), and never grant `TEMPORARY` to this role:
+
+```sql
+REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;
+```
+
+See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+
 > **Note**: `ALTER DEFAULT PRIVILEGES` applies to tables created by the role that runs it (usually `postgres`). If tables are created by a different role, you may need to re-run the `GRANT SELECT ON ALL TABLES` statements after schema changes.
 
 ## Files

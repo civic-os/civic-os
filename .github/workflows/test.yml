@@ -124,7 +124,7 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store, and status and category cache versions
+      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store, status and category cache versions, and that PUBLIC cannot create temporary objects
         run: |
           ./tests/functional/view-security-guard-test.sh
           ./tests/functional/v0-76-9-view-rls-test.sh
@@ -133,6 +133,7 @@ jobs:
           ./tests/functional/v0-79-0-instance-config-test.sh
           ./tests/functional/v0-80-0-widget-key-filters-test.sh
           ./tests/functional/v0-81-3-widget-empty-message-defaults-test.sh
+          ./tests/functional/v0-81-4-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
@@ -244,6 +245,12 @@ jobs:
           EOF
         env:
           PGPASSWORD: doadmin
+
+      - name: Verify the owner revoked TEMPORARY from PUBLIC (as restricted user)
+        # The test switches roles with SET ROLE, so it connects as the superuser; doadmin owns the database and ran the revoke.
+        run: ./tests/functional/v0-81-4-revoke-public-temp-test.sh
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
   # Go Microservices Tests
   go-services-tests:

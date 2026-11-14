@@ -84,11 +84,8 @@ BEGIN
   ), 'civic_os_users: lost security_invoker (CREATE OR REPLACE VIEW resets view options)';
 END $$;
 
--- ---------------------------------------------------------------------------
--- From here on, behave like a PostgREST request: session user authenticator
--- ---------------------------------------------------------------------------
-SET LOCAL SESSION AUTHORIZATION authenticator;
-SET LOCAL ROLE authenticated;
+-- Helpers are created here, before the role switch: API roles cannot create temporary objects (v0.81.4
+-- revokes TEMPORARY from PUBLIC). They are SECURITY INVOKER, so each call runs with the caller's privileges.
 
 -- helper to run a DML statement as the current principal and return the affected row count
 CREATE OR REPLACE FUNCTION pg_temp.rows_affected(p_sql text) RETURNS int LANGUAGE plpgsql AS $$
@@ -118,6 +115,14 @@ BEGIN
 EXCEPTION WHEN insufficient_privilege OR object_not_in_prerequisite_state THEN  -- RLS/grant denial, or a non-updatable view
   RETURN true;
 END $$;
+
+GRANT EXECUTE ON FUNCTION pg_temp.rows_affected(text), pg_temp.write_denied(text), pg_temp.is_rejected(text) TO PUBLIC;
+
+-- ---------------------------------------------------------------------------
+-- From here on, behave like a PostgREST request: session user authenticator
+-- ---------------------------------------------------------------------------
+SET LOCAL SESSION AUTHORIZATION authenticator;
+SET LOCAL ROLE authenticated;
 
 -- ===========================================================================
 -- notification_preferences (base table grants authenticated SELECT and UPDATE only)

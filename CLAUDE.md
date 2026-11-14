@@ -227,6 +227,8 @@ Use templates in `postgres/migrations/templates/` as starting points for common 
 
 **Function Security** (v0.76.5+): All non-anonymous functions have PUBLIC EXECUTE revoked; `ALTER DEFAULT PRIVILEGES` prevents regression. New migrations must `REVOKE EXECUTE ... FROM PUBLIC` (not `FROM web_anon`, which is a no-op). SECURITY DEFINER functions must include in-body authorization guards. See `docs/notes/SECURITY_DEFINER_AUDIT_2026-10.md` for the full audit, `docs/INTEGRATOR_GUIDE.md` (Securing RPC Functions) for the integrator rules, and `postgres/migrations/templates/add_rpc_function.sql` for the corrected template.
 
+**Database Privileges** (v0.81.4): Core revokes `TEMPORARY` on the Civic OS database from `PUBLIC` (CVE-2026-6460 hardening; the fix is a PostgreSQL minor upgrade), so only the owner and superusers create temporary objects. The deploy fails with a hint when the deploying role cannot revoke it, and prints a notice naming other databases where `PUBLIC` still holds it, for the operator to revoke. Never grant `TEMPORARY` back to `PUBLIC`, an API role or a read-only role. CI runs `tests/functional/v0-81-4-revoke-public-temp-test.sh`. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 
 ## Production Deployment & Containerization
