@@ -58,6 +58,8 @@ Name the databases the notice lists. `template_postgis` exists on the `postgis/p
 
 **Revert.** The revert grants `TEMPORARY` back to `PUBLIC`. The ACL stays explicit (`=Tc/owner`) rather than NULL, with the same privileges as the default.
 
+**Test scripts.** A functional test that switches to an API role (`SET ROLE authenticated`, `SET SESSION AUTHORIZATION authenticator`) can no longer create `pg_temp` helper functions or temporary tables after the switch. Create them as the superuser before switching, and grant `EXECUTE` on the helpers to `PUBLIC`. As `SECURITY INVOKER` functions they still run with the caller's privileges. `tests/functional/v0-76-9-view-rls-test.sh` was changed this way.
+
 ## Read-Only Login Roles
 
 A role with only `SELECT` grants is not read-only at the database level while `PUBLIC` holds `TEMPORARY`. After v0.81.4 and the revoke above, a read-only role cannot create temporary objects in any database. Do not grant `TEMPORARY` to such roles. The recipes in `docs/INTEGRATOR_GUIDE.md` (Database Role for MCP) and `infrastructure/vps/README.md` (step 10) say so.
