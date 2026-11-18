@@ -2003,12 +2003,12 @@ Stripe-Signature: t=...,v1=...
 
 ### Idempotency Guarantees
 
-**Three layers of protection:**
+**As built** (the advisory-lock design above was not built):
 
-1. **Database constraint:** `UNIQUE (provider, provider_event_id)` prevents duplicate inserts
-2. **ON CONFLICT DO NOTHING:** Atomic check-and-insert prevents race conditions
-3. **Advisory locks:** Worker acquires lock before processing to prevent concurrent execution
-4. **Processed flag check:** Worker skips if `processed = TRUE` (defense in depth)
+1. **Database constraint:** `UNIQUE (provider, provider_event_id)` on `metadata.webhooks` gives each Stripe event one row.
+2. **Upsert that skips processed events:** the handler inserts with `ON CONFLICT … DO UPDATE … WHERE processed = FALSE RETURNING id`. A processed event returns no row and is acknowledged as a duplicate (200). An unprocessed row is reprocessed, and the upsert's row lock makes a concurrent delivery of the same event wait for the first one to finish.
+3. **Errors are kept, and the event stays retryable:** when an event handler fails, its transaction is rolled back, then the error is written in its own statement as `processed = FALSE, error_message = …`, and Stripe gets a 500 so it retries. A later successful delivery marks the row processed and clears `error_message`. Failed events are the rows with `processed = FALSE AND error_message IS NOT NULL`.
+4. **Stripe idempotency keys:** the create-intent and refund workers send `Idempotency-Key: civic-os:create-intent:<transaction id>` and `civic-os:refund:<refund id>`. If a River retry runs after Stripe created the object but before the worker saved its id, Stripe returns the original PaymentIntent or Refund instead of creating a second one. Stripe keeps keys for 24 hours. (Without a key, stripe-go sends a random one per call, which only covers its own network retries.)
 
 ### Security: Custom Body Parser for Signature Verification
 
@@ -2966,6 +2966,15 @@ CREATE TABLE payments.unknown_webhooks (
 ---
 
 ## Testing Strategy
+
+### Payment Worker Tests (as built)
+
+The worker's tests live next to the code in `services/payment-worker/*_test.go`, not in the `test/` tree sketched below. They run in two tiers:
+
+- **No database:** fee math, the Stripe adapter against an `httptest` server standing in for the Stripe API (request parameters, error mapping, key masking), and the webhook HTTP paths that reject a request before processing (method, missing or bad signature, oversized body, health).
+- **Database:** the create-intent and refund workers (with a fake `PaymentProvider`) and webhook processing, against a migrated Civic OS database so the real triggers run (create-intent job enqueue, payment and refund notifications). These tests skip unless `PAYMENT_TEST_DATABASE_URL` is set. Each test creates its own user and rows and deletes them afterward, so a shared database is safe.
+
+How to run them, locally and in CI, is in `docs/development/TESTING.md` (Go Payment Worker Tests). The fixture-based design below is the original plan and was not built.
 
 ### Fixture-Based Integration Testing
 

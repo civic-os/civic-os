@@ -1231,7 +1231,8 @@ services:
 **Idempotency Protection:**
 - Duplicate webhook events are rejected at database level
 - `UNIQUE (provider, provider_event_id)` constraint in `metadata.webhooks` table
-- Prevents double-processing of events from Stripe retries
+- Prevents double-processing of events from Stripe retries; an event whose processing failed keeps its `error_message`, stays `processed = FALSE`, and is reprocessed on Stripe's next retry
+- PaymentIntents and refunds are created with Stripe idempotency keys derived from the Civic OS row id, so a worker retry cannot create a second charge or refund
 
 **Network Isolation:**
 - Consolidated-worker should NOT have direct internet access (only database + Stripe API + S3 + SMTP)
@@ -1441,7 +1442,7 @@ docker exec -it consolidated-worker /bin/sh -c 'echo "SELECT 1" | psql $DATABASE
 
 # Check for missing payment records (webhook received for non-existent payment)
 docker exec -it postgres_db psql -U postgres -d civic_os_prod -c \
-  "SELECT id, stripe_payment_intent_id, status FROM public.payment_transactions ORDER BY created_at DESC LIMIT 10;"
+  "SELECT id, provider_payment_id, status FROM public.payment_transactions ORDER BY created_at DESC LIMIT 10;"
 ```
 
 **Payment intent creation timing out:**
@@ -1469,21 +1470,21 @@ curl http://localhost:8080/health
 ```sql
 -- View recent payment transactions
 SELECT id, user_id, amount, currency, status,
-       stripe_payment_intent_id, created_at
+       provider_payment_id, created_at
 FROM public.payment_transactions
 WHERE created_at > NOW() - INTERVAL '1 hour'
 ORDER BY created_at DESC;
 
 -- View recent webhook events
 SELECT id, provider, event_type, signature_verified,
-       processed, created_at, error_message
+       processed, received_at, error_message
 FROM metadata.webhooks
-WHERE created_at > NOW() - INTERVAL '1 hour'
-ORDER BY created_at DESC;
+WHERE received_at > NOW() - INTERVAL '1 hour'
+ORDER BY received_at DESC;
 
 -- Check for failed webhooks
 SELECT event_type, COUNT(*) as failed_count,
-       MAX(created_at) as last_failure
+       MAX(received_at) as last_failure
 FROM metadata.webhooks
 WHERE processed = FALSE AND error_message IS NOT NULL
 GROUP BY event_type;

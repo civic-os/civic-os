@@ -136,6 +136,20 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
+      - name: Setup Go (payment-worker database tests)
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+          cache-dependency-path: services/payment-worker/go.sum
+
+      - name: Run payment-worker database tests against the migrated schema
+        # The go-services-tests job runs the same package without a database, where these
+        # tests skip; here they run the workers and webhook handler against real triggers.
+        working-directory: services/payment-worker
+        run: go test -race -count=1 ./...
+        env:
+          PAYMENT_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
+
       - name: Verify each recent revert restores the prior schema
         run: |
           set -euo pipefail

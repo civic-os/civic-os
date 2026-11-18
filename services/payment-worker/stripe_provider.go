@@ -21,6 +21,9 @@ type CreateIntentParams struct {
 	Amount      int64  // Amount in cents (e.g., 1000 = $10.00)
 	Currency    string // Currency code (e.g., "usd")
 	Description string // Payment description
+	// IdempotencyKey, when set, is sent as Stripe's Idempotency-Key so a retried
+	// call returns the original PaymentIntent instead of creating another.
+	IdempotencyKey string
 	// POC: No metadata, customer ID, or other fields yet
 }
 
@@ -36,6 +39,9 @@ type RefundParams struct {
 	PaymentIntentID string // Stripe PaymentIntent ID to refund (pi_...)
 	AmountCents     int64  // Amount to refund in cents (partial refunds supported)
 	Reason          string // Reason for refund (shown in Stripe dashboard)
+	// IdempotencyKey, when set, is sent as Stripe's Idempotency-Key so a retried
+	// call returns the original Refund instead of refunding again.
+	IdempotencyKey string
 }
 
 // RefundResult contains the result of creating a refund
@@ -92,6 +98,10 @@ func (s *StripeProvider) CreateIntent(ctx context.Context, params CreateIntentPa
 		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 			Enabled: stripe.Bool(true),
 		},
+	}
+
+	if params.IdempotencyKey != "" {
+		intentParams.SetIdempotencyKey(params.IdempotencyKey)
 	}
 
 	// Call Stripe API
@@ -154,6 +164,10 @@ func (s *StripeProvider) CreateRefund(ctx context.Context, params RefundParams) 
 	}
 
 	// Call Stripe API
+	if params.IdempotencyKey != "" {
+		refundParams.SetIdempotencyKey(params.IdempotencyKey)
+	}
+
 	stripeRefund, err := refund.New(refundParams)
 	if err != nil {
 		log.Printf("[Stripe] Error creating Refund: %v", err)
