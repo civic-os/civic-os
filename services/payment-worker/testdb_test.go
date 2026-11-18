@@ -102,6 +102,8 @@ type txFixture struct {
 	Status            string // default "pending_intent"
 	Description       string // default "Test payment"
 	ProviderPaymentID string // optional
+	EntityType        string // optional; NULL when empty
+	EntityID          string // optional; NULL when empty
 }
 
 // insertTransaction inserts a transaction owned by userID and returns its id.
@@ -128,9 +130,10 @@ func insertTransaction(t *testing.T, pool *pgxpool.Pool, userID string, f txFixt
 	}
 	var id string
 	err := pool.QueryRow(context.Background(),
-		`INSERT INTO payments.transactions (user_id, amount, currency, status, description, provider_payment_id)
-		 VALUES ($1::uuid, $2::numeric, $3, $4, $5, $6) RETURNING id::text`,
-		userID, f.Amount, f.Currency, f.Status, f.Description, providerID,
+		`INSERT INTO payments.transactions (user_id, amount, currency, status, description, provider_payment_id,
+		                                    entity_type, entity_id)
+		 VALUES ($1::uuid, $2::numeric, $3, $4, $5, $6, NULLIF($7, ''), NULLIF($8, '')) RETURNING id::text`,
+		userID, f.Amount, f.Currency, f.Status, f.Description, providerID, f.EntityType, f.EntityID,
 	).Scan(&id)
 	if err != nil {
 		t.Fatalf("insert transaction: %v", err)

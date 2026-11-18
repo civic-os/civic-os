@@ -52,6 +52,9 @@ func main() {
 	feeFlatCents := getEnvInt("PROCESSING_FEE_FLAT_CENTS", 0)
 	feeRefundable := getEnvBool("PROCESSING_FEE_REFUNDABLE", false)
 
+	// Sent as civic_os_instance metadata on every PaymentIntent and Refund
+	instanceKey := getEnv("PAYMENT_INSTANCE_KEY", "")
+
 	log.Printf("[Init] Configuration loaded:")
 	log.Printf("[Init]   Database: %s", maskPassword(databaseURL))
 	log.Printf("[Init]   Stripe API Key: %s", maskAPIKey(stripeAPIKey))
@@ -66,6 +69,11 @@ func main() {
 		log.Printf("[Init]   Processing Fee: %.2f%% + %d cents", feePercent, feeFlatCents)
 		log.Printf("[Init]   Processing Fee Refundable: %v", feeRefundable)
 	}
+	if instanceKey != "" {
+		log.Printf("[Init]   Instance Key (Stripe metadata): %s", instanceKey)
+	} else {
+		log.Printf("[Init]   Instance Key (Stripe metadata): not set")
+	}
 
 	// Validate required configuration
 	if stripeAPIKey == "" {
@@ -73,6 +81,11 @@ func main() {
 	}
 	if stripeWebhookSecret == "" {
 		log.Fatal("[Init] STRIPE_WEBHOOK_SECRET environment variable is required")
+	}
+	if warning, err := checkInstanceKey(stripeAPIKey, instanceKey); err != nil {
+		log.Fatalf("[Init] %v", err)
+	} else if warning != "" {
+		log.Printf("[Init] ⚠ %s", warning)
 	}
 
 	// ===========================================================================
@@ -132,12 +145,12 @@ func main() {
 	}
 
 	// Register CreateIntentWorker (for async payment intent creation)
-	createIntentWorker := NewCreateIntentWorker(dbPool, stripeProvider, feeConfig)
+	createIntentWorker := NewCreateIntentWorker(dbPool, stripeProvider, feeConfig, instanceKey)
 	river.AddWorker(workers, createIntentWorker)
 	log.Println("[Init] ✓ Registered CreateIntentWorker")
 
 	// Register RefundWorker (for async refund processing)
-	refundWorker := NewRefundWorker(dbPool, stripeProvider)
+	refundWorker := NewRefundWorker(dbPool, stripeProvider, instanceKey)
 	river.AddWorker(workers, refundWorker)
 	log.Println("[Init] ✓ Registered RefundWorker")
 

@@ -27,15 +27,17 @@ func (RefundWorkerArgs) Kind() string {
 // RefundWorker processes refund jobs
 type RefundWorker struct {
 	river.WorkerDefaults[RefundWorkerArgs]
-	dbPool   *pgxpool.Pool
-	provider PaymentProvider
+	dbPool      *pgxpool.Pool
+	provider    PaymentProvider
+	instanceKey string // PAYMENT_INSTANCE_KEY, sent as civic_os_instance when set
 }
 
 // NewRefundWorker creates a new RefundWorker
-func NewRefundWorker(dbPool *pgxpool.Pool, provider PaymentProvider) *RefundWorker {
+func NewRefundWorker(dbPool *pgxpool.Pool, provider PaymentProvider, instanceKey string) *RefundWorker {
 	return &RefundWorker{
-		dbPool:   dbPool,
-		provider: provider,
+		dbPool:      dbPool,
+		provider:    provider,
+		instanceKey: instanceKey,
 	}
 }
 
@@ -54,6 +56,8 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		TransactionID string
 		Status        string
 		Reason        string
+		EntityType    *string
+		EntityID      *string
 	}
 
 	query := `
@@ -61,8 +65,11 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 			r.id,
 			r.transaction_id,
 			r.status,
-			r.reason
+			r.reason,
+			t.entity_type,
+			t.entity_id
 		FROM payments.refunds r
+		JOIN payments.transactions t ON t.id = r.transaction_id
 		WHERE r.id = $1
 	`
 
@@ -71,6 +78,8 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		&refund.TransactionID,
 		&refund.Status,
 		&refund.Reason,
+		&refund.EntityType,
+		&refund.EntityID,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -98,6 +107,11 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		AmountCents:     amountCents,
 		Reason:          refund.Reason,
 		IdempotencyKey:  "civic-os:refund:" + refundID,
+		Metadata: refundMetadata(paymentIdentity{
+			TransactionID: refund.TransactionID,
+			EntityType:    refund.EntityType,
+			EntityID:      refund.EntityID,
+		}, refund.ID, w.instanceKey),
 	})
 	if err != nil {
 		log.Printf("[Refund] Error creating Stripe refund for %s: %v", refundID, err)

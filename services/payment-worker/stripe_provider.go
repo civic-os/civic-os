@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/paymentintent"
@@ -24,7 +25,9 @@ type CreateIntentParams struct {
 	// IdempotencyKey, when set, is sent as Stripe's Idempotency-Key so a retried
 	// call returns the original PaymentIntent instead of creating another.
 	IdempotencyKey string
-	// POC: No metadata, customer ID, or other fields yet
+	// Metadata is sent as the PaymentIntent's metadata. Stripe copies it to the
+	// Charge once, and payout reports read it as payment_metadata[<key>].
+	Metadata map[string]string
 }
 
 // PaymentIntentResult contains the result of creating a payment intent
@@ -42,6 +45,9 @@ type RefundParams struct {
 	// IdempotencyKey, when set, is sent as Stripe's Idempotency-Key so a retried
 	// call returns the original Refund instead of refunding again.
 	IdempotencyKey string
+	// Metadata is sent as the Refund's metadata, beside the "reason" key.
+	// Refunds do not inherit PaymentIntent metadata.
+	Metadata map[string]string
 }
 
 // RefundResult contains the result of creating a refund
@@ -103,6 +109,7 @@ func (s *StripeProvider) CreateIntent(ctx context.Context, params CreateIntentPa
 	if params.IdempotencyKey != "" {
 		intentParams.SetIdempotencyKey(params.IdempotencyKey)
 	}
+	addMetadata(intentParams.AddMetadata, params.Metadata)
 
 	// Call Stripe API
 	intent, err := paymentintent.New(intentParams)
@@ -120,6 +127,21 @@ func (s *StripeProvider) CreateIntent(ctx context.Context, params CreateIntentPa
 		ClientSecret:    intent.ClientSecret,
 		Status:          string(intent.Status),
 	}, nil
+}
+
+// addMetadata copies metadata onto Stripe request params through the params
+// type's own AddMetadata (stripe-go refuses a request that also sets the
+// deprecated embedded Params.Metadata), in key order so the request body is
+// the same on every attempt.
+func addMetadata(add func(key, value string), metadata map[string]string) {
+	keys := make([]string, 0, len(metadata))
+	for k := range metadata {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		add(k, metadata[k])
+	}
 }
 
 // maskAPIKey masks API key for logging (show first 7 chars + ...)
@@ -162,6 +184,7 @@ func (s *StripeProvider) CreateRefund(ctx context.Context, params RefundParams) 
 		refundParams.Reason = stripe.String("requested_by_customer")
 		refundParams.AddMetadata("reason", params.Reason)
 	}
+	addMetadata(refundParams.AddMetadata, params.Metadata)
 
 	// Call Stripe API
 	if params.IdempotencyKey != "" {
