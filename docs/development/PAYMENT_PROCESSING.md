@@ -1941,6 +1941,8 @@ COMMENT ON FUNCTION process_payment_webhook IS
 
 **Critical Design Decision:** We **always return 200 OK** to webhook senders (Stripe, PayPal, etc.). This prevents the provider from retrying, and instead we handle retries internally via River's job queue.
 
+> **As built**: the payment worker processes each event synchronously in its HTTP handler at `/webhooks/stripe` (the PostgREST `/rpc/process_payment_webhook` entry point below was not built, since PostgREST cannot verify Stripe signatures). It returns 200 for processed events, duplicates and event types it does not handle, and 500 when processing fails, so Stripe's own retry schedule reprocesses the event. See "Idempotency Guarantees" below for how the error is kept.
+
 **Rationale:**
 - Payment providers retry failed webhooks aggressively (exponential backoff, up to 3 days)
 - Provider retries can overwhelm our system during outages
@@ -2403,13 +2405,14 @@ This section provides step-by-step instructions for setting up Stripe accounts f
 
 1. Navigate to **Developers** → **Webhooks**
 2. Click **Add endpoint**
-3. Set **Endpoint URL**: `https://your-tenant-domain.com/rpc/process_payment_webhook`
+3. Set **Endpoint URL**: `https://api.your-tenant-domain.com/webhooks/stripe` (the payment worker; see `docs/deployment/PRODUCTION.md` for the route)
 4. Click **Select events** and choose:
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
    - `payment_intent.canceled`
    - `charge.refunded`
-   - `charge.dispute.created`
+
+   The worker handles these four. Any other event type is acknowledged and marked processed without action.
 5. Click **Add endpoint**
 6. Click on the created webhook, then **Reveal** to copy **Signing secret** (starts with `whsec_`)
 
@@ -2450,8 +2453,9 @@ brew install stripe/stripe-cli/stripe
 # Login to your Stripe account
 stripe login
 
-# Forward webhooks to local PostgREST
-stripe listen --forward-to http://localhost:3000/rpc/process_payment_webhook
+# Forward webhooks to the local payment worker (Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # Trigger test webhook
 stripe trigger payment_intent.succeeded
@@ -2535,8 +2539,9 @@ Use these test cards in **test mode** only:
 cd examples/community-center
 docker-compose up -d
 
-# 2. Start Stripe webhook listener (in separate terminal)
-stripe listen --forward-to http://localhost:8081/webhooks/stripe
+# 2. Start Stripe webhook listener (in separate terminal; Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # 3. Test payment flow in browser:
 #    - Create reservation request
@@ -3009,7 +3014,7 @@ stripe trigger payment_intent.payment_failed --print-json > test/fixtures/stripe
 stripe trigger charge.refunded --print-json > test/fixtures/stripe/charge_refunded.json
 
 # Or record live webhooks
-stripe listen --forward-to http://localhost:8080/webhooks --print-json > test/fixtures/
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded --forward-to http://localhost:8081/webhooks/stripe --print-json > test/fixtures/stripe/live_events.jsonl
 ```
 
 **Fixture Loader Helper:**
