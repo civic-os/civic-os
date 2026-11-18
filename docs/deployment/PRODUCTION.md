@@ -283,6 +283,7 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret  # From Stripe webhook configura
 
 # Payment processing configuration
 PAYMENT_CURRENCY=USD  # Default: USD
+PAYMENT_INSTANCE_KEY=your-instance  # v0.81.4+: sent as civic_os_instance metadata on Stripe objects; short, stable, never renamed
 PAYMENT_WORKER_COUNT=1  # River workers for payment intent creation
 PAYMENT_WORKER_DB_MAX_CONNS=4  # Database connection pool size
 

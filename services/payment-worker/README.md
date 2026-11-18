@@ -36,6 +36,7 @@ RPC polls status                       Updates database
 | `DATABASE_URL` | Yes | `postgres://...` | PostgreSQL connection string |
 | `STRIPE_API_KEY` | Yes | _(none)_ | Stripe secret key (sk_test_... or sk_live_...) |
 | `PAYMENT_CURRENCY` | No | `USD` | Default currency for payments |
+| `PAYMENT_INSTANCE_KEY` | No | _(none)_ | Sent as `civic_os_instance` metadata on every PaymentIntent and Refund (v0.81.4+). Warning at startup if unset with a live Stripe key |
 | `RIVER_WORKER_COUNT` | No | `1` | Number of concurrent workers |
 | `DB_MAX_CONNS` | No | `4` | Max database connections |
 | `DB_MIN_CONNS` | No | `1` | Min database connections |

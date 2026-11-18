@@ -4256,6 +4256,43 @@ data:
 - Stripe's minimum payment is $0.50 - verify your base amounts meet this after fees are added
 - Fee calculation uses banker's rounding for consistent cent-level precision
 
+#### Stripe Metadata
+
+Since v0.81.4 the payment worker sends Stripe **metadata** with every PaymentIntent and Refund, so a Stripe admin or a bookkeeper reading a payout report can tell which Civic OS transaction, record and instance a payment belongs to without matching `pi_…` ids by hand. No SQL or migration is needed: the worker builds the keys from the transaction row and its own settings.
+
+| Key | Value | On |
+|-----|-------|----|
+| `civic_os_transaction_id` | `payments.transactions.id` | PaymentIntent, Refund |
+| `civic_os_entity_type` | `entity_type` (table name), omitted when NULL | PaymentIntent, Refund |
+| `civic_os_entity_id` | `entity_id`, omitted when NULL | PaymentIntent, Refund |
+| `civic_os_instance` | `PAYMENT_INSTANCE_KEY`, omitted when unset | PaymentIntent, Refund |
+| `civic_os_base_cents` | `amount` in cents | PaymentIntent |
+| `civic_os_fee_cents` | Processing fee in cents, `"0"` when fees are disabled | PaymentIntent |
+| `civic_os_refund_id` | `payments.refunds.id` | Refund (beside the existing `reason` key) |
+
+`entity_type` and `entity_id` are filled by `payments.create_and_link_payment()`. A payment row inserted without the helper has no entity keys in Stripe.
+
+**Configuration** (payment worker environment):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PAYMENT_INSTANCE_KEY` | *(unset)* | Short, stable name for this instance, sent as `civic_os_instance` (for example `mottpark`). Set it whenever several instances or systems share one Stripe account. Don't rename it later: Stripe history would split under two names. The worker logs a warning at startup when the Stripe key is live (`sk_live_`, `rk_live_`) and this is unset, and refuses to start when it is over 500 characters. |
+
+**Using the keys in Stripe**:
+
+- **Payout and balance reports**: add `payment_metadata[civic_os_transaction_id]` (and any other key) as a column when downloading. Report columns read the PaymentIntent's metadata, which also covers refunds' original payments.
+- **Dashboard and Search API**: filter with `metadata['civic_os_entity_type']:'reservation_requests'` or by transaction id.
+- **Charges**: Stripe copies PaymentIntent metadata to the Charge once, when the Charge is created.
+
+**Notes**:
+
+- Keys use the `civic_os_` prefix; don't add your own keys with that prefix in Stripe.
+- Metadata holds identifiers only: no payer details, and no program or funding-source classification (the accounting export is the source for those).
+- Anyone with access to the Stripe Dashboard sees the metadata; the browser-side Stripe Elements flow does not.
+- Payments created before v0.81.4 have no Civic OS keys in Stripe.
+
+See `docs/notes/STRIPE_METADATA_DESIGN.md` for the design and the later phases (integrator-supplied keys, stored provider data).
+
 ### Scheduled Jobs System
 
 **Version**: v0.22.0+

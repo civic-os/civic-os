@@ -201,6 +201,8 @@ services:
 
       # Payment Configuration
       PAYMENT_CURRENCY: ${PAYMENT_CURRENCY:-USD}
+      # Sent as civic_os_instance metadata on Stripe objects (v0.81.4+)
+      PAYMENT_INSTANCE_KEY: ${PAYMENT_INSTANCE_KEY:-}
       RIVER_WORKER_COUNT: ${PAYMENT_WORKER_COUNT:-1}
 
       # Processing Fee Configuration (optional)

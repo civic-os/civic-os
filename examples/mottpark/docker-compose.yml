@@ -256,6 +256,7 @@ services:
 
       # Payment Configuration
       - PAYMENT_CURRENCY=${PAYMENT_CURRENCY:-USD}
+      - PAYMENT_INSTANCE_KEY=${PAYMENT_INSTANCE_KEY:-mottpark}
       - RIVER_WORKER_COUNT=${PAYMENT_WORKER_COUNT:-1}
       - WEBHOOK_PORT=8080
     networks:

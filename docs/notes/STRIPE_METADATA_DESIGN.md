@@ -1,6 +1,6 @@
 # Stripe Metadata Design
 
-**Status**: Directional design, not scheduled. No code.
+**Status**: Phase 1 built (v0.81.4): reserved keys on PaymentIntents and Refunds, and `PAYMENT_INSTANCE_KEY`. Phases 2 to 5 are directional, not scheduled.
 **Date**: 2026-11-18
 **Audience**: Civic OS contributors working on the payment worker and the Accounting Attribution module; integrators who build payable entities.
 
@@ -21,7 +21,7 @@ The reverse direction matters as much (section 5). Civic OS stores only the proc
 
 ## Context
 
-### What is sent today
+### What was sent before v0.81.4
 
 | Stripe call | Fields set | Code |
 |---|---|---|
@@ -289,7 +289,7 @@ The posting rules stay in Accounting Attribution. This design only makes sure th
 
 | Phase | Scope | Size |
 |---|---|---|
-| 1 | Reserved keys on PaymentIntent and Refund; `PAYMENT_INSTANCE_KEY`; Go unit tests on the params builder; Integrator Guide and payment guide updates | Worker only. No migration. |
+| 1 | Reserved keys on PaymentIntent and Refund; `PAYMENT_INSTANCE_KEY`; Go unit tests on the params builder; Integrator Guide and payment guide updates | Worker only. No migration. **Built in v0.81.4.** |
 | 2 | Neutral webhook event layer; `provider_account_ref`, `provider_environment`, `provider_charge_ref`, method type and label, `completed_at`, `receipt_url`, `provider_details`; refunds made outside Civic OS | One migration plus a webhook handler refactor |
 | 3 | `provider_fee`, `net_amount`, settlement columns, `payments.disputes`; shown on `/admin/payments` | One migration plus three new event types |
 | 4 | `outbound_metadata` column, validation trigger, `p_metadata` on `create_and_link_payment()`; shown on the `/admin/payments` detail; one example (Mott Park `reservation_payments` passing `reservation_id`) | One migration plus the worker merge |
@@ -301,7 +301,7 @@ Phase 1 is independent of everything else and gives Stripe admins most of the va
 ## Open questions
 
 1. Should Phase 1 ship with a deployment-run backfill (a CLI in the payment worker image) that sets reserved keys on existing PaymentIntents? Reports read the PaymentIntent's metadata, so a backfill would make historical payout reports joinable, even though historical Charges keep their empty snapshot.
-2. Is `PAYMENT_INSTANCE_KEY` required when the Stripe key is in live mode? A warning at worker startup is a softer option.
+2. ~~Is `PAYMENT_INSTANCE_KEY` required when the Stripe key is in live mode?~~ Settled in Phase 1: a warning at worker startup when the Stripe key starts `sk_live_` or `rk_live_` and the variable is unset, not a refusal. The worker does refuse a value over 500 characters, which Stripe would reject on every payment.
 3. Under Connect with direct charges, does any reserved key belong on the platform's application-fee objects too? Only relevant if the platform takes a fee, which the current payments direction avoids.
 4. Should `/admin/payments` show the exact metadata sent, including reserved keys, so support can tell an organization what to search for in Stripe?
 5. When exactly is Stripe's balance transaction attached to a charge, for each payment method the instances enable? This decides whether `fee_known` comes from `charge.updated`, from a fetch at completion, or both. Check against Stripe's documentation before Phase 3.

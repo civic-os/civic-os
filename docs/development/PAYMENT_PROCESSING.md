@@ -725,6 +725,22 @@ interface PaymentValue {
 
 ---
 
+## Stripe Metadata
+
+**Status:** ✅ Implemented (v0.81.4), Phase 1 of `docs/notes/STRIPE_METADATA_DESIGN.md`
+
+Every PaymentIntent and Refund carries reserved `civic_os_` metadata keys identifying the transaction, the paid record (`entity_type`, `entity_id`), the instance (`PAYMENT_INSTANCE_KEY`) and, on PaymentIntents, the base and fee split in cents. Refunds also carry `civic_os_refund_id` beside the existing `reason` key. The key list and operator guidance are in `docs/INTEGRATOR_GUIDE.md` (Stripe Metadata).
+
+Implementation (`services/payment-worker/`):
+
+- `stripe_metadata.go` builds the maps (`intentMetadata`, `refundMetadata`). A key whose value is empty is left out, because Stripe reads `""` as "delete this key"; a value over 500 characters is dropped with a log line rather than truncated.
+- `create_intent_worker.go` and `refund_worker.go` read `entity_type` and `entity_id` (the refund worker joins its transaction) and pass `Metadata` on `CreateIntentParams` / `RefundParams`.
+- `stripe_provider.go` adds each entry through the params type's own `AddMetadata`, in key order. stripe-go v81 refuses a request that also sets the deprecated embedded `Params.Metadata`.
+- The maps are a pure function of the row and the worker's settings. That matters for the idempotency keys (`civic-os:create-intent:<id>`, `civic-os:refund:<id>`): Stripe refuses a retry whose parameters differ from the first request under the same key.
+- `main.go` reads `PAYMENT_INSTANCE_KEY`, logs it, warns when the Stripe key is live and it is unset, and refuses to start when it is over 500 characters (`checkInstanceKey`).
+
+---
+
 ## Configurable Capture Timing
 
 ### Capture Modes

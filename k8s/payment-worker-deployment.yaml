@@ -69,6 +69,12 @@ spec:
               name: civic-os-config
               key: PAYMENT_CURRENCY
               optional: true  # Defaults to USD
+        - name: PAYMENT_INSTANCE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PAYMENT_INSTANCE_KEY
+              optional: true  # civic_os_instance Stripe metadata; omitted when unset
         - name: RIVER_WORKER_COUNT
           value: "1"
         - name: WEBHOOK_PORT

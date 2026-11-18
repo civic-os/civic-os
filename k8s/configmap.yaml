@@ -61,6 +61,9 @@ data:
   STRIPE_PUBLISHABLE_KEY: "pk_test_your_key_here"
   # Currency code for Stripe payments (default: USD)
   # PAYMENT_CURRENCY: "USD"
+  # Short, stable instance name sent as civic_os_instance metadata on every
+  # Stripe PaymentIntent and Refund (v0.81.4+). Never rename it once set.
+  # PAYMENT_INSTANCE_KEY: "my-instance"
 
   # Processing Fee Configuration (v0.21.0+, optional)
   # Enable to transparently pass credit card processing fees to customers
