@@ -4290,6 +4290,9 @@ Since v0.81.4 the payment worker sends Stripe **metadata** with every PaymentInt
 - Metadata holds identifiers only: no payer details, and no program or funding-source classification (the accounting export is the source for those).
 - Anyone with access to the Stripe Dashboard sees the metadata; the browser-side Stripe Elements flow does not.
 - Payments created before v0.81.4 have no Civic OS keys in Stripe.
+- **Upgrading**: Stripe accepts a retried request under the same idempotency key only with the same parameters, and the worker retries create-intent and refund jobs under a fixed key. A job that reached Stripe on the old worker but failed to update the database, and is retried by the new worker within 24 hours, fails with `idempotency_error`. Upgrade with no `create_payment_intent` or `process_refund` job in `retryable` state; the same applies when you change `PAYMENT_INSTANCE_KEY` or the fee settings. A job stuck this way has a Stripe object already: match it in the Dashboard and set the row's status by hand.
+- The refund reason is cut to Stripe's 500-character limit in `metadata[reason]`; the full reason stays in `payments.refunds`.
+- `PAYMENT_INSTANCE_KEY` is trimmed of surrounding spaces at startup.
 
 See `docs/notes/STRIPE_METADATA_DESIGN.md` for the design and the later phases (integrator-supplied keys, stored provider data).
 

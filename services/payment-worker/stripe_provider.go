@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sort"
 
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/paymentintent"
@@ -130,17 +129,11 @@ func (s *StripeProvider) CreateIntent(ctx context.Context, params CreateIntentPa
 }
 
 // addMetadata copies metadata onto Stripe request params through the params
-// type's own AddMetadata (stripe-go refuses a request that also sets the
-// deprecated embedded Params.Metadata), in key order so the request body is
-// the same on every attempt.
+// type's own AddMetadata: stripe-go refuses a request that also sets the
+// deprecated embedded Params.Metadata. Its form encoder sorts the keys.
 func addMetadata(add func(key, value string), metadata map[string]string) {
-	keys := make([]string, 0, len(metadata))
-	for k := range metadata {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		add(k, metadata[k])
+	for k, v := range metadata {
+		add(k, v)
 	}
 }
 
@@ -182,7 +175,9 @@ func (s *StripeProvider) CreateRefund(ctx context.Context, params RefundParams) 
 	// Add reason as metadata if provided
 	if params.Reason != "" {
 		refundParams.Reason = stripe.String("requested_by_customer")
-		refundParams.AddMetadata("reason", params.Reason)
+		// Free text from the admin: cut to Stripe's value limit rather than
+		// have Stripe refuse the refund.
+		refundParams.AddMetadata("reason", truncateRunes(params.Reason, stripeMetadataValueMax))
 	}
 	addMetadata(refundParams.AddMetadata, params.Metadata)
 

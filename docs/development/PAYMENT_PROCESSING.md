@@ -735,9 +735,10 @@ Implementation (`services/payment-worker/`):
 
 - `stripe_metadata.go` builds the maps (`intentMetadata`, `refundMetadata`). A key whose value is empty is left out, because Stripe reads `""` as "delete this key"; a value over 500 characters is dropped with a log line rather than truncated.
 - `create_intent_worker.go` and `refund_worker.go` read `entity_type` and `entity_id` (the refund worker joins its transaction) and pass `Metadata` on `CreateIntentParams` / `RefundParams`.
-- `stripe_provider.go` adds each entry through the params type's own `AddMetadata`, in key order. stripe-go v81 refuses a request that also sets the deprecated embedded `Params.Metadata`.
-- The maps are a pure function of the row and the worker's settings. That matters for the idempotency keys (`civic-os:create-intent:<id>`, `civic-os:refund:<id>`): Stripe refuses a retry whose parameters differ from the first request under the same key.
-- `main.go` reads `PAYMENT_INSTANCE_KEY`, logs it, warns when the Stripe key is live and it is unset, and refuses to start when it is over 500 characters (`checkInstanceKey`).
+- `stripe_provider.go` adds each entry through the params type's own `AddMetadata` (stripe-go's form encoder sorts the keys). stripe-go v81 refuses a request that also sets the deprecated embedded `Params.Metadata`.
+- The maps are a pure function of the row and the worker's settings. That matters for the idempotency keys (`civic-os:create-intent:<id>`, `civic-os:refund:<id>`): Stripe refuses a retry whose parameters differ from the first request under the same key. The settings are the exception: a job retried within 24 hours after an upgrade from a pre-metadata worker, or after `PAYMENT_INSTANCE_KEY` or the fee settings change, fails with `idempotency_error`. Changing the key format instead would let that retry create a second PaymentIntent or refund, so the INTEGRATOR_GUIDE asks operators to upgrade with no retryable payment jobs.
+- The admin's refund reason goes to `metadata[reason]` cut to 500 characters (`truncateRunes`), so a long reason never makes Stripe refuse the refund.
+- `main.go` reads `PAYMENT_INSTANCE_KEY`, trims it, logs it, warns when the Stripe key is live and it is unset, and refuses to start when it is over 500 characters (`checkInstanceKey`).
 
 ---
 

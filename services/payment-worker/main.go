@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -53,7 +54,7 @@ func main() {
 	feeRefundable := getEnvBool("PROCESSING_FEE_REFUNDABLE", false)
 
 	// Sent as civic_os_instance metadata on every PaymentIntent and Refund
-	instanceKey := getEnv("PAYMENT_INSTANCE_KEY", "")
+	instanceKey := strings.TrimSpace(getEnv("PAYMENT_INSTANCE_KEY", ""))
 
 	log.Printf("[Init] Configuration loaded:")
 	log.Printf("[Init]   Database: %s", maskPassword(databaseURL))

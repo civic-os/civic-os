@@ -77,6 +77,14 @@ func putMetadata(m map[string]string, key, value string) {
 	m[key] = value
 }
 
+// truncateRunes cuts s to at most n characters, never inside a character.
+func truncateRunes(s string, n int) string {
+	if utf8.RuneCountInString(s) <= n {
+		return s
+	}
+	return string([]rune(s)[:n])
+}
+
 func deref(s *string) string {
 	if s == nil {
 		return ""

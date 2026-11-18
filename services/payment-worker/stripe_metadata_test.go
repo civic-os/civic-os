@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 func TestIntentMetadata(t *testing.T) {
@@ -144,5 +145,17 @@ func TestCheckInstanceKey(t *testing.T) {
 				t.Errorf("warning = %q, wantWarn %v", warn, tt.wantWarn)
 			}
 		})
+	}
+}
+
+func TestTruncateRunes(t *testing.T) {
+	if got := truncateRunes("héllo", 3); got != "hél" {
+		t.Errorf("truncateRunes = %q, want %q", got, "hél")
+	}
+	if got := truncateRunes("abc", 5); got != "abc" {
+		t.Errorf("short string changed: %q", got)
+	}
+	if got := truncateRunes(strings.Repeat("é", 600), 500); utf8.RuneCountInString(got) != 500 || !utf8.ValidString(got) {
+		t.Errorf("cut is %d characters or invalid UTF-8", utf8.RuneCountInString(got))
 	}
 }

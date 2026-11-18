@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stripe/stripe-go/v81"
 )
@@ -254,6 +255,20 @@ func TestStripeCreateRefund_NoReason(t *testing.T) {
 	}
 	if _, ok := r.Form["metadata[reason]"]; ok {
 		t.Errorf("metadata[reason] should not be sent: %v", r.Form)
+	}
+}
+
+func TestStripeCreateRefund_LongReasonIsCutToStripeLimit(t *testing.T) {
+	f := newStripeFake(t, http.StatusOK, stripeRefundOK)
+	p := &StripeProvider{}
+
+	reason := strings.Repeat("é", stripeMetadataValueMax+20)
+	if _, err := p.CreateRefund(context.Background(), RefundParams{PaymentIntentID: "pi_abc", AmountCents: 100, Reason: reason}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	got := f.recorded()[0].Form.Get("metadata[reason]")
+	if want := strings.Repeat("é", stripeMetadataValueMax); got != want {
+		t.Errorf("metadata[reason] has %d characters, want %d", utf8.RuneCountInString(got), stripeMetadataValueMax)
 	}
 }
 
