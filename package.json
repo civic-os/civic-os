@@ -149,7 +149,7 @@
     "ng-packagr": "^22.2.4",
     "pa11y-ci": "^4.1.1",
     "pg": "^8.23.0",
-    "playwright-core": "~1.59.1",
+    "playwright-core": "~1.65.1",
     "postcss": "^8.5.27",
     "publint": "^0.3.25",
     "tailwindcss": "^4.3.3",

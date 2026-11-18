@@ -436,7 +436,7 @@ Nothing else is collapsed.
 
 | Pin | Value |
 |---|---|
-| Browser | Chromium headless shell from `@playwright/test` 1.59.1, viewport 1280x900, DPR 1, light scheme, reduced motion, service workers blocked |
+| Browser | Chromium headless shell from `@playwright/test` 1.65.1, viewport 1280x900, DPR 1, light scheme, reduced motion, service workers blocked |
 | Timezone / locale | `America/New_York` / `en-US` |
 | Clock | `page.clock.install({ time: CLOCK_T0 })`, Tuesday 2026-10-20 09:30 EDT. The clock then advances in real time. |
 | Login | A real Keycloak UI login (`#username`, `#password`, `#kc-login`) per role per run, saved as `storageState`. The `anonymous` role is the app opened logged out, with the same localStorage pins. Its requests carry no `Authorization` header (`web_anon`). |
@@ -447,7 +447,7 @@ Nothing else is collapsed.
 and RxJS `debounceTime(n > 0)` reschedules forever under a frozen `now()`:
 `emitWhenIdle` compares `now()` against `lastTime + dueTime`. Under a frozen
 clock, list search, edit-property debounces and guided-form autosave never
-fire. `install()` in Playwright 1.59 starts the fake clock at `CLOCK_T0` and
+fire. Playwright's `install()` starts the fake clock at `CLOCK_T0` and
 keeps it flowing in real time; only `pauseAt()` stops timers. "Today" is
 therefore fixed, and runtime timestamps fall in the masked window.
 
