@@ -3663,11 +3663,11 @@ Stripe → [HTTP: /webhooks/stripe] → Payment Worker → PostgreSQL
 
 Production:
 - URL: `https://your-domain.com/webhooks/stripe`
-- Events to send: `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`
+- Events to send: `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`, `charge.refunded`
 - Copy the **Signing secret** (starts with `whsec_`)
 
 Development:
-- Use Stripe CLI for local testing: `stripe listen --forward-to http://localhost:8081/webhooks/stripe`
+- Use Stripe CLI for local testing: `stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded --forward-to http://localhost:8081/webhooks/stripe` (Stripe CLI 1.53+ requires `--events`)
 - CLI prints signing secret to console
 
 **2. Set Environment Variable**
@@ -3695,8 +3695,9 @@ HTTP Server: Listening on :8080/webhooks/stripe
 Use Stripe CLI to forward webhooks from Stripe's test environment to your local worker:
 
 ```bash
-# Start Stripe listener (forwards webhooks to local worker)
-stripe listen --forward-to http://localhost:8081/webhooks/stripe
+# Start Stripe listener (forwards webhooks to local worker; Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # In another terminal, trigger test webhook events
 stripe trigger payment_intent.succeeded

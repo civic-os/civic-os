@@ -1941,6 +1941,8 @@ COMMENT ON FUNCTION process_payment_webhook IS
 
 **Critical Design Decision:** We **always return 200 OK** to webhook senders (Stripe, PayPal, etc.). This prevents the provider from retrying, and instead we handle retries internally via River's job queue.
 
+> **As built**: the payment worker processes each event synchronously in its HTTP handler at `/webhooks/stripe` (the PostgREST `/rpc/process_payment_webhook` entry point below was not built, since PostgREST cannot verify Stripe signatures). It returns 200 for processed events, duplicates and event types it does not handle, and 500 when processing fails, so Stripe's own retry schedule reprocesses the event. See "Idempotency Guarantees" below for how the error is kept.
+
 **Rationale:**
 - Payment providers retry failed webhooks aggressively (exponential backoff, up to 3 days)
 - Provider retries can overwhelm our system during outages
@@ -2003,12 +2005,12 @@ Stripe-Signature: t=...,v1=...
 
 ### Idempotency Guarantees
 
-**Three layers of protection:**
+**As built** (the advisory-lock design above was not built):
 
-1. **Database constraint:** `UNIQUE (provider, provider_event_id)` prevents duplicate inserts
-2. **ON CONFLICT DO NOTHING:** Atomic check-and-insert prevents race conditions
-3. **Advisory locks:** Worker acquires lock before processing to prevent concurrent execution
-4. **Processed flag check:** Worker skips if `processed = TRUE` (defense in depth)
+1. **Database constraint:** `UNIQUE (provider, provider_event_id)` on `metadata.webhooks` gives each Stripe event one row.
+2. **Upsert that skips processed events:** the handler inserts with `ON CONFLICT … DO UPDATE … WHERE processed = FALSE RETURNING id`. A processed event returns no row and is acknowledged as a duplicate (200). An unprocessed row is reprocessed, and the upsert's row lock makes a concurrent delivery of the same event wait for the first one to finish.
+3. **Errors are kept, and the event stays retryable:** when an event handler fails, its transaction is rolled back, then the error is written in its own statement as `processed = FALSE, error_message = …`, and Stripe gets a 500 so it retries. A later successful delivery marks the row processed and clears `error_message`. Failed events are the rows with `processed = FALSE AND error_message IS NOT NULL`.
+4. **Stripe idempotency keys:** the create-intent and refund workers send `Idempotency-Key: civic-os:create-intent:<transaction id>` and `civic-os:refund:<refund id>`. If a River retry runs after Stripe created the object but before the worker saved its id, Stripe returns the original PaymentIntent or Refund instead of creating a second one. Stripe keeps keys for 24 hours. (Without a key, stripe-go sends a random one per call, which only covers its own network retries.)
 
 ### Security: Custom Body Parser for Signature Verification
 
@@ -2403,13 +2405,14 @@ This section provides step-by-step instructions for setting up Stripe accounts f
 
 1. Navigate to **Developers** → **Webhooks**
 2. Click **Add endpoint**
-3. Set **Endpoint URL**: `https://your-tenant-domain.com/rpc/process_payment_webhook`
+3. Set **Endpoint URL**: `https://api.your-tenant-domain.com/webhooks/stripe` (the payment worker; see `docs/deployment/PRODUCTION.md` for the route)
 4. Click **Select events** and choose:
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
    - `payment_intent.canceled`
    - `charge.refunded`
-   - `charge.dispute.created`
+
+   The worker handles these four. Any other event type is acknowledged and marked processed without action.
 5. Click **Add endpoint**
 6. Click on the created webhook, then **Reveal** to copy **Signing secret** (starts with `whsec_`)
 
@@ -2450,8 +2453,9 @@ brew install stripe/stripe-cli/stripe
 # Login to your Stripe account
 stripe login
 
-# Forward webhooks to local PostgREST
-stripe listen --forward-to http://localhost:3000/rpc/process_payment_webhook
+# Forward webhooks to the local payment worker (Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # Trigger test webhook
 stripe trigger payment_intent.succeeded
@@ -2535,8 +2539,9 @@ Use these test cards in **test mode** only:
 cd examples/community-center
 docker-compose up -d
 
-# 2. Start Stripe webhook listener (in separate terminal)
-stripe listen --forward-to http://localhost:8081/webhooks/stripe
+# 2. Start Stripe webhook listener (in separate terminal; Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # 3. Test payment flow in browser:
 #    - Create reservation request
@@ -2967,6 +2972,15 @@ CREATE TABLE payments.unknown_webhooks (
 
 ## Testing Strategy
 
+### Payment Worker Tests (as built)
+
+The worker's tests live next to the code in `services/payment-worker/*_test.go`, not in the `test/` tree sketched below. They run in two tiers:
+
+- **No database:** fee math, the Stripe adapter against an `httptest` server standing in for the Stripe API (request parameters, error mapping, key masking), and the webhook HTTP paths that reject a request before processing (method, missing or bad signature, oversized body, health).
+- **Database:** the create-intent and refund workers (with a fake `PaymentProvider`) and webhook processing, against a migrated Civic OS database so the real triggers run (create-intent job enqueue, payment and refund notifications). These tests skip unless `PAYMENT_TEST_DATABASE_URL` is set. Each test creates its own user and rows and deletes them afterward, so a shared database is safe.
+
+How to run them, locally and in CI, is in `docs/development/TESTING.md` (Go Payment Worker Tests). The fixture-based design below is the original plan and was not built.
+
 ### Fixture-Based Integration Testing
 
 **Pattern:** Use real webhook payloads captured from Stripe as test fixtures.
@@ -3000,7 +3014,7 @@ stripe trigger payment_intent.payment_failed --print-json > test/fixtures/stripe
 stripe trigger charge.refunded --print-json > test/fixtures/stripe/charge_refunded.json
 
 # Or record live webhooks
-stripe listen --forward-to http://localhost:8080/webhooks --print-json > test/fixtures/
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded --forward-to http://localhost:8081/webhooks/stripe --print-json > test/fixtures/stripe/live_events.jsonl
 ```
 
 **Fixture Loader Helper:**

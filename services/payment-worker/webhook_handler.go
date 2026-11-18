@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -38,7 +39,11 @@ func (h *WebhookHandler) ProcessStripeWebhook(ctx context.Context, event stripe.
 		return fmt.Errorf("marshal event: %w", err)
 	}
 
-	// Insert webhook with idempotency check
+	// Insert webhook with idempotency check. A row that already exists is
+	// reprocessed only while processed = FALSE, which happens only when an
+	// earlier delivery failed and recordWebhookError saved its error; a
+	// processed event returns no row and is skipped as a duplicate. A concurrent
+	// delivery of the same event waits on this row until this transaction ends.
 	var webhookID string
 	err = tx.QueryRow(ctx, `
 		INSERT INTO metadata.webhooks (
@@ -49,7 +54,9 @@ func (h *WebhookHandler) ProcessStripeWebhook(ctx context.Context, event stripe.
 			signature_verified,
 			processed
 		) VALUES ($1, $2, $3, $4, TRUE, FALSE)
-		ON CONFLICT (provider, provider_event_id) DO NOTHING
+		ON CONFLICT (provider, provider_event_id) DO UPDATE
+			SET payload = EXCLUDED.payload, signature_verified = TRUE
+			WHERE metadata.webhooks.processed = FALSE
 		RETURNING id
 	`, "stripe", event.ID, event.Type, eventJSON).Scan(&webhookID)
 
@@ -82,9 +89,14 @@ func (h *WebhookHandler) ProcessStripeWebhook(ctx context.Context, event stripe.
 	}
 
 	if processingErr != nil {
-		// Mark webhook with error
-		h.markWebhookError(ctx, tx, webhookID, processingErr.Error())
-		return processingErr // Rollback transaction, return 500 to Stripe
+		// Roll back the handler's partial work, then save the error outside the
+		// transaction so it survives. The row stays processed = FALSE, so
+		// Stripe's retry (we return 500) reprocesses the event.
+		if err := tx.Rollback(ctx); err != nil {
+			log.Printf("[Webhook] Rollback failed for event %s: %v", event.ID, err)
+		}
+		h.recordWebhookError(ctx, event, eventJSON, processingErr.Error())
+		return processingErr
 	}
 
 	// Mark webhook as processed
@@ -260,15 +272,30 @@ func (h *WebhookHandler) markWebhookProcessed(ctx context.Context, tx pgx.Tx, we
 	return err
 }
 
-// markWebhookError marks webhook with error message
-func (h *WebhookHandler) markWebhookError(ctx context.Context, tx pgx.Tx, webhookID string, errorMsg string) error {
-	_, err := tx.Exec(ctx, `
-		UPDATE metadata.webhooks
-		SET error_message = $1, processed_at = NOW()
-		WHERE id = $2
-	`, errorMsg, webhookID)
+// recordWebhookError saves a processing error on the event's webhook row,
+// creating the row if the rolled-back transaction removed it. It runs outside
+// that transaction and ignores the request's cancellation, so the error is kept
+// even when the HTTP request has ended. It never overwrites a row another
+// delivery has since processed. Failures are logged only: the caller already
+// returns the processing error.
+func (h *WebhookHandler) recordWebhookError(ctx context.Context, event stripe.Event, eventJSON []byte, errorMsg string) {
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	defer cancel()
+	_, err := h.dbPool.Exec(ctx, `
+		INSERT INTO metadata.webhooks (
+			provider,
+			provider_event_id,
+			event_type,
+			payload,
+			signature_verified,
+			processed,
+			error_message
+		) VALUES ($1, $2, $3, $4, TRUE, FALSE, $5)
+		ON CONFLICT (provider, provider_event_id) DO UPDATE
+			SET error_message = EXCLUDED.error_message
+			WHERE metadata.webhooks.processed = FALSE
+	`, "stripe", event.ID, event.Type, eventJSON, errorMsg)
 	if err != nil {
-		log.Printf("[Webhook] Failed to mark webhook error: %v", err)
+		log.Printf("[Webhook] Failed to record error for event %s: %v", event.ID, err)
 	}
-	return err
 }

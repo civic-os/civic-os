@@ -489,6 +489,20 @@ Nothing enforces these app targets yet. For measured coverage per area (2026-10-
 
 **`@civic-os/core` thresholds** (enforced): statements 97%, branches 95%, functions 99%, lines 98%, set in `packages/core/vitest.config.ts` a little below the measured numbers. `npm run test:packages` (through `test:packages:unit`) fails when core drops below any of them, locally and in CI's `sdk-packages` job, which also uploads `coverage/core/lcov.info` to Codecov under the `core` flag. Functions has the least room: a few new uncovered functions fail it. Cover new core code rather than lowering a threshold; a lower threshold needs a reason in the commit.
 
+## Go Payment Worker Tests
+
+`services/payment-worker` tests run in two tiers. Plain `go test ./...` runs the tests that need no database (fees, the Stripe adapter against an `httptest` server, webhook request rejection) and skips the rest. Setting `PAYMENT_TEST_DATABASE_URL` to a database with every core migration deployed also runs the workers and webhook processing against the real triggers. Any migrated database works. A disposable one:
+
+```bash
+docker run -d --name payment-worker-testdb -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=civic_os_test -p 55433:5432 postgis/postgis:17-3.5
+docker exec payment-worker-testdb psql -U postgres -d civic_os_test -c "CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD 'test-password';"
+sqitch deploy db:pg://postgres:postgres@localhost:55433/civic_os_test   # from the repo root
+cd services/payment-worker && PAYMENT_TEST_DATABASE_URL=postgres://postgres:postgres@localhost:55433/civic_os_test go test -race -count=1 -cover ./...
+docker rm -f payment-worker-testdb
+```
+
+The shared fixtures are in `testdb_test.go` (`newTestUser`, `insertTransaction`, `insertRefund`, `cleanupWebhook`) and `fake_provider_test.go`. Every DB test starts from `newTestUser`, whose cleanup removes the user's River jobs, refunds, transactions and notifications, so tests can run in parallel on one database and leave nothing behind. Fixture amounts are decimal strings, never `float64`. CI runs the package twice: without a database in `go-services-tests`, and against the migrated schema in `test-migrations`.
+
 ## Nightly full-stack run
 
 `.github/workflows/nightly.yml` runs, every night at 07:00 UTC, the suites that need a full example stack and are too slow for every PR. Each matrix job gets its own runner, so every job uses the standard lane.
