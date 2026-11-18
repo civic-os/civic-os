@@ -59,7 +59,7 @@ func TestRefundWorker_Success(t *testing.T) {
 
 	reID := "re_test_" + randomSuffix()
 	prov := &fakeProvider{refundResult: &RefundResult{RefundID: reID, Status: "succeeded"}}
-	w := NewRefundWorker(pool, prov, "test-instance")
+	w := NewRefundWorker(pool, prov, metadataSettings{InstanceKey: "test-instance", SiteURL: "https://civic.example.org"})
 
 	before := time.Now().Add(-time.Minute)
 	if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: piID, AmountCents: 500}); err != nil {
@@ -76,6 +76,7 @@ func TestRefundWorker_Success(t *testing.T) {
 			"civic_os_entity_type":    "reservations",
 			"civic_os_entity_id":      entityID,
 			"civic_os_instance":       "test-instance",
+			"civic_os_record_url":     "https://civic.example.org/view/reservations/" + entityID,
 			"civic_os_refund_id":      refundID,
 		}}
 	if !reflect.DeepEqual(prov.refundCalls[0], want) {
@@ -124,7 +125,7 @@ func TestRefundWorker_ProviderErrorMarksFailedAndDoesNotRetry(t *testing.T) {
 
 	provErr := errors.New("charge already refunded " + randomSuffix())
 	prov := &fakeProvider{refundErr: provErr}
-	w := NewRefundWorker(pool, prov, "")
+	w := NewRefundWorker(pool, prov, metadataSettings{})
 
 	// Deliberately nil: Stripe refund errors are treated as permanent, so River must not retry.
 	if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: piID, AmountCents: 500}); err != nil {
@@ -152,7 +153,7 @@ func TestRefundWorker_ProviderErrorMarksFailedAndDoesNotRetry(t *testing.T) {
 func TestRefundWorker_NotFound(t *testing.T) {
 	pool := testPool(t)
 	prov := &fakeProvider{}
-	w := NewRefundWorker(pool, prov, "")
+	w := NewRefundWorker(pool, prov, metadataSettings{})
 
 	err := runRefund(w, RefundWorkerArgs{
 		RefundID:        "00000000-0000-4000-8000-" + randomSuffix()[:12],
@@ -176,7 +177,7 @@ func TestRefundWorker_SkipsWhenNotPending(t *testing.T) {
 			txID := insertTransaction(t, pool, user, txFixture{Status: "succeeded", ProviderPaymentID: "pi_test_" + randomSuffix()})
 			refundID := insertRefund(t, pool, txID, user, refundFixture{Status: status})
 			prov := &fakeProvider{}
-			w := NewRefundWorker(pool, prov, "")
+			w := NewRefundWorker(pool, prov, metadataSettings{})
 
 			if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: "pi_x", AmountCents: 500}); err != nil {
 				t.Fatalf("Work: %v", err)
@@ -207,7 +208,7 @@ func TestRefundWorker_NullTransactionDescription(t *testing.T) {
 	refundID := insertRefund(t, pool, txID, user, refundFixture{})
 
 	prov := &fakeProvider{}
-	w := NewRefundWorker(pool, prov, "")
+	w := NewRefundWorker(pool, prov, metadataSettings{})
 	if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: piID, AmountCents: 500}); err != nil {
 		t.Fatalf("Work: %v", err)
 	}

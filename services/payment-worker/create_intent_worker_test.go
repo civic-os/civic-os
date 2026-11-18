@@ -126,7 +126,7 @@ func TestCreateIntentWorker_Success(t *testing.T) {
 			secret := "secret_" + randomSuffix()
 			prov := &fakeProvider{intentResult: &PaymentIntentResult{PaymentIntentID: piID, ClientSecret: secret}}
 			fee := tt.fee
-			w := NewCreateIntentWorker(pool, prov, &fee, "test-instance")
+			w := NewCreateIntentWorker(pool, prov, &fee, metadataSettings{InstanceKey: "test-instance", SiteURL: "https://civic.example.org"})
 
 			if err := runCreateIntent(w, id); err != nil {
 				t.Fatalf("Work: %v", err)
@@ -144,6 +144,7 @@ func TestCreateIntentWorker_Success(t *testing.T) {
 					"civic_os_entity_type":    "permits",
 					"civic_os_entity_id":      entityID,
 					"civic_os_instance":       "test-instance",
+					"civic_os_record_url":     "https://civic.example.org/view/permits/" + entityID,
 					"civic_os_base_cents":     strconv.FormatInt(tt.wantCents-feeCents, 10),
 					"civic_os_fee_cents":      strconv.FormatInt(feeCents, 10),
 				}}
@@ -189,7 +190,8 @@ func TestCreateIntentWorker_MetadataOmitsMissingValues(t *testing.T) {
 	user := newTestUser(t, pool)
 	id := insertTransaction(t, pool, user, txFixture{Amount: "12.34"})
 	prov := &fakeProvider{}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, "")
+	// SITE_URL is set, but with a NULL entity there is no record to link to.
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{SiteURL: "https://civic.example.org"})
 	if err := runCreateIntent(w, id); err != nil {
 		t.Fatalf("Work: %v", err)
 	}
@@ -215,7 +217,7 @@ func TestCreateIntentWorker_NullDescriptionSendsEmptyString(t *testing.T) {
 		t.Fatal(err)
 	}
 	prov := &fakeProvider{}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, "")
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{})
 	if err := runCreateIntent(w, id); err != nil {
 		t.Fatalf("Work: %v", err)
 	}
@@ -231,7 +233,7 @@ func TestCreateIntentWorker_ProviderError(t *testing.T) {
 
 	provErr := errors.New("stripe down " + randomSuffix())
 	prov := &fakeProvider{intentErr: provErr}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30, Refundable: true}, "")
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30, Refundable: true}, metadataSettings{})
 
 	err := runCreateIntent(w, id)
 	if err == nil {
@@ -260,7 +262,7 @@ func TestCreateIntentWorker_ProviderError(t *testing.T) {
 func TestCreateIntentWorker_NotFound(t *testing.T) {
 	pool := testPool(t)
 	prov := &fakeProvider{}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, "")
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{})
 
 	err := runCreateIntent(w, "00000000-0000-4000-8000-"+randomSuffix()[:12])
 	if err == nil || !strings.Contains(err.Error(), "payment not found") {
@@ -279,7 +281,7 @@ func TestCreateIntentWorker_SkipsWhenNotPendingIntent(t *testing.T) {
 			user := newTestUser(t, pool)
 			id := insertTransaction(t, pool, user, txFixture{Status: status})
 			prov := &fakeProvider{}
-			w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30}, "")
+			w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30}, metadataSettings{})
 
 			if err := runCreateIntent(w, id); err != nil {
 				t.Fatalf("Work: %v", err)
@@ -313,7 +315,7 @@ func TestCreateIntentWorker_FractionalCentsAmounts(t *testing.T) {
 			user := newTestUser(t, pool)
 			id := insertTransaction(t, pool, user, txFixture{Amount: tt.amount})
 			prov := &fakeProvider{}
-			w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, "")
+			w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{})
 			if err := runCreateIntent(w, id); err != nil {
 				t.Fatalf("Work: %v", err)
 			}

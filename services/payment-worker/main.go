@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -53,8 +52,12 @@ func main() {
 	feeFlatCents := getEnvInt("PROCESSING_FEE_FLAT_CENTS", 0)
 	feeRefundable := getEnvBool("PROCESSING_FEE_REFUNDABLE", false)
 
-	// Sent as civic_os_instance metadata on every PaymentIntent and Refund
-	instanceKey := strings.TrimSpace(getEnv("PAYMENT_INSTANCE_KEY", ""))
+	// Sent as civic_os_instance and civic_os_record_url metadata on every
+	// PaymentIntent and Refund. SITE_URL has no default here, so an unset value
+	// sends no link rather than a localhost one.
+	instanceKey, instanceKeyWarning, instanceKeyErr := resolveInstanceKey(stripeAPIKey, getEnv("PAYMENT_INSTANCE_KEY", ""))
+	siteURL, siteURLErr := resolveSiteURL(getEnv("SITE_URL", ""))
+	stripeMetadata := metadataSettings{InstanceKey: instanceKey, SiteURL: siteURL}
 
 	log.Printf("[Init] Configuration loaded:")
 	log.Printf("[Init]   Database: %s", maskPassword(databaseURL))
@@ -75,6 +78,11 @@ func main() {
 	} else {
 		log.Printf("[Init]   Instance Key (Stripe metadata): not set")
 	}
+	if siteURL != "" {
+		log.Printf("[Init]   Site URL (Stripe record links): %s", siteURL)
+	} else {
+		log.Printf("[Init]   Site URL (Stripe record links): not set")
+	}
 
 	// Validate required configuration
 	if stripeAPIKey == "" {
@@ -83,10 +91,13 @@ func main() {
 	if stripeWebhookSecret == "" {
 		log.Fatal("[Init] STRIPE_WEBHOOK_SECRET environment variable is required")
 	}
-	if warning, err := checkInstanceKey(stripeAPIKey, instanceKey); err != nil {
-		log.Fatalf("[Init] %v", err)
-	} else if warning != "" {
-		log.Printf("[Init] ⚠ %s", warning)
+	if instanceKeyErr != nil {
+		log.Fatalf("[Init] %v", instanceKeyErr)
+	} else if instanceKeyWarning != "" {
+		log.Printf("[Init] ⚠ %s", instanceKeyWarning)
+	}
+	if siteURLErr != nil {
+		log.Fatalf("[Init] %v", siteURLErr)
 	}
 
 	// ===========================================================================
@@ -146,12 +157,12 @@ func main() {
 	}
 
 	// Register CreateIntentWorker (for async payment intent creation)
-	createIntentWorker := NewCreateIntentWorker(dbPool, stripeProvider, feeConfig, instanceKey)
+	createIntentWorker := NewCreateIntentWorker(dbPool, stripeProvider, feeConfig, stripeMetadata)
 	river.AddWorker(workers, createIntentWorker)
 	log.Println("[Init] ✓ Registered CreateIntentWorker")
 
 	// Register RefundWorker (for async refund processing)
-	refundWorker := NewRefundWorker(dbPool, stripeProvider, instanceKey)
+	refundWorker := NewRefundWorker(dbPool, stripeProvider, stripeMetadata)
 	river.AddWorker(workers, refundWorker)
 	log.Println("[Init] ✓ Registered RefundWorker")
 

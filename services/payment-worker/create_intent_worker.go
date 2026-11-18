@@ -71,19 +71,19 @@ func (CreateIntentWorkerArgs) Kind() string {
 // CreateIntentWorker processes payment intent creation jobs
 type CreateIntentWorker struct {
 	river.WorkerDefaults[CreateIntentWorkerArgs]
-	dbPool      *pgxpool.Pool
-	provider    PaymentProvider
-	feeConfig   *FeeConfig
-	instanceKey string // PAYMENT_INSTANCE_KEY, sent as civic_os_instance when set
+	dbPool    *pgxpool.Pool
+	provider  PaymentProvider
+	feeConfig *FeeConfig
+	metadata  metadataSettings // settings sent as Stripe metadata
 }
 
 // NewCreateIntentWorker creates a new CreateIntentWorker
-func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig, instanceKey string) *CreateIntentWorker {
+func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig, metadata metadataSettings) *CreateIntentWorker {
 	return &CreateIntentWorker{
-		dbPool:      dbPool,
-		provider:    provider,
-		feeConfig:   feeConfig,
-		instanceKey: instanceKey,
+		dbPool:    dbPool,
+		provider:  provider,
+		feeConfig: feeConfig,
+		metadata:  metadata,
 	}
 }
 
@@ -185,7 +185,7 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 			TransactionID: payment.ID,
 			EntityType:    payment.EntityType,
 			EntityID:      payment.EntityID,
-		}, w.instanceKey, baseAmountCents, feeCents),
+		}, w.metadata, baseAmountCents, feeCents),
 	})
 	if err != nil {
 		log.Printf("[CreateIntent] Error creating Stripe intent for payment %s: %v", paymentID, err)

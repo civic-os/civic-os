@@ -37,6 +37,7 @@ RPC polls status                       Updates database
 | `STRIPE_API_KEY` | Yes | _(none)_ | Stripe secret key (sk_test_... or sk_live_...) |
 | `PAYMENT_CURRENCY` | No | `USD` | Default currency for payments |
 | `PAYMENT_INSTANCE_KEY` | No | _(none)_ | Sent as `civic_os_instance` metadata on every PaymentIntent and Refund (v0.81.4+). Warning at startup if unset with a live Stripe key |
+| `SITE_URL` | No | _(none)_ | Public frontend URL; the base of the `civic_os_record_url` metadata link to the paid record (v0.81.4+). Startup fails on a value that is not an absolute http(s) URL |
 | `RIVER_WORKER_COUNT` | No | `1` | Number of concurrent workers |
 | `DB_MAX_CONNS` | No | `4` | Max database connections |
 | `DB_MIN_CONNS` | No | `1` | Min database connections |

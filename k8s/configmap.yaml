@@ -48,7 +48,8 @@ data:
   THUMBNAIL_MAX_WORKERS: "5"
 
   # Notification Configuration (v0.11.0+)
-  # Public URL for links in notification emails
+  # Public URL for links in notification emails, and the base of the paid
+  # record's link (civic_os_record_url) on Stripe objects (v0.81.4+)
   SITE_URL: "https://app.yourdomain.com"
   # Email address for notification sender (must be verified with your SMTP provider)
   SMTP_FROM: "notifications@yourdomain.com"

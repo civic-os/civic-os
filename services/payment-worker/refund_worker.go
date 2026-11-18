@@ -27,17 +27,17 @@ func (RefundWorkerArgs) Kind() string {
 // RefundWorker processes refund jobs
 type RefundWorker struct {
 	river.WorkerDefaults[RefundWorkerArgs]
-	dbPool      *pgxpool.Pool
-	provider    PaymentProvider
-	instanceKey string // PAYMENT_INSTANCE_KEY, sent as civic_os_instance when set
+	dbPool   *pgxpool.Pool
+	provider PaymentProvider
+	metadata metadataSettings // settings sent as Stripe metadata
 }
 
 // NewRefundWorker creates a new RefundWorker
-func NewRefundWorker(dbPool *pgxpool.Pool, provider PaymentProvider, instanceKey string) *RefundWorker {
+func NewRefundWorker(dbPool *pgxpool.Pool, provider PaymentProvider, metadata metadataSettings) *RefundWorker {
 	return &RefundWorker{
-		dbPool:      dbPool,
-		provider:    provider,
-		instanceKey: instanceKey,
+		dbPool:   dbPool,
+		provider: provider,
+		metadata: metadata,
 	}
 }
 
@@ -111,7 +111,7 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 			TransactionID: refund.TransactionID,
 			EntityType:    refund.EntityType,
 			EntityID:      refund.EntityID,
-		}, refund.ID, w.instanceKey),
+		}, refund.ID, w.metadata),
 	})
 	if err != nil {
 		log.Printf("[Refund] Error creating Stripe refund for %s: %v", refundID, err)

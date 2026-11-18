@@ -203,6 +203,8 @@ services:
       PAYMENT_CURRENCY: ${PAYMENT_CURRENCY:-USD}
       # Sent as civic_os_instance metadata on Stripe objects (v0.81.4+)
       PAYMENT_INSTANCE_KEY: ${PAYMENT_INSTANCE_KEY:-}
+      # Base of civic_os_record_url, the paid record's link on Stripe objects (v0.81.4+)
+      SITE_URL: ${SITE_URL:-https://${APP_DOMAIN}}
       RIVER_WORKER_COUNT: ${PAYMENT_WORKER_COUNT:-1}
 
       # Processing Fee Configuration (optional)

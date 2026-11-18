@@ -75,6 +75,12 @@ spec:
               name: civic-os-config
               key: PAYMENT_INSTANCE_KEY
               optional: true  # civic_os_instance Stripe metadata; omitted when unset
+        - name: SITE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: SITE_URL
+              optional: true  # base of civic_os_record_url Stripe metadata; omitted when unset
         - name: RIVER_WORKER_COUNT
           value: "1"
         - name: WEBHOOK_PORT

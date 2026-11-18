@@ -1,6 +1,6 @@
 # Stripe Metadata Design
 
-**Status**: Phase 1 built (v0.81.4): reserved keys on PaymentIntents and Refunds, and `PAYMENT_INSTANCE_KEY`. Phases 2 to 5 are directional, not scheduled.
+**Status**: Phase 1 built (v0.81.4): reserved keys on PaymentIntents and Refunds, `PAYMENT_INSTANCE_KEY`, and a link to the paid record built from `SITE_URL`. Phases 2 to 5 are directional, not scheduled.
 **Date**: 2026-11-18
 **Audience**: Civic OS contributors working on the payment worker and the Accounting Attribution module; integrators who build payable entities.
 
@@ -12,7 +12,7 @@ This note proposes sending Stripe **metadata** with every PaymentIntent and Refu
 
 | Layer | Keys | Source | Configured by |
 |---|---|---|---|
-| Reserved keys | `civic_os_transaction_id`, `civic_os_entity_type`, `civic_os_entity_id`, `civic_os_instance`, `civic_os_base_cents`, `civic_os_fee_cents`, plus `civic_os_refund_id` on refunds | Columns the worker already has, and one worker setting | Nobody. Always sent. |
+| Reserved keys | `civic_os_transaction_id`, `civic_os_entity_type`, `civic_os_entity_id`, `civic_os_instance`, `civic_os_record_url`, `civic_os_base_cents`, `civic_os_fee_cents`, plus `civic_os_refund_id` on refunds | Columns the worker already has, and two worker settings | Nobody. Always sent. |
 | Integrator keys | Anything the instance wants a Stripe admin to see (`reservation_id`, `program`, `event_date`) | A validated JSONB snapshot on the transaction row, passed by the initiation RPC | The integrator, per payment |
 
 Reserved keys identify the payment. They don't classify it: account, program and funding source belong to the Accounting Attribution ledger, which can be corrected later, while Stripe metadata is a snapshot taken when the payment is created. The join key between the two is `civic_os_transaction_id`.
@@ -67,11 +67,12 @@ Verified against Stripe's metadata, search and reporting documentation (2026-11-
 | `civic_os_entity_type` | `entity_type` | PaymentIntent, Refund | Table name, not display name: display names are translated and editable |
 | `civic_os_entity_id` | `entity_id` | PaymentIntent, Refund | Omitted when NULL |
 | `civic_os_instance` | Worker setting (see below) | PaymentIntent, Refund | Omitted when unset |
+| `civic_os_record_url` | `<SITE_URL>/view/<entity_type>/<entity_id>` | PaymentIntent, Refund | The paid record's Detail page. Omitted when `SITE_URL` is unset or the entity is NULL (see below) |
 | `civic_os_base_cents` | `amount × 100` | PaymentIntent | Integer string. Stripe's `amount` is the total. |
 | `civic_os_fee_cents` | `processing_fee × 100` | PaymentIntent | `"0"` when fees are disabled, so a report column is never blank |
 | `civic_os_refund_id` | `payments.refunds.id` | Refund | The existing `reason` key stays as it is |
 
-Seven keys at most, which leaves 43 for integrators.
+Eight keys at most, which leaves 42 for integrators.
 
 **The `civic_os_` prefix.** One Stripe account often serves more than one system: a donation platform, a point-of-sale app, a second Civic OS instance. A prefix keeps our keys from colliding with theirs, groups them in the report column picker, and lets validation reject integrator keys that try to impersonate core keys.
 
@@ -88,6 +89,16 @@ Seven keys at most, which leaves 43 for integrators.
 | `app_title` | Already set, but it's display text that admins can change and translate. A bad key. |
 
 Under Stripe Connect with direct charges, each organization's own Stripe account usually serves one instance, so the key is redundant there. It costs nothing, though, and still works if an organization later runs two instances.
+
+### Record link
+
+`civic_os_record_url` lets a Stripe admin go from a payment to the record it paid for in one step, instead of reading `entity_type` and `entity_id` and building the route by hand. Stripe accepts any string as a metadata value, so a URL is allowed; the Dashboard shows it as plain text, not a link.
+
+- **Base.** The payment worker reads `SITE_URL`, the variable the consolidated worker already uses for links in notifications, so one deployment setting serves both. The payment worker has no default: an unset value leaves the key out rather than sending `http://localhost:4200` from a misconfigured production worker. Startup refuses a value that is not an absolute `http` or `https` URL or that carries a query or fragment, because every link built from it would be broken. A trailing slash is dropped and a path is kept, for a frontend served under one.
+- **Route.** `/view/<entity_type>/<entity_id>` is the Detail route, and `entity_type` is the table name it takes (the `/admin/payments` page builds the same route). Each segment is path-escaped, because `entity_id` is any primary key as text.
+- **Snapshot.** Like every key, the URL is written once. A domain change leaves older Stripe objects pointing at the old host, and changing `SITE_URL` while a payment job waits to retry breaks that retry's idempotency key, the same as changing `PAYMENT_INSTANCE_KEY`. The worker could instead send only the path, but a path is not something a Stripe admin can open.
+- **Access.** The link grants nothing: the page asks for sign-in and shows the record only to users whose permissions allow it. It does reveal the instance's host to anyone with Dashboard access, which they can already infer from `civic_os_instance`.
+- **Which record.** The link names `entity_type`'s record. Where that is a payment child table (Mott Park's `reservation_payments`), the record a bookkeeper wants is its parent; Phase 4's integrator keys carry that.
 
 ### Where the keys are assembled
 
@@ -276,6 +287,7 @@ The posting rules stay in Accounting Attribution. This design only makes sure th
 | # | Question | Leaning | Alternative |
 |---|---|---|---|
 | 1 | Key namespace | `civic_os_` prefix on every core key; integrator keys may not use it | Bare keys (`entity_type`): shorter, but they collide with other systems on the same account |
+| 2a | Record link | `civic_os_record_url` built from `SITE_URL`, no default in the payment worker | Path only: survives domain changes, but can't be opened from Stripe |
 | 2 | Instance identifier source | `PAYMENT_INSTANCE_KEY` env var on the payment worker, omitted when unset | An `instance_config` key: editable, but requires the worker to read the config store, and renames split history |
 | 3 | Payer in metadata | No; the transaction id leads to the user | `civic_os_user_id`: pseudonymous, but adds nothing a Stripe admin can use |
 | 4 | Integrator mechanism | `p_metadata` parameter on `create_and_link_payment()`, stored in `outbound_metadata` | Declarative `path:` mapping on `metadata.entities`, later, on the same column |
@@ -289,7 +301,7 @@ The posting rules stay in Accounting Attribution. This design only makes sure th
 
 | Phase | Scope | Size |
 |---|---|---|
-| 1 | Reserved keys on PaymentIntent and Refund; `PAYMENT_INSTANCE_KEY`; Go unit tests on the params builder; Integrator Guide and payment guide updates | Worker only. No migration. **Built in v0.81.4.** |
+| 1 | Reserved keys on PaymentIntent and Refund; `PAYMENT_INSTANCE_KEY`; record link from `SITE_URL`; Go unit tests on the params builder; Integrator Guide and payment guide updates | Worker only. No migration. **Built in v0.81.4.** |
 | 2 | Neutral webhook event layer; `provider_account_ref`, `provider_environment`, `provider_charge_ref`, method type and label, `completed_at`, `receipt_url`, `provider_details`; refunds made outside Civic OS | One migration plus a webhook handler refactor |
 | 3 | `provider_fee`, `net_amount`, settlement columns, `payments.disputes`; shown on `/admin/payments` | One migration plus three new event types |
 | 4 | `outbound_metadata` column, validation trigger, `p_metadata` on `create_and_link_payment()`; shown on the `/admin/payments` detail; one example (Mott Park `reservation_payments` passing `reservation_id`) | One migration plus the worker merge |
