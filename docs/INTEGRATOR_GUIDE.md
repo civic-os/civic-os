@@ -4285,7 +4285,7 @@ Since v0.81.4 the payment worker sends Stripe **metadata** with every PaymentInt
 - **Payout and balance reports**: add `payment_metadata[civic_os_transaction_id]` (and any other key) as a column when downloading. Report columns read the PaymentIntent's metadata, which also covers refunds' original payments.
 - **Dashboard and Search API**: filter with `metadata['civic_os_entity_type']:'reservation_requests'` or by transaction id.
 - **Charges**: Stripe copies PaymentIntent metadata to the Charge once, when the Charge is created.
-- **Record links**: Stripe shows metadata as plain text, so open `civic_os_record_url` by copying it. The page asks for sign-in and shows the record only to users whose permissions allow it.
+- **Record links**: the Stripe Dashboard shows `civic_os_record_url` as a clickable link. The page asks for sign-in and shows the record only to users whose permissions allow it.
 
 **Notes**:
 

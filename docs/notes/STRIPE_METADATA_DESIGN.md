@@ -92,7 +92,7 @@ Under Stripe Connect with direct charges, each organization's own Stripe account
 
 ### Record link
 
-`civic_os_record_url` lets a Stripe admin go from a payment to the record it paid for in one step, instead of reading `entity_type` and `entity_id` and building the route by hand. Stripe accepts any string as a metadata value, so a URL is allowed; the Dashboard shows it as plain text, not a link.
+`civic_os_record_url` lets a Stripe admin go from a payment to the record it paid for in one step, instead of reading `entity_type` and `entity_id` and building the route by hand. Stripe accepts any string as a metadata value, so a URL is allowed, and the Dashboard renders a URL value as a clickable link (checked in a sandbox, 2026-11-18).
 
 - **Base.** The payment worker reads `SITE_URL`, the variable the consolidated worker already uses for links in notifications, so one deployment setting serves both. The payment worker has no default: an unset value leaves the key out rather than sending `http://localhost:4200` from a misconfigured production worker. Startup refuses a value that is not an absolute `http` or `https` URL or that carries a query or fragment, because every link built from it would be broken. A trailing slash is dropped and a path is kept, for a frontend served under one.
 - **Route.** `/view/<entity_type>/<entity_id>` is the Detail route, and `entity_type` is the table name it takes (the `/admin/payments` page builds the same route). Each segment is path-escaped, because `entity_id` is any primary key as text.
