@@ -26,6 +26,8 @@ import { DashboardService } from '../../services/dashboard.service';
 import { Dashboard } from '../../interfaces/dashboard';
 import { MOCK_DASHBOARDS } from '../../testing';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { TranslationService } from '../../services/translation.service';
+import { EN_TRANSLATIONS } from '../../i18n/en.translations';
 
 describe('DashboardSelectorComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -50,6 +52,21 @@ describe('DashboardSelectorComponent', () => {
         routerEvents.next(new NavigationEnd(1, '/', '/'));
     };
     const goToDashboard = (id?: string) => (id === undefined ? setRoute('') : setRoute('dashboard/:id', { id }));
+    // Like the real TranslationService: the locale's text, else the bundled English, else the key.
+    // Switching the locale bumps the version, as a translation load does.
+    const SPANISH: Record<string, string> = {
+        'a11y.select_dashboard': 'Seleccionar tablero',
+        'dashboard.default': 'Tablero Predeterminado',
+        'dashboard.all': 'Todos los tableros',
+        'dashboard.loading_list': 'Cargando tableros...',
+        'dashboard.unnamed': 'Tablero'
+    };
+    let locale: ReturnType<typeof signal<string>>;
+    let translationVersion: ReturnType<typeof signal<number>>;
+    const setLocale = (code: string) => {
+        locale.set(code);
+        translationVersion.update(v => v + 1);
+    };
 
     beforeEach(async () => {
         // Create mock services
@@ -65,6 +82,15 @@ describe('DashboardSelectorComponent', () => {
             routerState: { snapshot: { root: { routeConfig: null, paramMap: convertToParamMap({}), firstChild: null } } }
         };
 
+        locale = signal('en');
+        translationVersion = signal(1);
+        const mockTranslationService = {
+            version: translationVersion.asReadonly(),
+            loading: signal(false),
+            get: (key: string) => (locale() === 'es' ? SPANISH[key] : undefined) ?? EN_TRANSLATIONS[key] ?? key,
+            clearCache: () => {}
+        };
+
         // Set default mock return values to prevent "Cannot read properties of undefined"
         // Individual tests can override these as needed
         givenDashboards(of([]));
@@ -76,7 +102,8 @@ describe('DashboardSelectorComponent', () => {
                 provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()),
                 { provide: DashboardService, useValue: mockDashboardService },
-                { provide: Router, useValue: mockRouter }
+                { provide: Router, useValue: mockRouter },
+                { provide: TranslationService, useValue: mockTranslationService }
             ]
         }).compileComponents();
 
@@ -435,6 +462,44 @@ describe('DashboardSelectorComponent', () => {
             expect(menuItems.length).toBe(mockDashboards.length + 1);
         });
 
+        // #120: below sm the wrapper must not be the menu's containing block, so the
+        // menu is placed against the screen's end edge and capped to the viewport.
+        // Physical left/right classes would break RTL, so only logical ones are allowed.
+        const expectPhonePlacement = (compiled: HTMLElement) => {
+            const wrapper = compiled.querySelector('.dropdown') as HTMLElement;
+            const menu = compiled.querySelector('.dropdown-content') as HTMLElement;
+            expect(wrapper.classList).toContain('dropdown-end');
+            expect(wrapper.classList).toContain('max-sm:static');
+            expect(menu.classList).toContain('w-72');
+            expect(menu.classList).toContain('max-sm:end-2');
+            expect(menu.classList).toContain('max-sm:max-w-[calc(100vw-1rem)]');
+            const physical = [...wrapper.classList, ...menu.classList]
+                .filter(c => /(^|:)-?(left|right|ml|mr|pl|pr)-/.test(c));
+            expect(physical).toEqual([]);
+        };
+
+        it('should place the menu against the screen edge below sm', async () => {
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expectPhonePlacement(fixture.nativeElement as HTMLElement);
+        });
+
+        it('should place the loading menu the same way below sm', async () => {
+            givenDashboards(new Observable<Dashboard[]>(() => {}));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            expect(compiled.querySelector('.loading-spinner')).toBeTruthy();
+            expectPhonePlacement(compiled);
+        });
+
         it('should render default dashboard option', async () => {
             givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
@@ -715,6 +780,65 @@ describe('DashboardSelectorComponent', () => {
 
             expect(menuLabels(el).some(l => l.includes(legacy.display_name))).toBe(true);
             expect(el.querySelector('.dropdown-content .menu-title')).not.toBeNull();
+        });
+    });
+
+    describe('Translated labels', () => {
+        const render = async (dashboards: Dashboard[]) => {
+            givenDashboards(of(dashboards));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+            return fixture.nativeElement as HTMLElement;
+        };
+        const button = (el: HTMLElement) => el.querySelector('button.btn') as HTMLButtonElement;
+
+        it('should show the menu and button labels in the user\'s language', async () => {
+            setLocale('es');
+            const el = await render([MOCK_DASHBOARDS.welcome]);
+
+            expect(component.getCurrentDashboardName()).toBe('Tablero Predeterminado');
+            expect(button(el).getAttribute('aria-label')).toBe('Seleccionar tablero: Tablero Predeterminado');
+            const menu = el.querySelector('.dropdown-content') as HTMLElement;
+            expect(menu.querySelector('li button')?.textContent).toContain('Tablero Predeterminado');
+            expect(menu.querySelector('.menu-title')?.textContent?.trim()).toBe('Todos los tableros');
+            expect(el.textContent).not.toContain('Default Dashboard');
+            expect(el.textContent).not.toContain('All Dashboards');
+        });
+
+        it('should translate the fallback name of a dashboard missing from the list', async () => {
+            setLocale('es');
+            await render([MOCK_DASHBOARDS.welcome]);
+            goToDashboard('999');
+
+            expect(component.getCurrentDashboardName()).toBe('Tablero');
+        });
+
+        it('should translate the loading state', async () => {
+            setLocale('es');
+            // A fetch that never lands keeps the selector loading
+            givenDashboards(new Observable<Dashboard[]>(() => {}));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            fixture.detectChanges();
+            const el = fixture.nativeElement as HTMLElement;
+
+            expect(el.querySelector('.loading-spinner')).toBeTruthy();
+            expect(el.textContent).toContain('Cargando tableros...');
+        });
+
+        it('should follow a locale switch without reloading the dashboards', async () => {
+            const el = await render([MOCK_DASHBOARDS.welcome]);
+            expect(button(el).textContent).toContain('Default Dashboard');
+            const loads = mockDashboardService.getDashboards.mock.calls.length;
+
+            setLocale('es');
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expect(button(el).textContent).toContain('Tablero Predeterminado');
+            expect(el.querySelector('.menu-title')?.textContent?.trim()).toBe('Todos los tableros');
+            expect(mockDashboardService.getDashboards.mock.calls.length).toBe(loads);
         });
     });
 });

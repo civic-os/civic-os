@@ -1,5 +1,7 @@
 <!-- Dashboard Selector Dropdown (DaisyUI) -->
-<div class="dropdown dropdown-end">
+<!-- Below sm the wrapper is static, so the menu is placed against the full-width
+     drawer (end edge of the screen) instead of the button, and never runs off screen. -->
+<div class="dropdown dropdown-end max-sm:static">
   <!-- Dropdown Button -->
   <button type="button" class="btn btn-ghost" [attr.aria-label]="('a11y.select_dashboard' | translate) + ': ' + getCurrentDashboardName()">
     <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
@@ -11,7 +13,7 @@
   @if (!loading() && dashboards().length > 0) {
     <ul
       tabindex="0"
-      class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 p-2 shadow-lg border border-base-300"
+      class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 max-sm:max-w-[calc(100vw-1rem)] max-sm:end-2 p-2 shadow-lg border border-base-300"
     >
       <!-- Default Dashboard -->
       <li>
@@ -22,7 +24,7 @@
           class="flex items-center"
         >
           <span class="material-symbols-outlined" aria-hidden="true">home</span>
-          <span>Default Dashboard</span>
+          <span>{{ 'dashboard.default' | translate }}</span>
           @if (currentDashboardId() === undefined) {
             <span class="material-symbols-outlined ms-auto text-primary" aria-hidden="true">check</span>
           }
@@ -31,7 +33,7 @@
 
       @if (listedDashboards().length > 0) {
         <li class="menu-title">
-          <span>All Dashboards</span>
+          <span>{{ 'dashboard.all' | translate }}</span>
         </li>
       }
 
@@ -66,12 +68,12 @@
   @if (loading()) {
     <ul
       tabindex="0"
-      class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 p-2 shadow-lg border border-base-300"
+      class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 max-sm:max-w-[calc(100vw-1rem)] max-sm:end-2 p-2 shadow-lg border border-base-300"
     >
       <li class="menu-disabled">
         <a class="flex items-center justify-center">
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-          <span class="ms-2">Loading dashboards...</span>
+          <span class="ms-2">{{ 'dashboard.loading_list' | translate }}</span>
         </a>
       </li>
     </ul>

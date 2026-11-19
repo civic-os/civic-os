@@ -1188,7 +1188,7 @@ services:
 - **SSL/TLS connections** to PostgreSQL
 - **Row-Level Security** enabled on all tables
 - **Regular security updates** to PostgreSQL: apply minor releases promptly (pull the image and restart; the data directory is unchanged)
-- **No temporary objects for non-owner roles**: v0.82.1 revokes `TEMPORARY` from `PUBLIC` on the Civic OS database; as a superuser, revoke it on the cluster's other databases too. See `docs/notes/CVE_2026_6460_RESPONSE.md`
+- **No temporary objects for non-owner roles**: v0.82.2 revokes `TEMPORARY` from `PUBLIC` on the Civic OS database; as a superuser, revoke it on the cluster's other databases too. See `docs/notes/CVE_2026_6460_RESPONSE.md`
 
 ### 3. Application Security
 
