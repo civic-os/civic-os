@@ -489,22 +489,25 @@ jobs:
             --rawfile context release-context.txt \
             '{
               "anthropic_version": "bedrock-2023-05-31",
-              "max_tokens": 2048,
-              "temperature": 0.3,
+              "max_tokens": 8192,
+              "output_config": {"effort": "low"},
               "system": $system,
               "messages": [{"role": "user", "content": ("Generate release notes for Civic OS v" + $version + ".\n\n" + $context)}]
             }' > bedrock-request.json
 
-          # Call Bedrock
+          # Call Bedrock. Sonnet 5.5 rejects temperature/top_p/top_k and thinks
+          # by default (thinking tokens count toward max_tokens).
           aws bedrock-runtime invoke-model \
-            --model-id us.anthropic.claude-sonnet-4-6 \
+            --model-id us.anthropic.claude-sonnet-5-5 \
             --content-type application/json \
             --accept application/json \
             --body fileb://bedrock-request.json \
             bedrock-response.json
 
-          # Extract the text response
-          jq -r '.content[0].text' bedrock-response.json > ai-release-notes.md
+          # Extract the text blocks by type: the response can start with a
+          # thinking block. A refusal yields an empty file, so the fallback runs.
+          jq -j 'if .stop_reason == "refusal" then "" else ([.content[]? | select(.type == "text") | .text] | join("")) end' \
+            bedrock-response.json > ai-release-notes.md
 
           if [ -s ai-release-notes.md ]; then
             echo "llm_success=true" >> $GITHUB_OUTPUT
