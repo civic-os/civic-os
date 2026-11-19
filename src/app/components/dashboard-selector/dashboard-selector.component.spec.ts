@@ -707,10 +707,11 @@ describe('DashboardSelectorComponent', () => {
             expect(el.querySelector('.dropdown-content .menu-title')).toBeNull();
         });
 
-        it('should treat a dashboard without the flag as listed (instance before v0.82.0)', async () => {
-            const legacy: Dashboard = { ...MOCK_DASHBOARDS.welcome };
-            delete legacy.show_in_selector;
-            const el = await render([legacy]);
+        it('should treat a response without the flag as listed (old get_dashboards() during a deploy)', async () => {
+            // The type requires the field, but a browser can load the new frontend while PostgREST still
+            // serves the pre-v0.82.0 function for a few seconds; the selector then lists everything.
+            const { show_in_selector: _omitted, ...legacy } = MOCK_DASHBOARDS.welcome;
+            const el = await render([legacy as Dashboard]);
 
             expect(menuLabels(el).some(l => l.includes(legacy.display_name))).toBe(true);
             expect(el.querySelector('.dropdown-content .menu-title')).not.toBeNull();

@@ -52,7 +52,8 @@ export class DashboardSelectorComponent {
   // Read from the service's signal so a refresh (locale or role change) updates the menu
   dashboards = computed<Dashboard[]>(() => this.dashboardService.dashboards() ?? []);
   // The menu lists only these; the button label reads the full list, so an unlisted dashboard opened by
-  // link is still named. A missing flag (instance before v0.82.0) counts as listed.
+  // link is still named. A missing flag counts as listed: for a few seconds of a deploy the new frontend
+  // can meet the old get_dashboards().
   listedDashboards = computed<Dashboard[]>(() => this.dashboards().filter((d) => d.show_in_selector !== false));
   currentDashboardId = signal<number | undefined>(undefined);
   loading = signal(true);
