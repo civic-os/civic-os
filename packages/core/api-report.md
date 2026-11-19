@@ -626,6 +626,7 @@ interface Dashboard {
   created_at: string;
   updated_at: string;
   is_role_default?: boolean | undefined;
+  show_in_selector?: boolean | undefined;
   widgets?: Array<DashboardWidget> | undefined;
 }
 ```

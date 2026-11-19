@@ -151,7 +151,7 @@ This generates ~250 participants, 42 teams, 400 roster assignments, and 18 spons
 npm start
 ```
 
-Navigate to **http://localhost:4200** and use the dashboard selector in the navbar to explore the four chapters.
+Navigate to **http://localhost:4200**. The story opens on chapter 1 (2018), the only chapter in the dashboard selector. Chapters 2-4 are unlisted (`show_in_selector = false`, set by `08_storymap_unlisted_chapters.sql`): follow the forward button or the year chips at the bottom of each chapter to read on. Unlisted chapters stay public and open by direct link (`/dashboard/3`). To list every chapter in the selector, set `show_in_selector = true` on them.
 
 ## Editing the Narrative
 
@@ -192,7 +192,9 @@ examples/storymap/
     ├── 03_storymap_metadata.sql       # Entity/property customization
     ├── 04_storymap_dashboards.sql     # Dashboard & widget configuration
     ├── 05_mock_data.sql               # Generated mock data
-    └── 06_storymap_rbac.sql           # RBAC permissions (create/update/delete per role)
+    ├── 06_storymap_rbac.sql           # RBAC permissions (create/update/delete per role)
+    ├── 07_storymap_menu_layout.sql    # Sidebar menu tree
+    └── 08_storymap_unlisted_chapters.sql  # Chapters 2-4 left out of the dashboard selector
 ```
 
 ## Use Cases

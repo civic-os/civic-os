@@ -18,9 +18,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
+import { Router, NavigationEnd, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { of, throwError, Observable, BehaviorSubject, tap } from 'rxjs';
+import { of, throwError, Observable, Subject, tap } from 'rxjs';
 import { DashboardSelectorComponent } from './dashboard-selector.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { Dashboard } from '../../interfaces/dashboard';
@@ -42,7 +42,14 @@ describe('DashboardSelectorComponent', () => {
     // Like the real service: a fetch that lands fills the signal
     const givenDashboards = (source: Observable<Dashboard[]>) =>
         mockDashboardService.getDashboards.mockReturnValue(source.pipe(tap(d => dashboardsSignal.set(d))));
-    let paramMapSubject: BehaviorSubject<any>;
+    let routerEvents: Subject<unknown>;
+    // Like the real router: the navbar reads the deepest route of the router state after a navigation
+    const setRoute = (path: string, params: Record<string, string> = {}) => {
+        const leaf = { routeConfig: { path }, paramMap: convertToParamMap(params), firstChild: null };
+        mockRouter.routerState = { snapshot: { root: { routeConfig: null, paramMap: convertToParamMap({}), firstChild: leaf } } };
+        routerEvents.next(new NavigationEnd(1, '/', '/'));
+    };
+    const goToDashboard = (id?: string) => (id === undefined ? setRoute('') : setRoute('dashboard/:id', { id }));
 
     beforeEach(async () => {
         // Create mock services
@@ -51,17 +58,17 @@ describe('DashboardSelectorComponent', () => {
             getDashboards: vi.fn().mockName("DashboardService.getDashboards"),
             dashboards: dashboardsSignal.asReadonly()
         };
+        routerEvents = new Subject<unknown>();
         mockRouter = {
-            navigate: vi.fn().mockName("Router.navigate")
+            navigate: vi.fn().mockName("Router.navigate"),
+            events: routerEvents.asObservable(),
+            routerState: { snapshot: { root: { routeConfig: null, paramMap: convertToParamMap({}), firstChild: null } } }
         };
 
         // Set default mock return values to prevent "Cannot read properties of undefined"
         // Individual tests can override these as needed
         givenDashboards(of([]));
 
-        // Create BehaviorSubject for paramMap to simulate route changes
-        // Component subscribes to paramMap observable in constructor
-        paramMapSubject = new BehaviorSubject(convertToParamMap({}));
 
         await TestBed.configureTestingModule({
             imports: [DashboardSelectorComponent, CommonModule],
@@ -69,8 +76,7 @@ describe('DashboardSelectorComponent', () => {
                 provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()),
                 { provide: DashboardService, useValue: mockDashboardService },
-                { provide: Router, useValue: mockRouter },
-                { provide: ActivatedRoute, useValue: { paramMap: paramMapSubject.asObservable() } }
+                { provide: Router, useValue: mockRouter }
             ]
         }).compileComponents();
 
@@ -143,14 +149,14 @@ describe('DashboardSelectorComponent', () => {
 
         it('should update current dashboard ID from route params', () => {
             // Emit new param map with dashboard ID
-            paramMapSubject.next(convertToParamMap({ id: '3' }));
+            goToDashboard('3');
 
             expect(component.currentDashboardId()).toBe(3);
         });
 
         it('should set current dashboard ID to undefined when no route param', () => {
             // Emit param map without ID
-            paramMapSubject.next(convertToParamMap({}));
+            goToDashboard();
 
             expect(component.currentDashboardId()).toBeUndefined();
         });
@@ -210,23 +216,47 @@ describe('DashboardSelectorComponent', () => {
     describe('Route Parameter Handling', () => {
         it('should set current dashboard ID from route param', () => {
             // Emit route params with dashboard ID
-            paramMapSubject.next(convertToParamMap({ id: '5' }));
+            goToDashboard('5');
 
             expect(component.currentDashboardId()).toBe(5);
         });
 
         it('should set undefined when no route param', () => {
             // Emit route params without ID
-            paramMapSubject.next(convertToParamMap({}));
+            goToDashboard();
 
             expect(component.currentDashboardId()).toBeUndefined();
         });
 
         it('should parse string ID to integer', () => {
             // Emit route params with string ID
-            paramMapSubject.next(convertToParamMap({ id: '42' }));
+            goToDashboard('42');
 
             expect(component.currentDashboardId()).toBe(42);
+        });
+
+        it('should ignore an :id on a route that is not a dashboard', () => {
+            goToDashboard('5');
+            // A Detail page also has :id; it must not mark dashboard 7 as open
+            setRoute('view/:entityKey/:id', { entityKey: 'issues', id: '7' });
+
+            expect(component.currentDashboardId()).toBeUndefined();
+        });
+
+        it('should read a dashboard that is already open when the navbar is created', () => {
+            const leaf = { routeConfig: { path: 'dashboard/:id' }, paramMap: convertToParamMap({ id: '9' }), firstChild: null };
+            mockRouter.routerState = { snapshot: { root: { routeConfig: null, paramMap: convertToParamMap({}), firstChild: { routeConfig: { path: '' }, paramMap: convertToParamMap({}), firstChild: leaf } } } };
+
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+
+            expect(component.currentDashboardId()).toBe(9);
+        });
+
+        it('should ignore an id that is not a number', () => {
+            goToDashboard('abc');
+
+            expect(component.currentDashboardId()).toBeUndefined();
         });
     });
 
@@ -627,6 +657,63 @@ describe('DashboardSelectorComponent', () => {
 
             dashboardsSignal.set(undefined);
             expect(component.dashboards()).toEqual([]);
+        });
+    });
+
+    describe('Unlisted dashboards (show_in_selector = false)', () => {
+        const listed: Dashboard = { ...MOCK_DASHBOARDS.welcome, show_in_selector: true };
+        const unlisted: Dashboard = { ...MOCK_DASHBOARDS.multiWidget, show_in_selector: false };
+
+        const render = async (dashboards: Dashboard[], currentId?: number) => {
+            givenDashboards(of(dashboards));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            if (currentId !== undefined) {
+                goToDashboard(String(currentId));
+            }
+            await advanceTime(10);
+            fixture.detectChanges();
+            return fixture.nativeElement as HTMLElement;
+        };
+        const menuLabels = (el: HTMLElement) =>
+            Array.from(el.querySelectorAll('.dropdown-content li button')).map(b => b.textContent ?? '');
+
+        it('should leave unlisted dashboards out of the menu', async () => {
+            const el = await render([listed, unlisted]);
+
+            const labels = menuLabels(el);
+            expect(labels.length).toBe(2); // Default Dashboard + the listed one
+            expect(labels.some(l => l.includes(listed.display_name))).toBe(true);
+            expect(labels.some(l => l.includes(unlisted.display_name))).toBe(false);
+            expect(component.listedDashboards()).toEqual([listed]);
+        });
+
+        it('should still name an unlisted dashboard that is open', async () => {
+            const el = await render([listed, unlisted], unlisted.id);
+
+            expect(component.getCurrentDashboardName()).toBe(unlisted.display_name);
+            const button = el.querySelector('button.btn') as HTMLButtonElement;
+            expect(button.getAttribute('aria-label')).toContain(unlisted.display_name);
+            // Nothing in the menu is marked current
+            expect(el.querySelectorAll('.dropdown-content li button.menu-active').length).toBe(0);
+        });
+
+        it('should still offer Default Dashboard when every dashboard is unlisted', async () => {
+            const el = await render([unlisted]);
+
+            const labels = menuLabels(el);
+            expect(labels.length).toBe(1);
+            expect(labels[0]).toContain('Default Dashboard');
+            expect(el.querySelector('.dropdown-content .menu-title')).toBeNull();
+        });
+
+        it('should treat a dashboard without the flag as listed (instance before v0.82.0)', async () => {
+            const legacy: Dashboard = { ...MOCK_DASHBOARDS.welcome };
+            delete legacy.show_in_selector;
+            const el = await render([legacy]);
+
+            expect(menuLabels(el).some(l => l.includes(legacy.display_name))).toBe(true);
+            expect(el.querySelector('.dropdown-content .menu-title')).not.toBeNull();
         });
     });
 });

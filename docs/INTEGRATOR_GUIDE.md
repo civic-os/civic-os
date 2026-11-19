@@ -609,6 +609,7 @@ Fields:
 - `is_public` (BOOLEAN) - Visible to all users (false = owner-only)
 - `created_by` (UUID FK) - Dashboard owner
 - `sort_order` - Ordering in dashboard selector (lower numbers first)
+- `show_in_selector` (BOOLEAN, default `true`, v0.82.0) - `false` leaves the dashboard out of the dashboard selector while it stays reachable (see Unlisted dashboards below)
 
 **`metadata.widget_types`** - Registry of available widget types
 
@@ -671,7 +672,23 @@ SELECT public.set_dashboard_roles(:dashboard_id, NULL, 'show');
 
 `set_dashboard_roles(dashboard_id, role_keys, mode DEFAULT 'show', priority DEFAULT 0)` is admin only and replaces the dashboard's rows of that mode. `show` replaces only this dashboard's show rows and never touches default rows. `default` writes through `metadata.dashboard_role_defaults` (upsert on `role_id`, delete to clear), whose triggers maintain `dashboard_roles`. Because a role has one default, it moves each listed role's default from any other dashboard, as the legacy upsert did; `priority` is one value per call, which is enough because it only orders defaults on different dashboards. It rejects unknown role keys, unknown dashboards and other modes. It needs a signed-in admin JWT, so init scripts (which run without one) write `show` rows into `metadata.dashboard_roles` directly. Write `default` rows through `set_dashboard_roles()` or `dashboard_role_defaults`, never by inserting into `dashboard_roles` directly, or the legacy table goes stale. `metadata.dashboard_roles` is readable and writable by admins only.
 
-**Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard (each checked for visibility before it is returned), then the first dashboard the user can see (by `sort_order`, then `id`).
+**Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard (each checked for visibility before it is returned), then the first dashboard the user can see (listed dashboards first, then by `sort_order`, then `id`).
+
+**Unlisted dashboards** (v0.82.0): `show_in_selector = false` leaves a dashboard out of the navbar's dashboard selector. It changes nothing else: whoever can see the dashboard (the rule above) can still open it by direct link (`/dashboard/:id`), from a `dashboard_navigation` or `nav_buttons` widget, and as a landing dashboard. Use it for drill-down pages, the later chapters of a storymap, or a role's landing page that doesn't need a second entry in the menu. It is not access control: to hide a dashboard from some people, use `is_public = false` and `dashboard_roles`.
+- `get_dashboards()` returns every visible dashboard with its `show_in_selector`, and the selector filters, so it can still name an unlisted dashboard that is open. `get_dashboard()` returns the flag too.
+- Landing: a saved preference, a role default and the `is_default` dashboard may be unlisted (a landing-only dashboard for a role is a common use). The last tier prefers listed dashboards, so a user with no default does not land on a drill-down page; it returns an unlisted one only when nothing listed is visible.
+- The selector keeps its "Default Dashboard" entry when every visible dashboard is unlisted.
+- Admins see the same list as everyone else.
+
+```sql
+-- Reachable from the Operations dashboard's nav buttons, but not listed in the selector
+UPDATE metadata.dashboards SET show_in_selector = FALSE WHERE id = :drilldown_dashboard_id;
+-- A landing-only dashboard for the staff role
+UPDATE metadata.dashboards SET show_in_selector = FALSE WHERE id = :staff_home_id;
+SELECT public.set_dashboard_roles(:staff_home_id, ARRAY['staff'], 'default', 90);
+```
+
+See `examples/storymap/init-scripts/08_storymap_unlisted_chapters.sql` for a working example.
 
 **Impersonation and the creator clause**: the creator clause uses the real user id, while role matching follows the impersonated roles. An admin impersonating a role still sees dashboards they created and, because `is_admin()` follows the JWT roles, otherwise sees what that role sees. The dashboard selector refetches, and the dashboard page reloads (the default on `/`, `get_dashboard` on `/dashboard/:id`, so a dashboard the new roles cannot see shows "not found"), when impersonation starts, stops or changes and on login or logout.
 

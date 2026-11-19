@@ -265,6 +265,7 @@ docker-compose up -d
 - **Filtered list widgets** with temporal filtering
 - **Dashboard navigation** (sequential chapter flow with progress chips)
 - **Multi-dashboard narratives** (4 connected chapters)
+- **Unlisted dashboards** (v0.82.0): only chapter 1 is in the dashboard selector; chapters 2-4 are reached through the chapter navigation (`08_storymap_unlisted_chapters.sql`)
 - **Geography/GeoPoint type** for location data
 - Markdown content widgets
 

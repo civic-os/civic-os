@@ -23,6 +23,12 @@ export interface Dashboard {
   created_at: string;
   updated_at: string;
   is_role_default?: boolean;
+  /**
+   * false leaves the dashboard out of the dashboard selector; it stays reachable by link, from navigation
+   * widgets and as a landing dashboard. Listing only, not access control. Absent (an instance before
+   * v0.82.0) means listed.
+   */
+  show_in_selector?: boolean;
   widgets?: DashboardWidget[];  // Embedded widgets from PostgREST
 }
 
