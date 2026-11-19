@@ -23,6 +23,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 /**
  * Dashboard Selector Component
@@ -47,6 +48,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class DashboardSelectorComponent {
   private dashboardService = inject(DashboardService);
   private router = inject(Router);
+  private translationService = inject(TranslationService);
 
   // Component state (signals)
   // Read from the service's signal so a refresh (locale or role change) updates the menu
@@ -119,15 +121,17 @@ export class DashboardSelectorComponent {
   }
 
   /**
-   * Get display name of current dashboard
+   * Get display name of current dashboard, in the user's language when it is a framework label.
+   * Reads the translation version, like the translate pipe, so the label follows a locale switch.
    */
   getCurrentDashboardName(): string {
+    this.translationService.version();
     const currentId = this.currentDashboardId();
     if (currentId === undefined) {
-      return 'Default Dashboard';
+      return this.translationService.get('dashboard.default');
     }
 
     const dashboard = this.dashboards().find((d) => d.id === currentId);
-    return dashboard?.display_name || 'Dashboard';
+    return dashboard?.display_name || this.translationService.get('dashboard.unnamed');
   }
 }
