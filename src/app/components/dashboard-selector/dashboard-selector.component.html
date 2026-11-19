@@ -24,7 +24,7 @@
           class="flex items-center"
         >
           <span class="material-symbols-outlined" aria-hidden="true">home</span>
-          <span>Default Dashboard</span>
+          <span>{{ 'dashboard.default' | translate }}</span>
           @if (currentDashboardId() === undefined) {
             <span class="material-symbols-outlined ms-auto text-primary" aria-hidden="true">check</span>
           }
@@ -33,7 +33,7 @@
 
       @if (listedDashboards().length > 0) {
         <li class="menu-title">
-          <span>All Dashboards</span>
+          <span>{{ 'dashboard.all' | translate }}</span>
         </li>
       }
 
@@ -73,7 +73,7 @@
       <li class="menu-disabled">
         <a class="flex items-center justify-center">
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-          <span class="ms-2">Loading dashboards...</span>
+          <span class="ms-2">{{ 'dashboard.loading_list' | translate }}</span>
         </a>
       </li>
     </ul>
