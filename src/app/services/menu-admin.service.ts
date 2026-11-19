@@ -18,7 +18,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, map, of, switchMap } from 'rxjs';
-import type { MenuNodeRow } from '@civic-os/core';
+import type { Dashboard, MenuNodeRow } from '@civic-os/core';
 import { ApiError } from '../interfaces/api';
 import { getPostgrestUrl } from '../config/runtime';
 import { ErrorService } from './error.service';
@@ -40,6 +40,9 @@ export interface SaveMenuResult {
   /** The menu version after the save, to send with the next one. */
   version?: string;
 }
+
+/** The slice of a dashboard the menu editor needs: what it is called and whether the selector lists it. */
+export type MenuDashboard = Pick<Dashboard, 'id' | 'display_name' | 'show_in_selector'>;
 
 /** SQLSTATE that save_menu_tree raises for a stale expected version (PostgREST answers 409). */
 const STALE_MENU_CODE = 'PT409';
@@ -74,6 +77,17 @@ export class MenuAdminService {
           }))
         )
       )
+    );
+  }
+
+  /**
+   * The dashboards the editor can place: every dashboard the caller can see (`get_dashboards()`), listed in
+   * the selector or not, with translated titles. Read fresh, not from DashboardService's cache, so a dashboard
+   * created since the app loaded is offered too.
+   */
+  getDashboards(): Observable<MenuDashboard[]> {
+    return this.http.post<Dashboard[]>(getPostgrestUrl() + 'rpc/get_dashboards', {}).pipe(
+      map(rows => rows.map(({ id, display_name, show_in_selector }) => ({ id, display_name, show_in_selector })))
     );
   }
 

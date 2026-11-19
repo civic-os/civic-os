@@ -146,6 +146,23 @@ export class AppComponent implements AfterViewInit {
     this.schema.refreshMenuCache();
   }
 
+  // The menu shows each dashboard (a dashboard entry, a heading's link) only to roles that can see it, and
+  // who reads every node depends on the roles too, so the cached nodes are stale after an impersonation
+  // start, stop or role change, a login or a logout. The same trigger as DashboardService's roleEffect.
+  // Here rather than in SchemaService, which AuthService itself injects.
+  private readonly menuRoleEffect = (() => {
+    let initial = true;
+    return effect(() => {
+      this.impersonation.headerValue();
+      this.auth.authenticated();
+      if (initial) {
+        initial = false;
+        return;
+      }
+      untracked(() => this.schema.refreshMenuCache());
+    });
+  })();
+
   // Convert entities to signal for computed checks
   private entities = toSignal(this.schema.getEntities());
 

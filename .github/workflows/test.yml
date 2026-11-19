@@ -139,6 +139,27 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
+      # The menu tests compare the server's per-caller rows with @civic-os/core's buildMenu, so they need
+      # the built package.
+      - name: Setup Node.js (the menu tests run core's buildMenu)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Build packages for the menu tests
+        run: |
+          npm ci --ignore-scripts
+          npm run build:packages
+
+      - name: Verify the sidebar menu (rules, per-caller rows, menu permission, stale saves, dashboards in the menu)
+        run: |
+          ./tests/functional/v0-81-0-menu-nodes-test.sh
+          ./tests/functional/v0-81-2-menu-access-test.sh
+          ./tests/functional/v0-83-0-menu-dashboard-nodes-test.sh
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
+
       - name: Setup Go (payment-worker database tests)
         uses: actions/setup-go@v6
         with:

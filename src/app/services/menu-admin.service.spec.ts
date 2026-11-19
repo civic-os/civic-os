@@ -26,6 +26,7 @@ import { MenuAdminService } from './menu-admin.service';
 const NODE: MenuNodeRow = {
   node_key: 'issues', node_kind: 'entity', target_key: 'issues', display_name: null, icon: null,
   parent_node_key: null, sort_order: 0, is_hidden: false, collapsed_by_default: false,
+  dashboard_id: null, dashboard_display_name: null,
 };
 
 describe('MenuAdminService', () => {
@@ -60,6 +61,15 @@ describe('MenuAdminService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([{ ...NODE, base_display_name: null }]);
     expect(await result).toEqual({ nodes: [NODE], version: VERSION });
+  });
+
+  it('reads the dashboards fresh from get_dashboards, keeping id, title and listing', async () => {
+    const result = firstValueFrom(service.getDashboards());
+    const req = httpMock.expectOne(r => r.url.endsWith('rpc/get_dashboards'));
+    expect(req.request.method).toBe('POST');
+    req.flush([{ id: 2, display_name: 'Staff', description: null, is_default: false, is_public: false, show_title: true,
+      sort_order: 0, created_by: null, created_at: '', updated_at: '', is_role_default: false, show_in_selector: false }]);
+    expect(await result).toEqual([{ id: 2, display_name: 'Staff', show_in_selector: false }]);
   });
 
   it('reports no version when the server has no menu row', async () => {

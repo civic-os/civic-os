@@ -2386,7 +2386,15 @@ const MENU_HEADING_KEY: RegExp;
 Kind: function. Consumer: app.
 
 ```ts
-function menuBranchKeys(menu: readonly MenuEntry[], tableName: string): string[];
+function menuBranchKeys(menu: readonly MenuEntry[], target: MenuTarget): string[];
+```
+
+### `menuDashboardKey`
+
+Kind: function. Consumer: app.
+
+```ts
+function menuDashboardKey(dashboardId: number): string;
 ```
 
 ### `MenuEntry`
@@ -2399,6 +2407,7 @@ interface MenuEntry {
   kind: MenuNodeKind;
   label: string;
   tableName?: string | undefined;
+  dashboardId?: number | undefined;
   icon?: string | undefined;
   collapsedByDefault: boolean;
   children: ReadonlyArray<MenuEntry>;
@@ -2410,7 +2419,7 @@ interface MenuEntry {
 Kind: type. Consumer: typed MenuNodeRow.
 
 ```ts
-type MenuNodeKind = 'heading' | 'entity';
+type MenuNodeKind = 'heading' | 'entity' | 'dashboard';
 ```
 
 ### `MenuNodeRow`
@@ -2428,6 +2437,8 @@ interface MenuNodeRow {
   sort_order: number | null;
   is_hidden: boolean;
   collapsed_by_default: boolean;
+  dashboard_id: number | null;
+  dashboard_display_name: string | null;
 }
 ```
 
@@ -2437,6 +2448,14 @@ Kind: function. Consumer: app.
 
 ```ts
 function menuPlacementAllowed(kind: MenuNodeRow['node_kind'], parentKind: MenuNodeRow['node_kind'] | null): boolean;
+```
+
+### `MenuTarget`
+
+Kind: type. Consumer: typed menuBranchKeys.
+
+```ts
+type MenuTarget = string | { dashboardId: number; };
 ```
 
 ### `MenuTreeError`
@@ -2455,7 +2474,7 @@ interface MenuTreeError {
 Kind: type. Consumer: typed validateMenuTree.
 
 ```ts
-type MenuTreeErrorCode = 'duplicate-key' | 'heading-key' | 'heading-label' | 'heading-target' | 'entity-key' | 'unknown-parent' | 'parent-kind' | 'cycle' | 'depth' | 'duplicate-entity' | 'unknown-target';
+type MenuTreeErrorCode = 'duplicate-key' | 'heading-key' | 'heading-label' | 'heading-target' | 'entity-key' | 'unknown-parent' | 'parent-kind' | 'cycle' | 'depth' | 'duplicate-entity' | 'unknown-target' | 'dashboard-key' | 'dashboard-children' | 'duplicate-dashboard';
 ```
 
 ### `METADATA_SYSTEM_TABLES`

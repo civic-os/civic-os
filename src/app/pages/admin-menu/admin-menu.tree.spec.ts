@@ -22,16 +22,17 @@ import {
 } from './admin-menu.tree';
 
 const h = (key: string, depth = 1): DraftRow =>
-  ({ key, kind: 'heading', targetKey: null, label: key.toUpperCase(), icon: null, hidden: false, collapsed: false, depth });
+  ({ key, kind: 'heading', targetKey: null, dashboardId: null, label: key.toUpperCase(), icon: null, hidden: false, collapsed: false, depth });
 const e = (key: string, depth = 1): DraftRow =>
-  ({ key, kind: 'entity', targetKey: key, label: null, icon: null, hidden: false, collapsed: false, depth });
+  ({ key, kind: 'entity', targetKey: key, dashboardId: null, label: null, icon: null, hidden: false, collapsed: false, depth });
 const keys = (rows: DraftRow[]) => rows.map(r => `${r.depth}:${r.key}`);
 
 describe('admin-menu tree', () => {
   describe('nodesToRows / rowsToNodes', () => {
     const node = (key: string, over: Partial<MenuNodeRow>): MenuNodeRow => ({
       node_key: key, node_kind: 'entity', target_key: key, display_name: null, icon: null,
-      parent_node_key: null, sort_order: 0, is_hidden: false, collapsed_by_default: false, ...over,
+      parent_node_key: null, sort_order: 0, is_hidden: false, collapsed_by_default: false,
+      dashboard_id: null, dashboard_display_name: null, ...over,
     });
 
     it('orders siblings by sort_order then key, depth first', () => {
@@ -55,6 +56,20 @@ describe('admin-menu tree', () => {
         node('b', { sort_order: 20 }),
       ];
       expect(rowsToNodes(nodesToRows(db))).toEqual(db);
+    });
+
+    it('round trips dashboard rows and heading links, and drops a stray dashboard id from an entity row', () => {
+      const db: MenuNodeRow[] = [
+        node('intake', { node_kind: 'heading', target_key: null, display_name: 'Intake', sort_order: 0, dashboard_id: 3 }),
+        node('clients', { parent_node_key: 'intake', sort_order: 0 }),
+        node('dashboard:4', { node_kind: 'dashboard', target_key: null, parent_node_key: 'clients', sort_order: 0, dashboard_id: 4 }),
+      ];
+      const rows = nodesToRows(db);
+      expect(rows.map(r => [r.key, r.kind, r.dashboardId])).toEqual([['intake', 'heading', 3], ['clients', 'entity', null], ['dashboard:4', 'dashboard', 4]]);
+      expect(rowsToNodes(rows)).toEqual(db);
+      expect(rowsToNodes([{ ...e('a'), dashboardId: 9 }])[0].dashboard_id).toBeNull();
+      // A row from a server without the column has no dashboard
+      expect(nodesToRows([{ ...node('a', {}), dashboard_id: undefined } as unknown as MenuNodeRow])[0].dashboardId).toBeNull();
     });
 
     it('surfaces orphans and cycle members at the root', () => {
