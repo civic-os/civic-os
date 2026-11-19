@@ -435,6 +435,44 @@ describe('DashboardSelectorComponent', () => {
             expect(menuItems.length).toBe(mockDashboards.length + 1);
         });
 
+        // #120: below sm the wrapper must not be the menu's containing block, so the
+        // menu is placed against the screen's end edge and capped to the viewport.
+        // Physical left/right classes would break RTL, so only logical ones are allowed.
+        const expectPhonePlacement = (compiled: HTMLElement) => {
+            const wrapper = compiled.querySelector('.dropdown') as HTMLElement;
+            const menu = compiled.querySelector('.dropdown-content') as HTMLElement;
+            expect(wrapper.classList).toContain('dropdown-end');
+            expect(wrapper.classList).toContain('max-sm:static');
+            expect(menu.classList).toContain('w-72');
+            expect(menu.classList).toContain('max-sm:end-2');
+            expect(menu.classList).toContain('max-sm:max-w-[calc(100vw-1rem)]');
+            const physical = [...wrapper.classList, ...menu.classList]
+                .filter(c => /(^|:)-?(left|right|ml|mr|pl|pr)-/.test(c));
+            expect(physical).toEqual([]);
+        };
+
+        it('should place the menu against the screen edge below sm', async () => {
+            givenDashboards(of([MOCK_DASHBOARDS.welcome]));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expectPhonePlacement(fixture.nativeElement as HTMLElement);
+        });
+
+        it('should place the loading menu the same way below sm', async () => {
+            givenDashboards(new Observable<Dashboard[]>(() => {}));
+            fixture = TestBed.createComponent(DashboardSelectorComponent);
+            component = fixture.componentInstance;
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            expect(compiled.querySelector('.loading-spinner')).toBeTruthy();
+            expectPhonePlacement(compiled);
+        });
+
         it('should render default dashboard option', async () => {
             givenDashboards(of([MOCK_DASHBOARDS.welcome]));
 
