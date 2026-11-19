@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"errors"
+	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -116,13 +118,15 @@ func TestCreateIntentWorker_Success(t *testing.T) {
 			t.Parallel()
 			user := newTestUser(t, pool)
 			desc := "Permit fee " + randomSuffix()
-			id := insertTransaction(t, pool, user, txFixture{Amount: tt.amount, Description: desc})
+			entityID := randomSuffix()
+			id := insertTransaction(t, pool, user, txFixture{Amount: tt.amount, Description: desc,
+				EntityType: "permits", EntityID: entityID})
 
 			piID := "pi_test_" + randomSuffix()
 			secret := "secret_" + randomSuffix()
 			prov := &fakeProvider{intentResult: &PaymentIntentResult{PaymentIntentID: piID, ClientSecret: secret}}
 			fee := tt.fee
-			w := NewCreateIntentWorker(pool, prov, &fee)
+			w := NewCreateIntentWorker(pool, prov, &fee, metadataSettings{InstanceKey: "test-instance", SiteURL: "https://civic.example.org"})
 
 			if err := runCreateIntent(w, id); err != nil {
 				t.Fatalf("Work: %v", err)
@@ -132,9 +136,19 @@ func TestCreateIntentWorker_Success(t *testing.T) {
 				t.Fatalf("provider calls = %d, want 1", len(prov.intentCalls))
 			}
 			got := prov.intentCalls[0]
+			feeCents := decimalCents(t, tt.wantFee)
 			want := CreateIntentParams{Amount: tt.wantCents, Currency: "USD", Description: desc,
-				IdempotencyKey: "civic-os:create-intent:" + id}
-			if got != want {
+				IdempotencyKey: "civic-os:create-intent:" + id,
+				Metadata: map[string]string{
+					"civic_os_transaction_id": id,
+					"civic_os_entity_type":    "permits",
+					"civic_os_entity_id":      entityID,
+					"civic_os_instance":       "test-instance",
+					"civic_os_record_url":     "https://civic.example.org/view/permits/" + entityID,
+					"civic_os_base_cents":     strconv.FormatInt(tt.wantCents-feeCents, 10),
+					"civic_os_fee_cents":      strconv.FormatInt(feeCents, 10),
+				}}
+			if !reflect.DeepEqual(got, want) {
 				t.Errorf("provider params = %+v, want %+v", got, want)
 			}
 
@@ -168,6 +182,32 @@ func TestCreateIntentWorker_Success(t *testing.T) {
 	}
 }
 
+// A row inserted without payments.create_and_link_payment() has no entity, and
+// an instance without PAYMENT_INSTANCE_KEY has no instance name: those keys are
+// left out, never sent as "" (which Stripe reads as "delete this key").
+func TestCreateIntentWorker_MetadataOmitsMissingValues(t *testing.T) {
+	pool := testPool(t)
+	user := newTestUser(t, pool)
+	id := insertTransaction(t, pool, user, txFixture{Amount: "12.34"})
+	prov := &fakeProvider{}
+	// SITE_URL is set, but with a NULL entity there is no record to link to.
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{SiteURL: "https://civic.example.org"})
+	if err := runCreateIntent(w, id); err != nil {
+		t.Fatalf("Work: %v", err)
+	}
+	if len(prov.intentCalls) != 1 {
+		t.Fatalf("provider calls = %d, want 1", len(prov.intentCalls))
+	}
+	want := map[string]string{
+		"civic_os_transaction_id": id,
+		"civic_os_base_cents":     "1234",
+		"civic_os_fee_cents":      "0",
+	}
+	if got := prov.intentCalls[0].Metadata; !reflect.DeepEqual(got, want) {
+		t.Errorf("metadata = %v, want %v", got, want)
+	}
+}
+
 func TestCreateIntentWorker_NullDescriptionSendsEmptyString(t *testing.T) {
 	pool := testPool(t)
 	user := newTestUser(t, pool)
@@ -177,7 +217,7 @@ func TestCreateIntentWorker_NullDescriptionSendsEmptyString(t *testing.T) {
 		t.Fatal(err)
 	}
 	prov := &fakeProvider{}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{})
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{})
 	if err := runCreateIntent(w, id); err != nil {
 		t.Fatalf("Work: %v", err)
 	}
@@ -193,7 +233,7 @@ func TestCreateIntentWorker_ProviderError(t *testing.T) {
 
 	provErr := errors.New("stripe down " + randomSuffix())
 	prov := &fakeProvider{intentErr: provErr}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30, Refundable: true})
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30, Refundable: true}, metadataSettings{})
 
 	err := runCreateIntent(w, id)
 	if err == nil {
@@ -222,7 +262,7 @@ func TestCreateIntentWorker_ProviderError(t *testing.T) {
 func TestCreateIntentWorker_NotFound(t *testing.T) {
 	pool := testPool(t)
 	prov := &fakeProvider{}
-	w := NewCreateIntentWorker(pool, prov, &FeeConfig{})
+	w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{})
 
 	err := runCreateIntent(w, "00000000-0000-4000-8000-"+randomSuffix()[:12])
 	if err == nil || !strings.Contains(err.Error(), "payment not found") {
@@ -241,7 +281,7 @@ func TestCreateIntentWorker_SkipsWhenNotPendingIntent(t *testing.T) {
 			user := newTestUser(t, pool)
 			id := insertTransaction(t, pool, user, txFixture{Status: status})
 			prov := &fakeProvider{}
-			w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30})
+			w := NewCreateIntentWorker(pool, prov, &FeeConfig{Enabled: true, Percent: 2.9, FlatCents: 30}, metadataSettings{})
 
 			if err := runCreateIntent(w, id); err != nil {
 				t.Fatalf("Work: %v", err)
@@ -275,7 +315,7 @@ func TestCreateIntentWorker_FractionalCentsAmounts(t *testing.T) {
 			user := newTestUser(t, pool)
 			id := insertTransaction(t, pool, user, txFixture{Amount: tt.amount})
 			prov := &fakeProvider{}
-			w := NewCreateIntentWorker(pool, prov, &FeeConfig{})
+			w := NewCreateIntentWorker(pool, prov, &FeeConfig{}, metadataSettings{})
 			if err := runCreateIntent(w, id); err != nil {
 				t.Fatalf("Work: %v", err)
 			}
@@ -287,6 +327,16 @@ func TestCreateIntentWorker_FractionalCentsAmounts(t *testing.T) {
 }
 
 func ptr[T any](v T) *T { return &v }
+
+// decimalCents converts a NUMERIC(10,2) text value such as "0.61" to cents.
+func decimalCents(t *testing.T, s string) int64 {
+	t.Helper()
+	n, err := strconv.ParseInt(strings.Replace(s, ".", "", 1), 10, 64)
+	if err != nil {
+		t.Fatalf("decimalCents(%q): %v", s, err)
+	}
+	return n
+}
 
 func floatPtrEq(a, b *float64) bool {
 	if a == nil || b == nil {

@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # Payment Worker Service - Stripe payment processing via River queue
@@ -69,6 +69,18 @@ spec:
               name: civic-os-config
               key: PAYMENT_CURRENCY
               optional: true  # Defaults to USD
+        - name: PAYMENT_INSTANCE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PAYMENT_INSTANCE_KEY
+              optional: true  # civic_os_instance Stripe metadata; omitted when unset
+        - name: SITE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: SITE_URL
+              optional: true  # base of civic_os_record_url Stripe metadata; omitted when unset
         - name: RIVER_WORKER_COUNT
           value: "1"
         - name: WEBHOOK_PORT

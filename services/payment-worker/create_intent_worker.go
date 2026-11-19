@@ -74,14 +74,16 @@ type CreateIntentWorker struct {
 	dbPool    *pgxpool.Pool
 	provider  PaymentProvider
 	feeConfig *FeeConfig
+	metadata  metadataSettings // settings sent as Stripe metadata
 }
 
 // NewCreateIntentWorker creates a new CreateIntentWorker
-func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig) *CreateIntentWorker {
+func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig, metadata metadataSettings) *CreateIntentWorker {
 	return &CreateIntentWorker{
 		dbPool:    dbPool,
 		provider:  provider,
 		feeConfig: feeConfig,
+		metadata:  metadata,
 	}
 }
 
@@ -99,6 +101,8 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 		Currency    string
 		Description *string
 		Status      string
+		EntityType  *string
+		EntityID    *string
 	}
 
 	query := `
@@ -109,7 +113,9 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 			ROUND(amount * 100)::bigint,
 			currency,
 			description,
-			status
+			status,
+			entity_type,
+			entity_id
 		FROM payments.transactions
 		WHERE id = $1
 	`
@@ -121,6 +127,8 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 		&payment.Currency,
 		&payment.Description,
 		&payment.Status,
+		&payment.EntityType,
+		&payment.EntityID,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -165,12 +173,19 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 
 	// 6. Call Stripe to create PaymentIntent with TOTAL amount (base + fee).
 	// The idempotency key makes a River retry after a failed DB update (step 7)
-	// get the same PaymentIntent back instead of creating a second one.
+	// get the same PaymentIntent back instead of creating a second one; the
+	// metadata is built only from the row and settings, so the retry's
+	// parameters match the first attempt's, as Stripe requires.
 	result, err := w.provider.CreateIntent(ctx, CreateIntentParams{
 		Amount:         totalAmountCents,
 		Currency:       payment.Currency,
 		Description:    description,
 		IdempotencyKey: "civic-os:create-intent:" + paymentID,
+		Metadata: intentMetadata(paymentIdentity{
+			TransactionID: payment.ID,
+			EntityType:    payment.EntityType,
+			EntityID:      payment.EntityID,
+		}, w.metadata, baseAmountCents, feeCents),
 	})
 	if err != nil {
 		log.Printf("[CreateIntent] Error creating Stripe intent for payment %s: %v", paymentID, err)

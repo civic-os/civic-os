@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stripe/stripe-go/v81"
 )
@@ -79,7 +80,8 @@ func TestStripeCreateIntent_Success(t *testing.T) {
 	f := newStripeFake(t, http.StatusOK, stripeIntentOK)
 	p := &StripeProvider{apiKey: "k"}
 
-	res, err := p.CreateIntent(context.Background(), CreateIntentParams{Amount: 1050, Currency: "usd", Description: "Room rental"})
+	res, err := p.CreateIntent(context.Background(), CreateIntentParams{Amount: 1050, Currency: "usd", Description: "Room rental",
+		Metadata: map[string]string{"civic_os_transaction_id": "tx-1", "civic_os_fee_cents": "0"}})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -101,6 +103,8 @@ func TestStripeCreateIntent_Success(t *testing.T) {
 		"description":                        "Room rental",
 		"capture_method":                     "automatic",
 		"automatic_payment_methods[enabled]": "true",
+		"metadata[civic_os_transaction_id]":  "tx-1",
+		"metadata[civic_os_fee_cents]":       "0",
 	}
 	for k, v := range want {
 		if got := r.Form.Get(k); got != v {
@@ -199,7 +203,8 @@ func TestStripeCreateRefund_SuccessWithReason(t *testing.T) {
 	f := newStripeFake(t, http.StatusOK, stripeRefundOK)
 	p := &StripeProvider{}
 
-	res, err := p.CreateRefund(context.Background(), RefundParams{PaymentIntentID: "pi_abc", AmountCents: 750, Reason: "Event canceled by venue"})
+	res, err := p.CreateRefund(context.Background(), RefundParams{PaymentIntentID: "pi_abc", AmountCents: 750, Reason: "Event canceled by venue",
+		Metadata: map[string]string{"civic_os_refund_id": "rf-1", "civic_os_instance": "springfield"}})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -215,10 +220,12 @@ func TestStripeCreateRefund_SuccessWithReason(t *testing.T) {
 		t.Errorf("unexpected request: %s %s", r.Method, r.Path)
 	}
 	want := map[string]string{
-		"payment_intent":   "pi_abc",
-		"amount":           "750",
-		"reason":           "requested_by_customer",
-		"metadata[reason]": "Event canceled by venue",
+		"payment_intent":               "pi_abc",
+		"amount":                       "750",
+		"reason":                       "requested_by_customer",
+		"metadata[reason]":             "Event canceled by venue",
+		"metadata[civic_os_refund_id]": "rf-1",
+		"metadata[civic_os_instance]":  "springfield",
 	}
 	for k, v := range want {
 		if got := r.Form.Get(k); got != v {
@@ -238,11 +245,30 @@ func TestStripeCreateRefund_NoReason(t *testing.T) {
 	if r.Form.Get("payment_intent") != "pi_abc" || r.Form.Get("amount") != "100" {
 		t.Errorf("missing core fields: %v", r.Form)
 	}
+	for k := range r.Form {
+		if strings.HasPrefix(k, "metadata[") {
+			t.Errorf("form has %s with no reason and no metadata", k)
+		}
+	}
 	if _, ok := r.Form["reason"]; ok {
 		t.Errorf("reason should not be sent: %v", r.Form)
 	}
 	if _, ok := r.Form["metadata[reason]"]; ok {
 		t.Errorf("metadata[reason] should not be sent: %v", r.Form)
+	}
+}
+
+func TestStripeCreateRefund_LongReasonIsCutToStripeLimit(t *testing.T) {
+	f := newStripeFake(t, http.StatusOK, stripeRefundOK)
+	p := &StripeProvider{}
+
+	reason := strings.Repeat("é", stripeMetadataValueMax+20)
+	if _, err := p.CreateRefund(context.Background(), RefundParams{PaymentIntentID: "pi_abc", AmountCents: 100, Reason: reason}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	got := f.recorded()[0].Form.Get("metadata[reason]")
+	if want := strings.Repeat("é", stripeMetadataValueMax); got != want {
+		t.Errorf("metadata[reason] has %d characters, want %d", utf8.RuneCountInString(got), stripeMetadataValueMax)
 	}
 }
 

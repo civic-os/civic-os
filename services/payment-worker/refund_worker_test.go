@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -50,13 +51,15 @@ func TestRefundWorker_Success(t *testing.T) {
 	pool := testPool(t)
 	user := newTestUser(t, pool)
 	piID := "pi_test_" + randomSuffix()
-	txID := insertTransaction(t, pool, user, txFixture{Status: "succeeded", ProviderPaymentID: piID})
+	entityID := randomSuffix()
+	txID := insertTransaction(t, pool, user, txFixture{Status: "succeeded", ProviderPaymentID: piID,
+		EntityType: "reservations", EntityID: entityID})
 	reason := "Duplicate charge " + randomSuffix()
 	refundID := insertRefund(t, pool, txID, user, refundFixture{Amount: "5.00", Reason: reason})
 
 	reID := "re_test_" + randomSuffix()
 	prov := &fakeProvider{refundResult: &RefundResult{RefundID: reID, Status: "succeeded"}}
-	w := NewRefundWorker(pool, prov)
+	w := NewRefundWorker(pool, prov, metadataSettings{InstanceKey: "test-instance", SiteURL: "https://civic.example.org"})
 
 	before := time.Now().Add(-time.Minute)
 	if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: piID, AmountCents: 500}); err != nil {
@@ -67,8 +70,16 @@ func TestRefundWorker_Success(t *testing.T) {
 		t.Fatalf("provider calls = %d, want 1", len(prov.refundCalls))
 	}
 	want := RefundParams{PaymentIntentID: piID, AmountCents: 500, Reason: reason,
-		IdempotencyKey: "civic-os:refund:" + refundID}
-	if prov.refundCalls[0] != want {
+		IdempotencyKey: "civic-os:refund:" + refundID,
+		Metadata: map[string]string{
+			"civic_os_transaction_id": txID,
+			"civic_os_entity_type":    "reservations",
+			"civic_os_entity_id":      entityID,
+			"civic_os_instance":       "test-instance",
+			"civic_os_record_url":     "https://civic.example.org/view/reservations/" + entityID,
+			"civic_os_refund_id":      refundID,
+		}}
+	if !reflect.DeepEqual(prov.refundCalls[0], want) {
 		t.Errorf("provider params = %+v, want %+v", prov.refundCalls[0], want)
 	}
 
@@ -114,7 +125,7 @@ func TestRefundWorker_ProviderErrorMarksFailedAndDoesNotRetry(t *testing.T) {
 
 	provErr := errors.New("charge already refunded " + randomSuffix())
 	prov := &fakeProvider{refundErr: provErr}
-	w := NewRefundWorker(pool, prov)
+	w := NewRefundWorker(pool, prov, metadataSettings{})
 
 	// Deliberately nil: Stripe refund errors are treated as permanent, so River must not retry.
 	if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: piID, AmountCents: 500}); err != nil {
@@ -142,7 +153,7 @@ func TestRefundWorker_ProviderErrorMarksFailedAndDoesNotRetry(t *testing.T) {
 func TestRefundWorker_NotFound(t *testing.T) {
 	pool := testPool(t)
 	prov := &fakeProvider{}
-	w := NewRefundWorker(pool, prov)
+	w := NewRefundWorker(pool, prov, metadataSettings{})
 
 	err := runRefund(w, RefundWorkerArgs{
 		RefundID:        "00000000-0000-4000-8000-" + randomSuffix()[:12],
@@ -166,7 +177,7 @@ func TestRefundWorker_SkipsWhenNotPending(t *testing.T) {
 			txID := insertTransaction(t, pool, user, txFixture{Status: "succeeded", ProviderPaymentID: "pi_test_" + randomSuffix()})
 			refundID := insertRefund(t, pool, txID, user, refundFixture{Status: status})
 			prov := &fakeProvider{}
-			w := NewRefundWorker(pool, prov)
+			w := NewRefundWorker(pool, prov, metadataSettings{})
 
 			if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: "pi_x", AmountCents: 500}); err != nil {
 				t.Fatalf("Work: %v", err)
@@ -197,11 +208,19 @@ func TestRefundWorker_NullTransactionDescription(t *testing.T) {
 	refundID := insertRefund(t, pool, txID, user, refundFixture{})
 
 	prov := &fakeProvider{}
-	w := NewRefundWorker(pool, prov)
+	w := NewRefundWorker(pool, prov, metadataSettings{})
 	if err := runRefund(w, RefundWorkerArgs{RefundID: refundID, PaymentIntentID: piID, AmountCents: 500}); err != nil {
 		t.Fatalf("Work: %v", err)
 	}
 	if row := loadRefund(t, refundID); row.Status != "succeeded" {
 		t.Errorf("status = %q, want succeeded", row.Status)
+	}
+	// No entity on the transaction and no instance key: those keys are left out.
+	wantMeta := map[string]string{
+		"civic_os_transaction_id": txID,
+		"civic_os_refund_id":      refundID,
+	}
+	if len(prov.refundCalls) != 1 || !reflect.DeepEqual(prov.refundCalls[0].Metadata, wantMeta) {
+		t.Errorf("provider calls = %+v, want one call with metadata %v", prov.refundCalls, wantMeta)
 	}
 }

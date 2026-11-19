@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 apiVersion: v1
@@ -48,7 +48,8 @@ data:
   THUMBNAIL_MAX_WORKERS: "5"
 
   # Notification Configuration (v0.11.0+)
-  # Public URL for links in notification emails
+  # Public URL for links in notification emails, and the base of the paid
+  # record's link (civic_os_record_url) on Stripe objects (v0.81.4+)
   SITE_URL: "https://app.yourdomain.com"
   # Email address for notification sender (must be verified with your SMTP provider)
   SMTP_FROM: "notifications@yourdomain.com"
@@ -61,6 +62,9 @@ data:
   STRIPE_PUBLISHABLE_KEY: "pk_test_your_key_here"
   # Currency code for Stripe payments (default: USD)
   # PAYMENT_CURRENCY: "USD"
+  # Short, stable instance name sent as civic_os_instance metadata on every
+  # Stripe PaymentIntent and Refund (v0.81.4+). Never rename it once set.
+  # PAYMENT_INSTANCE_KEY: "my-instance"
 
   # Processing Fee Configuration (v0.21.0+, optional)
   # Enable to transparently pass credit card processing fees to customers
