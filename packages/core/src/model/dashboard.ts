@@ -17,7 +17,7 @@ export interface Dashboard {
   description: string | null;
   is_default: boolean;
   is_public: boolean;
-  show_title?: boolean;
+  show_title: boolean;
   sort_order: number;
   created_by: string | null;
   created_at: string;

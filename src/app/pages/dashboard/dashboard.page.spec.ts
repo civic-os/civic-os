@@ -712,31 +712,6 @@ describe('DashboardPage', () => {
             expect(header?.textContent).toContain('Visible Title Dashboard');
         });
 
-        it('should show dashboard header when show_title is undefined (default)', async () => {
-            const mockDashboard = createMockDashboard({
-                id: 1,
-                display_name: 'Default Title Dashboard',
-                // show_title not set — should default to showing
-                widgets: []
-            });
-
-            mockDashboardService.getDashboard.mockReturnValue(of(mockDashboard));
-
-            paramMapSubject.next(convertToParamMap({ id: '1' }));
-
-            fixture = TestBed.createComponent(DashboardPage);
-            component = fixture.componentInstance;
-
-            await advanceTime(10);
-            fixture.detectChanges();
-
-            const compiled = fixture.nativeElement as HTMLElement;
-            const header = compiled.querySelector('.dashboard-header');
-
-            expect(header).toBeTruthy();
-            expect(header?.textContent).toContain('Default Title Dashboard');
-        });
-
         it('should handle dashboard with description as null', async () => {
             const dashboardNoDesc = createMockDashboard({
                 display_name: 'Test Dashboard',

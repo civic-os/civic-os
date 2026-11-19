@@ -29,6 +29,7 @@ export function createMockDashboard(overrides?: Partial<Dashboard>): Dashboard {
     description: 'A test dashboard for unit tests',
     is_default: false,
     is_public: true,
+    show_title: true,
     sort_order: 0,
     show_in_selector: true,
     created_by: null,
