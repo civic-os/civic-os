@@ -124,7 +124,7 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store, status and category cache versions, and that PUBLIC cannot create temporary objects
+      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store, status and category cache versions, dashboard visibility and listing, and that PUBLIC cannot create temporary objects
         run: |
           ./tests/functional/view-security-guard-test.sh
           ./tests/functional/v0-76-9-view-rls-test.sh
@@ -133,9 +133,25 @@ jobs:
           ./tests/functional/v0-79-0-instance-config-test.sh
           ./tests/functional/v0-80-0-widget-key-filters-test.sh
           ./tests/functional/v0-81-3-widget-empty-message-defaults-test.sh
-          ./tests/functional/v0-81-4-revoke-public-temp-test.sh
+          ./tests/functional/v0-80-3-dashboard-role-visibility-test.sh
+          ./tests/functional/v0-82-0-dashboard-show-in-selector-test.sh
+          ./tests/functional/v0-82-1-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
+
+      - name: Setup Go (payment-worker database tests)
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+          cache-dependency-path: services/payment-worker/go.sum
+
+      - name: Run payment-worker database tests against the migrated schema
+        # The go-services-tests job runs the same package without a database, where these
+        # tests skip; here they run the workers and webhook handler against real triggers.
+        working-directory: services/payment-worker
+        run: go test -race -count=1 ./...
+        env:
+          PAYMENT_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 
       - name: Verify each recent revert restores the prior schema
         run: |
@@ -248,7 +264,7 @@ jobs:
 
       - name: Verify the owner revoked TEMPORARY from PUBLIC (as restricted user)
         # The test switches roles with SET ROLE, so it connects as the superuser; doadmin owns the database and ran the revoke.
-        run: ./tests/functional/v0-81-4-revoke-public-temp-test.sh
+        run: ./tests/functional/v0-82-1-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 

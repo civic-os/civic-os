@@ -16,7 +16,8 @@
  */
 
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
+import { filter } from 'rxjs';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard } from '../../interfaces/dashboard';
@@ -30,7 +31,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
  * Displays in navbar (app.component.html).
  *
  * Features:
- * - Lists all available dashboards (public + user's private)
+ * - Lists the visible dashboards, except unlisted ones (show_in_selector = false)
+ * - Names the current dashboard in the button, listed or not
  * - Highlights current dashboard
  * - Navigates to selected dashboard
  * - Signal-based state with OnPush change detection
@@ -45,11 +47,14 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class DashboardSelectorComponent {
   private dashboardService = inject(DashboardService);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
 
   // Component state (signals)
   // Read from the service's signal so a refresh (locale or role change) updates the menu
   dashboards = computed<Dashboard[]>(() => this.dashboardService.dashboards() ?? []);
+  // The menu lists only these; the button label reads the full list, so an unlisted dashboard opened by
+  // link is still named. A missing flag counts as listed: for a few seconds of a deploy the new frontend
+  // can meet the old get_dashboards().
+  listedDashboards = computed<Dashboard[]>(() => this.dashboards().filter((d) => d.show_in_selector !== false));
   currentDashboardId = signal<number | undefined>(undefined);
   loading = signal(true);
 
@@ -57,17 +62,27 @@ export class DashboardSelectorComponent {
     // Load all available dashboards
     this.loadDashboards();
 
-    // Subscribe to route parameter changes to update current dashboard highlight
-    this.route.paramMap.pipe(
+    // Track the open dashboard from the router. The selector lives in the navbar, outside the routed
+    // outlet, so its own ActivatedRoute is the root and never carries the :id of /dashboard/:id. Reading
+    // the deepest route after each navigation names a dashboard reached by link, the only way to reach an unlisted one.
+    this.currentDashboardId.set(this.dashboardIdFromRouter());
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       takeUntilDestroyed()
-    ).subscribe(params => {
-      const dashboardId = params.get('id');
-      if (dashboardId) {
-        this.currentDashboardId.set(parseInt(dashboardId, 10));
-      } else {
-        this.currentDashboardId.set(undefined);
-      }
-    });
+    ).subscribe(() => this.currentDashboardId.set(this.dashboardIdFromRouter()));
+  }
+
+  /** The id in /dashboard/:id, or undefined on any other route (including the default dashboard at /). */
+  private dashboardIdFromRouter(): number | undefined {
+    let route: ActivatedRouteSnapshot | undefined = this.router.routerState?.snapshot?.root;
+    while (route?.firstChild) {
+      route = route.firstChild;
+    }
+    if (route?.routeConfig?.path !== 'dashboard/:id') {
+      return undefined;
+    }
+    const id = Number(route.paramMap.get('id'));
+    return Number.isInteger(id) ? id : undefined;
   }
 
   /**

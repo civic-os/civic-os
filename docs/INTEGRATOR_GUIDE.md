@@ -609,6 +609,7 @@ Fields:
 - `is_public` (BOOLEAN) - Visible to all users (false = owner-only)
 - `created_by` (UUID FK) - Dashboard owner
 - `sort_order` - Ordering in dashboard selector (lower numbers first)
+- `show_in_selector` (BOOLEAN, default `true`, v0.82.0) - `false` leaves the dashboard out of the dashboard selector while it stays reachable (see Unlisted dashboards below)
 
 **`metadata.widget_types`** - Registry of available widget types
 
@@ -671,7 +672,23 @@ SELECT public.set_dashboard_roles(:dashboard_id, NULL, 'show');
 
 `set_dashboard_roles(dashboard_id, role_keys, mode DEFAULT 'show', priority DEFAULT 0)` is admin only and replaces the dashboard's rows of that mode. `show` replaces only this dashboard's show rows and never touches default rows. `default` writes through `metadata.dashboard_role_defaults` (upsert on `role_id`, delete to clear), whose triggers maintain `dashboard_roles`. Because a role has one default, it moves each listed role's default from any other dashboard, as the legacy upsert did; `priority` is one value per call, which is enough because it only orders defaults on different dashboards. It rejects unknown role keys, unknown dashboards and other modes. It needs a signed-in admin JWT, so init scripts (which run without one) write `show` rows into `metadata.dashboard_roles` directly. Write `default` rows through `set_dashboard_roles()` or `dashboard_role_defaults`, never by inserting into `dashboard_roles` directly, or the legacy table goes stale. `metadata.dashboard_roles` is readable and writable by admins only.
 
-**Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard (each checked for visibility before it is returned), then the first dashboard the user can see (by `sort_order`, then `id`).
+**Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard (each checked for visibility before it is returned), then the first dashboard the user can see (listed dashboards first, then by `sort_order`, then `id`).
+
+**Unlisted dashboards** (v0.82.0): `show_in_selector = false` leaves a dashboard out of the navbar's dashboard selector. It changes nothing else: whoever can see the dashboard (the rule above) can still open it by direct link (`/dashboard/:id`), from a `dashboard_navigation` or `nav_buttons` widget, and as a landing dashboard. Use it for drill-down pages, the later chapters of a storymap, or a role's landing page that doesn't need a second entry in the menu. It is not access control: to hide a dashboard from some people, use `is_public = false` and `dashboard_roles`.
+- `get_dashboards()` returns every visible dashboard with its `show_in_selector`, and the selector filters, so it can still name an unlisted dashboard that is open. `get_dashboard()` returns the flag too.
+- Landing: a saved preference, a role default and the `is_default` dashboard may be unlisted (a landing-only dashboard for a role is a common use). The last tier prefers listed dashboards, so a user with no default does not land on a drill-down page; it returns an unlisted one only when nothing listed is visible.
+- The selector keeps its "Default Dashboard" entry when every visible dashboard is unlisted.
+- Admins see the same list as everyone else.
+
+```sql
+-- Reachable from the Operations dashboard's nav buttons, but not listed in the selector
+UPDATE metadata.dashboards SET show_in_selector = FALSE WHERE id = :drilldown_dashboard_id;
+-- A landing-only dashboard for the staff role
+UPDATE metadata.dashboards SET show_in_selector = FALSE WHERE id = :staff_home_id;
+SELECT public.set_dashboard_roles(:staff_home_id, ARRAY['staff'], 'default', 90);
+```
+
+See `examples/storymap/init-scripts/08_storymap_unlisted_chapters.sql` for a working example.
 
 **Impersonation and the creator clause**: the creator clause uses the real user id, while role matching follows the impersonated roles. An admin impersonating a role still sees dashboards they created and, because `is_admin()` follows the JWT roles, otherwise sees what that role sees. The dashboard selector refetches, and the dashboard page reloads (the default on `/`, `get_dashboard` on `/dashboard/:id`, so a dashboard the new roles cannot see shows "not found"), when impersonation starts, stops or changes and on login or logout.
 
@@ -3663,11 +3680,11 @@ Stripe → [HTTP: /webhooks/stripe] → Payment Worker → PostgreSQL
 
 Production:
 - URL: `https://your-domain.com/webhooks/stripe`
-- Events to send: `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`
+- Events to send: `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`, `charge.refunded`
 - Copy the **Signing secret** (starts with `whsec_`)
 
 Development:
-- Use Stripe CLI for local testing: `stripe listen --forward-to http://localhost:8081/webhooks/stripe`
+- Use Stripe CLI for local testing: `stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded --forward-to http://localhost:8081/webhooks/stripe` (Stripe CLI 1.53+ requires `--events`)
 - CLI prints signing secret to console
 
 **2. Set Environment Variable**
@@ -3695,8 +3712,9 @@ HTTP Server: Listening on :8080/webhooks/stripe
 Use Stripe CLI to forward webhooks from Stripe's test environment to your local worker:
 
 ```bash
-# Start Stripe listener (forwards webhooks to local worker)
-stripe listen --forward-to http://localhost:8081/webhooks/stripe
+# Start Stripe listener (forwards webhooks to local worker; Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # In another terminal, trigger test webhook events
 stripe trigger payment_intent.succeeded
@@ -4254,6 +4272,50 @@ data:
 - The `max_refundable` computed column ensures refund validation respects the fee policy at time of payment
 - Stripe's minimum payment is $0.50 - verify your base amounts meet this after fees are added
 - Fee calculation uses banker's rounding for consistent cent-level precision
+
+#### Stripe Metadata
+
+Since v0.81.4 the payment worker sends Stripe **metadata** with every PaymentIntent and Refund, so a Stripe admin or a bookkeeper reading a payout report can tell which Civic OS transaction, record and instance a payment belongs to without matching `pi_…` ids by hand. No SQL or migration is needed: the worker builds the keys from the transaction row and its own settings.
+
+| Key | Value | On |
+|-----|-------|----|
+| `civic_os_transaction_id` | `payments.transactions.id` | PaymentIntent, Refund |
+| `civic_os_entity_type` | `entity_type` (table name), omitted when NULL | PaymentIntent, Refund |
+| `civic_os_entity_id` | `entity_id`, omitted when NULL | PaymentIntent, Refund |
+| `civic_os_instance` | `PAYMENT_INSTANCE_KEY`, omitted when unset | PaymentIntent, Refund |
+| `civic_os_record_url` | The paid record's Detail page, `<SITE_URL>/view/<entity_type>/<entity_id>`; omitted when `SITE_URL` is unset or the entity is NULL | PaymentIntent, Refund |
+| `civic_os_base_cents` | `amount` in cents | PaymentIntent |
+| `civic_os_fee_cents` | Processing fee in cents, `"0"` when fees are disabled | PaymentIntent |
+| `civic_os_refund_id` | `payments.refunds.id` | Refund (beside the existing `reason` key) |
+
+`entity_type` and `entity_id` are filled by `payments.create_and_link_payment()`. A payment row inserted without the helper has no entity keys in Stripe.
+
+**Configuration** (payment worker environment):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PAYMENT_INSTANCE_KEY` | *(unset)* | Short, stable name for this instance, sent as `civic_os_instance` (for example `mottpark`). Set it whenever several instances or systems share one Stripe account. Don't rename it later: Stripe history would split under two names. The worker logs a warning at startup when the Stripe key is live (`sk_live_`, `rk_live_`) and this is unset, and refuses to start when it is over 500 characters. |
+| `SITE_URL` | *(unset)* | Public URL of the frontend (for example `https://permits.example.gov`), the same value the consolidated worker uses for notification links. The base of `civic_os_record_url`; with it unset the key is left out. A trailing slash is dropped and a path is kept. The worker refuses to start when the value is not an absolute `http` or `https` URL or carries a query or fragment. |
+
+**Using the keys in Stripe**:
+
+- **Payout and balance reports**: add `payment_metadata[civic_os_transaction_id]` (and any other key) as a column when downloading. Report columns read the PaymentIntent's metadata, which also covers refunds' original payments.
+- **Dashboard and Search API**: filter with `metadata['civic_os_entity_type']:'reservation_requests'` or by transaction id.
+- **Charges**: Stripe copies PaymentIntent metadata to the Charge once, when the Charge is created.
+- **Record links**: the Stripe Dashboard shows `civic_os_record_url` as a clickable link. The page asks for sign-in and shows the record only to users whose permissions allow it.
+
+**Notes**:
+
+- Keys use the `civic_os_` prefix; don't add your own keys with that prefix in Stripe.
+- Metadata holds identifiers only: no payer details, and no program or funding-source classification (the accounting export is the source for those).
+- Anyone with access to the Stripe Dashboard sees the metadata; the browser-side Stripe Elements flow does not.
+- Payments created before v0.81.4 have no Civic OS keys in Stripe.
+- **Upgrading**: Stripe accepts a retried request under the same idempotency key only with the same parameters, and the worker retries create-intent and refund jobs under a fixed key. A job that reached Stripe on the old worker but failed to update the database, and is retried by the new worker within 24 hours, fails with `idempotency_error`. Upgrade with no `create_payment_intent` or `process_refund` job in `retryable` state; the same applies when you change `PAYMENT_INSTANCE_KEY`, `SITE_URL` or the fee settings. A job stuck this way has a Stripe object already: match it in the Dashboard and set the row's status by hand.
+- The refund reason is cut to Stripe's 500-character limit in `metadata[reason]`; the full reason stays in `payments.refunds`.
+- `PAYMENT_INSTANCE_KEY` is trimmed of surrounding spaces at startup.
+- `civic_os_record_url` is written once, when the PaymentIntent or Refund is created. A later domain change leaves old Stripe objects pointing at the old host, and a deleted record's link leads to a not-found page. The link points at the record named by `entity_type`, which for a payment made through a view or a child table may not be the record finance staff want.
+
+See `docs/notes/STRIPE_METADATA_DESIGN.md` for the design and the later phases (integrator-supplied keys, stored provider data).
 
 ### Scheduled Jobs System
 
@@ -6968,7 +7030,7 @@ GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
 ```
 
-`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.81.4 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.81.4 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.82.1 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.82.1 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 For full CRUD access, use the same `authenticated` role as the web frontend by authenticating through Keycloak.
 

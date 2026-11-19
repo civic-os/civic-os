@@ -21,7 +21,12 @@ type CreateIntentParams struct {
 	Amount      int64  // Amount in cents (e.g., 1000 = $10.00)
 	Currency    string // Currency code (e.g., "usd")
 	Description string // Payment description
-	// POC: No metadata, customer ID, or other fields yet
+	// IdempotencyKey, when set, is sent as Stripe's Idempotency-Key so a retried
+	// call returns the original PaymentIntent instead of creating another.
+	IdempotencyKey string
+	// Metadata is sent as the PaymentIntent's metadata. Stripe copies it to the
+	// Charge once, and payout reports read it as payment_metadata[<key>].
+	Metadata map[string]string
 }
 
 // PaymentIntentResult contains the result of creating a payment intent
@@ -36,6 +41,12 @@ type RefundParams struct {
 	PaymentIntentID string // Stripe PaymentIntent ID to refund (pi_...)
 	AmountCents     int64  // Amount to refund in cents (partial refunds supported)
 	Reason          string // Reason for refund (shown in Stripe dashboard)
+	// IdempotencyKey, when set, is sent as Stripe's Idempotency-Key so a retried
+	// call returns the original Refund instead of refunding again.
+	IdempotencyKey string
+	// Metadata is sent as the Refund's metadata, beside the "reason" key.
+	// Refunds do not inherit PaymentIntent metadata.
+	Metadata map[string]string
 }
 
 // RefundResult contains the result of creating a refund
@@ -94,6 +105,11 @@ func (s *StripeProvider) CreateIntent(ctx context.Context, params CreateIntentPa
 		},
 	}
 
+	if params.IdempotencyKey != "" {
+		intentParams.SetIdempotencyKey(params.IdempotencyKey)
+	}
+	addMetadata(intentParams.AddMetadata, params.Metadata)
+
 	// Call Stripe API
 	intent, err := paymentintent.New(intentParams)
 	if err != nil {
@@ -110,6 +126,15 @@ func (s *StripeProvider) CreateIntent(ctx context.Context, params CreateIntentPa
 		ClientSecret:    intent.ClientSecret,
 		Status:          string(intent.Status),
 	}, nil
+}
+
+// addMetadata copies metadata onto Stripe request params through the params
+// type's own AddMetadata: stripe-go refuses a request that also sets the
+// deprecated embedded Params.Metadata. Its form encoder sorts the keys.
+func addMetadata(add func(key, value string), metadata map[string]string) {
+	for k, v := range metadata {
+		add(k, v)
+	}
 }
 
 // maskAPIKey masks API key for logging (show first 7 chars + ...)
@@ -150,10 +175,17 @@ func (s *StripeProvider) CreateRefund(ctx context.Context, params RefundParams) 
 	// Add reason as metadata if provided
 	if params.Reason != "" {
 		refundParams.Reason = stripe.String("requested_by_customer")
-		refundParams.AddMetadata("reason", params.Reason)
+		// Free text from the admin: cut to Stripe's value limit rather than
+		// have Stripe refuse the refund.
+		refundParams.AddMetadata("reason", truncateRunes(params.Reason, stripeMetadataValueMax))
 	}
+	addMetadata(refundParams.AddMetadata, params.Metadata)
 
 	// Call Stripe API
+	if params.IdempotencyKey != "" {
+		refundParams.SetIdempotencyKey(params.IdempotencyKey)
+	}
+
 	stripeRefund, err := refund.New(refundParams)
 	if err != nil {
 		log.Printf("[Stripe] Error creating Refund: %v", err)

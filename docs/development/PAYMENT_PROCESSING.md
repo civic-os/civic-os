@@ -725,6 +725,24 @@ interface PaymentValue {
 
 ---
 
+## Stripe Metadata
+
+**Status:** ✅ Implemented (v0.81.4), Phase 1 of `docs/notes/STRIPE_METADATA_DESIGN.md`
+
+Every PaymentIntent and Refund carries reserved `civic_os_` metadata keys identifying the transaction, the paid record (`entity_type`, `entity_id`), the instance (`PAYMENT_INSTANCE_KEY`), a link to the record's Detail page (`civic_os_record_url`, from `SITE_URL`) and, on PaymentIntents, the base and fee split in cents. Refunds also carry `civic_os_refund_id` beside the existing `reason` key. The key list and operator guidance are in `docs/INTEGRATOR_GUIDE.md` (Stripe Metadata).
+
+Implementation (`services/payment-worker/`):
+
+- `stripe_metadata.go` builds the maps (`intentMetadata`, `refundMetadata`). A key whose value is empty is left out, because Stripe reads `""` as "delete this key"; a value over 500 characters is dropped with a log line rather than truncated.
+- `create_intent_worker.go` and `refund_worker.go` read `entity_type` and `entity_id` (the refund worker joins its transaction) and pass `Metadata` on `CreateIntentParams` / `RefundParams`.
+- `stripe_provider.go` adds each entry through the params type's own `AddMetadata` (stripe-go's form encoder sorts the keys). stripe-go v81 refuses a request that also sets the deprecated embedded `Params.Metadata`.
+- The maps are a pure function of the row and the worker's settings. That matters for the idempotency keys (`civic-os:create-intent:<id>`, `civic-os:refund:<id>`): Stripe refuses a retry whose parameters differ from the first request under the same key. The settings are the exception: a job retried within 24 hours after an upgrade from a pre-metadata worker, or after `PAYMENT_INSTANCE_KEY`, `SITE_URL` or the fee settings change, fails with `idempotency_error`. Changing the key format instead would let that retry create a second PaymentIntent or refund, so the INTEGRATOR_GUIDE asks operators to upgrade with no retryable payment jobs.
+- The admin's refund reason goes to `metadata[reason]` cut to 500 characters (`truncateRunes`), so a long reason never makes Stripe refuse the refund.
+- `main.go` reads `PAYMENT_INSTANCE_KEY` through `resolveInstanceKey`, which trims it, warns when the Stripe key is live and it is unset (or only whitespace), and refuses to start when it is over 500 characters; `main.go` logs the result.
+- `main.go` reads `SITE_URL` through `resolveSiteURL` (trimmed, trailing slash dropped, no default; startup fails unless it is an absolute http(s) URL without query or fragment). Both settings travel to the workers as one `metadataSettings` value. `recordURL` builds `<SITE_URL>/view/<entity_type>/<entity_id>` with each segment path-escaped, and returns `""` (so the key is left out) unless all three are set.
+
+---
+
 ## Configurable Capture Timing
 
 ### Capture Modes
@@ -1941,6 +1959,8 @@ COMMENT ON FUNCTION process_payment_webhook IS
 
 **Critical Design Decision:** We **always return 200 OK** to webhook senders (Stripe, PayPal, etc.). This prevents the provider from retrying, and instead we handle retries internally via River's job queue.
 
+> **As built**: the payment worker processes each event synchronously in its HTTP handler at `/webhooks/stripe` (the PostgREST `/rpc/process_payment_webhook` entry point below was not built, since PostgREST cannot verify Stripe signatures). It returns 200 for processed events, duplicates and event types it does not handle, and 500 when processing fails, so Stripe's own retry schedule reprocesses the event. See "Idempotency Guarantees" below for how the error is kept.
+
 **Rationale:**
 - Payment providers retry failed webhooks aggressively (exponential backoff, up to 3 days)
 - Provider retries can overwhelm our system during outages
@@ -2003,12 +2023,12 @@ Stripe-Signature: t=...,v1=...
 
 ### Idempotency Guarantees
 
-**Three layers of protection:**
+**As built** (the advisory-lock design above was not built):
 
-1. **Database constraint:** `UNIQUE (provider, provider_event_id)` prevents duplicate inserts
-2. **ON CONFLICT DO NOTHING:** Atomic check-and-insert prevents race conditions
-3. **Advisory locks:** Worker acquires lock before processing to prevent concurrent execution
-4. **Processed flag check:** Worker skips if `processed = TRUE` (defense in depth)
+1. **Database constraint:** `UNIQUE (provider, provider_event_id)` on `metadata.webhooks` gives each Stripe event one row.
+2. **Upsert that skips processed events:** the handler inserts with `ON CONFLICT … DO UPDATE … WHERE processed = FALSE RETURNING id`. A processed event returns no row and is acknowledged as a duplicate (200). An unprocessed row is reprocessed, and the upsert's row lock makes a concurrent delivery of the same event wait for the first one to finish.
+3. **Errors are kept, and the event stays retryable:** when an event handler fails, its transaction is rolled back, then the error is written in its own statement as `processed = FALSE, error_message = …`, and Stripe gets a 500 so it retries. A later successful delivery marks the row processed and clears `error_message`. Failed events are the rows with `processed = FALSE AND error_message IS NOT NULL`.
+4. **Stripe idempotency keys:** the create-intent and refund workers send `Idempotency-Key: civic-os:create-intent:<transaction id>` and `civic-os:refund:<refund id>`. If a River retry runs after Stripe created the object but before the worker saved its id, Stripe returns the original PaymentIntent or Refund instead of creating a second one. Stripe keeps keys for 24 hours. (Without a key, stripe-go sends a random one per call, which only covers its own network retries.)
 
 ### Security: Custom Body Parser for Signature Verification
 
@@ -2403,13 +2423,14 @@ This section provides step-by-step instructions for setting up Stripe accounts f
 
 1. Navigate to **Developers** → **Webhooks**
 2. Click **Add endpoint**
-3. Set **Endpoint URL**: `https://your-tenant-domain.com/rpc/process_payment_webhook`
+3. Set **Endpoint URL**: `https://api.your-tenant-domain.com/webhooks/stripe` (the payment worker; see `docs/deployment/PRODUCTION.md` for the route)
 4. Click **Select events** and choose:
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
    - `payment_intent.canceled`
    - `charge.refunded`
-   - `charge.dispute.created`
+
+   The worker handles these four. Any other event type is acknowledged and marked processed without action.
 5. Click **Add endpoint**
 6. Click on the created webhook, then **Reveal** to copy **Signing secret** (starts with `whsec_`)
 
@@ -2450,8 +2471,9 @@ brew install stripe/stripe-cli/stripe
 # Login to your Stripe account
 stripe login
 
-# Forward webhooks to local PostgREST
-stripe listen --forward-to http://localhost:3000/rpc/process_payment_webhook
+# Forward webhooks to the local payment worker (Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # Trigger test webhook
 stripe trigger payment_intent.succeeded
@@ -2535,8 +2557,9 @@ Use these test cards in **test mode** only:
 cd examples/community-center
 docker-compose up -d
 
-# 2. Start Stripe webhook listener (in separate terminal)
-stripe listen --forward-to http://localhost:8081/webhooks/stripe
+# 2. Start Stripe webhook listener (in separate terminal; Stripe CLI 1.53+ requires --events)
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded \
+  --forward-to http://localhost:8081/webhooks/stripe
 
 # 3. Test payment flow in browser:
 #    - Create reservation request
@@ -2967,6 +2990,15 @@ CREATE TABLE payments.unknown_webhooks (
 
 ## Testing Strategy
 
+### Payment Worker Tests (as built)
+
+The worker's tests live next to the code in `services/payment-worker/*_test.go`, not in the `test/` tree sketched below. They run in two tiers:
+
+- **No database:** fee math, the Stripe adapter against an `httptest` server standing in for the Stripe API (request parameters, error mapping, key masking), and the webhook HTTP paths that reject a request before processing (method, missing or bad signature, oversized body, health).
+- **Database:** the create-intent and refund workers (with a fake `PaymentProvider`) and webhook processing, against a migrated Civic OS database so the real triggers run (create-intent job enqueue, payment and refund notifications). These tests skip unless `PAYMENT_TEST_DATABASE_URL` is set. Each test creates its own user and rows and deletes them afterward, so a shared database is safe.
+
+How to run them, locally and in CI, is in `docs/development/TESTING.md` (Go Payment Worker Tests). The fixture-based design below is the original plan and was not built.
+
 ### Fixture-Based Integration Testing
 
 **Pattern:** Use real webhook payloads captured from Stripe as test fixtures.
@@ -3000,7 +3032,7 @@ stripe trigger payment_intent.payment_failed --print-json > test/fixtures/stripe
 stripe trigger charge.refunded --print-json > test/fixtures/stripe/charge_refunded.json
 
 # Or record live webhooks
-stripe listen --forward-to http://localhost:8080/webhooks --print-json > test/fixtures/
+stripe listen --events payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded --forward-to http://localhost:8081/webhooks/stripe --print-json > test/fixtures/stripe/live_events.jsonl
 ```
 
 **Fixture Loader Helper:**

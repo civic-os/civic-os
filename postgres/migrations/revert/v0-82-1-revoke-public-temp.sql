@@ -1,4 +1,4 @@
--- Revert civic_os:v0-81-4-revoke-public-temp
+-- Revert civic_os:v0-82-1-revoke-public-temp
 --
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later

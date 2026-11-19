@@ -29,13 +29,15 @@ type RefundWorker struct {
 	river.WorkerDefaults[RefundWorkerArgs]
 	dbPool   *pgxpool.Pool
 	provider PaymentProvider
+	metadata metadataSettings // settings sent as Stripe metadata
 }
 
 // NewRefundWorker creates a new RefundWorker
-func NewRefundWorker(dbPool *pgxpool.Pool, provider PaymentProvider) *RefundWorker {
+func NewRefundWorker(dbPool *pgxpool.Pool, provider PaymentProvider, metadata metadataSettings) *RefundWorker {
 	return &RefundWorker{
 		dbPool:   dbPool,
 		provider: provider,
+		metadata: metadata,
 	}
 }
 
@@ -54,7 +56,8 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		TransactionID string
 		Status        string
 		Reason        string
-		UserID        string
+		EntityType    *string
+		EntityID      *string
 	}
 
 	query := `
@@ -63,9 +66,10 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 			r.transaction_id,
 			r.status,
 			r.reason,
-			t.user_id
+			t.entity_type,
+			t.entity_id
 		FROM payments.refunds r
-		JOIN payments.transactions t ON r.transaction_id = t.id
+		JOIN payments.transactions t ON t.id = r.transaction_id
 		WHERE r.id = $1
 	`
 
@@ -74,7 +78,8 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		&refund.TransactionID,
 		&refund.Status,
 		&refund.Reason,
-		&refund.UserID,
+		&refund.EntityType,
+		&refund.EntityID,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -94,11 +99,19 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		return nil // Not an error - refund was already processed
 	}
 
-	// 3. Call Stripe to create refund
+	// 3. Call Stripe to create refund. The idempotency key makes a River retry
+	// after a failed DB update (step 4) get the same Refund back instead of
+	// refunding twice.
 	result, err := w.provider.CreateRefund(ctx, RefundParams{
 		PaymentIntentID: paymentIntentID,
 		AmountCents:     amountCents,
 		Reason:          refund.Reason,
+		IdempotencyKey:  "civic-os:refund:" + refundID,
+		Metadata: refundMetadata(paymentIdentity{
+			TransactionID: refund.TransactionID,
+			EntityType:    refund.EntityType,
+			EntityID:      refund.EntityID,
+		}, refund.ID, w.metadata),
 	})
 	if err != nil {
 		log.Printf("[Refund] Error creating Stripe refund for %s: %v", refundID, err)
@@ -123,12 +136,8 @@ func (w *RefundWorker) Work(ctx context.Context, job *river.Job[RefundWorkerArgs
 		return fmt.Errorf("database update error: %w", err)
 	}
 
-	// 5. Enqueue notification job for user
-	err = w.enqueueNotification(ctx, refund.UserID, refund.TransactionID, refundID)
-	if err != nil {
-		// Log but don't fail - notification is secondary
-		log.Printf("[Refund] Warning: Failed to enqueue notification: %v", err)
-	}
+	// The user's refund notification comes from the refund_succeeded_notification
+	// trigger on payments.refunds, which fires on the status change above.
 
 	log.Printf("[Refund] ✓ Refund %s completed successfully", refundID)
 	return nil
@@ -163,87 +172,6 @@ func (w *RefundWorker) updateRefundError(ctx context.Context, refundID string, e
 
 	_, err := w.dbPool.Exec(ctx, query, errorMsg, refundID)
 	return err
-}
-
-// enqueueNotification enqueues a notification job for the refund
-func (w *RefundWorker) enqueueNotification(ctx context.Context, userID, transactionID, refundID string) error {
-	// Build entity data for the notification template
-	entityData := map[string]interface{}{
-		"transaction_id": transactionID,
-		"refund_id":      refundID,
-	}
-
-	// Fetch additional data for the notification
-	var amount, refundAmount float64
-	var description, reason string
-
-	query := `
-		SELECT
-			t.amount,
-			t.description,
-			r.amount AS refund_amount,
-			r.reason
-		FROM payments.transactions t
-		JOIN payments.refunds r ON r.transaction_id = t.id
-		WHERE r.id = $1
-	`
-
-	err := w.dbPool.QueryRow(ctx, query, refundID).Scan(
-		&amount, &description, &refundAmount, &reason,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to fetch notification data: %w", err)
-	}
-
-	entityData["amount"] = amount
-	entityData["description"] = description
-	entityData["refund_amount"] = refundAmount
-	entityData["reason"] = reason
-
-	// Build notification args
-	entityDataJSON, _ := json.Marshal(entityData)
-	notificationArgs := map[string]interface{}{
-		"user_id":       userID,
-		"template_name": "payment_refunded",
-		"entity_type":   "payments.transactions",
-		"entity_id":     transactionID,
-		"entity_data":   json.RawMessage(entityDataJSON),
-		"channels":      []string{"email"},
-	}
-
-	argsJSON, err := json.Marshal(notificationArgs)
-	if err != nil {
-		return fmt.Errorf("failed to marshal notification args: %w", err)
-	}
-
-	// Enqueue notification job
-	insertQuery := `
-		INSERT INTO metadata.river_job (
-			kind,
-			args,
-			priority,
-			queue,
-			max_attempts,
-			scheduled_at,
-			state
-		) VALUES (
-			'send_notification',
-			$1,
-			2,
-			'default',
-			3,
-			NOW(),
-			'available'
-		)
-	`
-
-	_, err = w.dbPool.Exec(ctx, insertQuery, argsJSON)
-	if err != nil {
-		return fmt.Errorf("failed to enqueue notification: %w", err)
-	}
-
-	log.Printf("[Refund] ✓ Notification job enqueued for user %s", userID)
-	return nil
 }
 
 // MarshalJSON implements custom JSON marshaling for logging

@@ -393,6 +393,8 @@ config := jsonb_build_object(
 
 Provides client-side navigation between dashboards using Angular's `routerLink` directive. This widget is ideal for storymap-style sequential dashboards.
 
+To keep the chapters after the first out of the navbar's dashboard selector, set `show_in_selector = false` on them (v0.82.0). They stay reachable through this widget and by direct link. The StoryMap example does this (`examples/storymap/init-scripts/08_storymap_unlisted_chapters.sql`); see `docs/INTEGRATOR_GUIDE.md` (Unlisted dashboards).
+
 ### Complete Configuration Reference
 
 ```typescript

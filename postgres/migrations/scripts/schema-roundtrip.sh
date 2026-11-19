@@ -134,9 +134,13 @@ cmd_dump() {
 
   # Strip volatile lines: comments (version banner), session SETs, set_config,
   # and psql \restrict / \unrestrict tokens (random per dump on recent pg_dump).
+  # Then squeeze runs of empty lines to one, as `cat -s` does. Not `cat -s` itself:
+  # uutils coreutils (`cat` on Ubuntu 26.04 runners, 0.10.0) drops the empty line
+  # after a line whose newline arrives in the next pipe read, so a dump's blank lines
+  # depended on pipe timing and the stepwise check flaked.
   grep -v -E '^(--|SET |SELECT pg_catalog\.set_config|\\restrict |\\unrestrict )' "$raw" \
     | move_columns "${MOVED_COLUMNS[*]}" \
-    | cat -s > "$outfile"
+    | awk 'NR == 1 || $0 != "" || prev != "" { print } { prev = $0 }' > "$outfile"
 
   if [ ! -s "$outfile" ]; then
     echo "ERROR: schema dump is empty: $outfile" >&2

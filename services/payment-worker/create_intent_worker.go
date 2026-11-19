@@ -74,14 +74,16 @@ type CreateIntentWorker struct {
 	dbPool    *pgxpool.Pool
 	provider  PaymentProvider
 	feeConfig *FeeConfig
+	metadata  metadataSettings // settings sent as Stripe metadata
 }
 
 // NewCreateIntentWorker creates a new CreateIntentWorker
-func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig) *CreateIntentWorker {
+func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig, metadata metadataSettings) *CreateIntentWorker {
 	return &CreateIntentWorker{
 		dbPool:    dbPool,
 		provider:  provider,
 		feeConfig: feeConfig,
+		metadata:  metadata,
 	}
 }
 
@@ -95,20 +97,25 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 	var payment struct {
 		ID          string
 		UserID      string
-		Amount      float64
+		AmountCents int64
 		Currency    string
 		Description *string
 		Status      string
+		EntityType  *string
+		EntityID    *string
 	}
 
 	query := `
 		SELECT
 			id,
 			user_id,
-			amount,
+			-- Convert to cents in NUMERIC: float64(amount)*100 truncates (0.29 -> 28)
+			ROUND(amount * 100)::bigint,
 			currency,
 			description,
-			status
+			status,
+			entity_type,
+			entity_id
 		FROM payments.transactions
 		WHERE id = $1
 	`
@@ -116,10 +123,12 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 	err := w.dbPool.QueryRow(ctx, query, paymentID).Scan(
 		&payment.ID,
 		&payment.UserID,
-		&payment.Amount,
+		&payment.AmountCents,
 		&payment.Currency,
 		&payment.Description,
 		&payment.Status,
+		&payment.EntityType,
+		&payment.EntityID,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -130,8 +139,8 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 		return fmt.Errorf("database error: %w", err)
 	}
 
-	log.Printf("[CreateIntent] Fetched payment: id=%s, amount=%.2f %s, status=%s",
-		payment.ID, payment.Amount, payment.Currency, payment.Status)
+	log.Printf("[CreateIntent] Fetched payment: id=%s, amount=%d cents %s, status=%s",
+		payment.ID, payment.AmountCents, payment.Currency, payment.Status)
 
 	// 2. Validate payment is in correct state
 	if payment.Status != "pending_intent" {
@@ -139,8 +148,8 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 		return nil // Not an error - payment was already processed
 	}
 
-	// 3. Convert base amount to cents (Stripe uses smallest currency unit)
-	baseAmountCents := int64(payment.Amount * 100)
+	// 3. Base amount in cents (Stripe uses smallest currency unit), converted by the query
+	baseAmountCents := payment.AmountCents
 
 	// 4. Calculate processing fee
 	feeCents := w.feeConfig.CalculateFee(baseAmountCents)
@@ -162,11 +171,21 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 		description = *payment.Description
 	}
 
-	// 6. Call Stripe to create PaymentIntent with TOTAL amount (base + fee)
+	// 6. Call Stripe to create PaymentIntent with TOTAL amount (base + fee).
+	// The idempotency key makes a River retry after a failed DB update (step 7)
+	// get the same PaymentIntent back instead of creating a second one; the
+	// metadata is built only from the row and settings, so the retry's
+	// parameters match the first attempt's, as Stripe requires.
 	result, err := w.provider.CreateIntent(ctx, CreateIntentParams{
-		Amount:      totalAmountCents,
-		Currency:    payment.Currency,
-		Description: description,
+		Amount:         totalAmountCents,
+		Currency:       payment.Currency,
+		Description:    description,
+		IdempotencyKey: "civic-os:create-intent:" + paymentID,
+		Metadata: intentMetadata(paymentIdentity{
+			TransactionID: payment.ID,
+			EntityType:    payment.EntityType,
+			EntityID:      payment.EntityID,
+		}, w.metadata, baseAmountCents, feeCents),
 	})
 	if err != nil {
 		log.Printf("[CreateIntent] Error creating Stripe intent for payment %s: %v", paymentID, err)
@@ -197,9 +216,6 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 // updatePaymentFee updates the payment record with fee details
 // This is called BEFORE calling Stripe so we have an audit trail
 func (w *CreateIntentWorker) updatePaymentFee(ctx context.Context, paymentID string, feeCents int64) error {
-	// Convert fee cents to dollars for storage
-	feeDollars := float64(feeCents) / 100.0
-
 	// Store fee configuration at time of payment for auditing
 	// fee_percent and fee_flat_cents are only set if fees are enabled
 	var feePercent *float64
@@ -213,7 +229,7 @@ func (w *CreateIntentWorker) updatePaymentFee(ctx context.Context, paymentID str
 	query := `
 		UPDATE payments.transactions
 		SET
-			processing_fee = $1,
+			processing_fee = $1::numeric / 100,
 			fee_percent = $2,
 			fee_flat_cents = $3,
 			fee_refundable = $4,
@@ -222,7 +238,7 @@ func (w *CreateIntentWorker) updatePaymentFee(ctx context.Context, paymentID str
 	`
 
 	_, err := w.dbPool.Exec(ctx, query,
-		feeDollars,
+		feeCents,
 		feePercent,
 		feeFlatCents,
 		w.feeConfig.Refundable,
