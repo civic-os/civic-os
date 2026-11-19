@@ -605,11 +605,15 @@ Fields:
 - `id` (SERIAL PK) - Unique dashboard identifier
 - `display_name` - Dashboard name shown in selector
 - `description` - Optional description
-- `is_default` (BOOLEAN) - System default dashboard (only one should be true)
-- `is_public` (BOOLEAN) - Visible to all users (false = owner-only)
-- `created_by` (UUID FK) - Dashboard owner
-- `sort_order` - Ordering in dashboard selector (lower numbers first)
+- `is_default` (BOOLEAN, default `false`) - System default dashboard (at most one may be true)
+- `is_public` (BOOLEAN, default `true`) - Visible to all users (false = visible to the creator, admins and roles granted through `dashboard_roles`)
+- `created_by` (UUID FK, nullable) - Dashboard owner
+- `sort_order` (INT, default `0`) - Ordering in dashboard selector (lower numbers first)
+- `show_title` (BOOLEAN, default `true`) - Show the dashboard's name and description above its widgets
 - `show_in_selector` (BOOLEAN, default `true`, v0.82.0) - `false` leaves the dashboard out of the dashboard selector while it stays reachable (see Unlisted dashboards below)
+- `created_at`, `updated_at` (TIMESTAMPTZ) - Set by triggers
+
+Every column except `description` and `created_by` is `NOT NULL` (v0.82.0); omit a column to take its default rather than writing `NULL`. The v0.82.0 migration replaced existing NULLs with what the framework already read them as: `is_public` and `is_default` became `false` (a NULL `is_public` was already private), and a NULL `sort_order` became one past the largest `sort_order` + 10, which keeps those dashboards last.
 
 **`metadata.widget_types`** - Registry of available widget types
 
