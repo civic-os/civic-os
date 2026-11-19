@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-09T02:19:49.777Z",
+  "capturedAt": "2026-11-19T19:51:21.041Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -124,7 +124,7 @@
     }
   ],
   "example": "storymap",
-  "examplesTreeHash": "3031bffc474aa4f71eee8836b3f5dd536dc43dd4",
+  "examplesTreeHash": "d10d21064220c93d337b0b569f9c7fde8a489f79",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "schema_cache_versions": [
@@ -135,7 +135,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "f55e63cb155e9f0ef0ef835b1aa9df69d5619dd6",
+  "migrationsTreeHash": "611576bbfa0b211cdd5f2647fb93e32effccb73f",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

@@ -29,12 +29,14 @@
         </button>
       </li>
 
-      <li class="menu-title">
-        <span>All Dashboards</span>
-      </li>
+      @if (listedDashboards().length > 0) {
+        <li class="menu-title">
+          <span>All Dashboards</span>
+        </li>
+      }
 
-      <!-- Dashboard List -->
-      @for (dashboard of dashboards(); track dashboard.id) {
+      <!-- Dashboard List (unlisted dashboards stay reachable by link and as the landing dashboard) -->
+      @for (dashboard of listedDashboards(); track dashboard.id) {
         <li>
           <button
             type="button"

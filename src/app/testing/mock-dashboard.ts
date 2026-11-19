@@ -30,6 +30,7 @@ export function createMockDashboard(overrides?: Partial<Dashboard>): Dashboard {
     is_default: false,
     is_public: true,
     sort_order: 0,
+    show_in_selector: true,
     created_by: null,
     created_at: '2025-10-15T00:00:00Z',
     updated_at: '2025-10-15T00:00:00Z',
