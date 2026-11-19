@@ -2085,6 +2085,11 @@
     "translated_text": "Semana"
   },
   {
+    "source_key": "dashboard.all",
+    "source_type": "ui",
+    "translated_text": "Todos los tableros"
+  },
+  {
     "source_key": "dashboard.chart_empty",
     "source_type": "ui",
     "translated_text": "No hay datos para mostrar"
@@ -2185,6 +2190,11 @@
     "translated_text": "Este widget filtra por \"{{key}}\", que no existe para {{column}}."
   },
   {
+    "source_key": "dashboard.loading_list",
+    "source_type": "ui",
+    "translated_text": "Cargando tableros..."
+  },
+  {
     "source_key": "dashboard.no_dashboards",
     "source_type": "ui",
     "translated_text": "No hay tableros configurados"
@@ -2208,6 +2218,11 @@
     "source_key": "dashboard.select",
     "source_type": "ui",
     "translated_text": "Seleccionar Tablero"
+  },
+  {
+    "source_key": "dashboard.unnamed",
+    "source_type": "ui",
+    "translated_text": "Tablero"
   },
   {
     "source_key": "detail.actions",
