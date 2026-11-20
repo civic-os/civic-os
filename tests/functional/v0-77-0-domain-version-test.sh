@@ -255,9 +255,12 @@ BEGIN
 END $$;
 RESET ROLE;
 
--- authenticated non-admin: refused by the in-body guard
+-- authenticated non-admin: refused by the in-body guard. Since v0.84.0 the guard is _is_db_admin(), which
+-- admits a superuser or CREATEROLE session user, so the call runs as PostgREST's login role (authenticator),
+-- not as postgres with SET ROLE.
 SELECT set_config('request.jwt.claims',
   '{"sub":"00000000-0000-0000-0000-0000000000d1","role":"authenticated","roles":["manager"]}', true);
+SET LOCAL SESSION AUTHORIZATION authenticator;
 SET LOCAL ROLE authenticated;
 DO $$
 BEGIN
@@ -266,6 +269,7 @@ BEGIN
     '42501'), 'a non-admin is refused with 42501';
 END $$;
 RESET ROLE;
+RESET SESSION AUTHORIZATION;
 DO $$
 BEGIN
   ASSERT (SELECT domain_version FROM metadata.domain_version) = '0.0.0', 'the refused call changed nothing';

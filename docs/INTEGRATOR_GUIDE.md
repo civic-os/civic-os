@@ -5125,7 +5125,7 @@ Track the reasoning behind schema design choices using database-native architect
 - Decisions attach to **schema objects** (tables/columns), not data records
 - **Array-based linking** - a single decision can reference multiple entity types and/or property names for cross-entity architectural choices
 - **Append-only** with supersession model - decisions are never edited, only superseded by newer decisions
-- **Admin-only write**, authenticated read access via RLS
+- **Admin-only write**, authenticated read access via RLS. Since v0.84.0 `create_schema_decision()` also accepts the deployment role without a JWT (see [Scripting Instance Changes](#scripting-instance-changes-v0840)); `author_id` is then `NULL`
 - No Angular UI needed - usable via SQL immediately
 
 #### Quick Setup
@@ -5278,7 +5278,7 @@ A domain version is a semver number you assign to your instance's own tables and
 | `decision_id` | The schema decision (ADR) behind it |
 | `contract_hash` | `sha256:` hash of the typed-codegen contract (entities, properties, M:M, actions), identical for every role and locale; excludes permissions and presentation |
 
-**Setting it.** `set_domain_version()` is the only write path. It is admin only and every version except the seeded `0.0.0` needs an ADR: pass the id of an existing decision (`create_schema_decision()` returns it).
+**Setting it.** `set_domain_version()` and `bump_domain_version()` (v0.84.0) are the only write paths. Both take an admin JWT, or the deployment role in a script without one (see [Scripting Instance Changes](#scripting-instance-changes-v0840)), and every version except the seeded `0.0.0` needs an ADR: pass the id of an existing decision (`create_schema_decision()` returns it).
 
 ```sql
 SELECT set_domain_version(
@@ -5294,13 +5294,112 @@ SELECT set_domain_version(
 );
 ```
 
-The decision must exist and must not already be linked to a different domain version; it is stamped with the new version (`schema_decisions.domain_version`), so the ADR and the version point at each other. Errors: `42501` not admin, `22023` malformed version, a floor above the version, or a blank migration name, `23502` no decision given, `23503` decision does not exist, `23505` decision already linked to another version.
+The decision must exist and must not already be linked to a different domain version; it is stamped with the new version (`schema_decisions.domain_version`), so the ADR and the version point at each other. Errors: `42501` neither an admin JWT nor the deployment role, `22023` malformed version, a floor above the version, or a blank migration name, `23502` no decision given, `23503` decision does not exist, `23505` decision already linked to another version.
 
 **Choosing versions.** Bump the domain version for breaking changes to what apps depend on, and raise `min_client_domain_version` only when older apps must stop working. Apps check capability (does this entity or column exist) rather than version numbers; the number is for breaking changes.
 
 **What the user sees.** The About modal shows the domain version and, when known, the framework version (labelled "Database core version" since v0.77.2), read each time the modal opens. Instances older than v0.77.0 have no version record and the modal shows only the app version.
 
 **What custom apps do with it.** An app generated with `civic-os gen types` knows the `DOMAIN_VERSION` and `SCHEMA_HASH` it was built for. At bootstrap it reads this view, always refuses to run when `min_client_domain_version` is above its `DOMAIN_VERSION`, and otherwise follows its mismatch policy (`block`, `warn` or `verify`) when the hash differs. A schema change that alters a typed column, relation or action changes `contract_hash`, so regenerate the types and redeploy the app.
+
+### Scripting Instance Changes (v0.84.0+)
+
+Module installs, report packs and other changes to a live instance are applied by scripts that deployment automation runs, not by core migrations. Organizations change their instances after an install, so a script cannot assume the schema it was written against. Core gives such scripts two things: an **interface check** that stops the script before any change if something it depends on is missing or different, and a way to **record a schema decision and raise the domain version without a JWT**.
+
+**Who can call what.** A script connects as the **deployment role**, the login role that runs core migrations (`postgres` on a self-hosted instance, `doadmin` or `rds_admin` on a managed database). It has no JWT. `create_schema_decision()`, `set_domain_version()` and `bump_domain_version()` admit it through `metadata._is_db_admin()`, which accepts an admin JWT, a superuser, or a login role with `CREATEROLE`. PostgREST connects as `authenticator`, which is neither, so over the API these functions still need an admin JWT. The deployment role owns the functions, so it needs no grant; a deployment that runs scripts as a different login role grants it `EXECUTE` on each.
+
+#### Install sequence
+
+Run the whole script in one transaction, so it completes or leaves nothing behind:
+
+```sql
+BEGIN;
+-- 1. Core version: the functions this script uses exist from v0.84.0
+DO $$ BEGIN
+  -- framework_version() is NULL when the Sqitch registry is absent, which counts as too old
+  IF coalesce(string_to_array(metadata.framework_version(), '.')::int[], ARRAY[0]) < ARRAY[0, 84, 0] THEN
+    RAISE EXCEPTION 'people_served@1.1.0 needs Civic OS 0.84.0 or later';
+  END IF;
+END $$;
+
+-- 2. Everything the script reads or writes, checked before any change
+SELECT assert_interface($json$
+{ "template": "people_served@1.1.0",
+  "elements": [
+    { "element": "table", "name": "public.programs", "source": "shared/program", "writes": true,
+      "columns": [
+        { "name": "id",           "type": "bigint" },
+        { "name": "parent_id",    "type": "bigint", "nullable": true, "references": "public.programs.id" },
+        { "name": "display_name", "type": "varchar(100)" } ] },
+    { "element": "rpc", "name": "public.get_config", "args": ["text"] } ] }
+$json$::jsonb);
+
+-- 3. The changes: create or check tables, seed defaults, register what the module registers
+
+-- 4. Record why, and raise the domain version by one minor version linked to that decision
+SELECT bump_domain_version(
+  'minor',
+  'people_served@1.1.0',
+  create_schema_decision(
+    p_title        := 'People Served v1.1.0 module installed',
+    p_decision     := 'Install the People Served module',
+    p_migration_id := 'people_served@1.1.0'));
+COMMIT;
+```
+
+A script that can be re-run checks first whether it is already installed at the same version and, if so, skips the decision and the bump; core does not detect "nothing changed".
+
+#### `compare_interface()` and `assert_interface()`
+
+`compare_interface(jsonb)` returns one row per difference (`template`, `source`, `element`, `name`, `column_name`, `difference`, `severity`, `expected`, `actual`), ordered by element, name and column, and no rows when the instance matches. `assert_interface(jsonb)` prints each `info` row as a `NOTICE` and, if any row is an `error`, raises SQLSTATE `55000` with one `DETAIL` line per error:
+
+```
+ERROR:  interface check failed for people_served@1.1.0: 1 difference
+DETAIL: public.programs.parent_id: type integer, required bigint (required by shared/program)
+```
+
+**Declare what the script uses, not everything the table has.** Every property given is checked and every property left out is not. Columns a table element does not list are never looked at, so an organization that adds or drops a column the script never touches installs without a difference. The one exception is `"writes": true` on a table the script inserts into: then every undeclared column must be nullable, have a default, or be an identity or generated column, or the check reports `missing_default` before the `INSERT` would fail.
+
+| Element | Keys (required in bold) | Checks |
+|---|---|---|
+| `table` | **`name`** (`schema.table`), `columns`, `writes`, `source` | The relation exists and is a table, not a view. Per column (**`name`**, `type`, `nullable`, `references` as `schema.table.column`): it exists, its type is compatible, its nullability is compatible, a single-column FK points at the given column |
+| `rpc` | **`name`** (`schema.function`), **`args`** (types in order, possibly `[]`), `returns`, `source` | The exact signature resolves; `returns` (`bigint`, `setof bigint`, `TABLE(a integer, b text)`) matches after normalizing type names |
+| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`), `source` | Reported as `missing_core_feature` until the dimensions registry ships (v0.85.0) |
+| `module` | **`key`**, `version` (`MAJOR.MINOR`), `source` | Reported as `missing_core_feature` until the module registry ships (v0.85.0) |
+
+`template` and `source` are free labels used only in messages. Types are written in SQL spelling and normalized, so `int8`, `bigint` and `BIGINT` are the same and `varchar(50)` carries its length. A malformed declaration (an unknown element kind or key, a missing name, an unqualified name, a type that does not resolve) is a bug in the script, and both functions raise `22023` at once.
+
+**Type compatibility.** A difference is accepted, as an `info` row (`widened`), when every value the declaration describes still fits and readers still get the kind of value they expect:
+
+| Declared → live | Result |
+|---|---|
+| Same type and modifier | No row |
+| `varchar(n)` → `varchar(m)` with m ≥ n, unbounded `varchar`, or `text` | `widened` (info) |
+| `numeric(p,s)` → `numeric(p',s')` with s' ≥ s and p'−s' ≥ p−s, or unconstrained `numeric` | `widened` (info) |
+| `smallint` → `integer` → `bigint` | `widened` (info) |
+| nullable → `NOT NULL` | `now_required` (info) |
+| `NOT NULL` → nullable | `nullability_mismatch` (error) |
+| Anything else: shorter, less precise, `bigint` → `integer`, `timestamp` ↔ `timestamptz`, base type ↔ domain (`text` ↔ `email_address`), `json` ↔ `jsonb`, enum, array | `type_mismatch` (error) |
+
+A view that projects a widened column must be re-created with `DROP VIEW` and `CREATE VIEW` (repeating `WITH (security_invoker = true)`): `CREATE OR REPLACE VIEW` refuses to change a column's type.
+
+**Difference codes.** Errors: `missing_table`, `kind_mismatch`, `missing_column`, `type_mismatch`, `nullability_mismatch`, `missing_reference` (no FK, even when the column is intact: reporting axes come from FKs), `reference_mismatch` (the FK points elsewhere), `missing_default`, `missing_rpc`, `missing_core_feature`; from v0.85.0 also `missing_dimension`, `dimension_mismatch`, `missing_module`, `module_version_mismatch`. Info: `widened`, `now_required`.
+
+Both functions read `pg_catalog` only, write nothing, and run as the caller; `authenticated` may call them, so other tools can run the same check.
+
+#### `bump_domain_version()`
+
+```sql
+bump_domain_version(p_part TEXT,          -- 'major' | 'minor' | 'patch'
+                    p_migration TEXT,     -- stored as set_by_migration, e.g. 'people_served@1.1.0'
+                    p_decision_id INT,
+                    p_min_client_domain_version TEXT DEFAULT NULL)  -- NULL keeps the current floor
+RETURNS TEXT                              -- the new domain version
+```
+
+It drops pre-release and build metadata, raises the requested part and resets the lower ones (`1.3.0` + minor = `1.4.0`; `0.0.0` + minor = `0.1.0`; `1.4.0-rc.1` + minor = `1.5.0`), and sets the version through the same checks as `set_domain_version()`, with the same errors plus `22023` for an unknown part. It locks the version row, so two scripts running at once get consecutive versions instead of both writing the same one. A major bump that breaks clients generated for the previous version should pass the new version as the floor.
+
+Design: `docs/notes/MODULE_INSTALL_SUPPORT_DESIGN.md`.
 
 ### Instance Configuration (v0.79.0+)
 
