@@ -140,7 +140,7 @@ describe('DataService through the app interceptor chain', () => {
     await done;
   });
 
-  it('adds Accept-Language for a non-English locale and omits it for English', async () => {
+  it('adds Accept-Language for every locale, English included', async () => {
     locale = 'es';
     const es = firstValueFrom(service.deleteData('issues', 1));
     const esReq = await nextRequest(API + 'issues?id=eq.1');
@@ -151,7 +151,7 @@ describe('DataService through the app interceptor chain', () => {
     locale = 'en';
     const en = firstValueFrom(service.deleteData('issues', 2));
     const enReq = await nextRequest(API + 'issues?id=eq.2');
-    expect(enReq.request.headers.has('Accept-Language')).toBe(false);
+    expect(enReq.request.headers.get('Accept-Language')).toBe('en');
     enReq.flush(null, { status: 204, statusText: 'No Content' });
     await en;
   });

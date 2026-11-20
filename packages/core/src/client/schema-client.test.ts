@@ -92,7 +92,7 @@ describe('SchemaClient requests (URLs, headers, bodies as SchemaService sends th
       expect(requests).toHaveLength(1);
       expect(requests[0].method).toBe(method);
       expect(relative(requests[0])).toBe(path);
-      expect(requests[0].headers).toBeUndefined();
+      expect(requests[0].headers).toEqual({ 'Accept-Language': 'en' });
       expect(requests[0].body === undefined ? undefined : JSON.parse(requests[0].body)).toEqual(body);
     });
 
@@ -387,7 +387,7 @@ describe('SchemaClient error behaviour (as SchemaService)', () => {
 describe('SchemaClient locale and identity keyed cache', () => {
   it('a locale switch issues new requests with the new Accept-Language, and switching back is served from cache', async () => {
     const { transport, requests } = autoTransport(req =>
-      reply(200, [{ table_name: req.headers?.['Accept-Language'] ?? 'en' }]),
+      reply(200, [{ table_name: req.headers?.['Accept-Language'] ?? 'none' }]),
     );
     const client = new SchemaClient({ transport, apiUrl: API });
     const en = await client.getEntities();
@@ -397,7 +397,7 @@ describe('SchemaClient locale and identity keyed cache', () => {
     expect(client.peekEntities()).toBeUndefined();
     const es = await client.getEntities();
     expect(es).toEqual([{ table_name: 'es' }]);
-    expect(requests.map(r => r.headers)).toEqual([undefined, { 'Accept-Language': 'es' }]);
+    expect(requests.map(r => r.headers)).toEqual([{ 'Accept-Language': 'en' }, { 'Accept-Language': 'es' }]);
 
     client.use({ locale: 'en' });
     expect(client.peekEntities()).toBe(en);
@@ -964,12 +964,12 @@ describe('SchemaClient menu nodes', () => {
     collapsed_by_default: false,
   };
 
-  it('GETs schema_menu_nodes, with Accept-Language only for a non-default locale', async () => {
+  it('GETs schema_menu_nodes with the locale as Accept-Language, en included', async () => {
     const { transport, requests } = autoTransport(() => reply(200, [NODE]));
     const client = new SchemaClient({ transport, apiUrl: API });
     await expect(client.getMenuNodes()).resolves.toEqual([NODE]);
     expect(requests[0]).toMatchObject({ method: 'GET', url: API + 'schema_menu_nodes' });
-    expect(requests[0].headers).toBeUndefined();
+    expect(requests[0].headers).toEqual({ 'Accept-Language': 'en' });
     client.use({ locale: 'es' });
     await client.getMenuNodes();
     expect(requests[1].headers).toEqual({ 'Accept-Language': 'es' });
@@ -998,7 +998,7 @@ describe('SchemaClient menu nodes', () => {
   });
 
   it('caches per context bucket and the store follows the switch', async () => {
-    const { transport, requests } = autoTransport(req => reply(200, req.headers ? [{ ...NODE, display_name: 'Problemas' }] : [NODE]));
+    const { transport, requests } = autoTransport(req => reply(200, req.headers?.['Accept-Language'] === 'es' ? [{ ...NODE, display_name: 'Problemas' }] : [NODE]));
     const client = new SchemaClient({ transport, apiUrl: API });
     await client.getMenuNodes();
     client.use({ locale: 'es' });

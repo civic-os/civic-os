@@ -36,10 +36,15 @@ export interface PostgRESTClientConfig {
 /** Largest `limit` the MCP accepts on a read (consumer policy, Q-10; the app allows 1000 for calendars). */
 export const MCP_MAX_LIMIT = 100;
 
-/** Headers the MCP sends on every request, as before the move to core (core's fetch transport sends none of them by default). */
+/**
+ * Headers the MCP sends on every request, as before the move to core (core's fetch transport sends none of them by default).
+ * `Accept-Language: en` keeps metadata in English: without it Node's `fetch` sends `*`, which `metadata.t()` treated
+ * as a language to look up before v0.82.2. Core's SchemaClient sets the same header on its own requests.
+ */
 export const MCP_DEFAULT_HEADERS: Readonly<Record<string, string>> = {
   'Content-Type': 'application/json',
   Accept: 'application/json',
+  'Accept-Language': 'en',
 };
 
 /** A transport that adds `defaults` to every request; headers a request sets itself win. */

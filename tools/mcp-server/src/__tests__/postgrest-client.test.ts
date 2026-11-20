@@ -274,6 +274,14 @@ describe('PostgRESTClient', () => {
       expect(lastRequest().headers).toMatchObject({ Accept: 'application/json', 'Content-Type': 'application/json' });
     });
 
+    it('sends Accept-Language en on every request, so metadata stays English under Node\'s fetch', async () => {
+      fetchMock.mockImplementation(async () => jsonResponse([]));
+
+      await client.data.getData({ key: 'entities', fields: ['id'] });
+
+      expect(lastRequest().headers).toMatchObject({ 'Accept-Language': 'en' });
+    });
+
     it('throws PostgRESTRequestError with httpCode 0 on a network failure', async () => {
       fetchMock.mockRejectedValue(new TypeError('Connection refused'));
 

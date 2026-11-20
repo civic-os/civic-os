@@ -6198,7 +6198,7 @@ This means untranslated keys gracefully fall back to English rather than showing
 ### How It Works (Technical)
 
 - **Frontend**: `LocaleService` manages the current locale as a signal. `TranslationService` fetches translations from the database and caches them. The `TranslatePipe` (`{{ 'key' | translate }}`) renders translated text in templates.
-- **Backend**: An HTTP interceptor adds `Accept-Language` to all PostgREST requests. The `metadata.t()` function reads this header to return translated text. For English, `t()` short-circuits with zero table lookup overhead.
+- **Backend**: An HTTP interceptor adds `Accept-Language` to all PostgREST requests. The `metadata.t()` function reads this header to return translated text. For English, `t()` short-circuits with zero table lookup overhead. Since v0.82.2, `metadata.current_locale()` reads only the first language range of the header: every English variant (`en-US,en;q=0.9`) counts as `en`, and other tags keep their region with conventional casing (`es-mx` → `es-MX`), falling back to the base language when the regional row is missing. Store regional translations under conventionally cased tags (`es-MX`, not `es-mx`). Also since v0.82.2, `t()` compares its lookups under the default collation, so a non-English request uses the translations index even where views pass `information_schema` names; a function of your own that looks rows up by such names should add `COLLATE "default"` to its comparisons for the same reason.
 - **Persistence**: The user's locale preference is stored in `civic_os_users_private.locale` and synced to the JWT via Keycloak, so the preference persists across devices.
 
 ### Keycloak Configuration
@@ -7034,7 +7034,7 @@ GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
 ```
 
-`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.82.2 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.82.2 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.82.3 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.82.3 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 For full CRUD access, use the same `authenticated` role as the web frontend by authenticating through Keycloak.
 

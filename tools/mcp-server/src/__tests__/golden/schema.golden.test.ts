@@ -273,7 +273,7 @@ describe('golden (mcp): schema interpretation', () => {
       checkGolden(`${v.example}/${v.variant}/schema.views.json`, { entities });
     });
 
-    // The MCP never sends Accept-Language, so it never receives the translated
+    // The MCP always sends Accept-Language: en, so it never receives the translated
     // (.es) fixtures in production: no MCP-only artifacts for those variants.
     if (v.locale === 'en') {
       it(`${v.example}/${v.variant}: entity, column and action name resolution`, async () => {
