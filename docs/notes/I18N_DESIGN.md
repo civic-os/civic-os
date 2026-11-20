@@ -100,6 +100,8 @@ The `en.translations.ts` file is the single source of truth. It's ~10KB, well wi
 
 **Rationale**: Most Civic OS instances are English-only. The `t()` function will be used in Phase 2 to wrap schema VIEW columns. Zero overhead for the default case means no performance regression for instances that don't use i18n.
 
+**Amendment (v0.82.2)**: The short-circuit compares against `'en'` exactly, so it only holds if `current_locale()` returns exactly `'en'` for English requests. Until v0.82.2 it returned the raw header, and the browser's own `en-US,en;q=0.9` missed the short-circuit. See [Locale Normalization (v0.82.2)](#locale-normalization-v0822).
+
 ### `Accept-Language` Header for Locale Transport
 
 **Decision**: The Angular locale interceptor adds `Accept-Language: {locale}` to all PostgREST requests. PostgreSQL reads it via `current_setting('request.header.accept-language', true)`.
@@ -239,6 +241,40 @@ SELECT COALESCE(
   'en'
 );
 ```
+
+### Locale Normalization (v0.82.2)
+
+**Problem**: The locale interceptor (and core's schema client) sends no `Accept-Language` header when the locale is `en`, to save request overhead. The browser then sends its own header, for example `en-US,en;q=0.9`. `current_locale()` returned that raw string, so `t()` missed its English short-circuit and ran two translations lookups per string that could never match: the whole header, then the base language `en` (`split_part` on `-`). On the mottpark example, `GET /schema_properties` (268 rows, as `testadmin`) took about 5.8 s with `Accept-Language: en-US,en;q=0.9` and about 0.5 s without the header. Every instance and every regional-English browser was affected.
+
+**Decision**: `current_locale()` (plpgsql, still `STABLE`, same sources: the `request.headers` JSON blob, then the legacy GUC) returns one normalized language tag:
+
+| Header | `current_locale()` |
+|---|---|
+| none, empty, `*`, or not a language tag | `en` |
+| `en`, `en-US,en;q=0.9`, `EN-gb`, `en_AU` | `en` |
+| `es`, `es;q=0.8` | `es` |
+| `es-mx,es;q=0.9` | `es-MX` |
+| `zh-hant-tw` | `zh-Hant-TW` |
+| `fr-FR,fr;q=0.9,en;q=0.8` | `fr-FR` |
+
+Only the first language range counts (browsers list ranges in preference order), its quality value is dropped and `_` is read as `-`. A tag must match `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, else it is `en`.
+
+**Casing, not lowercasing**: The language subtag is lowercased, a 2-letter region uppercased and a 4-letter script title-cased. `metadata.translations.locale` stores tags like `es-MX` and `t()` compares them with `=`, so lowercasing the whole tag would have broken exact regional matches that worked before.
+
+**Regional fallback stays in `t()`**: Non-English regional tags keep their region. `t()` already tries the exact tag and then the base language (`es-AR` → `es`), so `current_locale()` does not drop the region. Only English collapses to `en`, because English has no translation rows for metadata (the defaults are the English text) and `t()` returns the default for `en` without a lookup.
+
+**Behavior changes**:
+- A regional-English request no longer sees `en` rows from `metadata.translations` through `t()`. Before, its base-language fallback could find them; now it gets the default text, as a plain `en` request always did. Core seeds `en` rows only for `ui` strings, which `get_translations_for_locale` serves to the app directly, not through `t()`.
+- A request whose first range is not a language tag (for example `*`) is English rather than a lookup for `*`.
+- A session that has used `request.headers` before reads `''` from it rather than NULL; `current_locale()` now treats that as no header instead of failing to cast `''` to JSON.
+
+**Unchanged**: `get_translation_defaults()` forces `{"accept-language":"en"}`, which still gives `en`. RTL locales (`ar`, `he`, `fa`, `ur`, `ps`, `prs`) are plain language subtags and pass through as they are. The frontend's `supportedLocales` holds the codes the interceptor sends, which normalize to themselves when they follow BCP 47 casing. `translate_widget_config()` and the other short-circuits that compare `current_locale()` with `'en'` benefit the same way. The function keeps its ACL (`CREATE OR REPLACE`), and `web_anon` keeps EXECUTE because `t()` runs inside anonymously readable views.
+
+**Clients**: Normalization covers every client, but it cannot tell a browser's own header from a chosen locale. The same release has the app, core's `SchemaClient` and the MCP server always send their locale, `en` included (see the [header transport amendment](#accept-language-header-for-locale-transport)), so a browser preferring a language the instance does not offer no longer gets that language's metadata under an English UI.
+
+**Not addressed here**: A real non-English request (`es`) still takes about 3 s on that `schema_properties` load, which is the cost of `t()` lookups themselves.
+
+**Tests**: `tests/functional/v0-82-2-current-locale-test.sh` covers the header table above, the `''` GUC case, translations resolving through `t()` and `schema_properties` (`es`, `es-MX`, lowercase `es-mx`, `es-AR` falling back to `es`, `ar`), the English default with an `en` row present, `get_translation_defaults()`, `STABLE` and the API role grants.
 
 ### VIEW Recreation (Collation)
 

@@ -6198,7 +6198,7 @@ This means untranslated keys gracefully fall back to English rather than showing
 ### How It Works (Technical)
 
 - **Frontend**: `LocaleService` manages the current locale as a signal. `TranslationService` fetches translations from the database and caches them. The `TranslatePipe` (`{{ 'key' | translate }}`) renders translated text in templates.
-- **Backend**: An HTTP interceptor adds `Accept-Language` to all PostgREST requests. The `metadata.t()` function reads this header to return translated text. For English, `t()` short-circuits with zero table lookup overhead.
+- **Backend**: An HTTP interceptor adds `Accept-Language` to all PostgREST requests. The `metadata.t()` function reads this header to return translated text. For English, `t()` short-circuits with zero table lookup overhead. Since v0.82.2, `metadata.current_locale()` reads only the first language range of the header: every English variant (`en-US,en;q=0.9`) counts as `en`, and other tags keep their region with conventional casing (`es-mx` → `es-MX`), falling back to the base language when the regional row is missing. Store regional translations under conventionally cased tags (`es-MX`, not `es-mx`).
 - **Persistence**: The user's locale preference is stored in `civic_os_users_private.locale` and synced to the JWT via Keycloak, so the preference persists across devices.
 
 ### Keycloak Configuration
