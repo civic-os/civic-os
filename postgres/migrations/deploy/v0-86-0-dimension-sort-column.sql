@@ -231,7 +231,10 @@ BEGIN
   IF p_parent_column IS NOT NULL THEN
     PERFORM metadata._install_tree_parent_guard(v_rel::regclass, p_key_column, p_parent_column);
   ELSE
-    EXECUTE format('DROP TRIGGER IF EXISTS tree_parent_guard ON %s', v_qualified);
+    -- drop a guard left from an earlier hierarchical registration; checked first so a flat registration is quiet
+    IF EXISTS (SELECT 1 FROM pg_catalog.pg_trigger t WHERE t.tgrelid = v_rel AND t.tgname = 'tree_parent_guard') THEN
+      EXECUTE format('DROP TRIGGER tree_parent_guard ON %s', v_qualified);
+    END IF;
   END IF;
 
   EXECUTE format(

@@ -97,52 +97,56 @@
       }
     },
     "sites": {
-      "createProps": ["display_name:TextLong", "address:TextLong"],
-      "editProps": ["display_name:TextLong", "lead_id:ForeignKeyName", "address:TextLong"],
+      "createProps": ["display_name:TextLong", "address:TextLong", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextLong", "lead_id:ForeignKeyName", "address:TextLong", "is_active:Boolean", "sort_order:IntegerNumber"],
       "rows": {
         "empty": {
-          "createFormInput": {"address": "", "display_name": null},
-          "editFormInput": {"address": "", "display_name": null, "lead_id": ""},
+          "createFormInput": {"address": "", "display_name": null, "sort_order": null},
+          "editFormInput": {"address": "", "display_name": null, "is_active": null, "lead_id": "", "sort_order": null},
           "outputs": {
             "*": {
-              "control": {"address": null, "lead_id": null},
-              "createApi": {"address": "", "display_name": null},
-              "editApi": {"address": "", "display_name": null, "lead_id": ""}
+              "control": {"address": null, "is_active": null, "lead_id": null},
+              "createApi": {"address": "", "display_name": null, "sort_order": null},
+              "editApi": {"address": "", "display_name": null, "is_active": null, "lead_id": "", "sort_order": null}
             }
           },
-          "rawRow": {"address": null, "lead_id": null}
+          "rawRow": {"address": null, "is_active": null, "lead_id": null}
         },
         "odd": {
-          "createFormInput": {"address": 42, "display_name": 42},
+          "createFormInput": {"address": 42, "display_name": 42, "sort_order": 7},
           "editFormInput": {
             "address": 42,
             "display_name": 42,
-            "lead_id": {"display_name": "x", "id": 3}
+            "is_active": false,
+            "lead_id": {"display_name": "x", "id": 3},
+            "sort_order": 7
           },
           "outputs": {
             "*": {
-              "control": {"address": "text", "display_name": "text", "lead_id": 3},
-              "createApi": {"address": 42, "display_name": 42},
+              "control": {"address": "text", "display_name": "text", "is_active": true, "lead_id": 3, "sort_order": 7},
+              "createApi": {"address": 42, "display_name": 42, "sort_order": 7},
               "editApi": {
                 "address": 42,
                 "display_name": 42,
-                "lead_id": {"display_name": "x", "id": 3}
+                "is_active": false,
+                "lead_id": {"display_name": "x", "id": 3},
+                "sort_order": 7
               }
             }
           },
-          "rawRow": {"address": "text", "display_name": "text", "lead_id": 3}
+          "rawRow": {"address": "text", "display_name": "text", "is_active": true, "lead_id": 3, "sort_order": 7}
         },
         "typical": {
-          "createFormInput": {"address": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
-          "editFormInput": {"address": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "lead_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "createFormInput": {"address": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"address": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "is_active": true, "lead_id": 3, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {"address": "text", "display_name": "text", "lead_id": 3},
-              "createApi": {"address": "text", "display_name": "text", "extra_key": "kept"},
-              "editApi": {"address": "text", "display_name": "text", "extra_key": "kept", "lead_id": 3}
+              "control": {"address": "text", "display_name": "text", "is_active": true, "lead_id": 3, "sort_order": 7},
+              "createApi": {"address": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7},
+              "editApi": {"address": "text", "display_name": "text", "extra_key": "kept", "is_active": true, "lead_id": 3, "sort_order": 7}
             }
           },
-          "rawRow": {"address": "text", "display_name": "text", "lead_id": 3}
+          "rawRow": {"address": "text", "display_name": "text", "is_active": true, "lead_id": 3, "sort_order": 7}
         }
       }
     },

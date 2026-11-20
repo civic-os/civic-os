@@ -2,7 +2,7 @@
   "actionAnomalies": {},
   "actionCounts": {"probes": 0, "resolvedToSelf": 0},
   "columnAnomalies": {},
-  "columnCounts": {"probes": 63, "resolvedToSelf": 63},
+  "columnCounts": {"probes": 69, "resolvedToSelf": 69},
   "entities": {
     "document_requirement_roles": {
       "byDisplayName": "document_requirement_roles",

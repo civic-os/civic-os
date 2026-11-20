@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "active_column": "is_active",
+    "default_value_id": 1,
+    "dimension_key": "site",
+    "display_name": "Site",
+    "external_id_column": null,
+    "hide_when_single": true,
+    "key_column": "id",
+    "label_column": "display_name",
+    "parent_column": null,
+    "sort_column": "sort_order",
+    "sort_order": 0,
+    "table_name": "sites",
+    "table_schema": "public"
+  }
+]

@@ -665,7 +665,7 @@
             "offset": 0,
             "sort": "site_id"
           },
-          "name": "order site_id asc [ForeignKeyName]",
+          "name": "order site_id asc [Dimension]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of site_id -> sort by the column site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
@@ -759,7 +759,6 @@
             "entity": "incident_reports",
             "filters": [
               {"field": "reported_by_id", "operator": "eq", "value": 5},
-              {"field": "site_id", "operator": "eq", "value": 5},
               {"field": "status_id", "operator": "eq", "value": 5},
               {"field": "follow_up_needed", "operator": "eq", "value": true}
             ],
@@ -774,13 +773,12 @@
                 "select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id",
                 "order=display_name.asc,id.asc",
                 "reported_by_id=eq.5",
-                "site_id=eq.5",
                 "status_id=eq.5",
                 "follow_up_needed=eq.true"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc&reported_by_id=eq.5&site_id=eq.5&status_id=eq.5&follow_up_needed=eq.true"
+              "url": "<PGRST>/incident_reports?select=display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed,id&order=display_name.asc,id.asc&reported_by_id=eq.5&status_id=eq.5&follow_up_needed=eq.true"
             }
           ]
         },
@@ -1637,10 +1635,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1651,10 +1649,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1665,10 +1663,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1679,10 +1677,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1806,6 +1804,26 @@
         {
           "call": "list_records",
           "input": {
+            "columns": ["display_name"],
+            "entity": "sites",
+            "limit": 25,
+            "offset": 0,
+            "sort": "is_active"
+          },
+          "name": "order is_active asc [Boolean]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=is_active.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sites?select=display_name,id&order=is_active.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
             "columns": ["id"],
             "entity": "sites",
             "sort": "created_at"
@@ -1869,10 +1887,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "decoded": ["select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,sort_order,updated_at,created_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/sites?select=display_name,lead_id:staff_members!lead_id(id,display_name),address,is_active,sort_order,updated_at,created_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Sites."
@@ -2791,7 +2809,7 @@
             "offset": 0,
             "sort": "site_id"
           },
-          "name": "order site_id asc [ForeignKeyName]",
+          "name": "order site_id asc [Dimension]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of site_id -> sort by the column site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
@@ -2864,7 +2882,6 @@
           "input": {
             "entity": "staff_members",
             "filters": [
-              {"field": "site_id", "operator": "eq", "value": 5},
               {"field": "role_id", "operator": "eq", "value": 5},
               {"field": "onboarding_status_id", "operator": "eq", "value": 5}
             ],
@@ -2878,13 +2895,12 @@
               "decoded": [
                 "select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id",
                 "order=display_name.asc,id.asc",
-                "site_id=eq.5",
                 "role_id=eq.5",
                 "onboarding_status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&site_id=eq.5&role_id=eq.5&onboarding_status_id=eq.5"
+              "url": "<PGRST>/staff_members?select=display_name,user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),site_id:sites!site_id(id,display_name),role_id:staff_roles!role_id(display_name),onboarding_status_id:statuses!onboarding_status_id(id,display_name,color,status_key),id&order=display_name.asc,id.asc&role_id=eq.5&onboarding_status_id=eq.5"
             }
           ]
         },
@@ -2895,26 +2911,26 @@
             "entity": "staff_members",
             "filters": [
               {
-                "field": "site_id",
+                "field": "role_id",
                 "operator": "in",
                 "value": [1, 2, 3]
               },
-              {"field": "site_id", "operator": "eq", "value": ""},
-              {"field": "site_id", "operator": "eq", "value": null},
+              {"field": "role_id", "operator": "eq", "value": ""},
+              {"field": "role_id", "operator": "eq", "value": null},
               {
-                "field": "site_id",
+                "field": "role_id",
                 "operator": "in",
                 "value": []
               },
-              {"field": "site_id", "operator": "in", "value": "not-an-array"},
-              {"field": "site_id", "operator": "eq", "value": 0},
-              {"field": "site_id", "operator": "eq", "value": false}
+              {"field": "role_id", "operator": "in", "value": "not-an-array"},
+              {"field": "role_id", "operator": "eq", "value": 0},
+              {"field": "role_id", "operator": "eq", "value": false}
             ]
           },
           "name": "filters with in-array, empty and null values",
-          "notes": ["filter site_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "notes": ["filter role_id eq with an undefined value dropped (no counterpart in the tool input)"],
           "requests": [],
-          "toolError": "\"\" not found in sites. Check the name and try again."
+          "toolError": "\"\" not found in staff_roles. Check the name and try again."
         },
         {
           "call": "list_records",
@@ -3464,7 +3480,7 @@
             "offset": 0,
             "sort": "assigned_to_site_id"
           },
-          "name": "order assigned_to_site_id asc [ForeignKeyName]",
+          "name": "order assigned_to_site_id asc [Dimension]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of assigned_to_site_id -> sort by the column assigned_to_site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
@@ -3504,7 +3520,7 @@
             "offset": 0,
             "sort": "site_id"
           },
-          "name": "order site_id asc [ForeignKeyName]",
+          "name": "order site_id asc [Dimension]",
           "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of site_id -> sort by the column site_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
@@ -3579,9 +3595,7 @@
             "filters": [
               {"field": "priority_id", "operator": "eq", "value": 5},
               {"field": "assigned_to_id", "operator": "eq", "value": 5},
-              {"field": "assigned_to_site_id", "operator": "eq", "value": 5},
               {"field": "assigned_to_role_id", "operator": "eq", "value": 5},
-              {"field": "site_id", "operator": "eq", "value": 5},
               {"field": "status_id", "operator": "eq", "value": 5}
             ],
             "limit": 25,
@@ -3596,14 +3610,12 @@
                 "order=display_name.asc,id.asc",
                 "priority_id=eq.5",
                 "assigned_to_id=eq.5",
-                "assigned_to_site_id=eq.5",
                 "assigned_to_role_id=eq.5",
-                "site_id=eq.5",
                 "status_id=eq.5"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc&priority_id=eq.5&assigned_to_id=eq.5&assigned_to_site_id=eq.5&assigned_to_role_id=eq.5&site_id=eq.5&status_id=eq.5"
+              "url": "<PGRST>/staff_tasks?select=display_name,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(display_name),site_id:sites!site_id(id,display_name),due_date,status_id:statuses!status_id(id,display_name),id&order=display_name.asc,id.asc&priority_id=eq.5&assigned_to_id=eq.5&assigned_to_role_id=eq.5&status_id=eq.5"
             }
           ]
         },

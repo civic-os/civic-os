@@ -31,10 +31,10 @@
       "list": ["display_name", "staff_member_id", "amount", "description", "status_id"]
     },
     "sites": {
-      "create": ["display_name", "address"],
-      "detail": ["display_name", "lead_id", "address", "updated_at", "created_at"],
-      "edit": ["display_name", "lead_id", "address"],
-      "list": ["display_name", "lead_id", "address"]
+      "create": ["display_name", "address", "sort_order"],
+      "detail": ["display_name", "lead_id", "address", "is_active", "sort_order", "updated_at", "created_at"],
+      "edit": ["display_name", "lead_id", "address", "is_active", "sort_order"],
+      "list": ["display_name", "lead_id", "address", "is_active"]
     },
     "staff_directory": {
       "create": [],

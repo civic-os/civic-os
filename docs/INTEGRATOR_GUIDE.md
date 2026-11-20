@@ -5474,6 +5474,8 @@ SELECT register_dimension('program', 'Program', 'public', 'programs',
 
 Errors from `register_dimension()`: `42501` neither an admin JWT nor the deployment role, or a table outside `public` over the API; `22023` a table or column that does not qualify, or a retired default; `23505` the key is registered for another table, or the table under another key; `23503` the default row does not exist; `23514` an existing parent cycle.
 
+Working example: `examples/staff-portal/init-scripts/21_sites_dimension.sql` registers the staff portal's `sites` as the `site` dimension.
+
 Design: `docs/notes/MODULE_INSTALL_SUPPORT_DESIGN.md` and `docs/notes/IMPACT_REPORTING_DESIGN.md` (Dimensions, Build amendments).
 
 ### Parent-Cycle Guard (v0.85.0+)

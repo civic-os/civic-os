@@ -10,7 +10,7 @@ import { defineQuery as defineCoreQuery } from '@civic-os/core';
 
 export const DOMAIN_VERSION = '0.0.0' as const;
 export const FRAMEWORK_VERSION = '0.86.0' as const;
-export const SCHEMA_HASH = 'sha256:1d7f28b0ca59194c4c95ce23633461b37c264ed24f0b06dc737c4dd8deaab017' as const;
+export const SCHEMA_HASH = 'sha256:758931d776aed424807bc60c3f74ec7b695e63b195065b552839226a515f92ea' as const;
 
 export interface Database {
   entities: {
@@ -244,7 +244,9 @@ export interface Database {
         created_at: string;
         display_name: string;
         id: number;
+        is_active: boolean;
         lead_id: number | null;
+        sort_order: number | null;
         updated_at: string;
       };
       Insert: {
@@ -252,7 +254,9 @@ export interface Database {
         created_at?: string;
         display_name: string;
         id?: number;
+        is_active?: boolean;
         lead_id?: number | null;
+        sort_order?: number | null;
         updated_at?: string;
       };
       Update: Partial<Database['entities']['sites']['Insert']>;

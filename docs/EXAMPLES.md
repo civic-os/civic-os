@@ -38,6 +38,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | **Causal Bindings** | ✅ | ✅ | | ✅ | ✅ | | |
 | **Schema Decisions (ADR)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Scheduled Jobs (River)** | | | | ✅ | | | |
+| **Dimensions (tree select)** | | | | | ✅ | | |
 | **Map Widgets** | | | | | | ✅ | |
 | **Calendar Widgets** | | ✅ | | ✅ | | | |
 | **Filtered List Widgets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
@@ -233,6 +234,7 @@ docker-compose up -d --build  # PostgREST auto-fetches JWKS from Keycloak
 - **Schema Decisions (ADR)** (architecture rationale)
 - **Full-text search** (staff members and incident reports)
 - **Custom dashboards** (Staff Portal personal view, Admin Overview)
+- **Dimensions** (v0.86.0: `sites` is the registered `site` dimension, so every `site_id` is a tree select with a default site and sites are retired, not deleted; `21_sites_dimension.sql`)
 - Auto-generated document checklists per staff member based on role
 - Denormalized fields with trigger-based sync
 
