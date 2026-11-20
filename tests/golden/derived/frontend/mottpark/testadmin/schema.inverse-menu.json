@@ -1,5 +1,81 @@
 {
   "inverse": {
+    "current_festival": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "feedback_response": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "feedback_submission": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "festival": {
+      "afterExclude": ["feedback_submission", "food_truck_application", "sponsorship_application", "vendor_application"],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "festival_id",
+          "sourceColumnDisplayName": "Festival",
+          "sourceTable": "feedback_response",
+          "sourceTableDisplayName": "Feedback Response"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "festival_id",
+          "sourceColumnDisplayName": "Festival",
+          "sourceTable": "feedback_submission",
+          "sourceTableDisplayName": "Mott Fest Feedback"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "festival_id",
+          "sourceColumnDisplayName": "Festival",
+          "sourceTable": "food_truck_application",
+          "sourceTableDisplayName": "Food Truck Application"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "festival_id",
+          "sourceColumnDisplayName": "Festival",
+          "sourceTable": "sponsorship_application",
+          "sourceTableDisplayName": "Sponsorship"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "festival_id",
+          "sourceColumnDisplayName": "Festival",
+          "sourceTable": "vendor_application",
+          "sourceTableDisplayName": "Booth Vendor Application"
+        }
+      ],
+      "excluding": ["feedback_response"]
+    },
+    "food_truck_application": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
     "holiday_rules": {
       "afterExclude": [],
       "all": [
@@ -11,12 +87,22 @@
           "sourceColumn": "relative_to_rule_id",
           "sourceColumnDisplayName": "Relative To Rule Id",
           "sourceTable": "holiday_rules",
-          "sourceTableDisplayName": "Holiday Rules"
+          "sourceTableDisplayName": "Holiday Rule"
         }
       ],
       "excluding": ["holiday_rules"]
     },
     "manager_events": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "mottfest_current_summary": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "mottfest_revenue_summary": {
       "afterExclude": [],
       "all": [],
       "excluding": []
@@ -37,7 +123,7 @@
           "sourceColumn": "payment_type_id",
           "sourceColumnDisplayName": "Payment Type Id",
           "sourceTable": "reservation_payments",
-          "sourceTableDisplayName": "Reservation Payments"
+          "sourceTableDisplayName": "Reservation Payment"
         }
       ],
       "excluding": ["reservation_payments"]
@@ -58,12 +144,51 @@
           "sourceColumn": "reservation_request_id",
           "sourceColumnDisplayName": "Reservation Request Id",
           "sourceTable": "reservation_payments",
-          "sourceTableDisplayName": "Reservation Payments"
+          "sourceTableDisplayName": "Reservation Payment"
         }
       ],
       "excluding": ["reservation_payments"]
+    },
+    "sponsorship_application": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "vendor_application": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
     }
   },
-  "management": ["public_calendar_events", "reservation_requests", "reservation_payments", "holiday_rules", "reservation_payment_types", "manager_events"],
-  "menu": ["reservation_requests", "reservation_payments", "public_calendar_events", "manager_events", "holiday_rules", "reservation_payment_types"]
+  "management": [
+    "public_calendar_events",
+    "reservation_requests",
+    "reservation_payments",
+    "holiday_rules",
+    "reservation_payment_types",
+    "manager_events",
+    "festival",
+    "vendor_application",
+    "food_truck_application",
+    "sponsorship_application",
+    "feedback_response",
+    "feedback_submission",
+    "mottfest_revenue_summary",
+    "mottfest_current_summary",
+    "current_festival"
+  ],
+  "menu": [
+    "reservation_requests",
+    "reservation_payments",
+    "public_calendar_events",
+    "manager_events",
+    "holiday_rules",
+    "vendor_application",
+    "food_truck_application",
+    "sponsorship_application",
+    "feedback_response",
+    "festival",
+    "mottfest_revenue_summary",
+    "reservation_payment_types"
+  ]
 }

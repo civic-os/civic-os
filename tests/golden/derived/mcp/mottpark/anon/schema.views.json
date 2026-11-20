@@ -1,5 +1,17 @@
 {
   "entities": {
+    "current_festival": {
+      "create": [],
+      "detail": ["display_name", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "payment_due_date", "vendor_fee", "food_truck_fee"],
+      "edit": ["display_name"],
+      "list": ["display_name", "event_date", "event_hours", "location", "applications_close_at", "payment_due_date", "vendor_fee", "food_truck_fee"]
+    },
+    "festival": {
+      "create": ["display_name", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "vendor_fee", "food_truck_fee", "vendor_capacity", "food_truck_capacity"],
+      "detail": ["display_name", "status_id", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "payment_due_date", "vendor_fee", "food_truck_fee", "vendor_capacity", "food_truck_capacity"],
+      "edit": ["display_name", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "vendor_fee", "food_truck_fee", "vendor_capacity", "food_truck_capacity", "status_id"],
+      "list": ["display_name", "status_id", "event_date", "applications_open_at", "applications_close_at", "payment_due_date"]
+    },
     "holiday_rules": {
       "create": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
       "detail": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order", "created_at", "updated_at"],

@@ -217,4 +217,4 @@ Reverting v0.81.2 (`sqitch revert --to v0-81-1-instance-config-translation-defau
 - **Custom-page nodes.** A fourth `node_kind` for custom pages (`docs/notes/CUSTOM_PAGES_DESIGN.md`) is a migration plus a `buildMenu` branch, and a heading could open one the way it opens a dashboard.
 - **Per-role menus.** One tree for everyone; hiding is global. Dashboard nodes and heading links follow dashboard visibility (v0.83.0), but entity nodes and headings are not filtered by role. Role-specific visibility for them would need its own model.
 - **MCP grouping hint.** Not done.
-- **Plural names.** Set a node label per entity; there is no automatic pluralization.
+- **Plural names.** The convention is a singular entity `display_name` (pages read "Add Work Order") and a plural node label (the sidebar reads "Work Orders"). There is no automatic pluralization, so each entity node carries its plural label, and an entity with no node shows under its singular name. A consequence: renaming an entity no longer renames its sidebar entry.

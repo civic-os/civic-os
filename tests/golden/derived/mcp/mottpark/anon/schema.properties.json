@@ -1,5 +1,34 @@
 {
   "entities": {
+    "current_festival": [
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "event_date", "select": "event_date", "type": "Date", "typeId": 4},
+      {"column": "event_hours", "select": "event_hours", "type": "TextShort", "typeId": 1},
+      {"column": "location", "select": "location", "type": "TextShort", "typeId": 1},
+      {"column": "applications_open_at", "select": "applications_open_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "applications_close_at", "select": "applications_close_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "payment_due_date", "select": "payment_due_date", "type": "Date", "typeId": 4},
+      {"column": "vendor_fee", "select": "vendor_fee", "type": "Money", "typeId": 7},
+      {"column": "food_truck_fee", "select": "food_truck_fee", "type": "Money", "typeId": 7}
+    ],
+    "festival": [
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "event_date", "select": "event_date", "type": "Date", "typeId": 4},
+      {"column": "event_hours", "select": "event_hours", "type": "TextShort", "typeId": 1},
+      {"column": "location", "select": "location", "type": "TextShort", "typeId": 1},
+      {"column": "applications_open_at", "select": "applications_open_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "applications_close_at", "select": "applications_close_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "payment_due_date", "select": "payment_due_date", "type": "Date", "typeId": 4},
+      {"column": "vendor_fee", "select": "vendor_fee", "type": "Money", "typeId": 7},
+      {"column": "food_truck_fee", "select": "food_truck_fee", "type": "Money", "typeId": 7},
+      {"column": "vendor_capacity", "select": "vendor_capacity", "type": "IntegerNumber", "typeId": 8},
+      {"column": "food_truck_capacity", "select": "food_truck_capacity", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
     "holiday_rules": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},

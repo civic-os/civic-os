@@ -1,0 +1,50 @@
+[
+  {
+    "category_key": "s",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "S",
+    "id": 10,
+    "sort_order": 1
+  },
+  {
+    "category_key": "m",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "M",
+    "id": 11,
+    "sort_order": 2
+  },
+  {
+    "category_key": "l",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "L",
+    "id": 12,
+    "sort_order": 3
+  },
+  {
+    "category_key": "xl",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "XL",
+    "id": 13,
+    "sort_order": 4
+  },
+  {
+    "category_key": "2xl",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "2XL",
+    "id": 14,
+    "sort_order": 5
+  },
+  {
+    "category_key": "3xl",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "3XL",
+    "id": 15,
+    "sort_order": 6
+  }
+]

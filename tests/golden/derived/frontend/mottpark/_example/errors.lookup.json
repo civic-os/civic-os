@@ -4,6 +4,13 @@
     {"column_name": "cancellation_reason", "constraint_name": "cancellation_reason_required", "error_message": "A cancellation reason is required when cancelling a reservation.", "table_name": "reservation_requests"},
     {"column_name": "denial_reason", "constraint_name": "denial_reason_required", "error_message": "A denial reason is required when denying a reservation.", "table_name": "reservation_requests"},
     {"column_name": null, "constraint_name": "dimension_row_delete", "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.", "table_name": "*"},
+    {"column_name": "festival_id", "constraint_name": "feedback_response_festival_id_fkey", "error_message": "This festival has applications or feedback, so it cannot be deleted.", "table_name": "feedback_response"},
+    {"column_name": "display_name", "constraint_name": "festival_display_name_key", "error_message": "A festival with this name already exists.", "table_name": "festival"},
+    {"column_name": "food_truck_capacity", "constraint_name": "festival_food_truck_capacity_check", "error_message": "Food truck spots cannot be negative.", "table_name": "festival"},
+    {"column_name": "status_id", "constraint_name": "festival_one_open", "error_message": "Another festival is already Open. Close it first.", "table_name": "festival"},
+    {"column_name": "vendor_capacity", "constraint_name": "festival_vendor_capacity_check", "error_message": "Booth vendor spots cannot be negative.", "table_name": "festival"},
+    {"column_name": "applications_close_at", "constraint_name": "festival_window_check", "error_message": "Applications must close after they open.", "table_name": "festival"},
+    {"column_name": "festival_id", "constraint_name": "food_truck_application_festival_id_fkey", "error_message": "This festival has applications or feedback, so it cannot be deleted.", "table_name": "food_truck_application"},
     {"column_name": "time_slot", "constraint_name": "max_advance_booking", "error_message": "Reservations cannot be made more than 1 year in advance.", "table_name": "reservation_requests"},
     {"column_name": "time_slot", "constraint_name": "min_advance_booking", "error_message": "Reservations must be made at least 24 hours in advance.", "table_name": "reservation_requests"},
     {
@@ -13,8 +20,11 @@
       "table_name": "public_calendar_events"
     },
     {"column_name": "policy_agreed", "constraint_name": "policy_must_be_agreed", "error_message": "You must agree to the Facility and Parkland Use Policy to submit a reservation request.", "table_name": "reservation_requests"},
+    {"column_name": "agreed_to_terms", "constraint_name": "sponsorship_application_agreed_check", "error_message": "Please agree to the sponsorship terms", "table_name": "sponsorship_application"},
+    {"column_name": "festival_id", "constraint_name": "sponsorship_application_festival_id_fkey", "error_message": "This festival has applications or feedback, so it cannot be deleted.", "table_name": "sponsorship_application"},
     {"column_name": null, "constraint_name": "tree_parent_cycle", "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.", "table_name": "*"},
-    {"column_name": "time_slot", "constraint_name": "valid_time_slot_bounds", "error_message": "Invalid time slot: end time must be after start time.", "table_name": "reservation_requests"}
+    {"column_name": "time_slot", "constraint_name": "valid_time_slot_bounds", "error_message": "Invalid time slot: end time must be after start time.", "table_name": "reservation_requests"},
+    {"column_name": "festival_id", "constraint_name": "vendor_application_festival_id_fkey", "error_message": "This festival has applications or feedback, so it cannot be deleted.", "table_name": "vendor_application"}
   ],
   "results": [
     {
@@ -193,6 +203,76 @@
       "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "Invalid feedback response festival id fkey. Check the value and try again. (feedback_response_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"feedback_response_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "Invalid feedback response festival id fkey. Check the value and try again. (feedback_response_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"feedback_response_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid festival display name key. Check the value and try again. (festival_display_name_key)",
+      "parseToHumanWithLookup": "A festival with this name already exists.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_display_name_key\""}
+    },
+    {
+      "parseToHuman": "Invalid festival display name key. Check the value and try again. (festival_display_name_key)",
+      "parseToHumanWithLookup": "A festival with this name already exists.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"festival_display_name_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid festival food truck capacity. Check the value and try again. (festival_food_truck_capacity_check)",
+      "parseToHumanWithLookup": "Food truck spots cannot be negative.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_food_truck_capacity_check\""}
+    },
+    {
+      "parseToHuman": "Invalid festival food truck capacity. Check the value and try again. (festival_food_truck_capacity_check)",
+      "parseToHumanWithLookup": "Food truck spots cannot be negative.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"festival_food_truck_capacity_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid festival one open. Check the value and try again. (festival_one_open)",
+      "parseToHumanWithLookup": "Another festival is already Open. Close it first.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_one_open\""}
+    },
+    {
+      "parseToHuman": "Invalid festival one open. Check the value and try again. (festival_one_open)",
+      "parseToHumanWithLookup": "Another festival is already Open. Close it first.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"festival_one_open\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid festival vendor capacity. Check the value and try again. (festival_vendor_capacity_check)",
+      "parseToHumanWithLookup": "Booth vendor spots cannot be negative.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_vendor_capacity_check\""}
+    },
+    {
+      "parseToHuman": "Invalid festival vendor capacity. Check the value and try again. (festival_vendor_capacity_check)",
+      "parseToHumanWithLookup": "Booth vendor spots cannot be negative.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"festival_vendor_capacity_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid festival window. Check the value and try again. (festival_window_check)",
+      "parseToHumanWithLookup": "Applications must close after they open.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_window_check\""}
+    },
+    {
+      "parseToHuman": "Invalid festival window. Check the value and try again. (festival_window_check)",
+      "parseToHumanWithLookup": "Applications must close after they open.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"festival_window_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid food truck application festival id fkey. Check the value and try again. (food_truck_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"food_truck_application_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "Invalid food truck application festival id fkey. Check the value and try again. (food_truck_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"food_truck_application_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid max advance booking. Check the value and try again. (max_advance_booking)",
       "parseToHumanWithLookup": "Reservations cannot be made more than 1 year in advance.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"max_advance_booking\""}
@@ -233,6 +313,26 @@
       "payload": {"code": "23514", "details": "Failing row violates constraint \"policy_must_be_agreed\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "Invalid sponsorship application agreed. Check the value and try again. (sponsorship_application_agreed_check)",
+      "parseToHumanWithLookup": "Please agree to the sponsorship terms",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"sponsorship_application_agreed_check\""}
+    },
+    {
+      "parseToHuman": "Invalid sponsorship application agreed. Check the value and try again. (sponsorship_application_agreed_check)",
+      "parseToHumanWithLookup": "Please agree to the sponsorship terms",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"sponsorship_application_agreed_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid sponsorship application festival id fkey. Check the value and try again. (sponsorship_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"sponsorship_application_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "Invalid sponsorship application festival id fkey. Check the value and try again. (sponsorship_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"sponsorship_application_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
       "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
@@ -251,6 +351,16 @@
       "parseToHuman": "Invalid valid time slot bounds. Check the value and try again. (valid_time_slot_bounds)",
       "parseToHumanWithLookup": "Invalid time slot: end time must be after start time.",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"valid_time_slot_bounds\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid vendor application festival id fkey. Check the value and try again. (vendor_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"vendor_application_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "Invalid vendor application festival id fkey. Check the value and try again. (vendor_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"vendor_application_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
@@ -318,6 +428,76 @@
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (feedback_response_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"feedback_response_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (feedback_response_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"feedback_response_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_display_name_key)",
+      "parseToHumanWithLookup": "A festival with this name already exists.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_display_name_key\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_display_name_key)",
+      "parseToHumanWithLookup": "A festival with this name already exists.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"festival_display_name_key\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_food_truck_capacity_check)",
+      "parseToHumanWithLookup": "Food truck spots cannot be negative.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_food_truck_capacity_check\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_food_truck_capacity_check)",
+      "parseToHumanWithLookup": "Food truck spots cannot be negative.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"festival_food_truck_capacity_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_one_open)",
+      "parseToHumanWithLookup": "Another festival is already Open. Close it first.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_one_open\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_one_open)",
+      "parseToHumanWithLookup": "Another festival is already Open. Close it first.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"festival_one_open\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_vendor_capacity_check)",
+      "parseToHumanWithLookup": "Booth vendor spots cannot be negative.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_vendor_capacity_check\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_vendor_capacity_check)",
+      "parseToHumanWithLookup": "Booth vendor spots cannot be negative.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"festival_vendor_capacity_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_window_check)",
+      "parseToHumanWithLookup": "Applications must close after they open.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"festival_window_check\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (festival_window_check)",
+      "parseToHumanWithLookup": "Applications must close after they open.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"festival_window_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (food_truck_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"food_truck_application_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (food_truck_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"food_truck_application_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (max_advance_booking)",
       "parseToHumanWithLookup": "Reservations cannot be made more than 1 year in advance.",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"max_advance_booking\""}
@@ -358,6 +538,26 @@
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"policy_must_be_agreed\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (sponsorship_application_agreed_check)",
+      "parseToHumanWithLookup": "Please agree to the sponsorship terms",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"sponsorship_application_agreed_check\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (sponsorship_application_agreed_check)",
+      "parseToHumanWithLookup": "Please agree to the sponsorship terms",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"sponsorship_application_agreed_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (sponsorship_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"sponsorship_application_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (sponsorship_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"sponsorship_application_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
       "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
@@ -376,6 +576,16 @@
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (valid_time_slot_bounds)",
       "parseToHumanWithLookup": "Invalid time slot: end time must be after start time.",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"valid_time_slot_bounds\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (vendor_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"vendor_application_festival_id_fkey\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (vendor_application_festival_id_fkey)",
+      "parseToHumanWithLookup": "This festival has applications or feedback, so it cannot be deleted.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"vendor_application_festival_id_fkey\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",

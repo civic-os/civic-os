@@ -1,5 +1,396 @@
 [
   {
+    "action_name": "open_applications",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Open applications for this festival? Applicants can submit during the application window.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Start accepting applications for this festival",
+    "disabled_tooltip": "Only Planning or Closed festivals can be opened",
+    "display_name": "Open Applications",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        22,
+        24
+      ]
+    },
+    "icon": "lock_open",
+    "id": 11,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "open_festival",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "festival",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        22,
+        24
+      ]
+    }
+  },
+  {
+    "action_name": "close_applications",
+    "button_style": "warning",
+    "can_execute": false,
+    "confirmation_message": "Close applications? Applicants will no longer be able to submit.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Stop accepting applications",
+    "disabled_tooltip": "Only an Open festival can be closed",
+    "display_name": "Close Applications",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        23
+      ]
+    },
+    "icon": "lock",
+    "id": 12,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "close_festival",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "festival",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        23
+      ]
+    }
+  },
+  {
+    "action_name": "mark_completed",
+    "button_style": "primary",
+    "can_execute": false,
+    "confirmation_message": "Mark this festival completed?",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Mark this festival as over",
+    "disabled_tooltip": "Only a Closed festival can be completed",
+    "display_name": "Mark Completed",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        24
+      ]
+    },
+    "icon": "event_available",
+    "id": 13,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "complete_festival",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "festival",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        24
+      ]
+    }
+  },
+  {
+    "action_name": "approve",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Approve this application? The applicant will be emailed the food truck fee and due date.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Approve this application",
+    "disabled_tooltip": "Only pending applications can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        32
+      ]
+    },
+    "icon": "check_circle",
+    "id": 20,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_food_truck_application",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "food_truck_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        32
+      ]
+    }
+  },
+  {
+    "action_name": "record_payment",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Record a payment received outside the system? The application is marked Paid and the applicant is emailed a receipt.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Record a check, cash, money order or CashApp payment",
+    "disabled_tooltip": "Only approved, unpaid applications",
+    "display_name": "Record Payment",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        33
+      ]
+    },
+    "icon": "payments",
+    "id": 21,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Payment Method",
+        "file_type": null,
+        "id": 10,
+        "join_column": "id",
+        "join_table": "statuses",
+        "options_source_rpc": "get_manual_payment_methods",
+        "param_name": "p_payment_method_id",
+        "param_type": "foreign_key",
+        "placeholder": null,
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      },
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Payment Date (blank = today)",
+        "file_type": null,
+        "id": 13,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_payment_date",
+        "param_type": "date",
+        "placeholder": null,
+        "required": false,
+        "sort_order": 20,
+        "status_entity_type": null,
+        "target_column": null
+      },
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Check # or Reference",
+        "file_type": null,
+        "id": 16,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_payment_reference",
+        "param_type": "text_short",
+        "placeholder": "Optional",
+        "required": false,
+        "sort_order": 30,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_food_truck_payment",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "food_truck_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        33
+      ]
+    }
+  },
+  {
+    "action_name": "enable_online_payment",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Switch this applicant to online card payment? They'll be emailed a payment link.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Switch this applicant to online card payment",
+    "disabled_tooltip": "Only approved applicants paying by another method",
+    "display_name": "Enable Online Payment",
+    "enabled_condition": {
+      "and": [
+        {
+          "field": "status_id",
+          "operator": "in",
+          "value": [
+            33
+          ]
+        },
+        {
+          "field": "preferred_payment_method_id",
+          "operator": "neq",
+          "value": 18
+        }
+      ]
+    },
+    "icon": "credit_card",
+    "id": 22,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "enable_online_payment_food_truck_application",
+    "show_on_detail": true,
+    "sort_order": 25,
+    "table_name": "food_truck_application",
+    "visibility_condition": {
+      "and": [
+        {
+          "field": "status_id",
+          "operator": "in",
+          "value": [
+            33
+          ]
+        },
+        {
+          "field": "preferred_payment_method_id",
+          "operator": "neq",
+          "value": 18
+        }
+      ]
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": false,
+    "confirmation_message": "Deny this application? The reason will be emailed to the applicant.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Deny this application",
+    "disabled_tooltip": "Only pending or approved applications",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        32,
+        33
+      ]
+    },
+    "icon": "block",
+    "id": 23,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Denial Reason",
+        "file_type": null,
+        "id": 4,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_denial_reason",
+        "param_type": "text",
+        "placeholder": "This is emailed to the applicant",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_food_truck_application",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "food_truck_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        32,
+        33
+      ]
+    }
+  },
+  {
+    "action_name": "withdraw",
+    "button_style": "warning",
+    "can_execute": false,
+    "confirmation_message": "Withdraw this application? Payments are not refunded through the system.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Withdraw this application",
+    "disabled_tooltip": "This application is already closed",
+    "display_name": "Withdraw",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        32,
+        33,
+        34
+      ]
+    },
+    "icon": "undo",
+    "id": 24,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Withdrawal Reason",
+        "file_type": null,
+        "id": 7,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_withdrawal_reason",
+        "param_type": "text",
+        "placeholder": "This is emailed to the applicant",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "withdraw_food_truck_application",
+    "show_on_detail": true,
+    "sort_order": 40,
+    "table_name": "food_truck_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        32,
+        33,
+        34
+      ]
+    }
+  },
+  {
     "action_name": "record_cash",
     "button_style": "success",
     "can_execute": false,
@@ -323,6 +714,637 @@
       "field": "can_waive_fees",
       "operator": "eq",
       "value": true
+    }
+  },
+  {
+    "action_name": "approve",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Approve this sponsorship? In-kind gifts are marked In-Kind; other sponsors are emailed the amount and due date.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Approve this sponsorship (in-kind gifts become In-Kind)",
+    "disabled_tooltip": "Only pending sponsorships can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        37
+      ]
+    },
+    "icon": "check_circle",
+    "id": 25,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_sponsorship",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "sponsorship_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        37
+      ]
+    }
+  },
+  {
+    "action_name": "record_payment",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Record a payment received outside the system? The application is marked Paid and the applicant is emailed a receipt.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Record a check, cash, money order or CashApp payment",
+    "disabled_tooltip": "Only approved, unpaid sponsorships",
+    "display_name": "Record Payment",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        38
+      ]
+    },
+    "icon": "payments",
+    "id": 26,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Payment Method",
+        "file_type": null,
+        "id": 11,
+        "join_column": "id",
+        "join_table": "statuses",
+        "options_source_rpc": "get_manual_payment_methods",
+        "param_name": "p_payment_method_id",
+        "param_type": "foreign_key",
+        "placeholder": null,
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      },
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Payment Date (blank = today)",
+        "file_type": null,
+        "id": 14,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_payment_date",
+        "param_type": "date",
+        "placeholder": null,
+        "required": false,
+        "sort_order": 20,
+        "status_entity_type": null,
+        "target_column": null
+      },
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Check # or Reference",
+        "file_type": null,
+        "id": 17,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_payment_reference",
+        "param_type": "text_short",
+        "placeholder": "Optional",
+        "required": false,
+        "sort_order": 30,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_sponsorship_payment",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "sponsorship_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        38
+      ]
+    }
+  },
+  {
+    "action_name": "enable_online_payment",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Switch this sponsor to online card payment? They'll be emailed a payment link.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Switch this sponsor to online card payment",
+    "disabled_tooltip": "Only approved sponsors paying by another method",
+    "display_name": "Enable Online Payment",
+    "enabled_condition": {
+      "and": [
+        {
+          "field": "status_id",
+          "operator": "in",
+          "value": [
+            38
+          ]
+        },
+        {
+          "field": "preferred_payment_method_id",
+          "operator": "neq",
+          "value": 18
+        }
+      ]
+    },
+    "icon": "credit_card",
+    "id": 27,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "enable_online_payment_sponsorship",
+    "show_on_detail": true,
+    "sort_order": 25,
+    "table_name": "sponsorship_application",
+    "visibility_condition": {
+      "and": [
+        {
+          "field": "status_id",
+          "operator": "in",
+          "value": [
+            38
+          ]
+        },
+        {
+          "field": "preferred_payment_method_id",
+          "operator": "neq",
+          "value": 18
+        }
+      ]
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": false,
+    "confirmation_message": "Deny this sponsorship? The reason will be emailed to the sponsor.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Deny this sponsorship",
+    "disabled_tooltip": "Only pending or approved sponsorships",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        37,
+        38
+      ]
+    },
+    "icon": "block",
+    "id": 28,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Denial Reason",
+        "file_type": null,
+        "id": 5,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_denial_reason",
+        "param_type": "text",
+        "placeholder": "This is emailed to the applicant",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_sponsorship",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "sponsorship_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        37,
+        38
+      ]
+    }
+  },
+  {
+    "action_name": "withdraw",
+    "button_style": "warning",
+    "can_execute": false,
+    "confirmation_message": "Withdraw this sponsorship? Payments are not refunded through the system.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Withdraw this sponsorship",
+    "disabled_tooltip": "This sponsorship is already closed",
+    "display_name": "Withdraw",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        37,
+        38,
+        39,
+        40
+      ]
+    },
+    "icon": "undo",
+    "id": 29,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Withdrawal Reason",
+        "file_type": null,
+        "id": 8,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_withdrawal_reason",
+        "param_type": "text",
+        "placeholder": "This is emailed to the applicant",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "withdraw_sponsorship",
+    "show_on_detail": true,
+    "sort_order": 40,
+    "table_name": "sponsorship_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        37,
+        38,
+        39,
+        40
+      ]
+    }
+  },
+  {
+    "action_name": "approve",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Approve this application? The applicant will be emailed the booth fee and due date.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Approve this application",
+    "disabled_tooltip": "Only pending applications can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26
+      ]
+    },
+    "icon": "check_circle",
+    "id": 14,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_vendor_application",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "vendor_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26
+      ]
+    }
+  },
+  {
+    "action_name": "waive_and_approve",
+    "button_style": "accent",
+    "can_execute": false,
+    "confirmation_message": "Approve with no fee due?",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Approve with no fee due",
+    "disabled_tooltip": "Only pending applications can be approved",
+    "display_name": "Waive Fee & Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26
+      ]
+    },
+    "icon": "money_off",
+    "id": 15,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Waiver Reason",
+        "file_type": null,
+        "id": 18,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_waiver_reason",
+        "param_type": "text",
+        "placeholder": "Optional; kept on the record",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "waive_and_approve_vendor_application",
+    "show_on_detail": true,
+    "sort_order": 15,
+    "table_name": "vendor_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26
+      ]
+    }
+  },
+  {
+    "action_name": "record_payment",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Record a payment received outside the system? The application is marked Paid and the applicant is emailed a receipt.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Record a check, cash, money order or CashApp payment",
+    "disabled_tooltip": "Only approved, unpaid applications",
+    "display_name": "Record Payment",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        27
+      ]
+    },
+    "icon": "payments",
+    "id": 16,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Payment Method",
+        "file_type": null,
+        "id": 9,
+        "join_column": "id",
+        "join_table": "statuses",
+        "options_source_rpc": "get_manual_payment_methods",
+        "param_name": "p_payment_method_id",
+        "param_type": "foreign_key",
+        "placeholder": null,
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      },
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Payment Date (blank = today)",
+        "file_type": null,
+        "id": 12,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_payment_date",
+        "param_type": "date",
+        "placeholder": null,
+        "required": false,
+        "sort_order": 20,
+        "status_entity_type": null,
+        "target_column": null
+      },
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Check # or Reference",
+        "file_type": null,
+        "id": 15,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_payment_reference",
+        "param_type": "text_short",
+        "placeholder": "Optional",
+        "required": false,
+        "sort_order": 30,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_vendor_payment",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "vendor_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        27
+      ]
+    }
+  },
+  {
+    "action_name": "enable_online_payment",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Switch this applicant to online card payment? They'll be emailed a payment link.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Switch this applicant to online card payment",
+    "disabled_tooltip": "Only approved applicants paying by another method",
+    "display_name": "Enable Online Payment",
+    "enabled_condition": {
+      "and": [
+        {
+          "field": "status_id",
+          "operator": "in",
+          "value": [
+            27
+          ]
+        },
+        {
+          "field": "preferred_payment_method_id",
+          "operator": "neq",
+          "value": 18
+        }
+      ]
+    },
+    "icon": "credit_card",
+    "id": 17,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "enable_online_payment_vendor_application",
+    "show_on_detail": true,
+    "sort_order": 25,
+    "table_name": "vendor_application",
+    "visibility_condition": {
+      "and": [
+        {
+          "field": "status_id",
+          "operator": "in",
+          "value": [
+            27
+          ]
+        },
+        {
+          "field": "preferred_payment_method_id",
+          "operator": "neq",
+          "value": 18
+        }
+      ]
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": false,
+    "confirmation_message": "Deny this application? The reason will be emailed to the applicant.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Deny this application",
+    "disabled_tooltip": "Only pending or approved applications",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26,
+        27
+      ]
+    },
+    "icon": "block",
+    "id": 18,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Denial Reason",
+        "file_type": null,
+        "id": 3,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_denial_reason",
+        "param_type": "text",
+        "placeholder": "This is emailed to the applicant",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_vendor_application",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "vendor_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26,
+        27
+      ]
+    }
+  },
+  {
+    "action_name": "withdraw",
+    "button_style": "warning",
+    "can_execute": false,
+    "confirmation_message": "Withdraw this application? Payments are not refunded through the system.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Withdraw this application",
+    "disabled_tooltip": "This application is already closed",
+    "display_name": "Withdraw",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26,
+        27,
+        28,
+        29
+      ]
+    },
+    "icon": "undo",
+    "id": 19,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Withdrawal Reason",
+        "file_type": null,
+        "id": 6,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_withdrawal_reason",
+        "param_type": "text",
+        "placeholder": "This is emailed to the applicant",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "withdraw_vendor_application",
+    "show_on_detail": true,
+    "sort_order": 40,
+    "table_name": "vendor_application",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        26,
+        27,
+        28,
+        29
+      ]
     }
   }
 ]

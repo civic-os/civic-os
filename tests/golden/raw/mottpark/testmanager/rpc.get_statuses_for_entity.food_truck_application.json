@@ -1,0 +1,52 @@
+[
+  {
+    "color": "#FCD34D",
+    "description": "Waiting for organizer review",
+    "display_name": "Pending",
+    "id": 32,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "pending"
+  },
+  {
+    "color": "#60A5FA",
+    "description": "Approved; food truck fee due",
+    "display_name": "Approved",
+    "id": 33,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "approved"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Approved and paid",
+    "display_name": "Paid",
+    "id": 34,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 3,
+    "status_key": "paid"
+  },
+  {
+    "color": "#EF4444",
+    "description": "Not accepted",
+    "display_name": "Denied",
+    "id": 35,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 5,
+    "status_key": "denied"
+  },
+  {
+    "color": "#9CA3AF",
+    "description": "Withdrawn by the organizers (no refunds)",
+    "display_name": "Withdrawn",
+    "id": 36,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 6,
+    "status_key": "withdrawn"
+  }
+]

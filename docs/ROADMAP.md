@@ -115,7 +115,11 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Chart widget (grouped bar via Unovis, v0.61.0)
   - [ ] Stat cards (backend aggregation required)
   - [ ] Query results from views
-- [ ] **Phase 6 - Permissions**: Role-gated dashboard visibility (`allowed_roles` column + RLS policy so non-public dashboards can be restricted to specific roles instead of only the creator), widget-level permissions, private dashboards
+- [~] **Phase 6 - Permissions**: Role-gated dashboards, widget-level permissions, private dashboards
+  - [x] Role-gated dashboard visibility (v0.80.3, through `metadata.dashboard_roles`; see Phase 3)
+  - [x] Dashboards reachable by link but unlisted in the selector (v0.82.0, `show_in_selector`)
+  - [ ] Widget-level permissions
+  - [ ] Private dashboards
 
 ### General
 - [~] **ADA/WCAG Compatibility** - ~60% complete (Phases 1-3 done)

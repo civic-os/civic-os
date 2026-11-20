@@ -1,5 +1,1830 @@
 {
   "entities": {
+    "current_festival": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "current_festival", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "current_festival", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "current_festival", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "current_festival", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,event_date,event_hours,location,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "event_date"
+          },
+          "name": "order event_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=event_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=event_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-event_date"
+          },
+          "name": "order event_date desc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=event_date.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=event_date.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "event_hours"
+          },
+          "name": "order event_hours asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=event_hours.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=event_hours.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "location"
+          },
+          "name": "order location asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=location.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=location.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "applications_close_at"
+          },
+          "name": "order applications_close_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=applications_close_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=applications_close_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "payment_due_date"
+          },
+          "name": "order payment_due_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=payment_due_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=payment_due_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "vendor_fee"
+          },
+          "name": "order vendor_fee asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=vendor_fee.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=vendor_fee.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "food_truck_fee"
+          },
+          "name": "order food_truck_fee asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=food_truck_fee.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=food_truck_fee.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "current_festival",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"created_at\" not found in current_festival. Available columns: \"Festival\", \"Id\", \"Event Date\", \"Event Hours\", \"Location\", \"Applications Open\", \"Applications Close\", \"Payment Due\", \"Booth Vendor Fee\", \"Food Truck Fee\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "current_festival",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "current_festival", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,event_date,event_hours,location,applications_open_at,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=display_name,event_date,event_hours,location,applications_open_at,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Current Festival."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "current_festival",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/current_festival?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "feedback_response": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_response", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_response", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_response", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_response", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "festival_id"
+          },
+          "name": "order festival_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=festival_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-festival_id"
+          },
+          "name": "order festival_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=festival_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "worth_it_financially_id"
+          },
+          "name": "order worth_it_financially_id asc [Category]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=worth_it_financially_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=worth_it_financially_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "worth_it_non_financially_id"
+          },
+          "name": "order worth_it_non_financially_id asc [Category]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=worth_it_non_financially_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=worth_it_non_financially_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "sort": "created_at"
+          },
+          "name": "order created_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_response",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "feedback_response",
+            "filters": [
+              {"field": "festival_id", "operator": "eq", "value": 5},
+              {"field": "worth_it_financially_id", "operator": "eq", "value": 5},
+              {"field": "worth_it_non_financially_id", "operator": "eq", "value": 5}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id",
+                "order=display_name.asc,id.asc",
+                "festival_id=eq.5",
+                "worth_it_financially_id=eq.5",
+                "worth_it_non_financially_id=eq.5"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,festival_id:festival!festival_id(id,display_name),worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),created_at,id&order=display_name.asc,id.asc&festival_id=eq.5&worth_it_financially_id=eq.5&worth_it_non_financially_id=eq.5"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_response",
+            "filters": [
+              {
+                "field": "festival_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "festival_id", "operator": "eq", "value": ""},
+              {"field": "festival_id", "operator": "eq", "value": null},
+              {
+                "field": "festival_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "festival_id", "operator": "in", "value": "not-an-array"},
+              {"field": "festival_id", "operator": "eq", "value": 0},
+              {"field": "festival_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter festival_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [],
+          "toolError": "\"\" not found in festival. Check the name and try again."
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_response",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "feedback_response", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),what_worked_well,what_did_not_go_well,worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_financially_other,worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),worth_it_non_financially_other,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=display_name,festival_id:festival!festival_id(id,display_name),what_worked_well,what_did_not_go_well,worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_financially_other,worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),worth_it_non_financially_other,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Feedback Response."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_response",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_response?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "feedback_submission": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_submission", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,festival_id:festival!festival_id(id,display_name),id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,festival_id:festival!festival_id(id,display_name),id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_submission", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,festival_id:festival!festival_id(id,display_name),id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,festival_id:festival!festival_id(id,display_name),id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_submission", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,festival_id:festival!festival_id(id,display_name),id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,festival_id:festival!festival_id(id,display_name),id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "feedback_submission", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,festival_id:festival!festival_id(id,display_name),id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,festival_id:festival!festival_id(id,display_name),id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_submission"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_submission",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_submission",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_submission",
+            "limit": 25,
+            "offset": 0,
+            "sort": "festival_id"
+          },
+          "name": "order festival_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,id&order=festival_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "feedback_submission",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-festival_id"
+          },
+          "name": "order festival_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,id&order=festival_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_submission",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "feedback_submission",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_submission",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "feedback_submission", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,festival_id:festival!festival_id(id,display_name),what_worked_well,what_did_not_go_well,worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_financially_other,worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),worth_it_non_financially_other,created_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=display_name,festival_id:festival!festival_id(id,display_name),what_worked_well,what_did_not_go_well,worth_it_financially_id:categories!worth_it_financially_id(id,display_name,color),worth_it_financially_other,worth_it_non_financially_id:categories!worth_it_non_financially_id(id,display_name,color),worth_it_non_financially_other,created_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Mott Fest Feedback."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "feedback_submission",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/feedback_submission?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "festival": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "festival", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "festival", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "festival", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "festival", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_id"
+          },
+          "name": "order status_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=status_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-status_id"
+          },
+          "name": "order status_id desc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=status_id.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "event_date"
+          },
+          "name": "order event_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=event_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=event_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "applications_open_at"
+          },
+          "name": "order applications_open_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=applications_open_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=applications_open_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "applications_close_at"
+          },
+          "name": "order applications_close_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=applications_close_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=applications_close_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "sort": "payment_due_date"
+          },
+          "name": "order payment_due_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=payment_due_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=payment_due_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "festival",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "festival",
+            "filters": [
+              {"field": "status_id", "operator": "eq", "value": 5}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id", "order=display_name.asc,id.asc", "status_id=eq.5"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,applications_open_at,applications_close_at,payment_due_date,id&order=display_name.asc,id.asc&status_id=eq.5"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "festival",
+            "filters": [
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "status_id", "operator": "eq", "value": ""},
+              {"field": "status_id", "operator": "eq", "value": null},
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "status_id", "operator": "in", "value": "not-an-array"},
+              {"field": "status_id", "operator": "eq", "value": 0},
+              {"field": "status_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter status_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [],
+          "toolError": "Status \"\" not found for entity type \"festival\". Available: \"Planning\", \"Open\", \"Closed\", \"Completed\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "festival",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "festival", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,event_hours,location,applications_open_at,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,vendor_capacity,food_truck_capacity,created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),event_date,event_hours,location,applications_open_at,applications_close_at,payment_due_date,vendor_fee,food_truck_fee,vendor_capacity,food_truck_capacity,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Festival."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "festival",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/festival?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "food_truck_application": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "food_truck_application", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "food_truck_application", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "food_truck_application", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "food_truck_application", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_id"
+          },
+          "name": "order status_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=status_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-status_id"
+          },
+          "name": "order status_id desc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=status_id.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "festival_id"
+          },
+          "name": "order festival_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=festival_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "amount_due"
+          },
+          "name": "order amount_due asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=amount_due.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=amount_due.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_name"
+          },
+          "name": "order contact_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=contact_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=contact_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "preferred_payment_method_id"
+          },
+          "name": "order preferred_payment_method_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=preferred_payment_method_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=preferred_payment_method_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "created_at"
+          },
+          "name": "order created_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "food_truck_application",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "food_truck_application",
+            "filters": [
+              {"field": "status_id", "operator": "eq", "value": 5},
+              {"field": "festival_id", "operator": "eq", "value": 5},
+              {"field": "preferred_payment_method_id", "operator": "eq", "value": 5}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc",
+                "status_id=eq.5",
+                "festival_id=eq.5",
+                "preferred_payment_method_id=eq.5"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc&status_id=eq.5&festival_id=eq.5&preferred_payment_method_id=eq.5"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "food_truck_application",
+            "filters": [
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "status_id", "operator": "eq", "value": ""},
+              {"field": "status_id", "operator": "eq", "value": null},
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "status_id", "operator": "in", "value": "not-an-array"},
+              {"field": "status_id", "operator": "eq", "value": 0},
+              {"field": "status_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter status_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [],
+          "toolError": "Status \"\" not found for entity type \"food_truck_application\". Available: \"Pending\", \"Approved\", \"Paid\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "civic_os_text_search=wfts.pot hole & co"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,id&order=display_name.desc&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "food_truck_application",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "food_truck_application", "limit": 25, "offset": 0, "search": "pot hole"},
+          "name": "hybrid search rawQueryParams",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc",
+                "civic_os_text_search=wfts.pot hole"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc&civic_os_text_search=wfts.pot%20hole"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "food_truck_application", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,menu_description,contact_name,email,phone,website,social_media,setup_needs,health_permit_file:files!health_permit_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),coi_file:files!coi_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),paid_amount,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,payment_reference,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,withdrawal_reason,promoted_on_social,applicant_id:civic_os_users!applicant_id(id,display_name,full_name,phone,email),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,menu_description,contact_name,email,phone,website,social_media,setup_needs,health_permit_file:files!health_permit_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),coi_file:files!coi_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),paid_amount,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,payment_reference,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,withdrawal_reason,promoted_on_social,applicant_id:civic_os_users!applicant_id(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Food Truck Application."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "food_truck_application",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/food_truck_application?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
     "holiday_rules": {
       "queries": [
         {
@@ -411,7 +2236,7 @@
               "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
-          "toolError": "Record #1 not found in Holiday Rules."
+          "toolError": "Record #1 not found in Holiday Rule."
         },
         {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
@@ -829,7 +2654,7 @@
               "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,status_id:statuses!status_id(id,display_name,color,status_key),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
-          "toolError": "Record #1 not found in Manager Events."
+          "toolError": "Record #1 not found in Manager Event."
         },
         {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
@@ -847,6 +2672,795 @@
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
               "url": "<PGRST>/manager_events?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "mottfest_current_summary": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_current_summary", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_current_summary?select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_current_summary", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_current_summary?select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_current_summary", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_current_summary?select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_current_summary", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_current_summary?select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "pipeline_no"
+          },
+          "name": "order pipeline_no asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-pipeline_no"
+          },
+          "name": "order pipeline_no desc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "pipeline"
+          },
+          "name": "order pipeline asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-pipeline"
+          },
+          "name": "order pipeline desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "submitted"
+          },
+          "name": "order submitted asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "pending"
+          },
+          "name": "order pending asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "approved_unpaid"
+          },
+          "name": "order approved_unpaid asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "paid"
+          },
+          "name": "order paid asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "waived"
+          },
+          "name": "order waived asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "in_kind"
+          },
+          "name": "order in_kind asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "denied"
+          },
+          "name": "order denied asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "withdrawn"
+          },
+          "name": "order withdrawn asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "total_paid"
+          },
+          "name": "order total_paid asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "in_kind_value"
+          },
+          "name": "order in_kind_value asc [DecimalNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "capacity"
+          },
+          "name": "order capacity asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "committed"
+          },
+          "name": "order committed asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_current_summary. Available columns: \"Pipeline No\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved Unpaid\", \"Paid\", \"Waived\", \"In Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_current_summary",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in mottfest_current_summary. Did you mean one of: \"Approved Unpaid\" (approved_unpaid), \"Paid\" (paid), \"Total Paid\" (total_paid)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in mottfest_current_summary. Did you mean one of: \"Approved Unpaid\" (approved_unpaid), \"Paid\" (paid), \"Total Paid\" (total_paid)?"
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_current_summary",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in mottfest_current_summary. Did you mean one of: \"Approved Unpaid\" (approved_unpaid), \"Paid\" (paid), \"Total Paid\" (total_paid)?"
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "mottfest_current_summary", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_current_summary?select=pipeline_no,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Current Festival Summary."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_current_summary",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [],
+          "thrown": "NameResolutionError: Ambiguous column \"id\" in mottfest_current_summary. Did you mean one of: \"Approved Unpaid\" (approved_unpaid), \"Paid\" (paid), \"Total Paid\" (total_paid)?"
+        }
+      ]
+    },
+    "mottfest_revenue_summary": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_revenue_summary", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_revenue_summary", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_revenue_summary", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "mottfest_revenue_summary", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "requests": [
+            {
+              "decoded": ["select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "festival_id"
+          },
+          "name": "order festival_id asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-festival_id"
+          },
+          "name": "order festival_id desc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "pipeline"
+          },
+          "name": "order pipeline asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-pipeline"
+          },
+          "name": "order pipeline desc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "submitted"
+          },
+          "name": "order submitted asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "pending"
+          },
+          "name": "order pending asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "approved_unpaid"
+          },
+          "name": "order approved_unpaid asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "paid"
+          },
+          "name": "order paid asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "waived"
+          },
+          "name": "order waived asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "in_kind"
+          },
+          "name": "order in_kind asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "denied"
+          },
+          "name": "order denied asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "withdrawn"
+          },
+          "name": "order withdrawn asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "total_paid"
+          },
+          "name": "order total_paid asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "in_kind_value"
+          },
+          "name": "order in_kind_value asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "capacity"
+          },
+          "name": "order capacity asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "sort": "committed"
+          },
+          "name": "order committed asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_revenue_summary",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"created_at\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "mottfest_revenue_summary",
+            "filters": [
+              {"field": "festival_id", "operator": "gte", "value": 100}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id", "order=id.asc", "festival_id=gte.100"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id&order=id.asc&festival_id=gte.100"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_revenue_summary",
+            "filters": [
+              {
+                "field": "festival_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "festival_id", "operator": "eq", "value": ""},
+              {"field": "festival_id", "operator": "eq", "value": null},
+              {
+                "field": "festival_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "festival_id", "operator": "in", "value": "not-an-array"},
+              {"field": "festival_id", "operator": "eq", "value": 0},
+              {"field": "festival_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter festival_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=id.asc", "and=(festival_id.in.(1,2,3),festival_id.is.null,festival_id.in.(),festival_id.in.not-an-array,festival_id.eq.0,festival_id.eq.false)"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=id&order=id.asc&and=(festival_id.in.(1,2,3),festival_id.is.null,festival_id.in.(),festival_id.in.not-an-array,festival_id.eq.0,festival_id.eq.false)"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in mottfest_revenue_summary. Available columns: \"Festival\", \"Id\", \"Festival Name\", \"Pipeline Order\", \"Pipeline\", \"Submitted\", \"Pending\", \"Approved (Unpaid)\", \"Paid\", \"Waived\""
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "mottfest_revenue_summary", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id", "order=id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=festival_id,pipeline,submitted,pending,approved_unpaid,paid,waived,in_kind,denied,withdrawn,total_paid,in_kind_value,capacity,committed,id&order=id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Revenue Summary."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "mottfest_revenue_summary",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/mottfest_revenue_summary?select=id&order=id.asc"
             }
           ]
         }
@@ -1108,7 +3722,7 @@
               "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,organization_name,contact_name,contact_phone,attendee_ages,is_admission_charged,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
-          "toolError": "Record #1 not found in Public Events."
+          "toolError": "Record #1 not found in Public Event."
         },
         {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
@@ -1432,7 +4046,7 @@
               "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
-          "toolError": "Record #1 not found in Payment Types."
+          "toolError": "Record #1 not found in Payment Type."
         },
         {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
@@ -1955,7 +4569,7 @@
               "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),can_record_payment,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
-          "toolError": "Record #1 not found in Reservation Payments."
+          "toolError": "Record #1 not found in Reservation Payment."
         },
         {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
@@ -2547,7 +5161,7 @@
               "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,can_waive_fees,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
-          "toolError": "Record #1 not found in Reservation Requests."
+          "toolError": "Record #1 not found in Reservation Request."
         },
         {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
@@ -2565,6 +5179,954 @@
               "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
               "method": "GET",
               "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "sponsorship_application": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsorship_application", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsorship_application", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsorship_application", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsorship_application", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_id"
+          },
+          "name": "order status_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=status_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-status_id"
+          },
+          "name": "order status_id desc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=status_id.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "festival_id"
+          },
+          "name": "order festival_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=festival_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "amount_due"
+          },
+          "name": "order amount_due asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=amount_due.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=amount_due.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_name"
+          },
+          "name": "order contact_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=contact_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=contact_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "tier_id"
+          },
+          "name": "order tier_id asc [Category]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=tier_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=tier_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "preferred_payment_method_id"
+          },
+          "name": "order preferred_payment_method_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=preferred_payment_method_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=preferred_payment_method_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "thank_you_sent"
+          },
+          "name": "order thank_you_sent asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=thank_you_sent.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=thank_you_sent.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "created_at"
+          },
+          "name": "order created_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsorship_application",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "sponsorship_application",
+            "filters": [
+              {"field": "status_id", "operator": "eq", "value": 5},
+              {"field": "festival_id", "operator": "eq", "value": 5},
+              {"field": "tier_id", "operator": "eq", "value": 5},
+              {"field": "preferred_payment_method_id", "operator": "eq", "value": 5},
+              {"field": "thank_you_sent", "operator": "eq", "value": "2026-07-04"}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id",
+                "order=display_name.asc,id.asc",
+                "status_id=eq.5",
+                "festival_id=eq.5",
+                "tier_id=eq.5",
+                "preferred_payment_method_id=eq.5",
+                "thank_you_sent=eq.2026-07-04"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id&order=display_name.asc,id.asc&status_id=eq.5&festival_id=eq.5&tier_id=eq.5&preferred_payment_method_id=eq.5&thank_you_sent=eq.2026-07-04"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsorship_application",
+            "filters": [
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "status_id", "operator": "eq", "value": ""},
+              {"field": "status_id", "operator": "eq", "value": null},
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "status_id", "operator": "in", "value": "not-an-array"},
+              {"field": "status_id", "operator": "eq", "value": 0},
+              {"field": "status_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter status_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [],
+          "toolError": "Status \"\" not found for entity type \"sponsorship_application\". Available: \"Pending\", \"Approved\", \"Paid\", \"In-Kind\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "civic_os_text_search=wfts.pot hole & co"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,id&order=display_name.desc&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsorship_application",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsorship_application", "limit": 25, "offset": 0, "search": "pot hole"},
+          "name": "hybrid search rawQueryParams",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id",
+                "order=display_name.asc,id.asc",
+                "civic_os_text_search=wfts.pot hole"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,contact_name,tier_id:categories!tier_id(id,display_name,color),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),thank_you_sent,created_at,id&order=display_name.asc,id.asc&civic_os_text_search=wfts.pot%20hole"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "sponsorship_application", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,mailing_address,contact_name,email,phone,website,tier_id:categories!tier_id(id,display_name,color),custom_amount,in_kind_description,in_kind_value,tshirt_size_id:categories!tshirt_size_id(id,display_name,color),logo_file:files!logo_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),agreed_to_terms,agreed_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),paid_amount,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,payment_reference,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,withdrawal_reason,promoted_on_social,thank_you_sent,applicant_id:civic_os_users!applicant_id(id,display_name,full_name,phone,email),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,mailing_address,contact_name,email,phone,website,tier_id:categories!tier_id(id,display_name,color),custom_amount,in_kind_description,in_kind_value,tshirt_size_id:categories!tshirt_size_id(id,display_name,color),logo_file:files!logo_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),agreed_to_terms,agreed_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),paid_amount,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,payment_reference,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,withdrawal_reason,promoted_on_social,thank_you_sent,applicant_id:civic_os_users!applicant_id(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Sponsorship."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsorship_application",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsorship_application?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "vendor_application": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "vendor_application", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "vendor_application", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "vendor_application", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "vendor_application", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status_id"
+          },
+          "name": "order status_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=status_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-status_id"
+          },
+          "name": "order status_id desc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=status_id.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=status_id.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "festival_id"
+          },
+          "name": "order festival_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of festival_id -> sort by the column festival_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=festival_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=festival_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "amount_due"
+          },
+          "name": "order amount_due asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=amount_due.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=amount_due.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "vendor_type_id"
+          },
+          "name": "order vendor_type_id asc [Category]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=vendor_type_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=vendor_type_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "contact_name"
+          },
+          "name": "order contact_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=contact_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=contact_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "preferred_payment_method_id"
+          },
+          "name": "order preferred_payment_method_id asc [Status]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=preferred_payment_method_id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=preferred_payment_method_id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "sort": "created_at"
+          },
+          "name": "order created_at asc [DateTimeLocal]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "vendor_application",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "vendor_application",
+            "filters": [
+              {"field": "status_id", "operator": "eq", "value": 5},
+              {"field": "festival_id", "operator": "eq", "value": 5},
+              {"field": "vendor_type_id", "operator": "eq", "value": 5},
+              {"field": "preferred_payment_method_id", "operator": "eq", "value": 5}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc",
+                "status_id=eq.5",
+                "festival_id=eq.5",
+                "vendor_type_id=eq.5",
+                "preferred_payment_method_id=eq.5"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc&status_id=eq.5&festival_id=eq.5&vendor_type_id=eq.5&preferred_payment_method_id=eq.5"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "vendor_application",
+            "filters": [
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "status_id", "operator": "eq", "value": ""},
+              {"field": "status_id", "operator": "eq", "value": null},
+              {
+                "field": "status_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "status_id", "operator": "in", "value": "not-an-array"},
+              {"field": "status_id", "operator": "eq", "value": 0},
+              {"field": "status_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter status_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [],
+          "toolError": "Status \"\" not found for entity type \"vendor_application\". Available: \"Pending\", \"Approved\", \"Paid\", \"Waived\", \"Denied\", \"Withdrawn\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "civic_os_text_search=wfts.pot hole & co"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,id&order=display_name.desc&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "vendor_application",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "vendor_application", "limit": 25, "offset": 0, "search": "pot hole"},
+          "name": "hybrid search rawQueryParams",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id",
+                "order=display_name.asc,id.asc",
+                "civic_os_text_search=wfts.pot hole"
+              ],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),contact_name,preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),created_at,id&order=display_name.asc,id.asc&civic_os_text_search=wfts.pot%20hole"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "vendor_application", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": [
+                "select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),description,contact_name,email,phone,website,social_media,placement_request,coi_file:files!coi_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),paid_amount,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,payment_reference,waiver_reason,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,withdrawal_reason,promoted_on_social,applicant_id:civic_os_users!applicant_id(id,display_name,full_name,phone,email),created_at,updated_at,id",
+                "order=display_name.asc,id.asc",
+                "id=eq.1"
+              ],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),festival_id:festival!festival_id(id,display_name),amount_due,vendor_type_id:categories!vendor_type_id(id,display_name,color),description,contact_name,email,phone,website,social_media,placement_request,coi_file:files!coi_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),preferred_payment_method_id:statuses!preferred_payment_method_id(id,display_name,color,status_key),payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),paid_amount,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,payment_reference,waiver_reason,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,withdrawal_reason,promoted_on_social,applicant_id:civic_os_users!applicant_id(id,display_name,full_name,phone,email),created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Booth Vendor Application."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "vendor_application",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/vendor_application?select=id&order=display_name.asc,id.asc"
             }
           ]
         }

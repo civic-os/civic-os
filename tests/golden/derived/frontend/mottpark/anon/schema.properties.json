@@ -1,5 +1,34 @@
 {
   "entities": {
+    "current_festival": [
+      {"column": "display_name", "columnSpan": 2, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "event_date", "columnSpan": 2, "defaultValue": null, "select": "event_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "event_hours", "columnSpan": 2, "defaultValue": null, "select": "event_hours", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "location", "columnSpan": 4, "defaultValue": null, "select": "location", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "applications_open_at", "columnSpan": 2, "defaultValue": null, "select": "applications_open_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "applications_close_at", "columnSpan": 2, "defaultValue": null, "select": "applications_close_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "payment_due_date", "columnSpan": 2, "defaultValue": null, "select": "payment_due_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "vendor_fee", "columnSpan": 2, "defaultValue": null, "select": "vendor_fee", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7},
+      {"column": "food_truck_fee", "columnSpan": 2, "defaultValue": null, "select": "food_truck_fee", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7}
+    ],
+    "festival": [
+      {"column": "display_name", "columnSpan": 3, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "status_id", "columnSpan": 2, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "selectForEdit": "status_id", "selectForList": "=", "type": "Status", "typeId": 22},
+      {"column": "event_date", "columnSpan": 2, "defaultValue": null, "select": "event_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "event_hours", "columnSpan": 2, "defaultValue": null, "select": "event_hours", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "location", "columnSpan": 4, "defaultValue": null, "select": "location", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "applications_open_at", "columnSpan": 3, "defaultValue": null, "select": "applications_open_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "applications_close_at", "columnSpan": 3, "defaultValue": null, "select": "applications_close_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "payment_due_date", "columnSpan": 2, "defaultValue": null, "select": "payment_due_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "vendor_fee", "columnSpan": 2, "defaultValue": null, "select": "vendor_fee", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7},
+      {"column": "food_truck_fee", "columnSpan": 2, "defaultValue": null, "select": "food_truck_fee", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7},
+      {"column": "vendor_capacity", "columnSpan": 2, "defaultValue": null, "select": "vendor_capacity", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "food_truck_capacity", "columnSpan": 2, "defaultValue": null, "select": "food_truck_capacity", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 2, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 2, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
     "holiday_rules": [
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
@@ -111,6 +140,35 @@
     ]
   },
   "freshTypes": {
+    "current_festival": [
+      "applications_close_at:DateTimeLocal",
+      "applications_open_at:DateTimeLocal",
+      "display_name:TextShort",
+      "event_date:Date",
+      "event_hours:TextShort",
+      "food_truck_fee:Money",
+      "id:IntegerNumber",
+      "location:TextShort",
+      "payment_due_date:Date",
+      "vendor_fee:Money"
+    ],
+    "festival": [
+      "applications_close_at:DateTimeLocal",
+      "applications_open_at:DateTimeLocal",
+      "created_at:DateTimeLocal",
+      "display_name:TextShort",
+      "event_date:Date",
+      "event_hours:TextShort",
+      "food_truck_capacity:IntegerNumber",
+      "food_truck_fee:Money",
+      "id:IntegerNumber",
+      "location:TextShort",
+      "payment_due_date:Date",
+      "status_id:Status",
+      "updated_at:DateTimeLocal",
+      "vendor_capacity:IntegerNumber",
+      "vendor_fee:Money"
+    ],
     "holiday_rules": [
       "created_at:DateTimeLocal",
       "day:IntegerNumber",
