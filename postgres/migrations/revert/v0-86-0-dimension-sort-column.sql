@@ -3,8 +3,7 @@
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 --
--- Restores the v0.85.0 compare_interface(), register_dimension() and schema_dimensions, then drops the setter
--- and the column.
+-- Restores the v0.85.0 compare_interface(), register_dimension() and schema_dimensions, then drops the column.
 
 BEGIN;
 
@@ -454,7 +453,9 @@ $$;
 COMMENT ON FUNCTION public.compare_interface(JSONB) IS
     'Compares the tables, columns, functions, dimensions and modules an install script declares it uses with the live schema; returns one row per difference (severity error or info) and none when the instance matches. Raises 22023 on a malformed declaration. See docs/notes/MODULE_INSTALL_SUPPORT_DESIGN.md. Added in v0.84.0; dimension and module elements compared since v0.85.0.';
 
-CREATE OR REPLACE FUNCTION public.register_dimension(
+DROP FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER, NAME);
+
+CREATE FUNCTION public.register_dimension(
     p_dimension_key TEXT,
     p_display_name TEXT,
     p_table_schema NAME,
@@ -667,7 +668,8 @@ $$;
 COMMENT ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER) IS
     'Registers (or re-registers) a lookup table as a dimension: checks the BIGINT key, the boolean active column and the parent FK; installs the delete guard, the parent-cycle guard and a default-fill trigger on every referencing FK column; upserts the registry row (a NULL default keeps the current one). Admin JWT or the deployment role; over the API only public tables. Added in v0.85.0.';
 
-DROP FUNCTION public.set_dimension_sort_column(TEXT, NAME);
+REVOKE EXECUTE ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER) TO authenticated;
 
 DROP VIEW public.schema_dimensions;
 

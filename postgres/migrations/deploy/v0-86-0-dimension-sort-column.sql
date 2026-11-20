@@ -10,12 +10,16 @@
 -- Design: docs/notes/IMPACT_REPORTING_DESIGN.md (Build amendments) and docs/notes/TREE_LIST_VIEW_DESIGN.md
 -- (Sibling order).
 --
---   metadata.dimensions.sort_column      nullable; NULL orders by label
---   public.schema_dimensions             returns it (re-created; security_invoker repeated)
---   public.set_dimension_sort_column()   sets or clears it; the column must exist; _is_db_admin(), no DDL
---   public.register_dimension()          same v0.85.0 signature (install scripts declare it in assert_interface());
---                                        when no sort column is set, a sort_order column is used by convention
---   public.compare_interface()           dimension elements accept the column role 'sort'
+--   metadata.dimensions.sort_column     nullable; NULL orders by label
+--   public.schema_dimensions            returns it (re-created; security_invoker repeated)
+--   public.register_dimension()         gains a trailing p_sort_column (default NULL): checked to exist; when
+--                                       omitted, a sort_order column is used if the table has one; it follows
+--                                       the latest registration, like every setting but the default
+--   public.compare_interface()          dimension elements accept the column role 'sort'
+--
+-- register_dimension() gains a parameter, so its v0.85.0 signature is dropped and the function re-created. No
+-- instance runs v0.85.0, so no install script declares the old signature; calls by name or by position up to
+-- p_sort_order are unaffected.
 
 BEGIN;
 
@@ -26,7 +30,7 @@ BEGIN;
 ALTER TABLE metadata.dimensions ADD COLUMN sort_column NAME;
 
 COMMENT ON COLUMN metadata.dimensions.sort_column IS
-    'Column that orders a dimension''s rows within each parent (then label, then key); NULL orders by label. Set by set_dimension_sort_column(), or to sort_order by convention at registration. Since v0.86.0.';
+    'Column that orders a dimension''s rows within each parent (then label, then key); NULL orders by label. Set by register_dimension(p_sort_column), or to sort_order by convention. Since v0.86.0.';
 
 -- ============================================================================
 -- 2. public.schema_dimensions
@@ -59,55 +63,12 @@ COMMENT ON VIEW public.schema_dimensions IS
 GRANT SELECT ON public.schema_dimensions TO web_anon, authenticated;
 
 -- ============================================================================
--- 3. public.set_dimension_sort_column()
--- ============================================================================
--- SQLSTATEs: 42501 not admin; 22023 unknown dimension or a column the table does not have.
-
-CREATE FUNCTION public.set_dimension_sort_column(p_dimension_key TEXT, p_sort_column NAME)
-RETURNS VOID
-LANGUAGE plpgsql
-VOLATILE
-SECURITY DEFINER
-SET search_path = metadata, public
-AS $$
-DECLARE
-  v_dim metadata.dimensions%ROWTYPE;
-BEGIN
-  IF NOT metadata._is_db_admin() THEN
-    RAISE EXCEPTION 'Admin access required' USING ERRCODE = '42501';
-  END IF;
-
-  SELECT * INTO v_dim FROM metadata.dimensions WHERE dimension_key = p_dimension_key FOR UPDATE;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Dimension % is not registered', p_dimension_key USING ERRCODE = '22023';
-  END IF;
-
-  IF p_sort_column IS NOT NULL AND NOT EXISTS (
-    SELECT 1 FROM pg_catalog.pg_attribute a
-    WHERE a.attrelid = to_regclass(format('%I.%I', v_dim.table_schema, v_dim.table_name))
-      AND a.attname = p_sort_column AND NOT a.attisdropped AND a.attnum > 0
-  ) THEN
-    RAISE EXCEPTION 'Sort column %.%.% does not exist', v_dim.table_schema, v_dim.table_name, p_sort_column
-      USING ERRCODE = '22023';
-  END IF;
-
-  UPDATE metadata.dimensions
-  SET sort_column = p_sort_column, updated_at = NOW()
-  WHERE dimension_key = p_dimension_key;
-END;
-$$;
-
-COMMENT ON FUNCTION public.set_dimension_sort_column(TEXT, NAME) IS
-    'Sets (or, with NULL, clears) the column that orders a dimension''s rows within each parent; clients order by it, then label, then key. The column must exist. Admin JWT or the deployment role. Added in v0.86.0.';
-
-REVOKE EXECUTE ON FUNCTION public.set_dimension_sort_column(TEXT, NAME) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.set_dimension_sort_column(TEXT, NAME) TO authenticated;
-
--- ============================================================================
--- 4. public.register_dimension(): the sort_order convention
+-- 3. public.register_dimension(..., p_sort_column)
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION public.register_dimension(
+DROP FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER);
+
+CREATE FUNCTION public.register_dimension(
     p_dimension_key TEXT,
     p_display_name TEXT,
     p_table_schema NAME,
@@ -119,7 +80,8 @@ CREATE OR REPLACE FUNCTION public.register_dimension(
     p_external_id_column NAME DEFAULT NULL,
     p_default_value_id BIGINT DEFAULT NULL,
     p_hide_when_single BOOLEAN DEFAULT TRUE,
-    p_sort_order INTEGER DEFAULT 0
+    p_sort_order INTEGER DEFAULT 0,
+    p_sort_column NAME DEFAULT NULL
 )
 RETURNS VOID
 LANGUAGE plpgsql
@@ -136,7 +98,7 @@ DECLARE
   v_existing metadata.dimensions%ROWTYPE;
   v_ref RECORD;
   v_trigger NAME;
-  v_sort_column NAME;
+  v_sort_column NAME := p_sort_column;
 BEGIN
   IF NOT metadata._is_db_admin() THEN
     RAISE EXCEPTION 'Admin access required' USING ERRCODE = '42501';
@@ -210,12 +172,15 @@ BEGIN
     RAISE EXCEPTION 'External id column %.% does not exist', v_qualified, p_external_id_column USING ERRCODE = '22023';
   END IF;
 
-  -- sibling order (v0.86.0): keep a sort column already set (set_dimension_sort_column()); otherwise use a
-  -- sort_order column by convention (Tree List View design, Sibling order) when the table has one
-  SELECT d.sort_column INTO v_sort_column FROM metadata.dimensions d WHERE d.dimension_key = p_dimension_key;
-  IF v_sort_column IS NULL AND EXISTS (
-       SELECT 1 FROM pg_catalog.pg_attribute a WHERE a.attrelid = v_rel AND a.attname = 'sort_order'
-         AND NOT a.attisdropped AND a.attnum > 0) THEN
+  -- sibling order (v0.86.0): the given column, else a sort_order column by convention (Tree List View design,
+  -- Sibling order) when the table has one, else none (clients order by label)
+  IF v_sort_column IS NOT NULL THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_attribute a WHERE a.attrelid = v_rel AND a.attname = v_sort_column
+                     AND NOT a.attisdropped AND a.attnum > 0) THEN
+      RAISE EXCEPTION 'Sort column %.% does not exist', v_qualified, v_sort_column USING ERRCODE = '22023';
+    END IF;
+  ELSIF EXISTS (SELECT 1 FROM pg_catalog.pg_attribute a WHERE a.attrelid = v_rel AND a.attname = 'sort_order'
+                  AND NOT a.attisdropped AND a.attnum > 0) THEN
     v_sort_column := 'sort_order';
   END IF;
 
@@ -329,11 +294,14 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER) IS
-    'Registers (or re-registers) a lookup table as a dimension: checks the BIGINT key, the boolean active column and the parent FK; installs the delete guard, the parent-cycle guard and a default-fill trigger on every referencing FK column; upserts the registry row (a NULL default keeps the current one). Since v0.86.0, when no sort column is set, a sort_order column orders siblings by convention. Admin JWT or the deployment role; over the API only public tables. Added in v0.85.0.';
+COMMENT ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER, NAME) IS
+    'Registers (or re-registers) a lookup table as a dimension: checks the BIGINT key, the boolean active column and the parent FK; installs the delete guard, the parent-cycle guard and a default-fill trigger on every referencing FK column; upserts the registry row (a NULL default keeps the current one). p_sort_column (v0.86.0) orders siblings; when omitted, a sort_order column is used if the table has one. Admin JWT or the deployment role; over the API only public tables. Added in v0.85.0; p_sort_column in v0.86.0.';
+
+REVOKE EXECUTE ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER, NAME) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.register_dimension(TEXT, TEXT, NAME, NAME, NAME, NAME, NAME, NAME, NAME, BIGINT, BOOLEAN, INTEGER, NAME) TO authenticated;
 
 -- ============================================================================
--- 5. public.compare_interface(): the 'sort' column role
+-- 4. public.compare_interface(): the 'sort' column role
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.compare_interface(p_declared JSONB)

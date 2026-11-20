@@ -327,7 +327,7 @@ DECLARE
   v_before text := (SELECT domain_version FROM metadata.domain_version);
 BEGIN
   PERFORM public.assert_interface($j${"template":"dm_program_install@1.0.0","elements":[
-    {"element":"rpc","name":"public.register_dimension","args":["text","text","name","name","name","name","name","name","name","bigint","boolean","integer"]},
+    {"element":"rpc","name":"public.register_dimension","args":["text","text","name","name","name","name","name","name","name","bigint","boolean","integer","name"]},
     {"element":"rpc","name":"public.bump_domain_version","args":["text","text","integer","text"],"returns":"text"},
     {"element":"rpc","name":"public.register_module","args":["text","text","text"]}]}$j$);
 

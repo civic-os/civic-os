@@ -10,16 +10,13 @@ SELECT sort_column FROM public.schema_dimensions WHERE FALSE;
 SELECT 1 / COUNT(*) FROM pg_class
 WHERE oid = 'public.schema_dimensions'::regclass AND reloptions @> ARRAY['security_invoker=true'];
 
--- the setter is a guarded definer, closed to web_anon
+-- the new signature only, a guarded definer, closed to web_anon
 SELECT 1 / COUNT(*) FROM pg_proc
-WHERE oid = 'public.set_dimension_sort_column(text,name)'::regprocedure AND prosecdef AND prosrc LIKE '%metadata._is_db_admin()%';
-SELECT 1 / (CASE WHEN has_function_privilege('web_anon', 'public.set_dimension_sort_column(text,name)', 'EXECUTE') THEN 0 ELSE 1 END);
-
--- register_dimension keeps its v0.85.0 signature, once
-SELECT 1 / (CASE WHEN COUNT(*) = 1 THEN 1 ELSE 0 END) FROM pg_proc
-WHERE oid = 'public.register_dimension(text,text,name,name,name,name,name,name,name,bigint,boolean,integer)'::regprocedure;
+WHERE oid = 'public.register_dimension(text,text,name,name,name,name,name,name,name,bigint,boolean,integer,name)'::regprocedure
+  AND prosecdef AND prosrc LIKE '%metadata._is_db_admin()%';
 SELECT 1 / (CASE WHEN COUNT(*) = 1 THEN 1 ELSE 0 END) FROM pg_proc
 WHERE proname = 'register_dimension' AND pronamespace = 'public'::regnamespace;
+SELECT 1 / (CASE WHEN has_function_privilege('web_anon', 'public.register_dimension(text,text,name,name,name,name,name,name,name,bigint,boolean,integer,name)', 'EXECUTE') THEN 0 ELSE 1 END);
 
 -- compare_interface accepts the sort role
 SELECT 1 / (CASE WHEN EXISTS (

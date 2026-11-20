@@ -8,9 +8,9 @@
 #     join_column) for an FK to a dimension and for the dimension table's own parent column;
 #   - registering a dimension leaves schema_properties and the contract hash unchanged (no derived column);
 #   - the properties cache version moves when the registry changes;
-#   - the sort column (v0.86.0): a sort_order column by convention at registration, set_dimension_sort_column()
-#     sets, keeps across re-registration, clears and refuses a missing column or dimension; schema_dimensions
-#     returns it; compare_interface() compares it as the 'sort' role; a non-admin JWT is refused;
+#   - the sort column (v0.86.0): register_dimension(p_sort_column) sets it and refuses a missing column; when
+#     omitted, a sort_order column is used by convention, else NULL; it follows the latest registration;
+#     schema_dimensions returns it; compare_interface() compares it as the 'sort' role;
 #   - the tree select strings exist in the six core locales.
 #
 # All fixtures are created inside one transaction that is rolled back.
@@ -116,21 +116,17 @@ BEGIN
   PERFORM public.register_dimension('dk_site', 'Site', 'public', 'dk_sites');
   ASSERT (SELECT sort_column FROM metadata.dimensions WHERE dimension_key = 'dk_site') = 'sort_order',
     'a sort_order column is used by convention';
-  PERFORM public.set_dimension_sort_column('dk_site', 'rank');
+  PERFORM public.register_dimension('dk_site', 'Site', 'public', 'dk_sites', p_sort_column := 'rank');
   ASSERT (SELECT sort_column FROM public.schema_dimensions WHERE dimension_key = 'dk_site') = 'rank',
-    'set_dimension_sort_column() sets it, and schema_dimensions returns it';
-  PERFORM public.register_dimension('dk_site', 'Site', 'public', 'dk_sites');
-  ASSERT (SELECT sort_column FROM metadata.dimensions WHERE dimension_key = 'dk_site') = 'rank',
-    're-registration keeps a sort column already set';
+    'p_sort_column sets it, and schema_dimensions returns it';
   PERFORM public.register_dimension('dk_ward', 'Ward', 'public', 'dk_wards');
   ASSERT (SELECT sort_column FROM metadata.dimensions WHERE dimension_key = 'dk_ward') IS NULL, 'no convention column: NULL';
-  ASSERT pg_temp.expect_sqlstate($q$SELECT public.set_dimension_sort_column('dk_ward', 'nope')$q$, '22023'),
+  ASSERT pg_temp.expect_sqlstate($q$SELECT public.register_dimension('dk_ward', 'Ward', 'public', 'dk_wards', p_sort_column := 'nope')$q$, '22023'),
     'a missing sort column is refused (22023)';
-  ASSERT pg_temp.expect_sqlstate($q$SELECT public.set_dimension_sort_column('dk_none', 'id')$q$, '22023'),
-    'an unknown dimension is refused (22023)';
-  PERFORM public.set_dimension_sort_column('dk_site', NULL);
-  ASSERT (SELECT sort_column FROM metadata.dimensions WHERE dimension_key = 'dk_site') IS NULL, 'NULL clears it';
-  PERFORM public.set_dimension_sort_column('dk_site', 'rank');
+  PERFORM public.register_dimension('dk_site', 'Site', 'public', 'dk_sites');
+  ASSERT (SELECT sort_column FROM metadata.dimensions WHERE dimension_key = 'dk_site') = 'sort_order',
+    'the sort column follows the latest registration (here the convention again)';
+  PERFORM public.register_dimension('dk_site', 'Site', 'public', 'dk_sites', p_sort_column := 'rank');
 
   ASSERT NOT EXISTS (SELECT 1 FROM public.compare_interface('{"elements":[{"element":"dimension","key":"dk_site","columns":{"sort":"rank"}}]}')),
     'the sort role matches';
@@ -138,19 +134,6 @@ BEGIN
     '{"elements":[{"element":"dimension","key":"dk_site","columns":{"sort":"sort_order"}}]}')) = 'dimension_mismatch:sort',
     'a different sort column is a dimension_mismatch on the sort role';
 END $$;
-
--- the setter needs an admin JWT or the deployment role
-SELECT set_config('request.jwt.claims',
-  '{"sub":"00000000-0000-0000-0000-0000000086b1","role":"authenticated","roles":["manager"]}', true);
-SET LOCAL SESSION AUTHORIZATION authenticator;
-SET LOCAL ROLE authenticated;
-DO $$
-BEGIN
-  ASSERT pg_temp.expect_sqlstate($q$SELECT public.set_dimension_sort_column('dk_site', 'id')$q$, '42501'),
-    'a non-admin JWT cannot set the sort column (42501)';
-END $$;
-RESET ROLE;
-RESET SESSION AUTHORIZATION;
 
 -- tree select strings
 DO $$

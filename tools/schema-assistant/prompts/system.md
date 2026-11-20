@@ -181,7 +181,7 @@ SELECT register_dimension('program', 'Program', 'public', 'programs',
   p_default_value_id := (SELECT id FROM public.programs WHERE display_name = 'General'));
 ```
 
-FK columns to a dimension are `BIGINT` (`program_id BIGINT REFERENCES public.programs(id)`), indexed like any FK. Siblings sort by a `sort_order` column when the table has one, else by label; `SELECT set_dimension_sort_column('program', 'rank')` names another column.
+FK columns to a dimension are `BIGINT` (`program_id BIGINT REFERENCES public.programs(id)`), indexed like any FK. Siblings sort by a `sort_order` column when the table has one, else by label; `p_sort_column := 'rank'` on `register_dimension()` names another column.
 
 ## RLS Policy Pattern (4 policies per table)
 

@@ -5446,7 +5446,7 @@ SELECT register_dimension(
   p_default_value_id   := (SELECT id FROM public.programs WHERE display_name = 'General'));
 ```
 
-Other parameters: `p_key_column` (default `id`), `p_label_column` (default `display_name`), `p_active_column` (default `is_active`), `p_hide_when_single` (default `true`: with one active row, clients hide the control and the server fills the value), `p_sort_order`.
+Other parameters: `p_sort_column` (sibling order, see below), `p_key_column` (default `id`), `p_label_column` (default `display_name`), `p_active_column` (default `is_active`), `p_hide_when_single` (default `true`: with one active row, clients hide the control and the server fills the value), `p_sort_order`.
 
 **What registration installs:**
 
@@ -5458,11 +5458,12 @@ Other parameters: `p_key_column` (default `id`), `p_label_column` (default `disp
 
 **Re-register after adding tables.** `register_dimension()` is idempotent and looks for referencing columns each time, so an install script that adds a table with a FK to a dimension calls it again afterwards. A `NULL` `p_default_value_id` on re-registration keeps the current default; the other settings follow the latest call. Over the API, fill triggers go only on referencing tables in `public` (a `NOTICE` names the ones skipped); the deployment role adds the rest.
 
-**Sibling order (v0.86.0):** `set_dimension_sort_column(p_dimension_key, p_sort_column)` names the column that orders a dimension's rows within each parent (admin JWT or the deployment role; the column must exist, `22023` otherwise; `NULL` clears it). Clients request it through PostgREST: `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc`. When no sort column is set, `register_dimension()` uses a `sort_order` column by convention if the table has one, and keeps a sort column already set on re-registration. Without either, rows sort by label. `schema_dimensions.sort_column` returns it, and `compare_interface()` dimension elements may declare it as the `sort` column role. The sort column is a separate setter, not a `register_dimension()` parameter, so install scripts that declare `register_dimension()`'s v0.85.0 signature in `assert_interface()` keep matching.
+**Sibling order (v0.86.0):** `p_sort_column` names the column that orders a dimension's rows within each parent (it must exist, `22023` otherwise). When omitted, a `sort_order` column is used if the table has one; without either, rows sort by label. Like every setting but the default, it follows the latest registration. Clients request it through PostgREST: `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc`. `schema_dimensions.sort_column` returns it, and `compare_interface()` dimension elements may declare it as the `sort` column role.
 
 ```sql
 ALTER TABLE public.programs ADD COLUMN rank INT;
-SELECT set_dimension_sort_column('program', 'rank');
+SELECT register_dimension('program', 'Program', 'public', 'programs',
+  p_parent_column := 'parent_id', p_sort_column := 'rank');
 ```
 
 **Changing the default:** `set_dimension_default(p_dimension_key, p_value_id)` (admin JWT or the deployment role). `NULL` clears it. A missing row is `23503`, a retired row `22023`. A default that is retired later is skipped, not cleared, and returns when the row is reactivated.

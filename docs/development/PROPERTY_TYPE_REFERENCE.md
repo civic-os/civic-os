@@ -32,7 +32,7 @@ Phone number requires custom user attribute and JWT mapper configuration. See `d
 
 **Edit control**: `TreeSelectComponent` (`src/app/components/tree-select/`), an ARIA editable combobox over a listbox, fed by `DimensionService` (registry row from `schema_dimensions`, rows from the dimension table with columns aliased to `id`, `label`, `parent_id`, `active`, ordered by label). Tree logic is core's `buildTree` / `flattenTree` (`packages/core/src/tree/`).
 
-- Siblings come in the registry's order: `DimensionService` requests `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc` (the sort column set with `set_dimension_sort_column()`, or a `sort_order` column by convention) and `buildTree()` keeps input order within siblings.
+- Siblings come in the registry's order: `DimensionService` requests `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc` (the sort column from `register_dimension(p_sort_column)`, or a `sort_order` column by convention) and `buildTree()` keeps input order within siblings.
 - Options are indented by level and named by their full path ("General › Youth › Teens"); listbox options carry no level, so the path is the accessible name.
 - Typing filters by label; ancestors of matches stay visible as context.
 - Retired rows (active column false) are hidden from new choices; the current value stays visible, marked "Inactive". A retired ancestor of an active row shows as disabled context.
