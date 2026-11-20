@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "column_name": null,
+    "constraint_name": "dimension_row_delete",
+    "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+    "table_name": "*"
+  },
+  {
+    "column_name": null,
+    "constraint_name": "tree_parent_cycle",
+    "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+    "table_name": "*"
+  }
+]

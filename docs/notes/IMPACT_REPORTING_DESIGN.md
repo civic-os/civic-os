@@ -1,6 +1,6 @@
 # Impact Reporting Design
 
-**Status**: Directional design. The dimensions and module registries and the `Dimension` property type are scheduled in issue #135 (v0.85.0, v0.86.0); the rest is not scheduled. No code yet.
+**Status**: Directional design. The dimensions and module registries are built (v0.85.0) and the `Dimension` property type is scheduled (v0.86.0), both in issue #135; the rest is not scheduled.
 **Date**: 2026-11-02
 **Audience**: Civic OS contributors building the Woven module line; integrators who will install report packs.
 
@@ -137,6 +137,7 @@ Like the delete guard, this protects row data, not schema. It never refuses a ch
 - **An active column is required.** Since no row can be deleted, `register_dimension()` refuses a table without `active_column`.
 - **API scope until accounting exists.** Over the API, `register_dimension()` accepts only base tables in `public` that `schema_entities` lists, and installs the fill trigger only on referencing tables that `schema_entities` lists; referencing tables in other schemas get it only when the deployment role registers. Framework schemas (`accounting`) join the allowed list when they exist.
 - **Contract hash.** `schema_properties` exposes `dimension_key`, and `metadata.schema_contract_hash()` includes it on every property, as it does `status_entity_type`. This changes every instance's hash once, at that release; typed clients under the `block` policy must be regenerated, and the release notes say so.
+- **Errors users can read.** *Built in v0.85.0.* The delete guard and the parent-cycle guard raise SQLSTATE `23514` with a message in PostgreSQL's check-violation form, naming `dimension_row_delete` and `tree_parent_cycle`, because the frontend finds a constraint name only in that text (PostgREST does not pass `CONSTRAINT` through). Both names have `metadata.constraint_messages` rows (`table_name = '*'`), and the `constraint_messages` view now translates every message through `metadata.t()` (source type `constraint_message`), so these two ship in the six core locales.
 - **Type precedence and one-row dimensions.** A column configured as Status or Category stays that type even when it references a registered table. `hide_when_single` hides the control on Create and Edit when the dimension has exactly one active row (the server fills it); Detail and List still show the value.
 
 The dimensions this design expects Woven to register:

@@ -39,7 +39,7 @@ import { ContrastTextDirective } from '../../directives/contrast-text.directive'
 const SOURCE_TYPES = [
   'ui', 'entity', 'property', 'status', 'category',
   'action', 'action_param', 'guided_form_step', 'static_text',
-  'dashboard', 'menu_node', 'instance_config'
+  'dashboard', 'menu_node', 'instance_config', 'constraint_message'
 ];
 
 /** Every stored source type the page labels, each with an `admin_translations.source_type.<type>` key. */

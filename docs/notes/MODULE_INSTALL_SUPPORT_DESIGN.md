@@ -1,6 +1,6 @@
 # Module Install Support Design
 
-**Status**: Scheduled in issue #135: steps 1 and 2 in v0.84.0, step 3 in v0.85.0 (see Phasing).
+**Status**: Built (issue #135): steps 1 and 2 in v0.84.0, step 3 in v0.85.0 (see Phasing).
 **Date**: 2026-11-05
 **Audience**: Civic OS contributors building the module registry and the Woven module line; integrators who script changes to an instance.
 

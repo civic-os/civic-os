@@ -24,6 +24,12 @@
     "table_name": "Issue"
   },
   {
+    "column_name": null,
+    "constraint_name": "dimension_row_delete",
+    "error_message": "Este registro se usa en los informes y no se puede eliminar. Márquelo como inactivo.",
+    "table_name": "*"
+  },
+  {
     "column_name": "severity_level",
     "constraint_name": "severity_valid_range",
     "error_message": "Severity must be between 1 (low) and 5 (critical)",
@@ -34,5 +40,11 @@
     "constraint_name": "tag_name_max_length",
     "error_message": "Tag name cannot exceed 50 characters",
     "table_name": "Tag"
+  },
+  {
+    "column_name": null,
+    "constraint_name": "tree_parent_cycle",
+    "error_message": "Un registro no puede colocarse debajo de sí mismo ni de uno de sus propios descendientes. Elija otro elemento superior.",
+    "table_name": "*"
   }
 ]

@@ -271,6 +271,9 @@ When database constraints are violated (CHECK, UNIQUE, FOREIGN KEY, EXCLUSION), 
 3. When a constraint error occurs, `ErrorService` extracts the constraint name from the PostgreSQL error
 4. The cached message is looked up and displayed to the user
 5. Cache is refreshed on navigation when `schema_cache_versions` detects changes
+6. Since v0.85.0 the view translates `error_message` through `metadata.t()` (source type `constraint_message`, key = the constraint name), so a message can be translated at `/admin/translations` under **Error messages**. Rows without a translation show the stored English text.
+
+A trigger can raise a friendly error the same way a CHECK constraint does: raise SQLSTATE `23514` with a message in PostgreSQL's own form, `... violates check constraint "<name>"`, and add a `constraint_messages` row for `<name>`. The frontend finds the name in that text. The framework guards `tree_parent_cycle` and `dimension_row_delete` (v0.85.0) work this way, with `table_name = '*'` because they apply to any table.
 
 **Supported Error Codes**:
 - `23514` - CHECK constraint violations
@@ -5364,8 +5367,8 @@ DETAIL: public.programs.parent_id: type integer, required bigint (required by sh
 |---|---|---|
 | `table` | **`name`** (`schema.table`), `columns`, `writes`, `source` | The relation exists and is a table, not a view. Per column (**`name`**, `type`, `nullable`, `references` as `schema.table.column`): it exists, its type is compatible, its nullability is compatible, a single-column FK points at the given column |
 | `rpc` | **`name`** (`schema.function`), **`args`** (types in order, possibly `[]`), `returns`, `source` | The exact signature resolves; `returns` (`bigint`, `setof bigint`, `TABLE(a integer, b text)`) matches after normalizing type names |
-| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`), `source` | Reported as `missing_core_feature` until the dimensions registry ships (v0.85.0) |
-| `module` | **`key`**, `version` (`MAJOR.MINOR`), `source` | Reported as `missing_core_feature` until the module registry ships (v0.85.0) |
+| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`), `source` | The key is registered (`missing_dimension`); when given, the registry names the same table and, per declared role, the same column, and that column still exists (`dimension_mismatch`, which is how a registry row left stale by a column rename comes to light). Undeclared roles are not compared. Before v0.85.0: `missing_core_feature` |
+| `module` | **`key`**, `version` (`MAJOR.MINOR`), `source` | The key is registered (`missing_module`); with `version: "1.2"`, the installed version has major 1 and minor 2 or higher (`module_version_mismatch`). Before v0.85.0: `missing_core_feature` |
 
 `template` and `source` are free labels used only in messages. Types are written in SQL spelling and normalized, so `int8`, `bigint` and `BIGINT` are the same and `varchar(50)` carries its length. A malformed declaration (an unknown element kind or key, a missing name, an unqualified name, a type that does not resolve) is a bug in the script, and both functions raise `22023` at once.
 
@@ -5399,7 +5402,86 @@ RETURNS TEXT                              -- the new domain version
 
 It drops pre-release and build metadata, raises the requested part and resets the lower ones (`1.3.0` + minor = `1.4.0`; `0.0.0` + minor = `0.1.0`; `1.4.0-rc.1` + minor = `1.5.0`), and sets the version through the same checks as `set_domain_version()`, with the same errors plus `22023` for an unknown part. It locks the version row, so two scripts running at once get consecutive versions instead of both writing the same one. A major bump that breaks clients generated for the previous version should pass the new version as the floor.
 
-Design: `docs/notes/MODULE_INSTALL_SUPPORT_DESIGN.md`.
+#### Module registry (v0.85.0+)
+
+`metadata.modules` records what is installed: modules (`people_served`), report packs (`pack:<key>`) and bridges (`bridge:<key>`), each with its own semver, distinct from the domain version.
+
+| Function | Who | What |
+|---|---|---|
+| `register_module(p_module_key, p_display_name, p_version)` | Admin JWT or the deployment role | Registers or re-registers (upgrade, re-run): replaces the name and version, keeps `installed_at`. `22023` for a malformed key (lowercase, digits, underscores, optional `pack:` or `bridge:` prefix), a blank name or a non-semver version |
+| `module_installed(p_module_key)` | Any role, anonymous included | `true` when the key is registered |
+
+An install script registers its module last, after the schema decision and the domain version bump. A report pack starts with `module_installed()` for each module it needs and exits quietly when one is absent, then declares the modules it needs as `module` elements in `assert_interface()`. A script that may run again checks `metadata.modules.version` to skip the decision and the bump when it is already installed at that version.
+
+#### Dimensions (v0.85.0+)
+
+A **dimension** is a lookup table that reports are cut by: program, site, department, ward. You create the table wherever you like, then register it; every foreign key from an entity to a registered table is a reporting axis.
+
+**Table requirements**, checked by `register_dimension()` (`22023` otherwise):
+
+- a `BIGINT` key column that is the primary key or unique on its own (`id BIGSERIAL PRIMARY KEY`);
+- a label column (default `display_name`);
+- a `BOOLEAN` active column (default `is_active`): rows are **retired, never deleted**;
+- for a hierarchy, a parent column with a foreign key from the table to its own key, indexed;
+- a base table (not a view). Over the API, with an admin JWT, only tables in `public`; the deployment role can register any schema.
+
+```sql
+CREATE TABLE public.programs (
+  id BIGSERIAL PRIMARY KEY,
+  parent_id BIGINT REFERENCES public.programs(id),
+  display_name VARCHAR(100) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  qb_class TEXT
+);
+CREATE INDEX ON public.programs(parent_id);
+INSERT INTO public.programs (display_name) VALUES ('General');
+
+SELECT register_dimension(
+  p_dimension_key      := 'program',
+  p_display_name       := 'Program',
+  p_table_schema       := 'public',
+  p_table_name         := 'programs',
+  p_parent_column      := 'parent_id',        -- NULL (default) for a flat dimension
+  p_external_id_column := 'qb_class',         -- optional: an id in an external system
+  p_default_value_id   := (SELECT id FROM public.programs WHERE display_name = 'General'));
+```
+
+Other parameters: `p_key_column` (default `id`), `p_label_column` (default `display_name`), `p_active_column` (default `is_active`), `p_hide_when_single` (default `true`: with one active row, clients hide the control and the server fills the value), `p_sort_order`.
+
+**What registration installs:**
+
+| Trigger | On | Effect |
+|---|---|---|
+| `dimension_delete_guard`, `dimension_truncate_guard` | The dimension table | Refuses every `DELETE` and `TRUNCATE` (`23514`, constraint `dimension_row_delete`, with a friendly message). Set the active column to false instead |
+| `tree_parent_guard` | The dimension table, when it has a parent column | Refuses a parent change that would create a cycle (see below). Registration refuses a table that already holds a cycle and names the rows |
+| `dimension_default_<column>` | Every table with a single-column FK to the dimension, except the table's own parent column | On `INSERT`, fills a `NULL` value with the default, unless the default row is retired. Never on `UPDATE`; an explicit value (or a column `DEFAULT`) is kept. Runs before `NOT NULL` checks, so a required column can be left out |
+
+**Re-register after adding tables.** `register_dimension()` is idempotent and looks for referencing columns each time, so an install script that adds a table with a FK to a dimension calls it again afterwards. A `NULL` `p_default_value_id` on re-registration keeps the current default; the other settings follow the latest call. Over the API, fill triggers go only on referencing tables in `public` (a `NOTICE` names the ones skipped); the deployment role adds the rest.
+
+**Changing the default:** `set_dimension_default(p_dimension_key, p_value_id)` (admin JWT or the deployment role). `NULL` clears it. A missing row is `23503`, a retired row `22023`. A default that is retired later is skipped, not cleared, and returns when the row is reactivated.
+
+**Reading:** `public.schema_dimensions` lists the registry (any role). `dimension_subtree(p_dimension_key, p_value_id)` returns the value and all its descendants that the caller can read (RLS applies), bounded even if a cycle exists.
+
+Errors from `register_dimension()`: `42501` neither an admin JWT nor the deployment role, or a table outside `public` over the API; `22023` a table or column that does not qualify, or a retired default; `23505` the key is registered for another table, or the table under another key; `23503` the default row does not exist; `23514` an existing parent cycle.
+
+Design: `docs/notes/MODULE_INSTALL_SUPPORT_DESIGN.md` and `docs/notes/IMPACT_REPORTING_DESIGN.md` (Dimensions, Build amendments).
+
+### Parent-Cycle Guard (v0.85.0+)
+
+Nothing in a self-referencing foreign key stops row A from being B's parent while B is A's. The `tree_parent_guard` trigger refuses any insert or update that would place a row under itself or one of its own descendants, with SQLSTATE `23514` and constraint name `tree_parent_cycle`. Users see the translated message "A record cannot be placed under itself or one of its own descendants. Choose a different parent."
+
+```sql
+SELECT enable_tree_parent_guard('categories', 'parent_id');          -- key column defaults to 'id'
+SELECT enable_tree_parent_guard('org_units', 'parent_unit_id', 'unit_id');
+```
+
+- Accepts a base table in `public` whose parent column has a single-column foreign key to the table's own key column (`22023` otherwise). Admin JWT or the deployment role.
+- Refuses (`23514`) a table that already contains a cycle, and names up to 20 rows in cycles. Fix them, then enable again.
+- The walk ignores RLS, so a row hidden from the writer still counts. Parent changes in one table are serialized by an advisory lock, so two concurrent edits cannot form a cycle between them (at `READ COMMITTED`, the API's isolation level).
+- The trigger has no column list, so the parent column can still be dropped or renamed. After a rename the guard is off until you enable it again with the new name, which refreshes the trigger. To remove the guard, `DROP TRIGGER tree_parent_guard ON <table>`.
+- Registered hierarchical dimensions get the guard from `register_dimension()`.
+
+Design: `docs/notes/TREE_LIST_VIEW_DESIGN.md` (Editing and cycle protection).
 
 ### Instance Configuration (v0.79.0+)
 

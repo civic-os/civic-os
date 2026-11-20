@@ -3,6 +3,7 @@
     {"column_name": "attendee_count", "constraint_name": "attendee_count_positive", "error_message": "Number of attendees must be between 1 and 75 (maximum capacity).", "table_name": "reservation_requests"},
     {"column_name": "cancellation_reason", "constraint_name": "cancellation_reason_required", "error_message": "A cancellation reason is required when cancelling a reservation.", "table_name": "reservation_requests"},
     {"column_name": "denial_reason", "constraint_name": "denial_reason_required", "error_message": "A denial reason is required when denying a reservation.", "table_name": "reservation_requests"},
+    {"column_name": null, "constraint_name": "dimension_row_delete", "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.", "table_name": "*"},
     {"column_name": "time_slot", "constraint_name": "max_advance_booking", "error_message": "Reservations cannot be made more than 1 year in advance.", "table_name": "reservation_requests"},
     {"column_name": "time_slot", "constraint_name": "min_advance_booking", "error_message": "Reservations must be made at least 24 hours in advance.", "table_name": "reservation_requests"},
     {
@@ -12,6 +13,7 @@
       "table_name": "public_calendar_events"
     },
     {"column_name": "policy_agreed", "constraint_name": "policy_must_be_agreed", "error_message": "You must agree to the Facility and Parkland Use Policy to submit a reservation request.", "table_name": "reservation_requests"},
+    {"column_name": null, "constraint_name": "tree_parent_cycle", "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.", "table_name": "*"},
     {"column_name": "time_slot", "constraint_name": "valid_time_slot_bounds", "error_message": "Invalid time slot: end time must be after start time.", "table_name": "reservation_requests"}
   ],
   "results": [
@@ -181,6 +183,16 @@
       "payload": {"code": "23514", "details": "Failing row violates constraint \"denial_reason_required\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid max advance booking. Check the value and try again. (max_advance_booking)",
       "parseToHumanWithLookup": "Reservations cannot be made more than 1 year in advance.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"max_advance_booking\""}
@@ -219,6 +231,16 @@
       "parseToHuman": "Invalid policy must be agreed. Check the value and try again. (policy_must_be_agreed)",
       "parseToHumanWithLookup": "You must agree to the Facility and Parkland Use Policy to submit a reservation request.",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"policy_must_be_agreed\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "Invalid valid time slot bounds. Check the value and try again. (valid_time_slot_bounds)",
@@ -286,6 +308,16 @@
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"denial_reason_required\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (max_advance_booking)",
       "parseToHumanWithLookup": "Reservations cannot be made more than 1 year in advance.",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"max_advance_booking\""}
@@ -324,6 +356,16 @@
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (policy_must_be_agreed)",
       "parseToHumanWithLookup": "You must agree to the Facility and Parkland Use Policy to submit a reservation request.",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"policy_must_be_agreed\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (valid_time_slot_bounds)",
