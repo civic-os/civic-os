@@ -32,6 +32,7 @@ export const BASE = 'http://pgrst.golden';
 /** Headers PostgRESTClient sets on every request (recorded once, not per request). */
 export const TRANSPORT_DEFAULTS: Record<string, string> = {
   Accept: 'application/json',
+  'Accept-Language': 'en',
   'Content-Type': 'application/json',
 };
 

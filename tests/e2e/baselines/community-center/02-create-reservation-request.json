@@ -11,7 +11,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -33,7 +33,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -55,7 +55,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -74,7 +74,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -93,7 +93,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -112,7 +112,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -131,7 +131,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -150,7 +150,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -169,7 +169,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -191,7 +191,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US"
+            "accept-language": "en"
           },
           "body": null,
           "status": "2xx|cancelled",
@@ -209,7 +209,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "content-type": "application/json",
             "authorization": "Bearer <present>"
           },
@@ -229,7 +229,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "content-type": "application/json",
             "authorization": "Bearer <present>"
           },
@@ -249,7 +249,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "content-type": "application/json",
             "authorization": "Bearer <present>"
           },
@@ -281,7 +281,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "content-type": "application/json",
             "prefer": "return=representation",
             "authorization": "Bearer <present>"
@@ -320,7 +320,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -343,7 +343,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -362,7 +362,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -384,7 +384,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -405,7 +405,7 @@
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "authorization": "Bearer <present>"
           },
           "body": null,
@@ -424,7 +424,7 @@
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US",
+            "accept-language": "en",
             "content-type": "application/json",
             "authorization": "Bearer <present>"
           },

@@ -106,6 +106,8 @@ The `en.translations.ts` file is the single source of truth. It's ~10KB, well wi
 
 **Rationale**: This reuses PostgREST's existing GUC variable mechanism (same pattern as JWT claims). No schema changes, no session state — the locale travels with each request. The interceptor follows the exact same pattern as `impersonation.interceptor.ts`.
 
+**Amendment (v0.82.2)**: The header is sent for every locale, `en` included. Until v0.82.2 the interceptor, and core's `SchemaClient` after it, skipped it for English to save request overhead, so the browser's own header reached PostgREST. A user whose browser preferred a language the instance does not offer (say `fr-FR,fr;q=0.9`, with `fr` not in `supportedLocales`) saw an English UI with any French metadata translations, and paid a translations lookup per string. A regional-English browser (`en-US,en;q=0.9`) missed `t()`'s English short-circuit the same way; [Locale Normalization (v0.82.2)](#locale-normalization-v0822) fixes that in the database for every client, and the explicit header fixes it for the app and the SDK on any core version. The MCP server sends `Accept-Language: en` as a transport default: Node's `fetch` otherwise sends `*`.
+
 ### Conditional Language Tab
 
 **Decision**: The Language tab in Settings only appears when `supportedLocales.length > 1`.
@@ -175,8 +177,9 @@ Signal-based service following the `ThemeService` pattern:
 
 ### Locale Interceptor (`src/app/interceptors/locale.interceptor.ts`)
 
-- Adds `Accept-Language` header to all PostgREST requests
+- Adds `Accept-Language: {locale}` to all PostgREST requests, `en` included (since v0.82.2), so the browser's own header never reaches `metadata.t()`
 - Skips non-PostgREST URLs
+- Core's `SchemaClient` sends the same header from its `locale` option (default `en`), and the MCP server sends `en`
 - Follows `impersonation.interceptor.ts` pattern exactly
 
 ## Testing
