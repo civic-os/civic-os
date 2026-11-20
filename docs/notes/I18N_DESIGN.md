@@ -272,9 +272,19 @@ Only the first language range counts (browsers list ranges in preference order),
 
 **Clients**: Normalization covers every client, but it cannot tell a browser's own header from a chosen locale. The same release has the app, core's `SchemaClient` and the MCP server always send their locale, `en` included (see the [header transport amendment](#accept-language-header-for-locale-transport)), so a browser preferring a language the instance does not offer no longer gets that language's metadata under an English UI.
 
-**Not addressed here**: A real non-English request (`es`) still takes about 3 s on that `schema_properties` load, which is the cost of `t()` lookups themselves.
+**Real non-English requests**: Normalization does not speed up a request that needs translations (`es` stayed at about 3 s on that load). The cause was the lookup's collation, fixed in the same release; see [Lookup Collation](#lookup-collation-v0822).
 
 **Tests**: `tests/functional/v0-82-2-current-locale-test.sh` covers the header table above, the `''` GUC case, translations resolving through `t()` and `schema_properties` (`es`, `es-MX`, lowercase `es-mx`, `es-AR` falling back to `es`, `ar`), the English default with an `en` row present, `get_translation_defaults()`, `STABLE` and the API role grants.
+
+### Lookup Collation (v0.82.2)
+
+**Problem**: A PL/pgSQL function's parameters and local variables take the collation of the arguments it is called with. `schema_properties` passes `information_schema` names (type `sql_identifier`, collation `"C"`) to `t()`, so `t()` compared `source_type`, `source_key` and `locale` under `"C"`. The `(source_type, source_key, locale)` btree index on `metadata.translations` is built under the database default collation, and an index only serves comparisons under its own collation, so every `t()` call scanned the whole table sequentially. On mottpark (about 4,000 translation rows) each call cost about 2 ms, and `SELECT * FROM schema_properties` under `es` took about 2.1 s against about 0.8 s under `en`.
+
+**Decision**: Migration `v0-82-2-translation-lookup-collation` adds `COLLATE "default"` to the parameter and variable side of both lookups. Equality under `"C"` and under the default (deterministic) collation agree, so results do not change; only the plan does. The same `es` query now takes about 0.5 to 0.8 s, on par with English.
+
+**Rule for new lookup functions**: A PL/pgSQL or SQL function that looks rows up by text arguments, and can be called with `information_schema` names or other `"C"`-collated values, should compare under `COLLATE "default"` (or the index's collation) so its index stays usable. `EXPLAIN` of the view does not show the problem, because the scan happens inside the function; `pg_stat_xact_user_tables.seq_scan`, or `auto_explain` with `log_nested_statements`, does.
+
+**Tests**: The same functional test disables sequential scans, calls `t()` with `"C"`-collated keys and asserts that `metadata.translations` was not scanned sequentially in the transaction. It fails against the v0.57.0 body.
 
 ### VIEW Recreation (Collation)
 

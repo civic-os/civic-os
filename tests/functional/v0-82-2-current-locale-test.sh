@@ -8,6 +8,8 @@
 #   - anything that is not a language tag (`*`, empty, junk) is `en`;
 #   - other tags keep their subtags with conventional casing (`es-mx` -> `es-MX`), and t() still
 #     resolves them: exact locale, then base language.
+# metadata.t() uses the translations index even when called with "C"-collated arguments, as
+# schema_properties does (v0-82-2-translation-lookup-collation).
 #
 # All fixtures live inside one transaction that is rolled back. Headers are set the way PostgREST 13+
 # sets them: a transaction-local `request.headers` JSON blob.
@@ -100,6 +102,31 @@ BEGIN
   ASSERT pg_temp.t_for('en-US,en;q=0.9', k, 'Probe') = 'Probe',
     'en-US takes the English short-circuit (default text, even with an en row)';
   ASSERT pg_temp.t_for(NULL, k, 'Probe') = 'Probe', 'no header gives the default text';
+END $$;
+
+-- t() uses the translations index even when its arguments carry collation "C", as schema_properties'
+-- information_schema names do (v0-82-2-translation-lookup-collation). With seq scans disabled the planner
+-- only scans the table when no index matches the comparison's collation, so any seq scan counted in this
+-- transaction means the lookup lost the index.
+DO $$
+DECLARE
+  v_before bigint;
+  v_after bigint;
+  v_name text;
+BEGIN
+  SET LOCAL enable_seqscan = off;
+  PERFORM pg_temp.locale_for('es-MX');
+  SELECT coalesce(seq_scan, 0) INTO v_before FROM pg_stat_xact_user_tables
+    WHERE relid = 'metadata.translations'::regclass;
+  v_name := metadata.t('property'::text COLLATE "C", 'v0_82_2_probe.col.display_name' COLLATE "C", 'Probe');
+  ASSERT v_name = 'Sonda MX', 'a "C"-collated key resolves its translation';
+  v_name := metadata.t('property'::text COLLATE "C", 'v0_82_2_probe.col.missing' COLLATE "C", 'Probe');
+  ASSERT v_name = 'Probe', 'a "C"-collated key with no row gives the default text';
+  SELECT coalesce(seq_scan, 0) INTO v_after FROM pg_stat_xact_user_tables
+    WHERE relid = 'metadata.translations'::regclass;
+  ASSERT v_after = v_before,
+    format('t() scanned metadata.translations sequentially %s times for "C"-collated keys', v_after - v_before);
+  RESET enable_seqscan;
 END $$;
 
 -- The same through schema_properties, when the database has an entity property to probe (an example
