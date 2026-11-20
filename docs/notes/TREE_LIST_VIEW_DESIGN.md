@@ -40,9 +40,9 @@ Calendar and map views solved the same kind of problem for time and place: the e
 | Map on the List page | Built. `show_map`, `map_property_name`, `map_color_property`. Renders beside the table; row hover highlights the marker. | Shows a view can coexist with the table; tree plus map is allowed (regions and sites). |
 | `recordList` facade (v0.78.0) | Built, `packages/core/src/facades/record-list.ts`. Snapshot store plus commands; `views` says which presentations apply; markers, polygons and events are derived in the snapshot. | The tree view is a fourth entry in `views` and a derived `tree` section in the snapshot. |
 | `options_source_rpc` (v0.44.0) | Built. Filters a FK dropdown's options through an RPC that receives the record's own id (`p_id`) on the Edit page. | Lets an instance remove the record and its descendants from the parent dropdown without new framework code. |
-| `metadata.dimensions` registry | Designed in `docs/notes/IMPACT_REPORTING_DESIGN.md`, not built. | No longer supplies tree defaults (see Enablement). `register_dimension()` installs the generalized guard. |
+| `metadata.dimensions` registry | Designed in `docs/notes/IMPACT_REPORTING_DESIGN.md`, not built. *Built in v0.85.0 (see the scheduling note under Phasing).* | No longer supplies tree defaults (see Enablement). `register_dimension()` installs the generalized guard. |
 | Parent-cycle guard | Designed in the same note, installed by `register_dimension()`. | Server-side cycle protection. Generalized here (see Editing and cycle protection). |
-| `Dimension` property type | Designed in the same note: a FK to a registered dimension renders as a hierarchical dropdown. Not built. | Shares the tree-building code. |
+| `Dimension` property type | Designed in the same note: a FK to a registered dimension renders as a hierarchical dropdown. Not built. *Built in v0.86.0 as a tree select.* | Shares the tree-building code. |
 
 The calendar design document (`docs/development/CALENDAR_INTEGRATION.md`, Phase 3) planned a List / Calendar tab toggle. The built page instead shows the calendar above the table and the map beside it, with no toggle. A tree cannot sit beside the table: it is the table, rearranged. So the tree view brings the toggle back, for tree entities only.
 
@@ -109,6 +109,8 @@ Rows are ordered within their siblings, never across levels. The order, first ma
 2. `tree_sort_property_name`, when set.
 3. A column named `sort_order` of an integer type, when present. The name is the one Category and the registry tables already use for ordering, and it is what most hand-built tree tables already have. [3/5; the alternative is no convention, so an integrator must always name the column. The convention costs nothing when absent and is overridden by setting the property.]
 4. `display_name`, then `id` (the query compiler's default order).
+
+*Note (2026-11-20, v0.86.0).* A registered dimension carries the same rule in the registry: `metadata.dimensions.sort_column` (`register_dimension(p_sort_column)`, or `sort_order` by convention) orders the `Dimension` tree select's siblings. When the tree list ships for a registered dimension table and `tree_sort_property_name` is unset, it should default to the registry's `sort_column`, so both views of one hierarchy agree.
 
 The server does the ordering: the skeleton request sends the same `order` the flat list would (through `buildOrderField`, which already orders FK columns by their embedded display name; the skeleton's select carries whatever columns or embeds that order needs), and the tree builder keeps the server's order within each sibling group (a stable grouping). No type-aware comparator is reimplemented in the client. Because the skeleton is ordered, the sibling limit's "first 4" are chosen by the server's sort. A sort change reloads the skeleton (one small request); display rows already loaded are reused.
 
@@ -213,7 +215,7 @@ The `Dimension` property type and the tree view need the same operations over th
 |---|---|---|
 | Build the tree, keeping server order within siblings | yes | yes |
 | Detect orphans and cycles without looping | yes | yes |
-| Depth and ancestor path per row | indentation, `aria-level` | indented options, "Parent › Child" label for the selected value |
+| Depth and ancestor path per row | indentation, `aria-level` | indented options; each option, the selected value and the Detail value named "Child (Root › Parent)" |
 | Descendants of a row | child counts | disabled options (a record cannot be its own ancestor) |
 | Flatten to visible rows given an expanded set and a match set | yes | type-ahead filtering keeps ancestors of matching options |
 | Inactive rows | dimmed | hidden from new choices, still shown when already selected |
@@ -221,7 +223,7 @@ The `Dimension` property type and the tree view need the same operations over th
 So the tree code lives once, in core: [5/5 that it must be shared; 4/5 on the shape]
 
 - `packages/core/src/tree/` (new module, Apache-2.0 header, no framework): `buildTree(skeletonRows, { key, parent })` returns an immutable index (roots, children by id, depth, ancestors, descendant counts, orphans, cycle members); `flattenTree(tree, { expanded, initialDepth, siblingLimit, matches?, focus?, revealed? })` returns the visible ids in order (the input to the display request) with level, set size, position and match or context marks, plus a "more" entry (parent id, hidden count) after each shortened group; `isInSubtree(tree, ancestorId, id)` ships with its first consumer (the `Dimension` dropdown or the deferred editor), not before, since every core export needs a verified consumer.
-- Angular: a `TreeSelectComponent` (hierarchical listbox or combobox) arrives with the `Dimension` edit control and is reused by the deferred Move dialog. A tree entity's parent field keeps the ordinary FK control until then.
+- Angular: a `TreeSelectComponent` (hierarchical listbox or combobox) arrives with the `Dimension` edit control and is reused by the deferred Move dialog. A tree entity's parent field keeps the ordinary FK control until then. *Note (2026-11-20, v0.86.0): a registered dimension's own parent column is a `Dimension` column, so it already uses the tree select, with the record and its descendants disabled.*
 
 ### SDK fit
 
@@ -282,7 +284,7 @@ New strings under the existing prefixes: the Table and Tree toggle labels, Expan
 | 1 | Metadata columns and `schema_entities` exposure; `upsert_entity_metadata()` parameters; core `tree` module (`buildTree`, `flattenTree`); `recordList` tree view with skeleton, match and chunked display requests, row cache and commands; List page tree grid with toggle, expand and collapse, counts, inactive and orphan marks, sibling limit and focus; generalized guard, `enable_tree_parent_guard()` and the `tree_parent_cycle` constraint message; Entities admin settings, row-count hint and missing-guard warning; Integrator Guide section (sizing, parent index, `options_source_rpc` recipe); translations | Nothing new |
 | 1b | `register_dimension()` installs the generalized guard; the `Dimension` property type and `TreeSelectComponent` on the shared module | `metadata.dimensions` (Impact Reporting Phase 1) |
 
-*Scheduling note (2026-11-19, issue #135).* The generalized guard, `enable_tree_parent_guard()` and the `tree_parent_cycle` constraint message ship ahead of the rest of Phase 1, in v0.85.0 with the dimensions registry, which installs the guard. Phase 1b's `Dimension` property type and `TreeSelectComponent` follow in v0.86.0 with `buildTree` and `flattenTree` from the core `tree` module, so the module's first consumer is the `Dimension` control rather than the List page. The rest of Phase 1 (the List page tree grid) is not scheduled.
+*Scheduling note (2026-11-19, issue #135).* The generalized guard, `enable_tree_parent_guard()` and the `tree_parent_cycle` constraint message ship ahead of the rest of Phase 1, in v0.85.0 with the dimensions registry, which installs the guard. Phase 1b's `Dimension` property type and `TreeSelectComponent` are built in v0.86.0 with `buildTree` and `flattenTree` from the core `tree` module, so the module's first consumer is the `Dimension` control rather than the List page. `flattenTree` covers what the control needs (an expanded set or `'all'`, and matches with their ancestors as context); the sibling limit, focus and "more" entries arrive with the tree grid. `isInSubtree` became `TreeIndex.descendants()`. The rest of Phase 1 (the List page tree grid) is not scheduled.
 | 2 | Tree editor (drag and Move dialog); skeleton paging for trees above 1,000 rows, moving the fallback to a higher cap; sibling reorder by drag; optional path column in Excel export | Demand after Phase 1; an instance with a tree above 1,000 rows |
 
 ## Non-goals

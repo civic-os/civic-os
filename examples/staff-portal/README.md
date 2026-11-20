@@ -39,6 +39,7 @@ Then open your browser to `http://localhost:4200`.
 - **Status Type System**: Centralized statuses for onboarding, documents, time-off, and reimbursements
 - **Full-Text Search**: Search staff members and incident reports
 - **Custom Dashboards**: Staff Portal (personal view) and Admin Overview (management view)
+- **Dimensions**: Sites are the registered `site` dimension (v0.86.0). Every `site_id` (staff members, incident reports, staff tasks) is a searchable tree select ordered by `sort_order`; a record created without a site gets Freedom School Site A; a site is retired by clearing **Active**, since deleting one is refused
 
 ## Test Users
 
@@ -62,6 +63,7 @@ Then open your browser to `http://localhost:4200`.
 - **`06_staff_portal_seed_data.sql`** - Reference data (staff roles, document requirements, sites)
 - **`07_staff_portal_dashboards.sql`** - Custom dashboards (Staff Portal, Admin Overview)
 - **`08_staff_portal_schema_decisions.sql`** - Architectural Decision Records (ADRs)
+- **`21_sites_dimension.sql`** - Registers `sites` as the `site` dimension (adds `is_active` and `sort_order`, default site, schema decision)
 
 ### Helper Files
 
@@ -74,7 +76,7 @@ Then open your browser to `http://localhost:4200`.
 ### Reference Tables
 
 - **Staff Roles** - Position categories (Lead Teacher, Assistant Teacher, Site Coordinator, Administrative Support) via Category system (`metadata.categories` with `entity_type='staff_role'`)
-- **`sites`** - Program locations with site lead assignment
+- **`sites`** - Program locations with site lead assignment; the registered `site` dimension (`is_active`, `sort_order`)
 - **`document_requirements`** - Templates for required onboarding documents (I-9, W-4, Background Check, etc.)
 
 ### Core Tables

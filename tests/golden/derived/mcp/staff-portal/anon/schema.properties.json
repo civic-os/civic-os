@@ -19,6 +19,8 @@
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "lead_id", "select": "lead_id:staff_members!lead_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "address", "select": "address", "type": "TextLong", "typeId": 2},
+      {"column": "is_active", "select": "is_active", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
     ],

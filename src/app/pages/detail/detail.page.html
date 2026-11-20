@@ -153,7 +153,7 @@
               } @else if (isProperty(item) && item.type !== 17) {
                 <!-- Render properties (excluding ManyToMany type=17, unless inline) -->
                 <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
-                  <app-display-property [datum]="data[item.column_name]" [property]="item"></app-display-property>
+                  <app-display-property [datum]="data[item.column_name]" [property]="item" [showPath]="true"></app-display-property>
                 </div>
               }
             }

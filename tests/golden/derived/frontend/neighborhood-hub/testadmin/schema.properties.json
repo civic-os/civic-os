@@ -385,6 +385,17 @@
         "typeId": 17
       }
     ],
+    "tool_categories": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "parent_id", "columnSpan": 1, "defaultValue": null, "select": "parent_id:tool_categories!parent_id(id,display_name)", "selectForEdit": "parent_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "color", "columnSpan": 1, "defaultValue": null, "select": "color", "selectForEdit": "=", "selectForList": "=", "type": "Color", "typeId": 13},
+      {"column": "is_active", "columnSpan": 1, "defaultValue": false, "select": "is_active", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
     "tool_instances": [
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
@@ -560,7 +571,7 @@
     "tool_types": [
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "category_id", "columnSpan": 1, "defaultValue": null, "select": "category_id:categories!category_id(id,display_name,color)", "selectForEdit": "category_id", "selectForList": "=", "type": "Category", "typeId": 23},
+      {"column": "category_id", "columnSpan": 1, "defaultValue": null, "select": "category_id:tool_categories!category_id(id,display_name)", "selectForEdit": "category_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
       {
         "column": "inventory_module_id",
         "columnSpan": 1,
@@ -781,6 +792,7 @@
     ],
     "project_parcels": ["created_at:DateTimeLocal", "parcel_id:ForeignKeyName", "project_id:ForeignKeyName"],
     "projects": ["created_at:DateTimeLocal", "description:TextLong", "display_name:TextShort", "id:IntegerNumber", "photos:PhotoGallery", "updated_at:DateTimeLocal"],
+    "tool_categories": ["color:Color", "created_at:DateTimeLocal", "description:TextLong", "display_name:TextShort", "id:IntegerNumber", "is_active:Boolean", "parent_id:Dimension", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"],
     "tool_instances": ["created_at:DateTimeLocal", "display_name:TextShort", "id:IntegerNumber", "instance_number:IntegerNumber", "status_id:Status", "tool_type_id:ForeignKeyName", "updated_at:DateTimeLocal"],
     "tool_reservation_checkouts": [
       "checkout_notes:TextLong",
@@ -817,7 +829,7 @@
       "workflow_status_id:Status"
     ],
     "tool_types": [
-      "category_id:Category",
+      "category_id:Dimension",
       "created_at:DateTimeLocal",
       "description:TextLong",
       "display_name:TextShort",

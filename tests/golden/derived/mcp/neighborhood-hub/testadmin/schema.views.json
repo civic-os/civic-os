@@ -156,6 +156,12 @@
       "edit": ["display_name", "description", "photos", "project_parcels_m2m"],
       "list": ["display_name", "description", "photos"]
     },
+    "tool_categories": {
+      "create": ["display_name", "parent_id", "description", "color", "sort_order"],
+      "detail": ["display_name", "parent_id", "description", "color", "is_active", "sort_order"],
+      "edit": ["display_name", "parent_id", "description", "color", "is_active", "sort_order"],
+      "list": ["display_name", "parent_id", "is_active"]
+    },
     "tool_instances": {
       "create": ["display_name", "tool_type_id", "instance_number", "status_id"],
       "detail": ["display_name", "tool_type_id", "instance_number", "status_id"],

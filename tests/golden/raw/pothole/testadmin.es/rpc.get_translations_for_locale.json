@@ -3863,5 +3863,30 @@
     "source_key": "time.start",
     "source_type": "ui",
     "translated_text": "Inicio"
+  },
+  {
+    "source_key": "tree_select.inactive",
+    "source_type": "ui",
+    "translated_text": "Inactivo"
+  },
+  {
+    "source_key": "tree_select.match_count",
+    "source_type": "ui",
+    "translated_text": "Opciones que coinciden: {{count}}"
+  },
+  {
+    "source_key": "tree_select.no_matches",
+    "source_type": "ui",
+    "translated_text": "Sin coincidencias"
+  },
+  {
+    "source_key": "tree_select.none",
+    "source_type": "ui",
+    "translated_text": "Ninguno"
+  },
+  {
+    "source_key": "tree_select.options",
+    "source_type": "ui",
+    "translated_text": "Opciones"
   }
 ]

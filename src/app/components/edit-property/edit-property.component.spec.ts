@@ -30,6 +30,7 @@ import { provideTranslationTesting } from '../../testing/translation-testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { settleLazyComponents } from '../../testing/lazy-components';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
+import { DimensionService, SchemaDimension } from '../../services/dimension.service';
 
 describe('EditPropertyComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -2468,6 +2469,86 @@ describe('EditPropertyComponent', () => {
             component.ngOnInit();
 
             expect(component.useFkSearchModal()).toBe(true);
+        });
+    });
+
+    describe('Dimension Type (v0.86.0)', () => {
+        const dim = (over: Partial<SchemaDimension> = {}): SchemaDimension => ({
+            dimension_key: 'program', display_name: 'Program', table_schema: 'public', table_name: 'programs',
+            key_column: 'id', label_column: 'display_name', parent_column: 'parent_id', active_column: 'is_active',
+            external_id_column: null, default_value_id: null, hide_when_single: true, sort_order: 0, ...over,
+        });
+        const rows = [
+            { id: 1, label: 'General', parent_id: null, active: true },
+            { id: 2, label: 'Youth', parent_id: 1, active: true },
+            { id: 3, label: 'Teens', parent_id: 2, active: true },
+            { id: 4, label: 'Retired', parent_id: null, active: false },
+        ];
+        const dimensionProp = (over = {}) => createMockProperty({
+            table_name: 'enrollments', column_name: 'program_id', display_name: 'Program',
+            type: EntityPropertyType.Dimension, udt_name: 'int8', join_table: 'programs', join_column: 'id',
+            join_schema: 'public', is_nullable: true, ...over,
+        });
+        const setup = (d: SchemaDimension | undefined, r = rows, value: number | null = null, prop = dimensionProp(), entityId = '') => {
+            const dims = TestBed.inject(DimensionService);
+            vi.spyOn(dims, 'getDimensionFor').mockReturnValue(of(d));
+            vi.spyOn(dims, 'getOptions').mockReturnValue(of(r));
+            const formGroup = new FormGroup({ [prop.column_name]: new FormControl<number | null>(value) });
+            fixture.componentRef.setInput('property', prop);
+            fixture.componentRef.setInput('formGroup', formGroup);
+            fixture.componentRef.setInput('entityId', entityId);
+            component.ngOnInit();
+            fixture.detectChanges();
+            return formGroup.get(prop.column_name)!;
+        };
+
+        it('renders the tree select labelled by the field, with the dimension rows', () => {
+            setup(dim());
+            const box = fixture.debugElement.query(By.css('app-tree-select input[role="combobox"]'));
+            expect(box.nativeElement.id).toBe('program_id');
+            expect(fixture.debugElement.query(By.css('label')).nativeElement.getAttribute('for')).toBe('program_id');
+            expect(component.dimensionOptions()).toHaveLength(4);
+        });
+
+        it('preselects the active default on an empty control', () => {
+            expect(setup(dim({ default_value_id: 2 })).value).toBe(2);
+        });
+
+        it('keeps an existing value and skips a retired default', () => {
+            expect(setup(dim({ default_value_id: 2 }), rows, 3).value).toBe(3);
+            expect(setup(dim({ default_value_id: 4 })).value).toBeNull();
+        });
+
+        it('hides the field and holds the only active row when hide_when_single', () => {
+            const control = setup(dim(), [rows[0], rows[3]]);
+            expect(component.hideSingleDimension()).toBe(true);
+            expect(control.value).toBe(1);
+            expect(fixture.debugElement.query(By.css('app-tree-select'))).toBeNull();
+        });
+
+        it('shows the field when hide_when_single is off, or the value is another row', () => {
+            setup(dim({ hide_when_single: false }), [rows[0]]);
+            expect(component.hideSingleDimension()).toBe(false);
+            setup(dim(), [rows[0], rows[3]], 4);
+            expect(component.hideSingleDimension()).toBe(false);
+        });
+
+        it('disables the record and its descendants when editing the dimension table\'s own parent', () => {
+            setup(dim(), rows, null, dimensionProp({ table_name: 'programs', column_name: 'parent_id' }), '2');
+            expect([...component.dimensionDisabledIds()].sort()).toEqual([2, 3]);
+        });
+
+        it('disables nothing for other tables or on create', () => {
+            setup(dim(), rows, null, dimensionProp(), '2');
+            expect(component.dimensionDisabledIds().size).toBe(0);
+            setup(dim(), rows, null, dimensionProp({ table_name: 'programs', column_name: 'parent_id' }), '');
+            expect(component.dimensionDisabledIds().size).toBe(0);
+        });
+
+        it('renders an empty select when the dimension is not registered', () => {
+            setup(undefined, []);
+            expect(component.dimensionOptions()).toEqual([]);
+            expect(fixture.debugElement.query(By.css('app-tree-select'))).toBeTruthy();
         });
     });
 });

@@ -11,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, StaticText } from '../../interfaces/entity';
 import { provideTranslationTesting } from '../translation-testing';
-import { loadRaw, Variant } from './golden-io';
+import { hasRaw, loadRaw, Variant } from './golden-io';
 
 export function typeName(t: EntityPropertyType): string {
   return EntityPropertyType[t] ?? `?${t}`;
@@ -47,7 +47,7 @@ export function flushAll(httpMock: HttpTestingController, fragment: string, body
 
 /**
  * Boot the REAL SchemaService against a raw-fixture variant, the way the app
- * does at bootstrap: schema_entities + schema_properties + schema_m2m_properties
+ * does at bootstrap: schema_entities + schema_properties + schema_m2m_properties + schema_dimensions
  * (getProperties) and static_text. Fixtures are deep-cloned on every flush
  * because getProperties() overwrites `type` on the objects it receives.
  */
@@ -59,6 +59,8 @@ export async function loadSchema(v: Variant, ...extraProviders: any[]): Promise<
   flushAll(httpMock, 'schema_entities', loadRaw(v, 'schema_entities'));
   flushAll(httpMock, 'schema_properties', loadRaw(v, 'schema_properties'));
   flushAll(httpMock, 'schema_m2m_properties', loadRaw(v, 'schema_m2m_properties'));
+  // the dimensions registry types FKs to registered tables as Dimension (v0.86.0)
+  flushAll(httpMock, 'schema_dimensions', hasRaw(v, 'schema_dimensions') ? loadRaw(v, 'schema_dimensions') : []);
   const props = await props$;
 
   const tables = await firstValueFrom(service.getEntities());

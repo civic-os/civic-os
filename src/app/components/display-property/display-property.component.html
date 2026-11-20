@@ -69,6 +69,15 @@
         {{ datum().display_name }}
       }
     }
+    @if (propType() == EntityPropertyType.Dimension) {
+      <!-- Dimension (v0.86.0): the label, plus the ancestors in parentheses where showPath is on (Detail) -->
+      @if (linkRelated()) {
+        <a [routerLink]="['/view', prop().join_table, datum().id]">{{ dimensionText() }}</a>
+      }
+      @if (!linkRelated()) {
+        {{ dimensionText() }}
+      }
+    }
     @if (propType() == EntityPropertyType.User) {
       <div class="break-words">
         @if (datum()?.full_name) {

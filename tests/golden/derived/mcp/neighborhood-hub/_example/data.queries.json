@@ -4551,6 +4551,276 @@
         }
       ]
     },
+    "tool_categories": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "tool_categories", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "tool_categories", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "tool_categories", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "tool_categories", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,parent_id:tool_categories!parent_id(id,display_name),is_active,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "tool_categories"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "parent_id"
+          },
+          "name": "order parent_id asc [Dimension]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of parent_id -> sort by the column parent_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=parent_id(display_name).asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=parent_id(display_name).asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-parent_id"
+          },
+          "name": "order parent_id desc [Dimension]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of parent_id -> sort by the column parent_id itself (list_records sorts by own columns only)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=parent_id(display_name).desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=parent_id(display_name).desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "sort": "is_active"
+          },
+          "name": "order is_active asc [Boolean]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=is_active.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=is_active.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "tool_categories",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,id", "order=display_name.desc", "display_name=ilike.*pot hole & co*"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,id&order=display_name.desc&display_name=ilike.*pot%20hole%20%26%20co*"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "tool_categories",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=id&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "tool_categories", "id": "1"},
+          "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=display_name,parent_id:tool_categories!parent_id(id,display_name),description,color,is_active,sort_order,created_at,updated_at,id", "order=display_name.asc,id.asc", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=display_name,parent_id:tool_categories!parent_id(id,display_name),description,color,is_active,sort_order,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Tool Categories."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "tool_categories",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc,id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/tool_categories?select=id&order=display_name.asc,id.asc"
+            }
+          ]
+        }
+      ]
+    },
     "tool_instances": {
       "queries": [
         {
@@ -6187,10 +6457,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
-              "decoded": ["select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -6201,10 +6471,10 @@
           "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
-              "decoded": ["select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -6215,10 +6485,10 @@
           "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
-              "decoded": ["select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -6229,10 +6499,10 @@
           "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
-              "decoded": ["select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
+              "decoded": ["select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id", "order=display_name.asc,id.asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "<PGRST>/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -6302,14 +6572,14 @@
             "offset": 0,
             "sort": "category_id"
           },
-          "name": "order category_id asc [Category]",
-          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "name": "order category_id asc [Dimension]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of category_id -> sort by the column category_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=display_name,id", "order=category_id.asc"],
+              "decoded": ["select=display_name,id", "order=category_id(display_name).asc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,id&order=category_id.asc"
+              "url": "<PGRST>/tool_types?select=display_name,id&order=category_id(display_name).asc"
             }
           ]
         },
@@ -6322,14 +6592,14 @@
             "offset": 0,
             "sort": "-category_id"
           },
-          "name": "order category_id desc [Category]",
-          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "name": "order category_id desc [Dimension]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of category_id -> sort by the column category_id itself (list_records sorts by own columns only)"],
           "requests": [
             {
-              "decoded": ["select=display_name,id", "order=category_id.desc"],
+              "decoded": ["select=display_name,id", "order=category_id(display_name).desc"],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,id&order=category_id.desc"
+              "url": "<PGRST>/tool_types?select=display_name,id&order=category_id(display_name).desc"
             }
           ]
         },
@@ -6460,13 +6730,13 @@
           "requests": [
             {
               "decoded": [
-                "select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id",
+                "select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id",
                 "order=display_name.asc,id.asc",
                 "display_name=ilike.*pot hole*"
               ],
               "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
+              "url": "<PGRST>/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*pot%20hole*"
             }
           ]
         },
@@ -6478,13 +6748,13 @@
           "requests": [
             {
               "decoded": [
-                "select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,created_at,updated_at,id",
+                "select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Tool Types."

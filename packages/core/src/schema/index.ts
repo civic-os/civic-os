@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { getPropertyType } from './property-type.js';
+export { dimensionFor, getPropertyType } from './property-type.js';
 export { METADATA_SYSTEM_TABLES, isSystemType } from './system-types.js';
 export type { SystemTableName } from './system-types.js';
 export {

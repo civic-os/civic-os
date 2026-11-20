@@ -91,7 +91,7 @@ Key fields:
 - `sort_order` - Field ordering in forms/tables (lower numbers first). A column without a value falls back to its position in the table, so a value you set can tie another column's position. Ties order by column name (since v0.77.3), so set `sort_order` on every column whose order matters.
 - `column_width` - Form field width: 1 (half) or 2 (full, default)
 - `sortable` - BOOLEAN - Enable column sorting on List pages
-- `filterable` - BOOLEAN - Show property in filter bar (supports: ForeignKeyName, User, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)
+- `filterable` - BOOLEAN - Show property in filter bar (supports: ForeignKeyName, Dimension, User, Status, Category, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)
 - `show_on_list` - BOOLEAN - Display in List page table (default: true)
 - `show_on_create` - BOOLEAN - Display in Create form (default: true)
 - `show_on_edit` - BOOLEAN - Display in Edit form (default: true)
@@ -5367,7 +5367,7 @@ DETAIL: public.programs.parent_id: type integer, required bigint (required by sh
 |---|---|---|
 | `table` | **`name`** (`schema.table`), `columns`, `writes`, `source` | The relation exists and is a table, not a view. Per column (**`name`**, `type`, `nullable`, `references` as `schema.table.column`): it exists, its type is compatible, its nullability is compatible, a single-column FK points at the given column |
 | `rpc` | **`name`** (`schema.function`), **`args`** (types in order, possibly `[]`), `returns`, `source` | The exact signature resolves; `returns` (`bigint`, `setof bigint`, `TABLE(a integer, b text)`) matches after normalizing type names |
-| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`), `source` | The key is registered (`missing_dimension`); when given, the registry names the same table and, per declared role, the same column, and that column still exists (`dimension_mismatch`, which is how a registry row left stale by a column rename comes to light). Undeclared roles are not compared. Before v0.85.0: `missing_core_feature` |
+| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`, and `sort` since v0.86.0), `source` | The key is registered (`missing_dimension`); when given, the registry names the same table and, per declared role, the same column, and that column still exists (`dimension_mismatch`, which is how a registry row left stale by a column rename comes to light). Undeclared roles are not compared. `sort` compares with the registry's sort column, including one taken from the `sort_order` convention. Before v0.85.0: `missing_core_feature` |
 | `module` | **`key`**, `version` (`MAJOR.MINOR`), `source` | The key is registered (`missing_module`); with `version: "1.2"`, the installed version has major 1 and minor 2 or higher (`module_version_mismatch`). Before v0.85.0: `missing_core_feature` |
 
 `template` and `source` are free labels used only in messages. Types are written in SQL spelling and normalized, so `int8`, `bigint` and `BIGINT` are the same and `varchar(50)` carries its length. A malformed declaration (an unknown element kind or key, a missing name, an unqualified name, a type that does not resolve) is a bug in the script, and both functions raise `22023` at once.
@@ -5415,15 +5415,17 @@ An install script registers its module last, after the schema decision and the d
 
 #### Dimensions (v0.85.0+)
 
-A **dimension** is a lookup table that reports are cut by: program, site, department, ward. You create the table wherever you like, then register it; every foreign key from an entity to a registered table is a reporting axis.
+A **dimension** is a lookup table that reports are cut by: program, site, department, ward. You create the table wherever you like, then register it; every foreign key from an entity to a registered table is a reporting axis, and in forms it becomes a tree select (see In forms below).
 
 **Table requirements**, checked by `register_dimension()` (`22023` otherwise):
 
 - a `BIGINT` key column that is the primary key or unique on its own (`id BIGSERIAL PRIMARY KEY`);
 - a label column (default `display_name`);
 - a `BOOLEAN` active column (default `is_active`): rows are **retired, never deleted**;
-- for a hierarchy, a parent column with a foreign key from the table to its own key, indexed;
-- a base table (not a view). Over the API, with an admin JWT, only tables in `public`; the deployment role can register any schema.
+- for a hierarchy, a parent column with a foreign key from the table to its own key;
+- a base table (not a view). Over the API, with an admin JWT, only tables in `public`; the deployment role can register any schema, but forms show the tree select only for tables in `public`.
+
+Index the parent column like any foreign key column; registration does not check it.
 
 ```sql
 CREATE TABLE public.programs (
@@ -5446,7 +5448,7 @@ SELECT register_dimension(
   p_default_value_id   := (SELECT id FROM public.programs WHERE display_name = 'General'));
 ```
 
-Other parameters: `p_key_column` (default `id`), `p_label_column` (default `display_name`), `p_active_column` (default `is_active`), `p_hide_when_single` (default `true`: with one active row, clients hide the control and the server fills the value), `p_sort_order`.
+Other parameters: `p_sort_column` (sibling order, see below), `p_key_column` (default `id`), `p_label_column` (default `display_name`), `p_active_column` (default `is_active`), `p_hide_when_single` (default `true`: with exactly one active row, forms hide the field, see In forms), `p_sort_order` (the dimension's position in `schema_dimensions`, not the order of its rows).
 
 **What registration installs:**
 
@@ -5456,13 +5458,45 @@ Other parameters: `p_key_column` (default `id`), `p_label_column` (default `disp
 | `tree_parent_guard` | The dimension table, when it has a parent column | Refuses a parent change that would create a cycle (see below). Registration refuses a table that already holds a cycle and names the rows |
 | `dimension_default_<column>` | Every table with a single-column FK to the dimension, except the table's own parent column | On `INSERT`, fills a `NULL` value with the default, unless the default row is retired. Never on `UPDATE`; an explicit value (or a column `DEFAULT`) is kept. Runs before `NOT NULL` checks, so a required column can be left out |
 
+**Existing data.** Registration changes no rows. A record whose FK is already empty stays empty: the fill trigger acts only on later inserts. `DELETE` grants on the dimension table stay, but the guard refuses every delete. A hierarchical table that already holds a parent cycle is refused (`23514`) with the rows named; fix them and register again.
+
+**Retiring a value.** Set its active column to false. Forms stop offering it, records that point at it keep it, and while it is the default the fill trigger skips it; reactivating the row restores both.
+
 **Re-register after adding tables.** `register_dimension()` is idempotent and looks for referencing columns each time, so an install script that adds a table with a FK to a dimension calls it again afterwards. A `NULL` `p_default_value_id` on re-registration keeps the current default; the other settings follow the latest call. Over the API, fill triggers go only on referencing tables in `public` (a `NOTICE` names the ones skipped); the deployment role adds the rest.
 
-**Changing the default:** `set_dimension_default(p_dimension_key, p_value_id)` (admin JWT or the deployment role). `NULL` clears it. A missing row is `23503`, a retired row `22023`. A default that is retired later is skipped, not cleared, and returns when the row is reactivated.
+**Sibling order (v0.86.0):** `p_sort_column` names the column that orders a dimension's rows within each parent (it must exist, `22023` otherwise). When omitted, a `sort_order` column is used if the table has one; without either, rows sort by label. Like every setting but the default, it follows the latest registration, so re-registering without `p_sort_column` falls back to `sort_order` or the label. Clients request it through PostgREST: `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc`. `schema_dimensions.sort_column` returns it, and `compare_interface()` dimension elements may declare it as the `sort` column role.
 
-**Reading:** `public.schema_dimensions` lists the registry (any role). `dimension_subtree(p_dimension_key, p_value_id)` returns the value and all its descendants that the caller can read (RLS applies), bounded even if a cycle exists.
+```sql
+ALTER TABLE public.programs ADD COLUMN rank INT;
+SELECT register_dimension('program', 'Program', 'public', 'programs',
+  p_parent_column := 'parent_id', p_sort_column := 'rank');
+```
 
-Errors from `register_dimension()`: `42501` neither an admin JWT nor the deployment role, or a table outside `public` over the API; `22023` a table or column that does not qualify, or a retired default; `23505` the key is registered for another table, or the table under another key; `23503` the default row does not exist; `23514` an existing parent cycle.
+**Changing the default:** `set_dimension_default(p_dimension_key, p_value_id)` (admin JWT or the deployment role). `NULL` clears it. An unregistered key or a retired row is `22023`, a missing row `23503`. A default that is retired later is skipped, not cleared, and returns when the row is reactivated.
+
+**In forms (v0.86.0).** A column is the **Dimension** property type when it is a `BIGINT` foreign key to the key column of a registered table in `public`. A column configured as Status or Category (`status_entity_type`, `category_entity_type`) keeps that type, and an `INTEGER` foreign key to a dimension stays an ordinary foreign key. A Dimension column differs from a foreign key in these ways:
+
+- **Edit control:** a searchable tree select. Options are indented and named label first with their ancestors in parentheses, root first: "Shovels (Hand Tools › Digging & Soil)". Siblings follow the sort column. Typing filters by label and keeps the ancestors of matches visible.
+- **Retired rows** are not offered. A record that already points at one keeps it, shown marked "Inactive".
+- **A dimension table's own parent column** gets the same control, with the record and its descendants disabled.
+- **New records** start on the dimension's default when that row is active, so a required column validates. With `hide_when_single` (the default) and exactly one active row, the field is hidden and set to that row, unless the record already holds a different value.
+- **Detail** shows the value the same way, label first with its ancestors in parentheses. List pages and other views show the label alone.
+- **Ignored settings:** today the tree select is the only control. `fk_search_modal`, `options_source_rpc` and `depends_on_columns` on a Dimension column are ignored, and `register_dimension()` raises a `NOTICE` naming each referencing column that has one set. Issue #142 will honor `fk_search_modal` with a tree-aware search modal; without the flag the tree select stays. The tree select works well up to about 20 rows in a flat dimension and about 100 in a nested one; above that, set `fk_search_modal` once #142 ships.
+
+Everything else (filters, sorting, import, export) works as for any foreign key. Filtering by a parent matches that row only, not its descendants. Many-to-many relationships to a dimension table are not supported as dimensions yet (issue #139). Forms read the dimension's rows each time they open, so added and retired rows show on the next form; a new registration or default reaches open browsers on their next navigation (the properties cache version follows the registry).
+
+**Converting an existing lookup table.** The neighborhood-hub example (below) moves tool categories out of the Category system into a nested dimension. The steps that apply to any conversion:
+
+1. Give the table a `BIGINT` key and a boolean active column (the staff portal example adds `is_active` and `sort_order` to an existing table; the neighborhood-hub example creates a new one).
+2. For each referencing column: drop its FK, point its values at the new keys if they changed, `ALTER COLUMN ... TYPE BIGINT`, and add the FK again.
+3. Clear `status_entity_type` or `category_entity_type` on those columns in `metadata.properties`, or they keep their old type.
+4. Register the dimension after every referencing table exists, and record a schema decision.
+
+**Reading:** `public.schema_dimensions` lists the registry (any role). `dimension_subtree(p_dimension_key, p_value_id)` returns the value and all its descendants that the caller can read (RLS applies), bounded even if a cycle exists; an unregistered key is `22023`.
+
+Errors from `register_dimension()`: `42501` neither an admin JWT nor the deployment role, or a table outside `public` over the API; `22023` a malformed key, a table or column that does not qualify, or a retired default; `23505` the key is registered for another table, or the table under another key; `23503` the default row does not exist; `23514` an existing parent cycle.
+
+Working examples: `examples/staff-portal/init-scripts/21_sites_dimension.sql` registers the staff portal's `sites` as a flat `site` dimension with a default; `examples/neighborhood-hub/init-scripts/48_neh_tool_category_dimension.sql` turns tool categories into a nested `tool_category` dimension, converting the referencing `INT` column to `BIGINT` and moving values out of the Category system.
 
 Design: `docs/notes/MODULE_INSTALL_SUPPORT_DESIGN.md` and `docs/notes/IMPACT_REPORTING_DESIGN.md` (Dimensions, Build amendments).
 
@@ -7249,7 +7283,7 @@ GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
 ```
 
-`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.85.1 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.85.1 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.86.1 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.86.1 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 For full CRUD access, use the same `authenticated` role as the web frontend by authenticating through Keycloak.
 

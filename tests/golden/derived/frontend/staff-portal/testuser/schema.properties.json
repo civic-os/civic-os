@@ -36,7 +36,7 @@
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "reported_by_id", "columnSpan": 1, "defaultValue": null, "select": "reported_by_id:staff_members!reported_by_id(id,display_name)", "selectForEdit": "reported_by_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
-      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
       {"column": "incident_date", "columnSpan": 1, "defaultValue": null, "select": "incident_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
       {"column": "status_id", "columnSpan": 1, "defaultValue": null, "select": "status_id:statuses!status_id(id,display_name)", "selectForEdit": "status_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
@@ -116,6 +116,8 @@
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "lead_id", "columnSpan": 1, "defaultValue": null, "select": "lead_id:staff_members!lead_id(id,display_name)", "selectForEdit": "lead_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {"column": "address", "columnSpan": 2, "defaultValue": null, "select": "address", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "is_active", "columnSpan": 1, "defaultValue": false, "select": "is_active", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
       {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
     ],
@@ -182,7 +184,7 @@
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "user_id", "columnSpan": 1, "defaultValue": null, "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email)", "selectForEdit": "user_id", "selectForList": "=", "type": "User", "typeId": 11},
-      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
       {"column": "role_id", "columnSpan": 1, "defaultValue": null, "select": "role_id:staff_roles!role_id(display_name)", "selectForEdit": "role_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
       {
         "column": "onboarding_status_id",
@@ -234,8 +236,8 @@
         "select": "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)",
         "selectForEdit": "assigned_to_site_id",
         "selectForList": "=",
-        "type": "ForeignKeyName",
-        "typeId": 10
+        "type": "Dimension",
+        "typeId": 28
       },
       {
         "column": "assigned_to_role_id",
@@ -247,7 +249,7 @@
         "type": "ForeignKeyName",
         "typeId": 10
       },
-      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "site_id", "columnSpan": 1, "defaultValue": null, "select": "site_id:sites!site_id(id,display_name)", "selectForEdit": "site_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
       {"column": "due_date", "columnSpan": 1, "defaultValue": null, "select": "due_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
       {
         "column": "assigned_by",
@@ -333,7 +335,7 @@
       "incident_date:Date",
       "people_involved:TextLong",
       "reported_by_id:ForeignKeyName",
-      "site_id:ForeignKeyName",
+      "site_id:Dimension",
       "status_id:ForeignKeyName",
       "updated_at:DateTimeLocal"
     ],
@@ -364,7 +366,7 @@
       "status_id:Status",
       "updated_at:DateTimeLocal"
     ],
-    "sites": ["address:TextLong", "created_at:DateTimeLocal", "display_name:TextLong", "id:IntegerNumber", "lead_id:ForeignKeyName", "updated_at:DateTimeLocal"],
+    "sites": ["address:TextLong", "created_at:DateTimeLocal", "display_name:TextLong", "id:IntegerNumber", "is_active:Boolean", "lead_id:ForeignKeyName", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"],
     "staff_directory": ["display_name:TextLong", "email:TextShort", "id:IntegerNumber", "phone_number:Telephone", "role_id:ForeignKeyName", "site_id:ForeignKeyName", "site_name:TextLong", "staff_role:TextLong"],
     "staff_documents": [
       "created_at:DateTimeLocal",
@@ -387,7 +389,7 @@
       "onboarding_status_id:Status",
       "pay_rate:Money",
       "role_id:ForeignKeyName",
-      "site_id:ForeignKeyName",
+      "site_id:Dimension",
       "start_date:Date",
       "updated_at:DateTimeLocal",
       "user_id:User"
@@ -397,7 +399,7 @@
       "assigned_by:User",
       "assigned_to_id:ForeignKeyName",
       "assigned_to_role_id:ForeignKeyName",
-      "assigned_to_site_id:ForeignKeyName",
+      "assigned_to_site_id:Dimension",
       "civic_os_text_search:Unknown",
       "completed_at:DateTimeLocal",
       "completion_notes:TextLong",
@@ -407,7 +409,7 @@
       "due_date:Date",
       "id:IntegerNumber",
       "priority_id:Category",
-      "site_id:ForeignKeyName",
+      "site_id:Dimension",
       "status_id:ForeignKeyName",
       "updated_at:DateTimeLocal"
     ],

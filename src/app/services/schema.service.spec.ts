@@ -2700,6 +2700,7 @@ describe('SchemaService', () => {
                 flushFragment('schema_entities', entities());
                 flushFragment('schema_properties', []);
                 flushFragment('schema_m2m_properties', []);
+                flushFragment('schema_dimensions', []);
                 flushFragment('schema_menu_nodes', nodes, nodesStatus);
                 await settle();
             }

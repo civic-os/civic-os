@@ -356,6 +356,7 @@ export class NameResolver {
   ): Promise<unknown> {
     switch (property.type) {
       case EntityPropertyType.ForeignKeyName:
+      case EntityPropertyType.Dimension:
         // Try to parse as number first (raw ID)
         if (/^\d+$/.test(value)) return parseInt(value, 10);
         // Try UUID

@@ -33,7 +33,7 @@ import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { settle } from './testing/await-http';
 
-const LATE_REQUEST_URLS = /\/(schema_properties|schema_m2m_properties|schema_menu_nodes|notification_preferences|rpc\/get_dashboards)(\?|$)/;
+const LATE_REQUEST_URLS = /\/(schema_properties|schema_m2m_properties|schema_dimensions|schema_menu_nodes|notification_preferences|rpc\/get_dashboards)(\?|$)/;
 
 describe('AppComponent', () => {
     let mockAuthService: any;
@@ -289,7 +289,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -327,7 +327,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -365,7 +365,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -546,7 +546,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -582,7 +582,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -620,7 +620,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -658,7 +658,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -696,7 +696,7 @@ describe('AppComponent', () => {
                 }
                 else if (req.request.url.includes('rpc/get_dashboards')) {
                     req.flush([]);
-                } else if (/\/(constraint_messages|schema_m2m_properties|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
+                } else if (/\/(constraint_messages|schema_m2m_properties|schema_dimensions|schema_menu_nodes)(\?|$)/.test(req.request.url)) {
                     req.flush([]);
                 } else {
                     throw new Error('Unexpected request ' + req.request.url);
@@ -714,7 +714,7 @@ describe('AppComponent', () => {
 
     describe('Sidebar menu', () => {
         function flushStartup(menuStatus: number, entities: unknown[] = []) {
-            httpMock.match(r => /\/(schema_cache_versions|rpc\/get_dashboards|constraint_messages|schema_properties|schema_m2m_properties)(\?|$)/.test(r.url))
+            httpMock.match(r => /\/(schema_cache_versions|rpc\/get_dashboards|constraint_messages|schema_properties|schema_m2m_properties|schema_dimensions)(\?|$)/.test(r.url))
                 .forEach(r => r.flush([]));
             httpMock.match(r => r.url.includes('schema_entities')).forEach(r => r.flush(entities));
             httpMock.match(r => r.url.includes('schema_menu_nodes')).forEach(r =>

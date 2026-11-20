@@ -24,6 +24,25 @@ User profile data (name, email, phone) is managed in **Keycloak** (single source
 
 Phone number requires custom user attribute and JWT mapper configuration. See `docs/AUTHENTICATION.md` (Step 5) for setup.
 
+## Dimension Type (v0.86.0)
+
+**Detection** (core `getPropertyType`, after Status and Category, before system types): a `BIGINT` (`int8`) column with a foreign key into `public` whose target table, schema and key column match a row of the dimensions registry. Like the system types (an FK to `files`, `civic_os_users`, ...), the type comes from the FK target alone; there is no extra column on `schema_properties`. Clients load `schema_dimensions` with the properties (core `SchemaClient.getDimensions()`, invalidated with the properties cache, whose version follows the registry) and pass it to `getPropertyType(prop, dimensions)`; `dimensionFor(prop, dimensions)` returns the matching registry row. Without the registry (an instance older than v0.85.0) the column is a `ForeignKeyName`. A dimension table outside `public` has no API path, so FKs to it stay `ForeignKeyName`.
+
+**Same as ForeignKeyName**: the select string embeds `display_name` of the target, the edit select reads the raw id, ordering is by `col(display_name)`, the List filter is the checkbox list with `in`, import and export resolve names through the target table, and junction detection treats it as an FK. Filters match the chosen ids only; no client uses `dimension_subtree()` to include descendants. The MCP server treats it as an FK too; see `docs/notes/MCP_SERVER_DESIGN.md` (Dimension Columns).
+
+**Edit control**: `TreeSelectComponent` (`src/app/components/tree-select/`), an ARIA editable combobox over a listbox, fed by `DimensionService` (registry row from `schema_dimensions`, rows from the dimension table with columns aliased to `id`, `label`, `parent_id`, `active`, read each time a control loads, uncached, so added and retired rows show on the next form; a failed request yields no options). Tree logic is core's `buildTree` / `flattenTree` (`packages/core/src/tree/`).
+
+- Siblings come in the registry's order: `DimensionService` requests `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc` (the sort column from `register_dimension(p_sort_column)`, or a `sort_order` column by convention) and `buildTree()` keeps input order within siblings.
+- Options are indented by level and named label first with their ancestors in parentheses, root first ("Shovels (Hand Tools › Digging & Soil)", `formatTreeLabel()` in `src/app/utils/tree-path.ts`); listbox options carry no level, so this is the accessible name. The closed text box shows the same text, so truncation hides ancestors, never the chosen row.
+- Typing filters by label; ancestors of matches stay visible as context.
+- Retired rows (active column false) are hidden from new choices; the current value stays visible, marked "Inactive". A retired ancestor of an active row shows as disabled context.
+- On a dimension table's own parent column (the FK points at its own table), the record and its descendants are disabled.
+- On an empty control the dimension's active default is preselected, so a required column validates and the user sees what the server would fill. The server-side fill trigger still covers import, MCP and SQL inserts.
+- `hide_when_single`: with exactly one active row the field is not rendered and holds that row, unless the record already holds a different value.
+- `fk_search_modal`, `options_source_rpc` and `depends_on_columns` are ignored: `useFkSearchModal` and the options branches in `EditPropertyComponent` apply only to `ForeignKeyName` (and `User`), so the tree select is the only control. `register_dimension()` raises a NOTICE for each referencing column that has one set. Issue #142 will honor `fk_search_modal` with a tree-aware search modal (without the flag the tree select stays); many-to-many relationships to a dimension are issue #139.
+
+**Display** (`DisplayPropertyComponent`, `dimensionText`): a link to the record. Detail passes `showPath` to `DisplayPropertyComponent`, which shows "Shovels (Hand Tools › Digging & Soil)": the label renders at once and the ancestors follow from `DimensionService.getAncestorLabels()`, one flat request for the dimension table resolved by `buildTree()` (no recursive query, no cache; a flat dimension makes no request). List and other contexts show `display_name` alone.
+
 ## Geography (GeoPoint) Type
 
 **Detection**: `geography(Point, 4326)`

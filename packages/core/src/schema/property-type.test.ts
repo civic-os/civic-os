@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { EntityPropertyType } from '../model/index.js';
 import type { SchemaEntityProperty } from '../model/index.js';
-import { getPropertyType } from './property-type.js';
+import { dimensionFor, getPropertyType } from './property-type.js';
 import { isSystemType } from './system-types.js';
 import {
   propertyToSelectString,
@@ -257,5 +257,43 @@ describe('select string builders', () => {
     expect(propertyToSelectStringForEdit(m2m({ relatedTableHasColor: true })))
       .toBe('tags_m2m:issue_tags!issue_id(tags!tag_id(id,display_name,color))');
     expect(propertyToSelectStringForEdit(prop({ column_name: 'x', type: T.ManyToMany }))).toBe('x');
+  });
+});
+
+describe('Dimension detection (v0.86.0)', () => {
+  const T = EntityPropertyType;
+  const programs = { dimension_key: 'program', table_schema: 'public', table_name: 'programs', key_column: 'id' };
+  const regions = { dimension_key: 'region', table_schema: 'geo', table_name: 'regions', key_column: 'id' };
+  const fk = (over: Partial<SchemaEntityProperty> = {}) =>
+    prop({ udt_name: 'int8', join_schema: 'public', join_table: 'programs', join_column: 'id', ...over });
+
+  it('a BIGINT FK to a registered table is a Dimension', () => {
+    expect(getPropertyType(fk(), [programs])).toBe(T.Dimension);
+    expect(getPropertyType(fk({ join_schema: '' }), [programs])).toBe(T.Dimension);
+  });
+
+  it('without the registry, or for an unregistered table, it is a ForeignKeyName', () => {
+    expect(getPropertyType(fk())).toBe(T.ForeignKeyName);
+    expect(getPropertyType(fk(), [])).toBe(T.ForeignKeyName);
+    expect(getPropertyType(fk({ join_table: 'sites' }), [programs])).toBe(T.ForeignKeyName);
+  });
+
+  it('needs BIGINT, the registered key column, a public target, and an FK', () => {
+    expect(getPropertyType(fk({ udt_name: 'int4' }), [programs])).toBe(T.ForeignKeyName);
+    expect(getPropertyType(fk({ join_column: 'code' }), [programs])).toBe(T.ForeignKeyName);
+    expect(getPropertyType(fk({ join_schema: 'geo', join_table: 'regions' }), [regions])).toBe(T.ForeignKeyName);
+    expect(getPropertyType(fk({ join_column: null as never }), [programs])).toBe(T.IntegerNumber);
+  });
+
+  it('Status and Category win over Dimension', () => {
+    expect(getPropertyType(fk({ category_entity_type: 'c' }), [programs])).toBe(T.Category);
+    expect(getPropertyType(fk({ status_entity_type: 's' }), [programs])).toBe(T.Status);
+  });
+
+  it('dimensionFor() returns the registry row for an FK to a registered table', () => {
+    expect(dimensionFor(fk(), [regions, programs])).toBe(programs);
+    expect(dimensionFor(fk(), undefined)).toBeUndefined();
+    expect(dimensionFor(fk({ join_table: '' }), [programs])).toBeUndefined();
+    expect(dimensionFor(fk({ join_schema: 'geo', join_table: 'regions' }), [regions])).toBeUndefined();
   });
 });
