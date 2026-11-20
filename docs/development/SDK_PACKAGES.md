@@ -137,7 +137,7 @@ Exactly one of `--from-fixture` and `--url` is required. The generator reads the
 
 ### Snapshots
 
-`tests/golden/codegen/<example>.ts` holds the generated file for the admin variant of every raw capture listed in `tests/golden/raw/MANIFEST.json`. A cross-check test compares every embedded shape with core's default select. CI runs `npm run golden:codegen:check` after the packages build.
+`tests/golden/codegen/<example>.ts` holds the generated file for the admin variant of every raw capture listed in `tests/golden/raw/MANIFEST.json`. A cross-check test compares every embedded shape with core's default select. CI runs `npm run golden:codegen:check` after the packages build. The snapshots are version-neutral so a release bump leaves them alone: the script replaces the CLI version in the header comment with `<version>`, and `FRAMEWORK_VERSION` is `'__MASKED__'` because the raw captures mask `framework_version`. The CLI's real output still prints both versions.
 
 ```bash
 npm run build:packages
