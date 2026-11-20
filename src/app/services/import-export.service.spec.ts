@@ -855,7 +855,8 @@ describe('ImportExportService', () => {
             RecurringTimeSlot: 24,
             PhotoGallery: 25,
             GeoPolygon: 26,
-            Markdown: 27
+            Markdown: 27,
+            Dimension: 28
         };
 
         it('should have matching enum keys', () => {
@@ -886,7 +887,7 @@ describe('ImportExportService', () => {
 
             expect(enumKeys.length, 'New EntityPropertyType detected! Update:\n' +
                 '  1. import-validation.worker.ts\n' +
-                '  2. EXPECTED_WORKER_ENUM_VALUES in this test').toBe(28); // Unknown(0) through Markdown(27) = 28 types
+                '  2. EXPECTED_WORKER_ENUM_VALUES in this test').toBe(29); // Unknown(0) through Dimension(28) = 29 types
         });
     });
 

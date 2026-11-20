@@ -52,6 +52,7 @@ import type { ConstraintMessage } from '../model/api.js';
 import type { EntityAction, SchemaEntityProperty, SchemaEntityTable, StaticText } from '../model/entity.js';
 import type { GuidedFormDefinition, GuidedFormStep } from '../model/guided-form.js';
 import type { MenuNodeRow } from '../model/menu.js';
+import type { SchemaDimension } from '../model/dimension.js';
 import type { CategoryOption, M2mPropertyMetadata, StatusOption } from '../model/schema.js';
 import type { DomainVersionInfo, DomainVersionRow } from '../version/types.js';
 import type { Transport } from '../transport/types.js';
@@ -119,6 +120,7 @@ export type SchemaResource =
   | 'entities'
   | 'properties'
   | 'm2m_properties'
+  | 'dimensions'
   | 'constraint_messages'
   | 'statuses'
   | 'categories'
@@ -174,6 +176,7 @@ interface Bucket {
   menuNodes: Slot<MenuNodeRow[]>;
   properties: Slot<SchemaEntityProperty[]>;
   m2m: Slot<M2mPropertyMetadata[]>;
+  dimensions: Slot<SchemaDimension[]>;
   constraintMessages: Slot<ConstraintMessage[]>;
   staticText: Slot<StaticText[]>;
   guidedForms: Slot<GuidedFormDefinition[]>;
@@ -192,6 +195,7 @@ function newBucket(identity: string, locale: string): Bucket {
     menuNodes: newSlot(),
     properties: newSlot(),
     m2m: newSlot(),
+    dimensions: newSlot(),
     constraintMessages: newSlot(),
     staticText: newSlot(),
     guidedForms: newSlot(),
@@ -360,6 +364,16 @@ export class SchemaClient implements HandleSource {
     return this.get<SchemaEntityProperty[]>(this.current, 'schema_properties');
   }
 
+  /**
+   * `GET schema_dimensions` (v0.86.0): the registered dimensions, which type BIGINT foreign keys to their
+   * tables as `Dimension`. Forgotten with the properties. An error (an instance older than v0.85.0)
+   * resolves `[]` and is cached.
+   */
+  getDimensions(): Promise<SchemaDimension[]> {
+    const bucket = this.current;
+    return this.load(bucket.dimensions, () => this.getList<SchemaDimension>(bucket, 'schema_dimensions', 'dimensions'));
+  }
+
   /** `GET schema_m2m_properties`. An error resolves `[]` and is cached. */
   getM2mMetadata(): Promise<M2mPropertyMetadata[]> {
     const bucket = this.current;
@@ -491,6 +505,10 @@ export class SchemaClient implements HandleSource {
     return this.current.properties.value;
   }
 
+  peekDimensions(): SchemaDimension[] | undefined {
+    return this.current.dimensions.value;
+  }
+
   /**
    * The actions of the last successful {@link getEntityActions} for `tableName`,
    * `undefined` before one or after {@link invalidateEntities}. Only a peek for
@@ -565,6 +583,7 @@ export class SchemaClient implements HandleSource {
     for (const bucket of this.buckets.values()) {
       resetSlot(bucket.properties);
       resetSlot(bucket.m2m);
+      resetSlot(bucket.dimensions);
     }
   }
 
@@ -800,6 +819,7 @@ function resetBucket(bucket: Bucket): void {
   resetSlot(bucket.menuNodes);
   resetSlot(bucket.properties);
   resetSlot(bucket.m2m);
+  resetSlot(bucket.dimensions);
   resetSlot(bucket.constraintMessages);
   resetSlot(bucket.staticText);
   resetSlot(bucket.guidedForms);

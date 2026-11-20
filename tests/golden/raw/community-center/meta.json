@@ -121,6 +121,12 @@
       "file": "schema_menu_nodes",
       "method": "GET",
       "path": "schema_menu_nodes"
+    },
+    {
+      "consumer": "core schema-client getDimensions() (frontend schema.service + mcp schema-cache Dimension typing, v0.86.0)",
+      "file": "schema_dimensions",
+      "method": "GET",
+      "path": "schema_dimensions"
     }
   ],
   "example": "community-center",
@@ -209,6 +215,14 @@
       "serverKeys": null,
       "tieKeys": [
         "cache_name"
+      ]
+    },
+    "schema_dimensions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "dimension_key"
       ]
     },
     "schema_entities": {
@@ -355,6 +369,7 @@
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.reservation_request.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -385,6 +400,7 @@
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.reservation_request": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -414,6 +430,7 @@
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.reservation_request.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -445,6 +462,7 @@
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.reservation_request": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -474,6 +492,7 @@
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.reservation_request.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -505,6 +524,7 @@
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.reservation_request": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -534,6 +554,7 @@
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.reservation_request.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -565,6 +586,7 @@
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.reservation_request": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -594,6 +616,7 @@
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.reservation_request.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -625,6 +648,7 @@
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.reservation_request": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,

@@ -121,6 +121,7 @@ describe('SchemaService over the core SchemaClient', () => {
       await entities;
       httpMock.expectOne(urlHas('schema_properties')).flush([MOCK_PROPERTIES.textShort]);
       (await awaitRequest(httpMock, urlHas('schema_m2m_properties'))).flush('x', fail);
+      (await awaitRequest(httpMock, urlHas('schema_dimensions'))).flush([]);
       const props = await done;
       expect(props.length).toBe(1);
       expect(errorSpy).not.toHaveBeenCalled();
@@ -133,6 +134,7 @@ describe('SchemaService over the core SchemaClient', () => {
       const done = firstValueFrom(service.getProperties()).catch(e => e);
       httpMock.expectOne(urlHas('schema_properties')).flush({ message: 'down' }, fail);
       (await awaitRequest(httpMock, urlHas('schema_m2m_properties'))).flush([]);
+      (await awaitRequest(httpMock, urlHas('schema_dimensions'))).flush([]);
       const err = await done;
       expect(err).toBeInstanceOf(HttpErrorResponse);
       expect(err.status).toBe(500);
@@ -381,6 +383,7 @@ describe('SchemaService over the core SchemaClient', () => {
       service.refreshPropertiesCache();
       httpMock.expectOne(urlHas('schema_properties')).flush([]);
       (await awaitRequest(httpMock, urlHas('schema_m2m_properties'))).flush([]);
+      (await awaitRequest(httpMock, urlHas('schema_dimensions'))).flush([]);
       await settle();
     });
   });

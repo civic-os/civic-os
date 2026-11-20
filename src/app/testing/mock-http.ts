@@ -73,6 +73,8 @@ export function expectPostgrestRequestWithParams(
 export function flushM2mMetadata(httpMock: HttpTestingController, data: any[] = []) {
   const reqs = httpMock.match(req => req.url.includes('schema_m2m_properties'));
   reqs.forEach(req => req.flush(data));
+  // getProperties() also loads the dimensions registry alongside (v0.86.0); answer it empty
+  httpMock.match(req => req.url.includes('schema_dimensions')).forEach(req => req.flush([]));
 }
 
 /**

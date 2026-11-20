@@ -47,6 +47,7 @@ const EXPECTED: ReadonlyArray<readonly [string, number]> = [
   ['PhotoGallery', 25],
   ['GeoPolygon', 26],
   ['Markdown', 27],
+  ['Dimension', 28],
 ];
 
 // Numeric enums carry reverse mappings (value to name), so split them apart.
@@ -54,13 +55,13 @@ const names = Object.keys(EntityPropertyType).filter((k) => Number.isNaN(Number(
 const values = Object.values(EntityPropertyType).filter((v): v is number => typeof v === 'number');
 
 describe('EntityPropertyType', () => {
-  it('has exactly 28 members', () => {
-    expect(values).toHaveLength(28);
-    expect(names).toHaveLength(28);
+  it('has exactly 29 members', () => {
+    expect(values).toHaveLength(29);
+    expect(names).toHaveLength(29);
   });
 
   it('has contiguous values from 0 to 27', () => {
-    expect([...values].sort((a, b) => a - b)).toEqual(Array.from({ length: 28 }, (_, i) => i));
+    expect([...values].sort((a, b) => a - b)).toEqual(Array.from({ length: 29 }, (_, i) => i));
   });
 
   it('maps every member name to its pinned value, in order', () => {

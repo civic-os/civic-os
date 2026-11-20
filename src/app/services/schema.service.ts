@@ -25,7 +25,7 @@ import { ValidatorFn } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { ConstraintMessage } from '../interfaces/api';
 import { LocaleService } from './locale.service';
-import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle, FilterCriteria, MenuEntry, MenuNodeRow } from '@civic-os/core';
+import type { M2mPropertyMetadata, StatusOption, CategoryOption, SchemaResource, DomainVersionInfo, EntityHandle, FilterCriteria, MenuEntry, MenuNodeRow, SchemaDimension } from '@civic-os/core';
 import { buildMenu, hasKeyFilters, resolveKeyFilters, SchemaClient } from '@civic-os/core';
 import { angularHttpTransport } from '../sdk/angular-http-transport';
 import { fromCore } from '../sdk/from-core';
@@ -335,12 +335,13 @@ export class SchemaService {
     return combineLatest([
       this.cached$(() => this.client.peekProperties(), () => this.client.getProperties()),
       this.getEntities().pipe(take(1)),
-      this.cached$(() => this.client.peekM2mMetadata(), () => this.client.getM2mMetadata())
+      this.cached$(() => this.client.peekM2mMetadata(), () => this.client.getM2mMetadata()),
+      this.getDimensions(),
     ]).pipe(
-      map(([props, tables, m2mMetadata]) => {
-        // First, set property types
+      map(([props, tables, m2mMetadata, dimensions]) => {
+        // First, set property types (a BIGINT FK to a registered dimension is a Dimension, v0.86.0)
         const typedProps = props.map(p => {
-          p.type = this.getPropertyType(p);
+          p.type = this.getPropertyType(p, dimensions);
           return p;
         });
 
@@ -608,14 +609,22 @@ export class SchemaService {
           return props
             .filter(p => p.table_name == table.table_name)
             .map(p => {
-              p.type = this.getPropertyType(p);
+              p.type = this.getPropertyType(p, this.client.peekDimensions());
               return p;
             });
         })
       );
   }
-  private getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
-    return coreGetPropertyType(val);
+  private getPropertyType(val: SchemaEntityProperty, dimensions?: readonly SchemaDimension[]): EntityPropertyType {
+    return coreGetPropertyType(val, dimensions);
+  }
+
+  /**
+   * The dimensions registry (`schema_dimensions`, v0.86.0), cached with the properties and forgotten with
+   * them. Empty on an instance older than v0.85.0.
+   */
+  public getDimensions(): Observable<SchemaDimension[]> {
+    return this.cached$(() => this.client.peekDimensions(), () => this.client.getDimensions());
   }
   public static propertyToSelectString(prop: SchemaEntityProperty): string {
     return corePropertyToSelectString(prop);

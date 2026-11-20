@@ -35,6 +35,7 @@ export function formatValue(value: unknown, property: SchemaProperty): string {
       return formatDateTimeLocal(value as string);
 
     case EntityPropertyType.ForeignKeyName:
+    case EntityPropertyType.Dimension:
       return formatForeignKey(value);
 
     case EntityPropertyType.User:
@@ -256,6 +257,8 @@ export function getTypeLabel(property: SchemaProperty): string {
     case EntityPropertyType.DecimalNumber: return 'Decimal';
     case EntityPropertyType.ForeignKeyName:
       return property.join_table ? `Foreign Key → ${property.join_table}` : 'Foreign Key';
+    case EntityPropertyType.Dimension:
+      return `Dimension → ${property.join_table} (hierarchical lookup; an empty value is filled with the dimension's default on create)`;
     case EntityPropertyType.User: return 'User';
     case EntityPropertyType.GeoPoint: return 'Geographic Point';
     case EntityPropertyType.GeoPolygon: return 'Geographic Polygon';

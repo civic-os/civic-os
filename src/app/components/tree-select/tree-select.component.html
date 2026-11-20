@@ -1,0 +1,75 @@
+<div class="relative w-full not-prose">
+  <div class="relative">
+    <input #textbox
+      type="text"
+      role="combobox"
+      class="input w-full pe-10"
+      autocomplete="off"
+      aria-autocomplete="list"
+      [id]="inputId()"
+      [attr.aria-expanded]="open()"
+      [attr.aria-controls]="listId()"
+      [attr.aria-activedescendant]="activeDescendant()"
+      [attr.aria-describedby]="ariaDescribedby()"
+      [attr.aria-invalid]="ariaInvalid() || null"
+      [attr.aria-required]="ariaRequired() || null"
+      [disabled]="disabled()"
+      [placeholder]="'form.select_option' | translate"
+      [value]="displayText()"
+      (focus)="openList()"
+      (click)="openList()"
+      (input)="onInput($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      (blur)="onBlur()" />
+    <span class="material-symbols-outlined pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-base-content/60" aria-hidden="true">
+      {{ open() ? 'expand_less' : 'expand_more' }}
+    </span>
+  </div>
+
+  @if (open()) {
+    <ul role="listbox"
+      class="absolute start-0 z-30 mt-1 min-w-full w-max max-w-[min(32rem,calc(100vw-2rem))] max-h-72 overflow-y-auto rounded-box border border-base-300 bg-base-100 p-1 shadow-lg"
+      [id]="listId()"
+      [attr.aria-label]="'tree_select.options' | translate">
+      @for (entry of entries(); track entry === null ? 'none' : entry.id; let i = $index) {
+        @if (entry === null) {
+          <li role="option"
+            class="cursor-pointer rounded px-3 py-2 text-base-content/70"
+            [id]="optionId(null)"
+            [class.bg-base-200]="i === activeIndex()"
+            [attr.aria-selected]="value() === null"
+            (mousedown)="$event.preventDefault(); choose(null)">
+            {{ 'tree_select.none' | translate }}
+          </li>
+        } @else {
+          <li role="option"
+            class="flex items-center gap-2 rounded py-2 pe-3"
+            [id]="optionId(entry)"
+            [style.padding-inline-start.rem]="0.75 + (entry.row.level - 1) * 1.25"
+            [class.cursor-pointer]="!entry.disabled"
+            [class.bg-base-200]="i === activeIndex()"
+            [class.font-semibold]="value() === entry.id"
+            [class.text-base-content/60]="entry.disabled"
+            [attr.aria-selected]="value() === entry.id"
+            [attr.aria-disabled]="entry.disabled || null"
+            [attr.aria-label]="entry.path + (entry.inactive ? ' (' + ('tree_select.inactive' | translate) + ')' : '')"
+            (mousedown)="$event.preventDefault(); choose(entry)">
+            <span class="truncate" aria-hidden="true">{{ entry.label }}</span>
+            @if (entry.inactive) {
+              <span class="badge badge-ghost badge-sm" aria-hidden="true">{{ 'tree_select.inactive' | translate }}</span>
+            }
+            @if (value() === entry.id) {
+              <span class="material-symbols-outlined ms-auto text-base" aria-hidden="true">check</span>
+            }
+          </li>
+        }
+      }
+      @if (visible().length === 0) {
+        <li role="presentation" class="px-3 py-2 text-base-content/60">{{ 'tree_select.no_matches' | translate }}</li>
+      }
+    </ul>
+  }
+  <span class="sr-only" aria-live="polite">
+    @if (open() && query().trim()) {{{ 'tree_select.match_count' | translate: { count: matchCount() } }}}
+  </span>
+</div>

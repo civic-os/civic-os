@@ -125,7 +125,7 @@ export function propertyToSelectStringForEdit(prop: SchemaEntityProperty): strin
   }
 
   // For FK fields in edit forms, we only need the raw ID value
-  if (prop.type === EntityPropertyType.ForeignKeyName) {
+  if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.Dimension) {
     return prop.column_name;
   }
 

@@ -763,5 +763,12 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.admin_menu.moved_into': '{{name}} moved into {{parent}}, position {{i}} of {{n}}',
   'a11y.admin_menu.moved_root': '{{name}} moved to the top level, position {{i}} of {{n}}',
   'a11y.admin_menu.removed': '{{name}} removed from the menu',
-  'a11y.admin_menu.added': '{{name}} added to the menu'
+  'a11y.admin_menu.added': '{{name}} added to the menu',
+
+  // Tree select for the Dimension property type (v0.86.0)
+  'tree_select.options': 'Options',
+  'tree_select.none': 'None',
+  'tree_select.inactive': 'Inactive',
+  'tree_select.no_matches': 'No matches',
+  'tree_select.match_count': 'Matching options: {{count}}'
 };

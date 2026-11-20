@@ -176,6 +176,7 @@ export enum EntityPropertyType {
     PhotoGallery,       // v0.47.0 - Multi-image gallery with drag-drop reorder
     GeoPolygon,         // v0.49.0 - Interactive polygon map (geography(Polygon, 4326))
     Markdown,           // v0.70.0 - Rich text with markdown formatting
+    Dimension,          // v0.86.0 - BIGINT FK to a registered dimension table: tree select
 }
 
 /**

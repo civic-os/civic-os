@@ -61,7 +61,7 @@
         <span class="sr-only">{{ 'form.no' | translate }}</span>
       }
     }
-    @if (propType() == EntityPropertyType.ForeignKeyName) {
+    @if (propType() == EntityPropertyType.ForeignKeyName || propType() == EntityPropertyType.Dimension) {
       @if (linkRelated()) {
         <a [routerLink]="['/view', prop().join_table, datum().id]">{{ datum().display_name }}</a>
       }

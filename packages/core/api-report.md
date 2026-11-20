@@ -174,6 +174,14 @@ Kind: function. Consumer: mcp.
 function buildSearchParams(term: string, options?: SearchParamsOptions): string[];
 ```
 
+### `buildTree`
+
+Kind: function. Consumer: app.
+
+```ts
+function buildTree<T extends object>(rows: readonly T[], columns: TreeColumns<T>): TreeIndex;
+```
+
 ### `BulkInsertOptions`
 
 Kind: interface. Consumer: typed DataClient.
@@ -822,6 +830,14 @@ Kind: function. Consumer: app.
 function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: readonly SchemaEntityProperty[]): Map<string, ManyToManyMeta[]>;
 ```
 
+### `dimensionFor`
+
+Kind: function. Consumer: app.
+
+```ts
+function dimensionFor<D extends { table_name: string; table_schema: string; key_column: string; }>(val: Pick<SchemaEntityProperty, 'join_schema' | 'join_table' | 'join_column'>, dimensions: readonly D[] | undefined): D | undefined;
+```
+
 ### `DomainVersionInfo`
 
 Kind: interface. Consumer: app.
@@ -1309,6 +1325,7 @@ enum EntityPropertyType {
   PhotoGallery = 25,
   GeoPolygon = 26,
   Markdown = 27,
+  Dimension = 28,
 }
 ```
 
@@ -1637,6 +1654,41 @@ interface FilteredListWidgetConfig {
 }
 ```
 
+### `FlattenOptions`
+
+Kind: interface. Consumer: typed flattenTree.
+
+```ts
+interface FlattenOptions {
+  readonly expanded?: ReadonlySet<TreeKey> | 'all' | undefined;
+  readonly matches?: ReadonlySet<TreeKey> | undefined;
+}
+```
+
+### `flattenTree`
+
+Kind: function. Consumer: app.
+
+```ts
+function flattenTree(tree: TreeIndex, options?: FlattenOptions): readonly FlatTreeRow[];
+```
+
+### `FlatTreeRow`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface FlatTreeRow {
+  readonly key: TreeKey;
+  readonly level: number;
+  readonly setSize: number;
+  readonly posInSet: number;
+  readonly hasChildren: boolean;
+  readonly expanded: boolean;
+  readonly match?: 'match' | 'context' | undefined;
+}
+```
+
 ### `ForeignKeyLookup`
 
 Kind: interface. Consumer: app.
@@ -1793,7 +1845,7 @@ function getJunctionTableNamesFromProperties(props: readonly SchemaEntityPropert
 Kind: function. Consumer: app.
 
 ```ts
-function getPropertyType(val: SchemaEntityProperty): EntityPropertyType;
+function getPropertyType(val: SchemaEntityProperty, dimensions?: readonly { table_name: string; table_schema: string; key_column: string; }[]): EntityPropertyType;
 ```
 
 ### `getRenderableColumnSpan`
@@ -1928,6 +1980,7 @@ interface HandleSource {
   peekEntities(): readonly SchemaEntityTable[] | undefined;
   peekProperties(): readonly SchemaEntityProperty[] | undefined;
   peekEntityActions(tableName: string): readonly EntityAction[] | undefined;
+  peekDimensions?: (() => readonly SchemaDimension[] | undefined) | undefined;
 }
 ```
 
@@ -2918,6 +2971,7 @@ interface PropertySchemaTruth {
   readonly joinColumn: string | null;
   readonly statusEntityType: string | null;
   readonly categoryEntityType: string | null;
+  readonly dimensionKey: string | null;
 }
 ```
 
@@ -3455,6 +3509,7 @@ class SchemaClient {
   getMenuNodes(): Promise<MenuNodeRow[]>;
   getProperties(): Promise<SchemaEntityProperty[]>;
   fetchPropertiesFresh(): Promise<SchemaEntityProperty[]>;
+  getDimensions(): Promise<SchemaDimension[]>;
   getM2mMetadata(): Promise<M2mPropertyMetadata[]>;
   getConstraintMessages(): Promise<ConstraintMessage[]>;
   getStaticText(): Promise<StaticText[]>;
@@ -3468,6 +3523,7 @@ class SchemaClient {
   peekEntities(): SchemaEntityTable[] | undefined;
   peekMenuNodes(): MenuNodeRow[] | undefined;
   peekProperties(): SchemaEntityProperty[] | undefined;
+  peekDimensions(): SchemaDimension[] | undefined;
   peekEntityActions(tableName: string): EntityAction[] | undefined;
   entity(name: string): EntityHandle | undefined;
   peekM2mMetadata(): M2mPropertyMetadata[] | undefined;
@@ -3530,6 +3586,28 @@ class SchemaContractError {
   message: string;
   stack?: string | undefined;
   cause?: unknown;
+}
+```
+
+### `SchemaDimension`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface SchemaDimension {
+  dimension_key: string;
+  display_name: string;
+  table_schema: string;
+  table_name: string;
+  key_column: string;
+  label_column: string;
+  parent_column: string | null;
+  active_column: string;
+  external_id_column: string | null;
+  default_value_id: number | null;
+  hide_when_single: boolean;
+  sort_order: number;
+  sort_column?: string | null | undefined;
 }
 ```
 
@@ -3684,7 +3762,7 @@ type SchemaMismatchReason = 'client-ahead' | 'invalid' | 'hash-mismatch' | 'unve
 Kind: type. Consumer: app.
 
 ```ts
-type SchemaResource = 'entities' | 'statuses' | 'properties' | 'm2m_properties' | 'constraint_messages' | 'categories' | 'guided_forms' | 'guided_form_steps' | 'static_text' | 'entity_actions' | 'domain_version';
+type SchemaResource = 'entities' | 'statuses' | 'properties' | 'm2m_properties' | 'dimensions' | 'constraint_messages' | 'categories' | 'guided_forms' | 'guided_form_steps' | 'static_text' | 'entity_actions' | 'domain_version';
 ```
 
 ### `SchemaRlsPolicy`
@@ -3774,7 +3852,7 @@ interface Series {
 Kind: type. Consumer: app.
 
 ```ts
-type SeriesEditScope = 'this_only' | 'this_and_future' | 'all';
+type SeriesEditScope = 'all' | 'this_only' | 'this_and_future';
 ```
 
 ### `SeriesGroup`
@@ -4160,6 +4238,54 @@ interface TransportResponse {
   statusText?: string | undefined;
   headers: Record<string, string>;
   text: string;
+}
+```
+
+### `TreeColumns`
+
+Kind: interface. Consumer: typed buildTree.
+
+```ts
+interface TreeColumns<T> {
+  readonly key: keyof T & string;
+  readonly parent: keyof T & string;
+}
+```
+
+### `TreeIndex`
+
+Kind: interface. Consumer: app.
+
+```ts
+interface TreeIndex {
+  readonly roots: ReadonlyArray<TreeKey>;
+  node(key: TreeKey): TreeNodeInfo | undefined;
+  descendants(key: TreeKey): readonly TreeKey[];
+  readonly size: number;
+}
+```
+
+### `TreeKey`
+
+Kind: type. Consumer: typed buildTree.
+
+```ts
+type TreeKey = string | number;
+```
+
+### `TreeNodeInfo`
+
+Kind: interface. Consumer: typed buildTree.
+
+```ts
+interface TreeNodeInfo {
+  readonly key: TreeKey;
+  readonly level: number;
+  readonly ancestors: ReadonlyArray<TreeKey>;
+  readonly children: ReadonlyArray<TreeKey>;
+  readonly descendantCount: number;
+  readonly orphan: boolean;
+  readonly cycle: boolean;
 }
 ```
 

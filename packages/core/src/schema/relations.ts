@@ -166,7 +166,7 @@ export function detectJunctionTables(
     const fkProps = tableProps.filter(p =>
       p.join_table &&
       p.join_schema === 'public' &&
-      (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User)
+      (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User || p.type === EntityPropertyType.Dimension)
     );
 
     // Must have exactly 2 FKs
@@ -182,7 +182,8 @@ export function detectJunctionTables(
       !metadataColumns.includes(p.column_name) &&
       !fkProps.includes(p) &&
       p.type !== EntityPropertyType.ForeignKeyName &&
-      p.type !== EntityPropertyType.User
+      p.type !== EntityPropertyType.User &&
+      p.type !== EntityPropertyType.Dimension
     );
 
     const hasExtraColumns = extraColumnProps.length > 0;
@@ -354,7 +355,7 @@ export function detectParentHops(
     p.join_schema === 'public' &&
     p.join_table !== junctionTable &&
     !systemTables.includes(p.join_table) &&
-    (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User)
+    (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User || p.type === EntityPropertyType.Dimension)
   );
 
   // Find candidates whose target table has display_name

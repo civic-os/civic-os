@@ -141,7 +141,8 @@
     {"order": "col", "type": "RecurringTimeSlot"},
     {"order": "col", "type": "PhotoGallery"},
     {"order": "col", "type": "GeoPolygon"},
-    {"order": "col", "type": "Markdown"}
+    {"order": "col", "type": "Markdown"},
+    {"order": "col(display_name)", "type": "Dimension"}
   ],
   "listPageBuildSearchParams": {
     "both": ["or=(civic_os_text_search.wfts.pot%20hole,display_name.ilike.*pot%20hole*)"],

@@ -161,6 +161,28 @@ ON CONFLICT DO NOTHING;
 
 3. Column definition: `priority INT` with FK to `metadata.categories(id)`
 
+## Dimension Pattern (hierarchical lookups reports are cut by)
+
+Use for a lookup that reports group by and that may be a hierarchy: program, site, department, ward. The table needs a `BIGINT` key, a label, a `BOOLEAN` active column (rows are retired, never deleted) and, for a hierarchy, an indexed self-referencing parent FK. Registering it makes every FK to it a `Dimension` property (a tree select in forms), fills an empty FK with the default on insert, refuses deletes and parent cycles.
+
+```sql
+CREATE TABLE public.programs (
+  id BIGSERIAL PRIMARY KEY,
+  parent_id BIGINT REFERENCES public.programs(id),
+  display_name VARCHAR(100) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE INDEX ON public.programs(parent_id);
+INSERT INTO public.programs (display_name) VALUES ('General');
+
+-- after every table with a FK to programs exists (re-run when one is added later)
+SELECT register_dimension('program', 'Program', 'public', 'programs',
+  p_parent_column := 'parent_id',
+  p_default_value_id := (SELECT id FROM public.programs WHERE display_name = 'General'));
+```
+
+FK columns to a dimension are `BIGINT` (`program_id BIGINT REFERENCES public.programs(id)`), indexed like any FK. Siblings sort by a `sort_order` column when the table has one, else by label; `SELECT set_dimension_sort_column('program', 'rank')` names another column.
+
 ## RLS Policy Pattern (4 policies per table)
 
 ```sql

@@ -41,7 +41,7 @@
               </div>
 
               <!-- Foreign Key / User / Status / Category: Checkbox list -->
-              @if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.User || prop.type === EntityPropertyType.Status || prop.type === EntityPropertyType.Category) {
+              @if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.Dimension || prop.type === EntityPropertyType.User || prop.type === EntityPropertyType.Status || prop.type === EntityPropertyType.Category) {
                 <fieldset class="border-0 p-0 m-0 min-w-0">
                   <legend class="sr-only">{{ prop.display_name }}</legend>
                   <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">

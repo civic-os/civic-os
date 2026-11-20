@@ -98,7 +98,7 @@ export class ImportExportService {
           // Their data is already in denormalized text columns. PostgREST cannot resolve
           // FK embeddings through aggregate VIEWs (GROUP BY breaks FK detection).
           if (entity.is_view && p.show_on_list === false &&
-              [EntityPropertyType.ForeignKeyName, EntityPropertyType.User,
+              [EntityPropertyType.ForeignKeyName, EntityPropertyType.Dimension, EntityPropertyType.User,
                EntityPropertyType.Status, EntityPropertyType.Category].includes(p.type)) {
             return false;
           }
@@ -189,7 +189,7 @@ export class ImportExportService {
    * display_name is always available while full_name may be null for privacy.
    */
   private buildOrderField(property: SchemaEntityProperty): string {
-    if (property.type === EntityPropertyType.ForeignKeyName) {
+    if (property.type === EntityPropertyType.ForeignKeyName || property.type === EntityPropertyType.Dimension) {
       return `${property.column_name}(display_name)`;
     }
     if (property.type === EntityPropertyType.User) {
@@ -216,7 +216,7 @@ export class ImportExportService {
         const value = row[prop.column_name];
 
         // FK columns - add both ID and display name columns
-        if (prop.type === EntityPropertyType.ForeignKeyName) {
+        if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.Dimension) {
           if (value && typeof value === 'object' && 'id' in value) {
             exportRow[prop.display_name] = value.id;
             exportRow[prop.display_name + ' (Name)'] = value.display_name;
@@ -462,6 +462,7 @@ export class ImportExportService {
     // Add reference sheets for FK, User, Status, and M:M target fields
     const referenceProps = templateProperties.filter(p =>
       p.type === EntityPropertyType.ForeignKeyName ||
+      p.type === EntityPropertyType.Dimension ||
       p.type === EntityPropertyType.User ||
       p.type === EntityPropertyType.Status ||
       p.type === EntityPropertyType.ManyToMany
@@ -495,6 +496,7 @@ export class ImportExportService {
         return min && max ? `Number between ${min}-${max}` : 'Number';
 
       case EntityPropertyType.ForeignKeyName:
+      case EntityPropertyType.Dimension:
       case EntityPropertyType.User:
       case EntityPropertyType.Status:
       case EntityPropertyType.Category:
@@ -628,6 +630,7 @@ export class ImportExportService {
   ): Observable<Map<string, ForeignKeyLookup>> {
     const referenceProps = properties.filter(p =>
       p.type === EntityPropertyType.ForeignKeyName ||
+      p.type === EntityPropertyType.Dimension ||
       p.type === EntityPropertyType.User ||
       p.type === EntityPropertyType.Status ||
       p.type === EntityPropertyType.Category ||

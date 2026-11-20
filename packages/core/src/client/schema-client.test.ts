@@ -75,6 +75,7 @@ describe('SchemaClient requests (URLs, headers, bodies as SchemaService sends th
     ['getProperties', c => c.getProperties(), 'GET', 'schema_properties'],
     ['fetchPropertiesFresh', c => c.fetchPropertiesFresh(), 'GET', 'schema_properties'],
     ['getM2mMetadata', c => c.getM2mMetadata(), 'GET', 'schema_m2m_properties'],
+    ['getDimensions', c => c.getDimensions(), 'GET', 'schema_dimensions'],
     ['getConstraintMessages', c => c.getConstraintMessages(), 'GET', 'constraint_messages'],
     ['getStaticText', c => c.getStaticText(), 'GET', 'static_text'],
     ['getGuidedFormDefinitions', c => c.getGuidedFormDefinitions(), 'GET', 'schema_guided_forms'],
@@ -125,6 +126,7 @@ describe('SchemaClient issues requests synchronously on a cold cache', () => {
     ['getProperties', c => c.getProperties()],
     ['fetchPropertiesFresh', c => c.fetchPropertiesFresh()],
     ['getM2mMetadata', c => c.getM2mMetadata()],
+    ['getDimensions', c => c.getDimensions()],
     ['getConstraintMessages', c => c.getConstraintMessages()],
     ['getStaticText', c => c.getStaticText()],
     ['getGuidedFormDefinitions', c => c.getGuidedFormDefinitions()],
@@ -327,6 +329,7 @@ describe('SchemaClient error behaviour (as SchemaService)', () => {
 
   const degrading: Array<[string, SchemaResource, (c: SchemaClient) => Promise<unknown>, (c: SchemaClient) => unknown, string | undefined]> = [
     ['getM2mMetadata', 'm2m_properties', c => c.getM2mMetadata(), c => c.peekM2mMetadata(), undefined],
+    ['getDimensions', 'dimensions', c => c.getDimensions(), c => c.peekDimensions(), undefined],
     ['getConstraintMessages', 'constraint_messages', c => c.getConstraintMessages(), c => c.peekConstraintMessages(), undefined],
     ['getStaticText', 'static_text', c => c.getStaticText(), c => c.peekStaticText(), undefined],
     ['getGuidedFormDefinitions', 'guided_forms', c => c.getGuidedFormDefinitions(), c => c.peekGuidedFormDefinitions(), undefined],
@@ -1240,5 +1243,22 @@ describe('SchemaClient.readDomainVersion', () => {
       throw new TransportError('network', 'offline');
     });
     await expect(new SchemaClient({ transport, apiUrl: API }).readDomainVersion()).rejects.toBeInstanceOf(TransportError);
+  });
+});
+
+describe('SchemaClient dimensions registry (v0.86.0)', () => {
+  it('caches schema_dimensions, peeks it, and forgets it with the properties', async () => {
+    let calls = 0;
+    const { transport } = autoTransport(() => { calls++; return reply(200, '[{"dimension_key":"program"}]'); });
+    const client = new SchemaClient({ transport, apiUrl: API });
+    expect(client.peekDimensions()).toBeUndefined();
+    await client.getDimensions();
+    await client.getDimensions();
+    expect(calls).toBe(1);
+    expect(client.peekDimensions()).toEqual([{ dimension_key: 'program' }]);
+    client.invalidateProperties();
+    expect(client.peekDimensions()).toBeUndefined();
+    await client.getDimensions();
+    expect(calls).toBe(2);
   });
 });

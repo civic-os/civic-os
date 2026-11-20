@@ -24,6 +24,24 @@ User profile data (name, email, phone) is managed in **Keycloak** (single source
 
 Phone number requires custom user attribute and JWT mapper configuration. See `docs/AUTHENTICATION.md` (Step 5) for setup.
 
+## Dimension Type (v0.86.0)
+
+**Detection** (core `getPropertyType`, after Status and Category, before system types): a `BIGINT` (`int8`) column with a foreign key into `public` whose target table, schema and key column match a row of the dimensions registry. Like the system types (an FK to `files`, `civic_os_users`, ...), the type comes from the FK target alone; there is no extra column on `schema_properties`. Clients load `schema_dimensions` with the properties (core `SchemaClient.getDimensions()`, invalidated with the properties cache, whose version follows the registry) and pass it to `getPropertyType(prop, dimensions)`; `dimensionFor(prop, dimensions)` returns the matching registry row. Without the registry (an instance older than v0.85.0) the column is a `ForeignKeyName`. A dimension table outside `public` has no API path, so FKs to it stay `ForeignKeyName`.
+
+**Same as ForeignKeyName**: the select string embeds `display_name` of the target, the edit select reads the raw id, ordering is by `col(display_name)`, the List filter is the checkbox list with `in`, import and export resolve names through the target table, junction detection treats it as an FK, and the MCP server resolves names and formats values the same way (its type label says "Dimension → table").
+
+**Edit control**: `TreeSelectComponent` (`src/app/components/tree-select/`), an ARIA editable combobox over a listbox, fed by `DimensionService` (registry row from `schema_dimensions`, rows from the dimension table with columns aliased to `id`, `label`, `parent_id`, `active`, ordered by label). Tree logic is core's `buildTree` / `flattenTree` (`packages/core/src/tree/`).
+
+- Siblings come in the registry's order: `DimensionService` requests `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc` (the sort column set with `set_dimension_sort_column()`, or a `sort_order` column by convention) and `buildTree()` keeps input order within siblings.
+- Options are indented by level and named by their full path ("General › Youth › Teens"); listbox options carry no level, so the path is the accessible name.
+- Typing filters by label; ancestors of matches stay visible as context.
+- Retired rows (active column false) are hidden from new choices; the current value stays visible, marked "Inactive". A retired ancestor of an active row shows as disabled context.
+- On a dimension table's own parent column (the FK points at its own table), the record and its descendants are disabled.
+- On an empty control the dimension's active default is preselected, so a required column validates and the user sees what the server would fill. The server-side fill trigger still covers import, MCP and SQL inserts.
+- `hide_when_single`: with exactly one active row the field is not rendered and holds that row.
+
+**Display**: same as ForeignKeyName (link to the record, `display_name`).
+
 ## Geography (GeoPoint) Type
 
 **Detection**: `geography(Point, 4326)`

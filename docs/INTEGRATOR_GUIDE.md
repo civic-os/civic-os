@@ -91,7 +91,7 @@ Key fields:
 - `sort_order` - Field ordering in forms/tables (lower numbers first). A column without a value falls back to its position in the table, so a value you set can tie another column's position. Ties order by column name (since v0.77.3), so set `sort_order` on every column whose order matters.
 - `column_width` - Form field width: 1 (half) or 2 (full, default)
 - `sortable` - BOOLEAN - Enable column sorting on List pages
-- `filterable` - BOOLEAN - Show property in filter bar (supports: ForeignKeyName, User, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)
+- `filterable` - BOOLEAN - Show property in filter bar (supports: ForeignKeyName, Dimension, User, Status, Category, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)
 - `show_on_list` - BOOLEAN - Display in List page table (default: true)
 - `show_on_create` - BOOLEAN - Display in Create form (default: true)
 - `show_on_edit` - BOOLEAN - Display in Edit form (default: true)
@@ -5367,7 +5367,7 @@ DETAIL: public.programs.parent_id: type integer, required bigint (required by sh
 |---|---|---|
 | `table` | **`name`** (`schema.table`), `columns`, `writes`, `source` | The relation exists and is a table, not a view. Per column (**`name`**, `type`, `nullable`, `references` as `schema.table.column`): it exists, its type is compatible, its nullability is compatible, a single-column FK points at the given column |
 | `rpc` | **`name`** (`schema.function`), **`args`** (types in order, possibly `[]`), `returns`, `source` | The exact signature resolves; `returns` (`bigint`, `setof bigint`, `TABLE(a integer, b text)`) matches after normalizing type names |
-| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`), `source` | The key is registered (`missing_dimension`); when given, the registry names the same table and, per declared role, the same column, and that column still exists (`dimension_mismatch`, which is how a registry row left stale by a column rename comes to light). Undeclared roles are not compared. Before v0.85.0: `missing_core_feature` |
+| `dimension` | **`key`**, `table`, `columns` (roles `key`, `label`, `parent`, `active`, `external_id`, and `sort` since v0.86.0), `source` | The key is registered (`missing_dimension`); when given, the registry names the same table and, per declared role, the same column, and that column still exists (`dimension_mismatch`, which is how a registry row left stale by a column rename comes to light). Undeclared roles are not compared. Before v0.85.0: `missing_core_feature` |
 | `module` | **`key`**, `version` (`MAJOR.MINOR`), `source` | The key is registered (`missing_module`); with `version: "1.2"`, the installed version has major 1 and minor 2 or higher (`module_version_mismatch`). Before v0.85.0: `missing_core_feature` |
 
 `template` and `source` are free labels used only in messages. Types are written in SQL spelling and normalized, so `int8`, `bigint` and `BIGINT` are the same and `varchar(50)` carries its length. A malformed declaration (an unknown element kind or key, a missing name, an unqualified name, a type that does not resolve) is a bug in the script, and both functions raise `22023` at once.
@@ -5458,7 +5458,16 @@ Other parameters: `p_key_column` (default `id`), `p_label_column` (default `disp
 
 **Re-register after adding tables.** `register_dimension()` is idempotent and looks for referencing columns each time, so an install script that adds a table with a FK to a dimension calls it again afterwards. A `NULL` `p_default_value_id` on re-registration keeps the current default; the other settings follow the latest call. Over the API, fill triggers go only on referencing tables in `public` (a `NOTICE` names the ones skipped); the deployment role adds the rest.
 
+**Sibling order (v0.86.0):** `set_dimension_sort_column(p_dimension_key, p_sort_column)` names the column that orders a dimension's rows within each parent (admin JWT or the deployment role; the column must exist, `22023` otherwise; `NULL` clears it). Clients request it through PostgREST: `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc`. When no sort column is set, `register_dimension()` uses a `sort_order` column by convention if the table has one, and keeps a sort column already set on re-registration. Without either, rows sort by label. `schema_dimensions.sort_column` returns it, and `compare_interface()` dimension elements may declare it as the `sort` column role. The sort column is a separate setter, not a `register_dimension()` parameter, so install scripts that declare `register_dimension()`'s v0.85.0 signature in `assert_interface()` keep matching.
+
+```sql
+ALTER TABLE public.programs ADD COLUMN rank INT;
+SELECT set_dimension_sort_column('program', 'rank');
+```
+
 **Changing the default:** `set_dimension_default(p_dimension_key, p_value_id)` (admin JWT or the deployment role). `NULL` clears it. A missing row is `23503`, a retired row `22023`. A default that is retired later is skipped, not cleared, and returns when the row is reactivated.
+
+**In forms (v0.86.0).** Every `BIGINT` foreign key to a registered table in `public` becomes the **Dimension** property type: a searchable tree select with indented options named by their full path, retired rows hidden from new choices, and the record and its descendants disabled when editing a dimension table's own parent column. A new record's field starts on the dimension's default when that row is active. With `hide_when_single` (the default) and exactly one active row, the field is not shown at all. It filters, sorts, exports and imports like any foreign key. Changing a registration or its default refreshes open browsers on their next navigation (the properties cache version follows the registry).
 
 **Reading:** `public.schema_dimensions` lists the registry (any role). `dimension_subtree(p_dimension_key, p_value_id)` returns the value and all its descendants that the caller can read (RLS applies), bounded even if a cycle exists.
 
