@@ -24,7 +24,7 @@ export interface SchemaDimension {
   external_id_column: string | null;
   /** Filled into an empty FK on insert, unless retired. */
   default_value_id: number | null;
-  /** With exactly one active row, clients hide the control; the server fills the value. */
+  /** With exactly one active row, forms hide the control and set it to that row. */
   hide_when_single: boolean;
   /** Orders the dimensions in the registry, not a dimension's rows. */
   sort_order: number;
@@ -33,4 +33,10 @@ export interface SchemaDimension {
    * label. Optional so registry rows from a v0.85.0 instance still type-check.
    */
   sort_column?: string | null;
+  /**
+   * Registry columns the table no longer has (renamed or dropped), in role order; every named column when the
+   * table is gone; empty when healthy (v0.86.1). A dimension with any is treated as unregistered by
+   * {@link dimensionFor}. Optional so registry rows from earlier instances still type-check.
+   */
+  missing_columns?: readonly string[] | null;
 }

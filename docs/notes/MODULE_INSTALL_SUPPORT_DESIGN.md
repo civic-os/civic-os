@@ -258,6 +258,16 @@ Two of them generate DDL as the function owner, so the admin JWT path is narrowe
 | 5 | Scripts without a JWT are admitted by `metadata._is_db_admin()` on `set_domain_version()`, `create_schema_decision()` and the registry RPCs, plus a `bump_domain_version()` helper. **Decided 2026-11-05.** | A dedicated deployer role: fewer privileges, but provisioning on every instance and no precedent in core |
 | 6 | Interface comparison and the install path live in this note, not the Impact Reporting note. **Decided 2026-11-05.** | Extend the Impact Reporting module registry section: one file, but a reporting note would own schema-contract and versioning features |
 
+### Decisions after build
+
+*Recorded 2026-11-20, after v0.86.0; answers the three open questions below.*
+
+| # | Decision | Alternative and trade-off |
+|---|---|---|
+| 7 | **An install stores the interface it declared** (open question 1). `register_module(p_module_key, p_display_name, p_version, p_interface JSONB)` (v0.86.1) saves the declaration, validated by the `compare_interface()` parser (`22023` when malformed), in `metadata.modules.interface`. It follows the latest registration, like the version; the v0.85.0 three-argument form is kept (v0.85.0 is released) and registers with none. No warning is built yet: a later schema editor or Instance Management MCP warning reads the stored declarations, and modules installed from v0.86.1 on already carry theirs. | Warn now: larger scope while the Instance Management MCP is unbuilt. Store nothing: drift shows only at the next install, and modules installed before a warning existed would never carry declarations |
+| 8 | **The registry keeps column names and reports stale ones at read time** (open question 2). `schema_dimensions.missing_columns` (v0.86.1) lists the registry columns, in role order, that the table no longer has (every named column when the table is gone). Core's `dimensionFor()` treats such a dimension as unregistered, so its FK columns fall back to the ordinary dropdown instead of failing; `compare_interface()` keeps reporting `dimension_mismatch`; re-registering repairs it. | Refuse renames with an event trigger: needs a superuser and is refused on some managed databases (the Impact Reporting design already rejects event triggers). Store `attnum`: follows renames, but also follows a rename that changes a column's meaning, unnoticed. Names alone: forms fail until the next install reports it |
+| 9 | **Unique constraints may be declared; check constraints may not** (open question 3). The shape is settled now and built with the first script that relies on one: a `table` element takes `unique`, a list of column lists (`"unique": [["external_id"]]`), each met by any unique index or constraint, without a predicate, over exactly those columns in any order; a missing one is an error (`missing_unique`). | Build now: no script needs it yet. Check constraints too: comparing expressions is brittle across `pg_get_constraintdef()` formatting, and a name-only check proves little. Neither: each script checks in its own SQL |
+
 ## Phasing
 
 Both features belong to Impact Reporting Phase 1 and must exist before the first module's install script is written:
@@ -272,9 +282,9 @@ Documentation ships with the build per the documentation rules: an Integrator Gu
 
 ## Open questions
 
-1. Should the schema editor and the Instance Management MCP warn when an admin edits a column that an installed template declares? That needs the declarations stored on the instance (for example with the module registry row), which this design does not do.
-2. Should `metadata.dimensions` follow renames by storing column numbers (`attnum`) instead of names? Today a rename leaves the registry naming a column that no longer exists. The comparison reports it, but only at the next install.
-3. Should `compare_interface()` also accept a declared check constraint or unique constraint, for dependents that rely on uniqueness of a column such as `external_id`?
+1. ~~Should the schema editor and the Instance Management MCP warn when an admin edits a column that an installed template declares?~~ Answered 2026-11-20: store the declarations now (`metadata.modules.interface`, v0.86.1), warn later (decision 7).
+2. ~~Should `metadata.dimensions` follow renames by storing column numbers (`attnum`) instead of names?~~ Answered 2026-11-20: keep names and report stale ones at read time (`schema_dimensions.missing_columns`, v0.86.1; decision 8).
+3. ~~Should `compare_interface()` also accept a declared check constraint or unique constraint?~~ Answered 2026-11-20: unique only, shape settled, built when first needed (decision 9).
 
 ## References
 

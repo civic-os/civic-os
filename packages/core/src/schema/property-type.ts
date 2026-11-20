@@ -8,12 +8,14 @@ import type { SchemaDimension, SchemaEntityProperty } from '../model/index.js';
 import { isSystemType } from './system-types.js';
 
 /** The slice of a registry row that identifies a dimension's table and key. */
-type DimensionTarget = Pick<SchemaDimension, 'table_schema' | 'table_name' | 'key_column'>;
+type DimensionTarget = Pick<SchemaDimension, 'table_schema' | 'table_name' | 'key_column' | 'missing_columns'>;
 
 /**
  * The registered dimension a property's foreign key points at (v0.86.0): the FK targets, in `public`, the
  * table and key column of a row of `schema_dimensions`. A dimension outside `public` has no API path, so an
- * FK to it is not a Dimension. Undefined when the property is not an FK to a registered table.
+ * FK to it is not a Dimension. A registry row whose `missing_columns` is not empty (a renamed or dropped column,
+ * v0.86.1) is skipped, so the FK stays an ordinary one. Undefined when the property is not an FK to a registered
+ * table.
  *
  * @consumer app
  */
@@ -23,7 +25,14 @@ export function dimensionFor<D extends DimensionTarget>(
 ): D | undefined {
   if (!dimensions || !val.join_table || !val.join_column) return undefined;
   if (val.join_schema && val.join_schema !== 'public') return undefined;
-  return dimensions.find(d => d.table_schema === 'public' && d.table_name === val.join_table && d.key_column === val.join_column);
+  return dimensions.find(
+    d =>
+      d.table_schema === 'public' &&
+      d.table_name === val.join_table &&
+      d.key_column === val.join_column &&
+      // a registry naming a column the table no longer has (v0.86.1) is not trusted: the FK stays an ordinary one
+      !d.missing_columns?.length,
+  );
 }
 
 /**
