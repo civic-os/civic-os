@@ -10775,7 +10775,7 @@
       "state": "passed",
       "assertions": 11
     },
-    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > adds Accept-Language for a non-English locale and omits it for English": {
+    "src/app/sdk/interceptor-chain.spec.ts :: DataService through the app interceptor chain > adds Accept-Language for every locale, English included": {
       "state": "passed",
       "assertions": 2
     },

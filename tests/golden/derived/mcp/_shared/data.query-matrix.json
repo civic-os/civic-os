@@ -1806,5 +1806,5 @@
     "parents.id": "IntegerNumber",
     "summary_items.name": "TextShort"
   },
-  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+  "transportDefaults": {"Accept": "application/json", "Accept-Language": "en", "Content-Type": "application/json"}
 }
