@@ -5408,10 +5408,10 @@ It drops pre-release and build metadata, raises the requested part and resets th
 
 | Function | Who | What |
 |---|---|---|
-| `register_module(p_module_key, p_display_name, p_version)` | Admin JWT or the deployment role | Registers or re-registers (upgrade, re-run): replaces the name and version, keeps `installed_at`. `22023` for a malformed key (lowercase, digits, underscores, optional `pack:` or `bridge:` prefix), a blank name or a non-semver version |
+| `register_module(p_module_key, p_display_name, p_version, p_interface)` | Admin JWT or the deployment role | Registers or re-registers (upgrade, re-run): replaces the name, version and interface, keeps `installed_at`. `p_interface` (v0.86.1) is the declaration the script passed to `assert_interface()`, stored in `metadata.modules.interface` so later tools can tell which modules depend on a column; `NULL` for none. `22023` for a malformed key (lowercase, digits, underscores, optional `pack:` or `bridge:` prefix), a blank name, a non-semver version or a malformed declaration. The v0.85.0 three-argument form still works and registers with no interface |
 | `module_installed(p_module_key)` | Any role, anonymous included | `true` when the key is registered |
 
-An install script registers its module last, after the schema decision and the domain version bump. A report pack starts with `module_installed()` for each module it needs and exits quietly when one is absent, then declares the modules it needs as `module` elements in `assert_interface()`. A script that may run again checks `metadata.modules.version` to skip the decision and the bump when it is already installed at that version.
+The install script registers its own module, not the deployment automation: last, after the schema decision and the domain version bump, in the same transaction as the install, so the registry never names a module whose install failed partway. Pass the same declaration to `assert_interface()` and to `register_module(p_interface)`. A report pack starts with `module_installed()` for each module it needs and exits quietly when one is absent, then declares the modules it needs as `module` elements in `assert_interface()`. A script that may run again checks `metadata.modules.version` to skip the decision and the bump when it is already installed at that version.
 
 #### Dimensions (v0.85.0+)
 
@@ -5492,7 +5492,9 @@ Everything else (filters, sorting, import, export) works as for any foreign key.
 3. Clear `status_entity_type` or `category_entity_type` on those columns in `metadata.properties`, or they keep their old type.
 4. Register the dimension after every referencing table exists, and record a schema decision.
 
-**Reading:** `public.schema_dimensions` lists the registry (any role). `dimension_subtree(p_dimension_key, p_value_id)` returns the value and all its descendants that the caller can read (RLS applies), bounded even if a cycle exists; an unregistered key is `22023`.
+**Renamed or dropped columns (v0.86.1).** The registry stores column names. When a table no longer has a column the registry names (a rename, a drop, or the table itself gone), `schema_dimensions.missing_columns` lists it, and forms treat the dimension as unregistered: its foreign keys show the ordinary dropdown instead of the tree select until you re-register with the new names. The delete guard keeps working. The parent-cycle guard and the default-fill triggers read columns by the names they were installed with, so a renamed parent column or referencing FK column goes unguarded or unfilled until re-registration reinstalls them under the new names. A renamed referencing column does not appear in `missing_columns`, which covers only the dimension table's own columns. `compare_interface()` reports the same columns as `dimension_mismatch`. Renames cannot be refused (that needs an event trigger, which needs a superuser), so rename and re-register in one script.
+
+**Reading:** `public.schema_dimensions` lists the registry (any role), with `missing_columns` empty for a healthy registration. `dimension_subtree(p_dimension_key, p_value_id)` returns the value and all its descendants that the caller can read (RLS applies), bounded even if a cycle exists; an unregistered key is `22023`.
 
 Errors from `register_dimension()`: `42501` neither an admin JWT nor the deployment role, or a table outside `public` over the API; `22023` a malformed key, a table or column that does not qualify, or a retired default; `23505` the key is registered for another table, or the table under another key; `23503` the default row does not exist; `23514` an existing parent cycle.
 

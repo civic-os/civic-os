@@ -296,4 +296,12 @@ describe('Dimension detection (v0.86.0)', () => {
     expect(dimensionFor(fk({ join_table: '' }), [programs])).toBeUndefined();
     expect(dimensionFor(fk({ join_schema: 'geo', join_table: 'regions' }), [regions])).toBeUndefined();
   });
+
+  it('a registry row with missing columns is not trusted: the FK stays an ordinary one (v0.86.1)', () => {
+    const renamed = { ...programs, missing_columns: ['label_column_old'] };
+    expect(dimensionFor(fk(), [renamed])).toBeUndefined();
+    expect(getPropertyType(fk(), [renamed])).toBe(T.ForeignKeyName);
+    expect(dimensionFor(fk(), [{ ...programs, missing_columns: [] }])).toEqual({ ...programs, missing_columns: [] });
+    expect(dimensionFor(fk(), [{ ...programs, missing_columns: null }])).toEqual({ ...programs, missing_columns: null });
+  });
 });
