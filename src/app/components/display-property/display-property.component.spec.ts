@@ -27,6 +27,8 @@ import { provideMarkdown } from 'ngx-markdown';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { DebugElement } from '@angular/core';
 import { settleLazyComponents } from '../../testing/lazy-components';
+import { DimensionService } from '../../services/dimension.service';
+import { of } from 'rxjs';
 
 describe('DisplayPropertyComponent', () => {
     let component: DisplayPropertyComponent;
@@ -243,6 +245,57 @@ describe('DisplayPropertyComponent', () => {
 
             const textContent = fixture.nativeElement.textContent.trim();
             expect(textContent).toContain('Not Set');
+        });
+    });
+
+    describe('Dimension Type', () => {
+        const dimensionProp = () => createMockProperty({
+            column_name: 'category_id', type: EntityPropertyType.Dimension,
+            join_schema: 'public', join_table: 'tool_categories', join_column: 'id',
+        });
+        let calls: Array<[unknown, unknown]>;
+
+        beforeEach(async () => {
+            calls = [];
+            TestBed.resetTestingModule();
+            await TestBed.configureTestingModule({
+                imports: [DisplayPropertyComponent],
+                providers: [
+                    provideZonelessChangeDetection(),
+                    provideRouter([]),
+                    provideTranslationTesting(),
+                    provideMarkdown(),
+                    {
+                        provide: DimensionService,
+                        useValue: { getAncestorLabels: (prop: unknown, id: unknown) => { calls.push([prop, id]); return of(['Hand Tools', 'Digging & Soil']); } },
+                    },
+                ],
+            }).compileComponents();
+            fixture = TestBed.createComponent(DisplayPropertyComponent);
+            component = fixture.componentInstance;
+        });
+
+        it('shows the label alone by default (List), with no ancestor lookup', () => {
+            fixture.componentRef.setInput('property', dimensionProp());
+            fixture.componentRef.setInput('datum', { id: 9, display_name: 'Shovels' });
+            fixture.detectChanges();
+
+            const link = fixture.debugElement.query(By.css('a'));
+            expect(link.nativeElement.textContent.trim()).toBe('Shovels');
+            expect(link.nativeElement.getAttribute('href')).toContain('/view/tool_categories/9');
+            expect(calls).toEqual([]);
+        });
+
+        it('shows the ancestors in parentheses after the label when showPath is on (Detail)', () => {
+            fixture.componentRef.setInput('property', dimensionProp());
+            fixture.componentRef.setInput('datum', { id: 9, display_name: 'Shovels' });
+            fixture.componentRef.setInput('showPath', true);
+            fixture.detectChanges();
+
+            expect(fixture.debugElement.query(By.css('a')).nativeElement.textContent.trim())
+                .toBe('Shovels (Hand Tools › Digging & Soil)');
+            expect(calls.length).toBe(1);
+            expect(calls[0][1]).toBe(9);
         });
     });
 

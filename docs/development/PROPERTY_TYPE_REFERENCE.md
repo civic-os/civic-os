@@ -33,14 +33,15 @@ Phone number requires custom user attribute and JWT mapper configuration. See `d
 **Edit control**: `TreeSelectComponent` (`src/app/components/tree-select/`), an ARIA editable combobox over a listbox, fed by `DimensionService` (registry row from `schema_dimensions`, rows from the dimension table with columns aliased to `id`, `label`, `parent_id`, `active`, ordered by label). Tree logic is core's `buildTree` / `flattenTree` (`packages/core/src/tree/`).
 
 - Siblings come in the registry's order: `DimensionService` requests `order=<sort_column>.asc.nullslast,<label>.asc,<key>.asc` (the sort column from `register_dimension(p_sort_column)`, or a `sort_order` column by convention) and `buildTree()` keeps input order within siblings.
-- Options are indented by level and named by their full path ("General › Youth › Teens"); listbox options carry no level, so the path is the accessible name.
+- Options are indented by level and named label first with their ancestors in parentheses, root first ("Teens (General › Youth)", `formatTreeLabel()` in `src/app/utils/tree-path.ts`); listbox options carry no level, so this is the accessible name. The closed text box shows the same text, so truncation hides ancestors, never the chosen row.
 - Typing filters by label; ancestors of matches stay visible as context.
 - Retired rows (active column false) are hidden from new choices; the current value stays visible, marked "Inactive". A retired ancestor of an active row shows as disabled context.
 - On a dimension table's own parent column (the FK points at its own table), the record and its descendants are disabled.
 - On an empty control the dimension's active default is preselected, so a required column validates and the user sees what the server would fill. The server-side fill trigger still covers import, MCP and SQL inserts.
 - `hide_when_single`: with exactly one active row the field is not rendered and holds that row.
+- `fk_search_modal`, `options_source_rpc` and `depends_on_columns` are ignored: the tree select is the only control. `register_dimension()` raises a NOTICE for each referencing column that has one set.
 
-**Display**: same as ForeignKeyName (link to the record, `display_name`).
+**Display**: a link to the record. Detail passes `showPath` to `DisplayPropertyComponent`, which shows "Shovels (Hand Tools › Digging & Soil)": the label renders at once and the ancestors follow from `DimensionService.getAncestorLabels()`, one flat request for the dimension table resolved by `buildTree()` (no recursive query, no cache; a flat dimension makes no request). List and other contexts show `display_name` alone.
 
 ## Geography (GeoPoint) Type
 

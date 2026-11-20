@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+import { formatTreeLabel } from '../../utils/tree-path';
 import { ChangeDetectionStrategy, Component, ElementRef, computed, forwardRef, input, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { buildTree, flattenTree, type FlatTreeRow, type TreeIndex } from '@civic-os/core';
@@ -28,13 +29,12 @@ interface VisibleOption {
   context: boolean;
 }
 
-const PATH_SEPARATOR = ' › ';
-
 /**
  * A hierarchical select for the Dimension property type (v0.86.0): an ARIA combobox (an editable text box)
  * over a listbox of indented options, following the WAI-ARIA APG "editable combobox with list autocomplete"
  * pattern. Typing filters by label and keeps the ancestors of matches visible as context. Each option is
- * named by its full path ("General › Youth › Teens"), since listbox options carry no level. Inactive rows
+ * named by its label and ancestors ("Teens (General › Youth)"), since listbox options carry no level; the label
+ * leads so a truncated text box still shows the chosen row. Inactive rows
  * are hidden from new choices but still shown, marked, when already selected. `disabledIds` disables rows
  * (a record and its descendants when choosing its own parent).
  *
@@ -79,13 +79,13 @@ export class TreeSelectComponent implements ControlValueAccessor {
   private readonly byId = computed(() => new Map(this.options().map(o => [String(o.id), o])));
   private readonly tree = computed<TreeIndex>(() => buildTree(this.options(), { key: 'id', parent: 'parent_id' }));
 
-  /** "General › Youth › Teens" for a row id, or '' when the row is not among the options. */
+  /** "Teens (General › Youth)" for a row id, or '' when the row is not among the options. */
   pathOf(id: number | null): string {
     if (id === null) return '';
     const node = this.tree().node(id);
     const own = this.byId().get(String(id));
     if (!node || !own) return '';
-    return [...node.ancestors.map(a => this.byId().get(String(a))?.label ?? ''), own.label].join(PATH_SEPARATOR);
+    return formatTreeLabel(own.label, node.ancestors.map(a => this.byId().get(String(a))?.label ?? ''));
   }
 
   readonly selectedText = computed(() => this.pathOf(this.value()));

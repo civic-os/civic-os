@@ -270,6 +270,15 @@ BEGIN
       'CREATE OR REPLACE TRIGGER %I BEFORE INSERT ON %I.%I '
       'FOR EACH ROW EXECUTE FUNCTION metadata.dimension_default_fill(%L, %L)',
       v_trigger, v_ref.ref_schema, v_ref.ref_table, p_dimension_key, v_ref.ref_column);
+    -- the column becomes the Dimension type, whose tree select ignores the FK dropdown settings (v0.86.0)
+    IF v_ref.ref_schema = 'public' AND EXISTS (
+         SELECT 1 FROM metadata.properties mp
+         WHERE mp.table_name = v_ref.ref_table AND mp.column_name = v_ref.ref_column
+           AND (coalesce(mp.fk_search_modal, false) OR mp.options_source_rpc IS NOT NULL
+                OR coalesce(cardinality(mp.depends_on_columns), 0) > 0)) THEN
+      RAISE NOTICE 'dimension %: %.% now shows a tree select, which ignores its fk_search_modal, options_source_rpc and depends_on_columns settings',
+        p_dimension_key, v_ref.ref_table, v_ref.ref_column;
+    END IF;
   END LOOP;
 
   -- ------------------------------------------------------------------

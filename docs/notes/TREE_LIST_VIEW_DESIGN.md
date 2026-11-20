@@ -215,7 +215,7 @@ The `Dimension` property type and the tree view need the same operations over th
 |---|---|---|
 | Build the tree, keeping server order within siblings | yes | yes |
 | Detect orphans and cycles without looping | yes | yes |
-| Depth and ancestor path per row | indentation, `aria-level` | indented options, "Parent › Child" label for the selected value |
+| Depth and ancestor path per row | indentation, `aria-level` | indented options, "Child (Parent)" label for the selected value and on Detail |
 | Descendants of a row | child counts | disabled options (a record cannot be its own ancestor) |
 | Flatten to visible rows given an expanded set and a match set | yes | type-ahead filtering keeps ancestors of matching options |
 | Inactive rows | dimmed | hidden from new choices, still shown when already selected |

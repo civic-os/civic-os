@@ -5,8 +5,8 @@
 
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, catchError, map, of } from 'rxjs';
-import { dimensionFor, type SchemaDimension } from '@civic-os/core';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
+import { buildTree, dimensionFor, type SchemaDimension } from '@civic-os/core';
 import type { SchemaEntityProperty } from '../interfaces/entity';
 import { getPostgrestUrl } from '../config/runtime';
 import { SchemaService } from './schema.service';
@@ -60,5 +60,26 @@ export class DimensionService {
         map(rows => rows.map(r => ({ id: r.id, label: String(r.label ?? ''), parent_id: r.parent_id ?? null, active: r.active !== false }))),
         catchError(() => of([])),
       );
+  }
+
+  /**
+   * Labels of a row's ancestors, root first, for showing its path on Detail. One flat request for the whole
+   * table, the same one the tree select makes; core's buildTree resolves the path, so no recursive query runs.
+   * A flat dimension, a column that is not a dimension, or a row the caller cannot see yields [] with no request.
+   */
+  getAncestorLabels(
+    prop: Pick<SchemaEntityProperty, 'join_schema' | 'join_table' | 'join_column'>,
+    id: number | null | undefined,
+  ): Observable<string[]> {
+    if (id === null || id === undefined) return of([]);
+    return this.getDimensionFor(prop).pipe(
+      switchMap(dim => (dim?.parent_column ? this.getOptions(dim) : of([] as DimensionOption[]))),
+      map(rows => {
+        if (!rows.length) return [];
+        const labels = new Map(rows.map(r => [String(r.id), r.label]));
+        const node = buildTree(rows, { key: 'id', parent: 'parent_id' }).node(id);
+        return node ? node.ancestors.map(a => labels.get(String(a)) ?? '') : [];
+      }),
+    );
   }
 }

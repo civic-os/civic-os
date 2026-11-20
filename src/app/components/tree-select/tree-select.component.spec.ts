@@ -62,7 +62,7 @@ describe('TreeSelectComponent', () => {
     await settle();
     expect(input.getAttribute('aria-expanded')).toBe('true');
     expect(input.getAttribute('aria-controls')).toBe('program_id-listbox');
-    expect(labels()).toEqual(['None', 'General', 'General › Youth', 'General › Youth › Teens', 'Other']);
+    expect(labels()).toEqual(['None', 'General', 'Youth (General)', 'Teens (General › Youth)', 'Other']);
     const teens = options()[3];
     expect(teens.style.paddingInlineStart).toBe('3.25rem');
   });
@@ -70,10 +70,10 @@ describe('TreeSelectComponent', () => {
   it('shows the current value even when retired, marked inactive, and its path in the closed box', async () => {
     host.control.setValue(4);
     await settle();
-    expect(input.value).toBe('General › Adults');
+    expect(input.value).toBe('Adults (General)');
     input.dispatchEvent(new Event('focus'));
     await settle();
-    expect(labels()).toContain('General › Adults (Inactive)');
+    expect(labels()).toContain('Adults (General), Inactive');
     expect(options().find(o => o.getAttribute('aria-selected') === 'true')?.id).toBe('program_id-opt-4');
   });
 
@@ -88,7 +88,7 @@ describe('TreeSelectComponent', () => {
     expect(host.control.value).toBe(2);
     expect(host.control.touched).toBe(true);
     expect(input.getAttribute('aria-expanded')).toBe('false');
-    expect(input.value).toBe('General › Youth');
+    expect(input.value).toBe('Youth (General)');
   });
 
   it('Home, End, ArrowUp and Escape move and close; ArrowDown opens a closed list', async () => {
@@ -115,7 +115,7 @@ describe('TreeSelectComponent', () => {
     input.value = 'tee';
     input.dispatchEvent(new Event('input'));
     await settle();
-    expect(labels()).toEqual(['General', 'General › Youth', 'General › Youth › Teens']);
+    expect(labels()).toEqual(['General', 'Youth (General)', 'Teens (General › Youth)']);
     expect(fixture.nativeElement.querySelector('[aria-live]').textContent).toContain('1');
     // context rows are active rows here, so still selectable, but the first match is the active one
     expect(input.getAttribute('aria-activedescendant')).toBe('program_id-opt-3');
@@ -149,7 +149,7 @@ describe('TreeSelectComponent', () => {
     await settle();
     key('ArrowDown');
     await settle();
-    expect(labels()).toEqual(['General', 'General › Youth', 'General › Youth › Teens', 'Other']);
+    expect(labels()).toEqual(['General', 'Youth (General)', 'Teens (General › Youth)', 'Other']);
     expect(input.getAttribute('aria-activedescendant')).toBe('program_id-opt-5');
     key('ArrowUp');
     await settle();
@@ -176,7 +176,7 @@ describe('TreeSelectComponent', () => {
   it('reads string and empty values from the form', async () => {
     host.control.setValue('3' as unknown as number);
     await settle();
-    expect(input.value).toBe('General › Youth › Teens');
+    expect(input.value).toBe('Teens (General › Youth)');
     host.control.setValue('' as unknown as number);
     await settle();
     expect(input.value).toBe('');

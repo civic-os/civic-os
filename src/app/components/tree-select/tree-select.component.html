@@ -52,7 +52,7 @@
             [class.text-base-content/60]="entry.disabled"
             [attr.aria-selected]="value() === entry.id"
             [attr.aria-disabled]="entry.disabled || null"
-            [attr.aria-label]="entry.path + (entry.inactive ? ' (' + ('tree_select.inactive' | translate) + ')' : '')"
+            [attr.aria-label]="entry.path + (entry.inactive ? ', ' + ('tree_select.inactive' | translate) : '')"
             (mousedown)="$event.preventDefault(); choose(entry)">
             <span class="truncate" aria-hidden="true">{{ entry.label }}</span>
             @if (entry.inactive) {

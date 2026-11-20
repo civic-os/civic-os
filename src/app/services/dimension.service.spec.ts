@@ -63,4 +63,44 @@ describe('DimensionService', () => {
     http.expectOne(`${base}programs?select=id:id,label:title,active:is_active&order=title.asc,id.asc`).flush('no', { status: 403, statusText: 'Forbidden' });
     expect(await result).toEqual([]);
   });
+
+  describe('getAncestorLabels', () => {
+    const PROP = { join_schema: 'public', join_table: 'programs', join_column: 'id' };
+    const ROWS = [
+      { id: 1, label: 'General', parent_id: null, active: true },
+      { id: 2, label: 'Youth', parent_id: 1, active: true },
+      { id: 3, label: 'Teens', parent_id: 2, active: true },
+    ];
+    const optionsUrl = `${base}programs?select=id:id,label:title,parent_id:parent_id,active:is_active&order=title.asc,id.asc`;
+
+    it('returns the ancestors root first from one flat request', async () => {
+      const result = firstValueFrom(service.getAncestorLabels(PROP, 3));
+      http.expectOne(optionsUrl).flush(ROWS);
+      expect(await result).toEqual(['General', 'Youth']);
+    });
+
+    it('returns [] for a root or a row the caller cannot see', async () => {
+      const root = firstValueFrom(service.getAncestorLabels(PROP, 1));
+      http.expectOne(optionsUrl).flush(ROWS);
+      expect(await root).toEqual([]);
+      const hidden = firstValueFrom(service.getAncestorLabels(PROP, 99));
+      http.expectOne(optionsUrl).flush(ROWS);
+      expect(await hidden).toEqual([]);
+    });
+
+    it('makes no request for no value, a flat dimension or a column that is not a dimension', async () => {
+      expect(await firstValueFrom(service.getAncestorLabels(PROP, null))).toEqual([]);
+      expect(await firstValueFrom(service.getAncestorLabels({ ...PROP, join_table: 'sites' }, 1))).toEqual([]);
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(), provideHttpClient(withXhr()), provideHttpClientTesting(),
+          { provide: SchemaService, useValue: { getDimensions: () => of([{ ...DIM, parent_column: null }]) } },
+        ],
+      });
+      const flat = TestBed.inject(DimensionService);
+      http = TestBed.inject(HttpTestingController);
+      expect(await firstValueFrom(flat.getAncestorLabels(PROP, 1))).toEqual([]);
+    });
+  });
 });
