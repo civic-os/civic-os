@@ -1,5 +1,4 @@
 {
-  "capturedAt": "2026-11-20T17:21:09.908Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -130,7 +129,6 @@
     }
   ],
   "example": "staff-portal",
-  "examplesTreeHash": "663e51f77900dad5e677e07ffffa4a687d63bb0b",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "categories": [
@@ -140,12 +138,14 @@
     "schema_cache_versions": [
       "version"
     ],
+    "schema_domain_version": [
+      "framework_version"
+    ],
     "statuses": [
       "created_at",
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "aad42c27c09cbf90f88db4c2fa488748c84a5ae2",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
