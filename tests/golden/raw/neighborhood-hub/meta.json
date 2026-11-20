@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-20T17:48:19.920Z",
+  "capturedAt": "2026-11-20T19:35:37.238Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -130,7 +130,7 @@
     }
   ],
   "example": "neighborhood-hub",
-  "examplesTreeHash": "57c2aa4f612646f638417a7ad4a597e6199c6211",
+  "examplesTreeHash": "9ff8a8f6860b7f029fbb1008171057218ac7edbb",
   "maskValue": "__MASKED__",
   "maskedFields": {
     "categories": [
@@ -145,7 +145,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "19e2cf6ba4426659f41406e9c811ab23b73c1ffd",
+  "migrationsTreeHash": "78f195123f783ad77281c562a5b0d48366058fa0",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

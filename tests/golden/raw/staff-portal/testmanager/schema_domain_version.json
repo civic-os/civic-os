@@ -3,7 +3,7 @@
     "contract_hash": "sha256:758931d776aed424807bc60c3f74ec7b695e63b195065b552839226a515f92ea",
     "decision_id": null,
     "domain_version": "0.0.0",
-    "framework_version": "0.86.0",
+    "framework_version": "0.86.1",
     "min_client_domain_version": null,
     "set_by_migration": "v0-77-0-domain-version"
   }

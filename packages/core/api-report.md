@@ -835,7 +835,7 @@ function detectJunctionTables(tables: readonly SchemaEntityTable[], properties: 
 Kind: function. Consumer: app.
 
 ```ts
-function dimensionFor<D extends { table_name: string; table_schema: string; key_column: string; }>(val: Pick<SchemaEntityProperty, 'join_schema' | 'join_table' | 'join_column'>, dimensions: readonly D[] | undefined): D | undefined;
+function dimensionFor<D extends { table_name: string; table_schema: string; key_column: string; missing_columns?: (readonly string[] | null) | undefined; }>(val: Pick<SchemaEntityProperty, 'join_schema' | 'join_table' | 'join_column'>, dimensions: readonly D[] | undefined): D | undefined;
 ```
 
 ### `DomainVersionInfo`
@@ -1845,7 +1845,7 @@ function getJunctionTableNamesFromProperties(props: readonly SchemaEntityPropert
 Kind: function. Consumer: app.
 
 ```ts
-function getPropertyType(val: SchemaEntityProperty, dimensions?: readonly { table_name: string; table_schema: string; key_column: string; }[]): EntityPropertyType;
+function getPropertyType(val: SchemaEntityProperty, dimensions?: readonly { table_name: string; table_schema: string; key_column: string; missing_columns?: (readonly string[] | null) | undefined; }[]): EntityPropertyType;
 ```
 
 ### `getRenderableColumnSpan`
@@ -3608,6 +3608,7 @@ interface SchemaDimension {
   hide_when_single: boolean;
   sort_order: number;
   sort_column?: string | null | undefined;
+  missing_columns?: ReadonlyArray<string> | null | undefined;
 }
 ```
 
