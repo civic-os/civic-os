@@ -83,7 +83,7 @@ Both call `cache.ensureFresh()` before rendering.
 
 The schema cache mirrors the Angular frontend's `SchemaService` pattern.
 
-**Startup**: Full load of `schema_entities`, `schema_properties`, `schema_entity_actions`, statuses, categories, and constraint messages. Builds derived lookups (entity-by-table, properties-by-table, etc.).
+**Startup**: Full load of `schema_entities`, `schema_properties`, `schema_entity_actions`, statuses, categories, constraint messages, and the dimensions registry (`schema_dimensions`, used only to type properties; see Dimension Columns). Builds derived lookups (entity-by-table, properties-by-table, etc.).
 
 **Not cached: status transitions.** There is no `status_transitions` view; transitions are read per call by `get_status_workflow` (see Status Workflow Transitions below).
 
@@ -210,6 +210,17 @@ Same pattern as statuses — shared `metadata.categories` table with `entity_typ
 Generic foreign keys query the target table via PostgREST: `GET /{join_table}?display_name=eq.{name}&select=id`. This is async (HTTP round-trip) and has no entity_type scoping — FK target tables are standalone.
 
 When the exact match finds nothing, the fallback is an exact **case-insensitive** match through PostgREST's `imatch` (`~*`) with an anchored, fully escaped pattern (`exactCaseInsensitivePattern()`: `"a*b"` becomes `^a\*b$`). It is not `ilike`: `%` and `_` would act as wildcards, and PostgREST rewrites every `*` in an `ilike` value to `%` even after a backslash, so a literal `*` cannot be expressed at all. Before v0.76.6 the fallback was an unescaped `ilike`, so "100%" also matched "100X" and "a*b" matched "aXb", producing a "Multiple matches" error or the wrong record (ledger row N-03). This matches the Excel import's exact, case-insensitive name lookup.
+
+### Dimension Columns (v0.86.0)
+
+A `Dimension` column (a BIGINT FK to a table in the dimensions registry; see `docs/development/PROPERTY_TYPE_REFERENCE.md`) is handled as an FK everywhere in the server:
+
+- **Typing.** `schema-cache.ts` loads `schema_dimensions` alongside the properties through core `SchemaClient.getDimensions()`, which degrades to an empty list, and types each property with core `getPropertyType(prop, dimensions)`. Without the registry the column is a `ForeignKeyName`, which behaves the same here. The properties cache version follows the registry, so a new registration is picked up on the next version check.
+- **Values.** In `create_record` and `update_record`, `name-resolver.ts` resolves a Dimension value like a `ForeignKeyName`: an all-digit string is the numeric id, a UUID passes through, anything else is a display-name lookup on the join table (FK Resolution above). `formatters/value.ts` formats it like an FK.
+- **Filters.** `tools/list-records.ts` treats any column with a `join_table` as a reference column: `like`/`ilike` are rejected and filter values resolve by display name, as for other FKs (a UUID passes through; digit strings stay name lookups).
+- **Description.** `describe_entity` labels it "Dimension → <table> (hierarchical lookup; an empty value is filled with the dimension's default on create)".
+
+Current limitations: filtering by a parent matches that row only, not its descendants (`dimension_subtree()` exists in SQL but the server does not call it), and values are shown by label without their ancestor path. The server has no tree UI, and it ignores the menu.
 
 ### Why This Matters
 
@@ -425,7 +436,7 @@ Multi-condition:   ?and=(created_at.gte.2026-08-15,created_at.lt.2026-09-01)
 
 ### Pattern Matching on Reference Columns
 
-`like`/`ilike` on FK, Status, or Category columns is rejected early with a helpful error. These columns store integer IDs — pattern matching would match against the raw ID, not the display name. The error suggests using `eq` with an exact name or the `search` parameter instead.
+`like`/`ilike` on FK (Dimension included), Status, or Category columns is rejected early with a helpful error. These columns store integer IDs — pattern matching would match against the raw ID, not the display name. The error suggests using `eq` with an exact name or the `search` parameter instead.
 
 ### Entity Name Resolution Filtering
 

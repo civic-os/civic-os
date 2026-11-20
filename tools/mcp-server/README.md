@@ -83,7 +83,7 @@ Users and LLMs speak in display names. The server resolves:
 
 - Entities: "Time Entry" -> `time_entries`
 - Columns: "Client" -> `client_id`
-- FK values: "Website Redesign" -> looks up project ID
+- FK values: "Website Redesign" -> looks up project ID (also for Dimension columns, v0.86.0: FKs to a registered dimension table)
 - Statuses: "Active" -> status ID
 - Actions: "Approve" -> action config
 

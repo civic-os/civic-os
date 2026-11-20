@@ -98,7 +98,7 @@ Module templates declare interface elements as `yaml` blocks in their specs. Pos
 | Element | Always checked | Checked only when given | Compared with |
 |---|---|---|---|
 | `table` | `name` (schema-qualified) exists and is a table; each listed column exists | per column: `type`, `nullable`, `references` (`schema.table.column`); `writes: true` on the table (see below) | `pg_class`, `pg_attribute`, `pg_constraint`, `pg_attrdef` |
-| `dimension` | `key` is registered | `table`; each listed column role (`key`, `label`, `parent`, `active`, `external_id`) | `metadata.dimensions` and the live table |
+| `dimension` | `key` is registered | `table`; each listed column role (`key`, `label`, `parent`, `active`, `external_id`; `sort` since v0.86.0) | `metadata.dimensions` and the live table |
 | `module` | `key` is installed | `version` (`MAJOR.MINOR`) | `metadata.modules` |
 | `rpc` | `name` with `args[]` (types in order) resolves | `returns` | `to_regprocedure()`, `pg_get_function_result()` |
 
@@ -242,7 +242,7 @@ Install scripts also call `register_dimension()`, `register_module()` and `regis
 Two of them generate DDL as the function owner, so the admin JWT path is narrowed (*decided 2026-11-06*; specified in the Impact Reporting note's Permissions section):
 
 - `register_report_measure()` writes `row_filter` SQL text into a VIEW. A non-NULL filter is accepted only from a session that has no JWT and that `_is_db_admin()` admits, checked by a new `metadata._is_deployer()` helper (superuser or `CREATEROLE`, no `is_admin()` branch). Otherwise an application admin could inject DDL that runs as the owner.
-- `register_dimension()` installs triggers. Over the API it accepts only tables `schema_entities` lists or tables in framework-owned schemas, quotes identifiers with `%I`, and installs only the fixed delete and parent guards.
+- `register_dimension()` installs triggers. Over the API it accepts only tables `schema_entities` lists or tables in framework-owned schemas, quotes identifiers with `%I`, and installs only the fixed delete and parent guards. *As built (v0.85.0):* over the API it accepts any base table in `public`, listed or not, and installs its fixed triggers (delete, parent-cycle and default-fill) only on tables in `public`.
 
 ## Decisions
 
