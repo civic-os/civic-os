@@ -1,6 +1,12 @@
+<ng-template #linkContent let-entry>
+  @if (entry.icon) {
+    <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
+  }
+  {{ entry.label }}
+</ng-template>
 <ng-template #nodes let-list>
   @for (entry of list; track entry.key) {
-    @if (entry.kind === 'heading') {
+    @if (entry.kind === 'heading' && !isLinkedHeading(entry)) {
       <li>
         <details [open]="isOpen(entry)" (toggle)="onDetailsToggle(entry, $event)">
           <summary>
@@ -15,17 +21,16 @@
         </details>
       </li>
     } @else if (entry.children.length > 0) {
-      <!-- Link and toggle sit side by side as direct items, so DaisyUI styles both; the toggle draws the summary's chevron -->
+      <!-- Link and toggle sit side by side as direct items, so DaisyUI styles both; the toggle draws the summary's chevron.
+           Entity and dashboard entries with children, and nested headings that open a dashboard. -->
       <li class="grid grid-cols-[minmax(0,1fr)_auto]">
-        <a [routerLink]="['/view', entry.tableName]"
+        <a [routerLink]="link(entry)"
            (click)="navigated.emit()"
+           [attr.aria-current]="isActive(entry) ? 'page' : null"
            [class.menu-active]="isActive(entry)"
            [class.font-bold]="isActive(entry)"
            [class.opacity-85]="!isActive(entry)">
-          @if (entry.icon) {
-            <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
-          }
-          {{ entry.label }}
+          <ng-container *ngTemplateOutlet="linkContent; context: { $implicit: entry }" />
         </a>
         <button type="button" class="menu-dropdown-toggle content-center"
                 [class.menu-dropdown-show]="isOpen(entry)"
@@ -40,15 +45,13 @@
       </li>
     } @else {
       <li>
-        <a [routerLink]="['/view', entry.tableName]"
+        <a [routerLink]="link(entry)"
            (click)="navigated.emit()"
+           [attr.aria-current]="isActive(entry) ? 'page' : null"
            [class.menu-active]="isActive(entry)"
            [class.font-bold]="isActive(entry)"
            [class.opacity-85]="!isActive(entry)">
-          @if (entry.icon) {
-            <span class="material-symbols-outlined" aria-hidden="true">{{ entry.icon }}</span>
-          }
-          {{ entry.label }}
+          <ng-container *ngTemplateOutlet="linkContent; context: { $implicit: entry }" />
         </a>
       </li>
     }
@@ -58,7 +61,30 @@
 <ng-content select="[menuStart]" />
 <!-- Root level: titled sections (styled like the sidebar's About and Admin), their entries at the root indent -->
 @for (section of sections(); track section.key) {
-  @if (section.kind === 'heading') {
+  @if (section.kind === 'heading' && isLinkedHeading(section.entry)) {
+    <!-- A section whose title opens a dashboard: the title is a link, the chevron a separate toggle -->
+    <li [class]="section.entry.children.length > 0 ? 'mt-4 grid grid-cols-[minmax(0,1fr)_auto]' : 'mt-4'">
+      <a class="py-2 text-base font-bold uppercase tracking-wide"
+         [routerLink]="link(section.entry)"
+         (click)="navigated.emit()"
+         [attr.aria-current]="isActive(section.entry) ? 'page' : null"
+         [class.menu-active]="isActive(section.entry)">
+        <ng-container *ngTemplateOutlet="linkContent; context: { $implicit: section.entry }" />
+      </a>
+      @if (section.entry.children.length > 0) {
+        <button type="button" class="menu-dropdown-toggle content-center"
+                [class.menu-dropdown-show]="isOpen(section.entry)"
+                [attr.aria-expanded]="isOpen(section.entry)"
+                [attr.aria-controls]="childrenId(section.entry)"
+                [attr.aria-label]="(isOpen(section.entry) ? 'a11y.collapse_menu_section' : 'a11y.expand_menu_section') | translate:{ label: section.entry.label }"
+                (click)="toggle(section.entry)"></button>
+        <ul [id]="childrenId(section.entry)" class="menu-dropdown col-span-2 ms-0 ps-0 before:hidden"
+            [class.menu-dropdown-show]="isOpen(section.entry)" [hidden]="!isOpen(section.entry)">
+          <ng-container *ngTemplateOutlet="nodes; context: { $implicit: section.entry.children }" />
+        </ul>
+      }
+    </li>
+  } @else if (section.kind === 'heading') {
     <li class="mt-4">
       <details [open]="isOpen(section.entry)" (toggle)="onDetailsToggle(section.entry, $event)">
         <summary class="py-2 text-base font-bold uppercase tracking-wide">

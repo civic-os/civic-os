@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { MenuEntry, MenuNodeRow } from '../model/menu.js';
-import { buildMenu, MAX_MENU_DEPTH, MENU_HEADING_KEY, menuBranchKeys, menuPlacementAllowed, validateMenuTree } from './build-menu.js';
+import { buildMenu, MAX_MENU_DEPTH, MENU_HEADING_KEY, menuBranchKeys, menuDashboardKey, menuPlacementAllowed, validateMenuTree } from './build-menu.js';
 
 type E = { table_name: string; display_name: string; sort_order: number };
 const ent = (table_name: string, sort_order = 0, display_name = table_name.toUpperCase()): E => ({ table_name, display_name, sort_order });
@@ -20,6 +20,8 @@ const entityNode = (key: string, over: Partial<MenuNodeRow> = {}): MenuNodeRow =
   sort_order: null,
   is_hidden: false,
   collapsed_by_default: false,
+  dashboard_id: null,
+  dashboard_display_name: null,
   ...over,
 });
 const heading = (key: string, over: Partial<MenuNodeRow> = {}): MenuNodeRow => ({
@@ -32,6 +34,24 @@ const heading = (key: string, over: Partial<MenuNodeRow> = {}): MenuNodeRow => (
   sort_order: null,
   is_hidden: false,
   collapsed_by_default: false,
+  dashboard_id: null,
+  dashboard_display_name: null,
+  ...over,
+});
+
+/** A dashboard node the caller can see (title `D<id>`), unless `dashboard_display_name` is overridden to null. */
+const dashboardNode = (id: number, over: Partial<MenuNodeRow> = {}): MenuNodeRow => ({
+  node_key: `dashboard:${id}`,
+  node_kind: 'dashboard',
+  target_key: null,
+  display_name: null,
+  icon: null,
+  parent_node_key: null,
+  sort_order: null,
+  is_hidden: false,
+  collapsed_by_default: false,
+  dashboard_id: id,
+  dashboard_display_name: `D${id}`,
   ...over,
 });
 
@@ -240,6 +260,77 @@ describe('buildMenu', () => {
   });
 });
 
+describe('buildMenu with dashboards', () => {
+  it('renders a dashboard node the caller can see, labelled by its node label or the dashboard title', () => {
+    const menu = buildMenu([ent('a')], [
+      heading('g'),
+      entityNode('a', { parent_node_key: 'g', sort_order: 1 }),
+      dashboardNode(7, { parent_node_key: 'g', sort_order: 2 }),
+      dashboardNode(8, { parent_node_key: 'g', sort_order: 3, display_name: 'Reports', icon: 'monitoring' }),
+      dashboardNode(9, { parent_node_key: 'g', sort_order: 4, display_name: '  ' }),
+    ]);
+    expect(shape(menu)).toEqual(['g[a,dashboard:7,dashboard:8,dashboard:9]']);
+    expect(menu[0].children[1]).toEqual({
+      key: 'dashboard:7', kind: 'dashboard', label: 'D7', dashboardId: 7, collapsedByDefault: false, children: [],
+    });
+    expect(menu[0].children[2]).toMatchObject({ label: 'Reports', icon: 'monitoring', dashboardId: 8 });
+    expect(menu[0].children[3].label).toBe('D9');
+  });
+
+  it('drops a dashboard node the caller cannot see, or a hidden one, and never lists dashboards without a node', () => {
+    const nodes = [heading('g'), dashboardNode(7, { parent_node_key: 'g', dashboard_display_name: null }), dashboardNode(8, { is_hidden: true })];
+    expect(buildMenu([], nodes)).toEqual([]);
+    expect(shape(buildMenu([ent('a')], nodes))).toEqual(['a']);
+  });
+
+  it('a dashboard node under an entity node is a child of that entity', () => {
+    const menu = buildMenu([ent('cases')], [entityNode('cases'), dashboardNode(3, { parent_node_key: 'cases' })]);
+    expect(shape(menu)).toEqual(['cases[dashboard:3]']);
+  });
+
+  it('lifts the children of a dashboard node the caller cannot see, and keeps those of one they can (bad data)', () => {
+    const nodes = [dashboardNode(1, { dashboard_display_name: null }), entityNode('a', { parent_node_key: 'dashboard:1' })];
+    expect(shape(buildMenu([ent('a')], nodes))).toEqual(['a']);
+    const seen = [dashboardNode(1), entityNode('a', { parent_node_key: 'dashboard:1' })];
+    expect(shape(buildMenu([ent('a')], seen))).toEqual(['dashboard:1[a]']);
+  });
+
+  it('a heading opens a dashboard the caller can see, and stays a plain heading otherwise', () => {
+    const linked = buildMenu([ent('a')], [heading('g', { dashboard_id: 4, dashboard_display_name: 'Staff' }), entityNode('a', { parent_node_key: 'g' })]);
+    expect(linked[0]).toMatchObject({ kind: 'heading', label: 'G', dashboardId: 4 });
+    const unseen = buildMenu([ent('a')], [heading('g', { dashboard_id: 4 }), entityNode('a', { parent_node_key: 'g' })]);
+    expect(unseen[0].label).toBe('G');
+    expect('dashboardId' in unseen[0]).toBe(false);
+  });
+
+  it('keeps a linked heading with no visible children, and drops it when the caller cannot see its dashboard', () => {
+    expect(buildMenu([], [heading('g', { dashboard_id: 4, dashboard_display_name: 'Staff' })])).toEqual([
+      { key: 'g', kind: 'heading', label: 'G', dashboardId: 4, collapsedByDefault: false, children: [] },
+    ]);
+    expect(buildMenu([], [heading('g', { dashboard_id: 4 })])).toEqual([]);
+    expect(buildMenu([], [heading('g', { dashboard_id: 4, dashboard_display_name: 'Staff', is_hidden: true })])).toEqual([]);
+  });
+
+  it('a linked heading keeps its parent heading', () => {
+    const nodes = [heading('outer'), heading('inner', { parent_node_key: 'outer', dashboard_id: 2, dashboard_display_name: 'X' })];
+    expect(shape(buildMenu([], nodes))).toEqual(['outer[inner]']);
+  });
+
+  it('links each dashboard once, in depth-first order (bad data)', () => {
+    const menu = buildMenu([], [
+      heading('g', { sort_order: 1, dashboard_id: 5, dashboard_display_name: 'Five' }),
+      dashboardNode(5, { parent_node_key: 'g' }),
+      dashboardNode(5, { node_key: 'dup', sort_order: 2 }),
+    ]);
+    expect(menu).toEqual([{ key: 'g', kind: 'heading', label: 'G', dashboardId: 5, collapsedByDefault: false, children: [] }]);
+  });
+
+  it('treats rows from a server without the dashboard columns as having no dashboard', () => {
+    const legacy = { ...heading('g'), dashboard_id: undefined, dashboard_display_name: undefined } as unknown as MenuNodeRow;
+    expect(buildMenu([ent('a')], [legacy, entityNode('a', { parent_node_key: 'g' })])[0]).not.toHaveProperty('dashboardId');
+  });
+});
+
 describe('validateMenuTree', () => {
   const codes = (nodes: MenuNodeRow[], entities?: { table_name: string }[]) => validateMenuTree(nodes, entities).map(e => `${e.code}:${e.nodeKey}`);
 
@@ -294,6 +385,34 @@ describe('validateMenuTree', () => {
     expect(codes(nodes, [ent('a')])).toEqual(['unknown-target:b']);
   });
 
+  it('accepts dashboard nodes at the root, under a heading and under an entity, and a linked heading', () => {
+    const nodes = [
+      heading('g', { dashboard_id: 1 }),
+      dashboardNode(2, { parent_node_key: 'g' }),
+      entityNode('a'),
+      dashboardNode(3, { parent_node_key: 'a' }),
+      dashboardNode(4),
+    ];
+    expect(codes(nodes)).toEqual([]);
+  });
+
+  it('rejects anything under a dashboard node', () => {
+    expect(codes([dashboardNode(1), entityNode('a', { parent_node_key: 'dashboard:1' }), heading('h', { parent_node_key: 'dashboard:1' }), dashboardNode(2, { parent_node_key: 'dashboard:1' })]))
+      .toEqual(['dashboard-children:a', 'dashboard-children:h', 'dashboard-children:dashboard:2']);
+  });
+
+  it('checks the dashboard key, the missing dashboard, a target on a dashboard node and a dashboard on an entity node', () => {
+    expect(codes([dashboardNode(1, { node_key: 'dash_1' })])).toEqual(['dashboard-key:dash_1']);
+    expect(codes([dashboardNode(1, { dashboard_id: null })])).toEqual(['dashboard-key:dashboard:1']);
+    expect(codes([dashboardNode(1, { target_key: 'a' })])).toEqual(['dashboard-key:dashboard:1']);
+    expect(codes([entityNode('a', { dashboard_id: 1 })])).toEqual(['dashboard-key:a']);
+  });
+
+  it('reports a dashboard placed twice, as a node or as a heading link', () => {
+    expect(codes([heading('g', { dashboard_id: 1 }), dashboardNode(1), heading('h', { dashboard_id: 1 })]))
+      .toEqual(['duplicate-dashboard:dashboard:1', 'duplicate-dashboard:h']);
+  });
+
   it('reports several problems on one node, in node order', () => {
     const nodes = [heading('Bad', { display_name: null }), entityNode('x', { parent_node_key: 'Bad' })];
     expect(codes(nodes)).toEqual(['heading-key:Bad', 'heading-label:Bad']);
@@ -310,13 +429,21 @@ describe('placement rules', () => {
     for (const bad of ['', '2024', '_a', 'A', 'a-b', 'a b', 'é']) expect(MENU_HEADING_KEY.test(bad)).toBe(false);
   });
 
-  it('a heading sits at the root or under a heading; an entity node sits anywhere', () => {
+  it('a heading sits at the root or under a heading; an entity or dashboard node sits anywhere but under a dashboard', () => {
     expect(menuPlacementAllowed('heading', null)).toBe(true);
     expect(menuPlacementAllowed('heading', 'heading')).toBe(true);
     expect(menuPlacementAllowed('heading', 'entity')).toBe(false);
     expect(menuPlacementAllowed('entity', null)).toBe(true);
     expect(menuPlacementAllowed('entity', 'heading')).toBe(true);
     expect(menuPlacementAllowed('entity', 'entity')).toBe(true);
+    expect(menuPlacementAllowed('dashboard', null)).toBe(true);
+    expect(menuPlacementAllowed('dashboard', 'heading')).toBe(true);
+    expect(menuPlacementAllowed('dashboard', 'entity')).toBe(true);
+    for (const kind of ['heading', 'entity', 'dashboard'] as const) expect(menuPlacementAllowed(kind, 'dashboard')).toBe(false);
+  });
+
+  it('a dashboard node key is dashboard:<id>', () => {
+    expect(menuDashboardKey(12)).toBe('dashboard:12');
   });
 });
 
@@ -336,6 +463,19 @@ describe('menuBranchKeys', () => {
     expect(menuBranchKeys(menu, 'consents')).toEqual(['clientele', 'clients']);
     expect(menuBranchKeys(menu, 'clients')).toEqual(['clientele']);
     expect(menuBranchKeys(menu, 'reports')).toEqual(['rep']);
+  });
+
+  it('finds a dashboard entry or a heading that opens the dashboard', () => {
+    const withDashboards = buildMenu([ent('cases')], [
+      heading('mod', { dashboard_id: 1, dashboard_display_name: 'Module' }),
+      entityNode('cases', { parent_node_key: 'mod' }),
+      dashboardNode(2, { parent_node_key: 'cases' }),
+    ]);
+    expect(menuBranchKeys(withDashboards, { dashboardId: 2 })).toEqual(['mod', 'cases']);
+    expect(menuBranchKeys(withDashboards, { dashboardId: 1 })).toEqual([]);
+    expect(menuBranchKeys(withDashboards, { dashboardId: 9 })).toEqual([]);
+    // A table name never matches a dashboard entry
+    expect(menuBranchKeys(withDashboards, 'dashboard:2')).toEqual([]);
   });
 
   it('returns [] for a root entry or a table that is not in the menu', () => {

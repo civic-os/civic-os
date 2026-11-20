@@ -679,6 +679,8 @@ SELECT public.set_dashboard_roles(:dashboard_id, NULL, 'show');
 **Landing dashboard** (`get_user_default_dashboard()`): the user's saved preference if still visible, then the highest-priority role default, then the `is_default` public dashboard (each checked for visibility before it is returned), then the first dashboard the user can see (listed dashboards first, then by `sort_order`, then `id`).
 
 **Unlisted dashboards** (v0.82.0): `show_in_selector = false` leaves a dashboard out of the navbar's dashboard selector. It changes nothing else: whoever can see the dashboard (the rule above) can still open it by direct link (`/dashboard/:id`), from a `dashboard_navigation` or `nav_buttons` widget, and as a landing dashboard. Use it for drill-down pages, the later chapters of a storymap, or a role's landing page that doesn't need a second entry in the menu. It is not access control: to hide a dashboard from some people, use `is_public = false` and `dashboard_roles`.
+
+**Dashboards in the sidebar menu** (v0.83.0): a dashboard can also sit in the sidebar, as a dashboard node or as the link of a module heading, shown only to callers who can see it. Menu placement is independent of `show_in_selector` and of access. See [Dashboards in the menu](#dashboards-in-the-menu-v0830).
 - `get_dashboards()` returns every visible dashboard with its `show_in_selector`, and the selector filters, so it can still name an unlisted dashboard that is open. `get_dashboard()` returns the flag too.
 - Landing: a saved preference, a role default and the `is_default` dashboard may be unlisted (a landing-only dashboard for a role is a common use). The last tier prefers listed dashboards, so a user with no default does not land on a drill-down page; it returns an unlisted one only when nothing listed is visible.
 - The selector keeps its "Default Dashboard" entry when every visible dashboard is unlisted.
@@ -5441,12 +5443,12 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 
 ### Menu Configuration (v0.81.0+)
 
-The sidebar lists your entities as a tree of headings and entity links, stored in `metadata.menu_nodes`. The tree decides which entities appear in the sidebar, in what order, under which heading, and under what label. Admins edit it at `/admin/menu`; integrators can seed it in SQL.
+The sidebar lists your entities as a tree of headings and entity links, stored in `metadata.menu_nodes`. The tree decides which entities appear in the sidebar, in what order, under which heading, and under what label. Since v0.83.0 it can also hold dashboards (see [Dashboards in the menu](#dashboards-in-the-menu-v0830)). Admins edit it at `/admin/menu`; integrators can seed it in SQL.
 
 **Rules.**
 
-- A node is a `heading` (a label with no target) or an `entity` (a link). The tree is at most three levels deep, the root being level 1.
-- Headings sit at the root or under a heading. Entity nodes sit at the root, under a heading or under another entity node.
+- A node is a `heading` (a label with no target, which may open a dashboard), an `entity` (a link) or, since v0.83.0, a `dashboard` (a link with nothing under it). The tree is at most three levels deep, the root being level 1.
+- Headings sit at the root or under a heading. Entity and dashboard nodes sit at the root, under a heading or under an entity node. Nothing sits under a dashboard node.
 - An entity node's `node_key` is its table name (also its `target_key`). A heading's `node_key` is a slug matching `^[a-z][a-z0-9_]*$`, and a heading needs a `display_name`.
 - Each entity has at most one node. The target must be a table in the `public` schema or a view registered in `metadata.entities` (virtual entities qualify). Junction tables are never listed.
 - `is_hidden = TRUE` hides the node and everything under it. A hidden entity is not offered again as "unplaced".
@@ -5462,6 +5464,35 @@ The sidebar lists your entities as a tree of headings and entity links, stored i
 - Admins, holders of `metadata.menu_nodes:update` and holders of `metadata.translations:update` read every node with its stored parent. The editor and Translation Admin need the hidden ones.
 - Everyone else, anonymous users included, gets only the nodes their sidebar shows. A hidden node and its subtree are left out, and so is an entity node whose table the caller cannot read (it is not in their `schema_entities`); its children are returned with the nearest kept ancestor as `parent_node_key`. A heading with no visible entry under it is left out.
 - One exception keeps hidden entities hidden: an entity node inside a hidden subtree whose table the caller can read is returned as a stub (`node_key`, `node_kind`, `target_key`, `is_hidden = true`, every other column NULL). Without it the sidebar would treat the entity as unplaced and list it at the root. The stub names only a table the caller already sees in `schema_entities`.
+
+#### Dashboards in the menu (v0.83.0)
+
+A dashboard can sit in the sidebar next to the entities it belongs to, in two ways:
+
+- **A dashboard node** links to one dashboard. Its `node_kind` is `dashboard`, its `dashboard_id` is the dashboard, its `node_key` is `dashboard:<id>` (for example `dashboard:7`), and it has no `target_key`. It sits wherever an entity node may: at the root, under a heading, or under an entity node (a dashboard about that entity's records). Nothing nests under it. Its label is the node's `display_name`, else the dashboard's translated title.
+- **A heading may open a dashboard**: set its `dashboard_id`. The heading's title becomes a link to the dashboard and the chevron beside it opens and closes the section, so a module heading can lead to the module's landing page. Headings keep their own `display_name` (always required), never the dashboard title.
+
+A dashboard has one place in the menu: one dashboard node or one heading link (a `UNIQUE` constraint). Dashboards without a node are not in the menu at all; unlike entities, they are never listed as unplaced.
+
+**Who sees it.** A dashboard node shows, and a heading's title links, only for callers who can see the dashboard under the dashboard visibility rule (admin, the creator, `is_public`, or a `dashboard_roles` row for one of their roles; see [Dashboard System](#dashboard-system)). For everyone else the dashboard node is left out, and a linked heading stays as a plain heading when it has entries under it, or disappears when its link was all it had. `schema_menu_nodes` returns the dashboard's translated title as `dashboard_display_name`, which is NULL when the caller cannot see it, so a heading's label is the only text a caller ever gets about a dashboard they cannot open. Entity nodes still show regardless of permission.
+
+**Placement is not access, and not listing.** Putting a dashboard in the menu changes neither who can open it nor whether the navbar's dashboard selector lists it (`show_in_selector`, v0.82.0): a dashboard can be in the menu, the selector, both or neither. To keep a dashboard from some people, use `is_public = false` and `dashboard_roles`.
+
+**Deleting a dashboard** deletes its dashboard node and clears a heading's link (the heading and everything under it stay). Changes to a placed dashboard's title, `is_public`, `created_by` or role rows move the menu's cache version, so open browsers refetch the menu on their next navigation. The sidebar also refetches it when an admin starts or stops impersonating, and on login and logout.
+
+```sql
+-- The module heading opens the staff dashboard; the borrower dashboard sits under it
+UPDATE metadata.menu_nodes
+SET dashboard_id = (SELECT id FROM metadata.dashboards WHERE display_name = 'Lending Staff')
+WHERE node_key = 'tool_lending';
+
+INSERT INTO metadata.menu_nodes (node_key, node_kind, dashboard_id, parent_node_key, sort_order)
+SELECT 'dashboard:' || d.id, 'dashboard', d.id, 'tool_lending', 40
+FROM metadata.dashboards d WHERE d.display_name = 'Borrower Home'
+ON CONFLICT (node_key) DO UPDATE SET parent_node_key = EXCLUDED.parent_node_key, sort_order = EXCLUDED.sort_order;
+```
+
+Dashboard ids differ between instances, so install scripts resolve them by a stable column such as `display_name`. `examples/neighborhood-hub/init-scripts/47_neh_menu_dashboards.sql` is a working example. A dashboard node's label override translates like any node label, under `menu_node` and `dashboard:<id>.display_name`.
 
 **Seeding the tree.** Seed the tree from migrations and init scripts, which run as a database role and are not subject to the policies. The `metadata` schema is not exposed by PostgREST, so API callers change the menu only through `save_menu_tree()`. Insert parents before children.
 
@@ -5501,6 +5532,7 @@ Menu labels translate through source type `menu_node` and key `<node_key>.displa
 - Each row has a label, icon and Collapsed by default, and an eye button that hides or shows it. A hidden row shrinks to one line (dimmed name, a Hidden badge and the row buttons). An entity row's label placeholder is the entity's display name; the editor edits the untranslated base label, so use the translations table (or Translation Admin) for other locales.
 - A **Not shown** badge marks an entity row the sidebar leaves out for you: a junction table, a table you cannot read (it still shows to users who can), or a table or view that no longer exists. These rows never block saving.
 - **Not in the menu** lists tables and views that have no row. They show at the root until placed; **Add to menu** places one. Removing a row from the tree returns it there.
+- **Dashboards not in the menu** (v0.83.0) lists the dashboards you can see that have no row, listed in the selector or not. **Add to menu** appends a dashboard node at the root; move or indent it from there (it cannot take children). A heading's **Opens dashboard** select links the heading to one of them; choosing None returns the dashboard to the list. A dashboard row or link to a dashboard you cannot see (a non-admin menu editor) gets the **Not shown** badge and is saved back unchanged.
 - **Add a heading** creates a root heading whose key is a slug of its label. The key never changes after that, so renaming the label later keeps its translations.
 - A live preview shows the menu as users will see it. Structural problems (depth, a heading under an entity, duplicates) are reported before save.
 - Saving calls `save_menu_tree(p_nodes jsonb, p_expected_version timestamptz DEFAULT NULL)`, which replaces the whole tree in one transaction. It requires `is_admin()` or `metadata.menu_nodes:update` (error `42501` otherwise) and runs as the caller, so the table's write policies apply too. A stored entity node whose table or view has since been dropped (or the view unregistered) is skipped and its children move up to its parent, so a dropped table never makes the menu unsaveable; the result lists the skipped keys in `skipped`, and the editor reloads to show the stored tree. A new node with a bad target is still rejected. The result is `{nodes, skipped, menu_version}`.
@@ -5522,9 +5554,11 @@ ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 
 Drop `p_show_in_sidebar` from `upsert_entity_metadata()` calls (the function now takes 16 parameters; named-argument calls just remove the argument). A script that sets `show_in_sidebar = TRUE` needs nothing: entities without a node already show. `add_guided_form_step()` hides step tables with a hidden node. Entities registered after the migration have no node until you place or hide them.
 
-**Rolling back.** Reverting the migration restores `show_in_sidebar` and writes a flat `sort_order` (position times 10, in the menu's top-to-bottom order). An entity is hidden if its node or any ancestor was hidden. Headings, nesting, labels, icons, collapsed flags and menu translations are lost, so export `schema_menu_nodes` first if you want them back.
+**Rolling back v0.83.0** deletes dashboard nodes and clears heading links; the rest of the tree is untouched.
 
-Not in v0.81.0: custom-page nodes (the node kind is reserved), dashboards in the menu, per-role menus, and a grouping hint for the MCP server (it addresses entities by name and ignores the menu). See `docs/notes/MENU_CONFIGURATION_DESIGN.md` for the design.
+**Rolling back.** Reverting the v0.81.0 migration restores `show_in_sidebar` and writes a flat `sort_order` (position times 10, in the menu's top-to-bottom order). An entity is hidden if its node or any ancestor was hidden. Headings, nesting, labels, icons, collapsed flags and menu translations are lost, so export `schema_menu_nodes` first if you want them back.
+
+Not yet: custom-page nodes, per-role menus (dashboard nodes are the only per-caller filter on leaves), and a grouping hint for the MCP server (it addresses entities by name and ignores the menu). See `docs/notes/MENU_CONFIGURATION_DESIGN.md` for the design.
 
 ### Generated Types for Custom Apps
 
@@ -7034,7 +7068,7 @@ GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
 ```
 
-`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.82.3 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.82.3 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.83.1 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.83.1 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 For full CRUD access, use the same `authenticated` role as the web frontend by authenticating through Keycloak.
 

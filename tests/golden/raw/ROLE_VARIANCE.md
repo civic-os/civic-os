@@ -78,7 +78,7 @@ For each example and endpoint (default locale), roles are grouped by byte-identi
 | `schema_entities.mcp` | anon / testuser+testmanager / testeditor+testadmin | anon 15 rows vs testadmin 24; only-anon 0, only-admin 9, changed 14; fields: delete(14), insert(14), update(14), select(11) |
 | `schema_entity_actions` | anon+testuser+testeditor+testmanager / testadmin | anon 24 rows vs testadmin 24; only-anon 0, only-admin 0, changed 24; fields: can_execute(24) |
 | `schema_entity_actions.mcp` | anon+testuser+testeditor+testmanager / testadmin | anon 24 rows vs testadmin 24; only-anon 0, only-admin 0, changed 24; fields: can_execute(24) |
-| `schema_menu_nodes` | anon / testuser+testeditor+testmanager / testadmin | anon 20 rows vs testadmin 29; only-anon 0, only-admin 9, changed 20; fields: node_key(20), target_key(20), sort_order(17), is_hidden(13), parent_node_key(12), base_display_name(9), display_name(9), node_kind(9), collapsed_by_default(2) |
+| `schema_menu_nodes` | anon / testuser+testeditor+testmanager / testadmin | anon 21 rows vs testadmin 31; only-anon 0, only-admin 10, changed 21; fields: node_key(21), target_key(20), sort_order(18), parent_node_key(13), is_hidden(11), node_kind(10), base_display_name(8), display_name(8), dashboard_id(4), dashboard_display_name(3), collapsed_by_default(2) |
 | `schema_properties` | anon / testuser+testeditor+testmanager+testadmin | anon 152 rows vs testadmin 233; only-anon 0, only-admin 81, changed 0 |
 | `schema_properties.mcp` | anon / testuser+testeditor+testmanager+testadmin | anon 152 rows vs testadmin 233; only-anon 0, only-admin 81, changed 0 |
 

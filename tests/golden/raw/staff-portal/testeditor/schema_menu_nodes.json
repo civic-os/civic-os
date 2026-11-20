@@ -2,6 +2,8 @@
   {
     "base_display_name": "Administration",
     "collapsed_by_default": true,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Administration",
     "icon": null,
     "is_hidden": false,
@@ -14,6 +16,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -26,6 +30,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -38,6 +44,8 @@
   {
     "base_display_name": "My Work",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "My Work",
     "icon": null,
     "is_hidden": false,
@@ -50,6 +58,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -62,6 +72,8 @@
   {
     "base_display_name": "People",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "People",
     "icon": null,
     "is_hidden": false,
@@ -74,6 +86,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -86,6 +100,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -98,6 +114,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -110,6 +128,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -122,6 +142,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -134,6 +156,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -146,6 +170,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -158,6 +184,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -170,6 +198,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,

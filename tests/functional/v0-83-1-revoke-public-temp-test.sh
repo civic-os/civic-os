@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Functional Test: v0-82-3 revoke TEMPORARY from PUBLIC (CVE-2026-6460 hardening)
+# Functional Test: v0-83-1 revoke TEMPORARY from PUBLIC (CVE-2026-6460 hardening)
 # =============================================================================
 # Verifies that after the migration:
 #   1. PUBLIC holds CONNECT but not TEMPORARY on the Civic OS database
@@ -14,7 +14,7 @@
 # leaves no roles, grants or tables behind. Connect as a superuser (the default) to allow SET ROLE.
 #
 # Usage (run against a fully migrated database):
-#   DATABASE_URL=postgres://... ./tests/functional/v0-82-3-revoke-public-temp-test.sh
+#   DATABASE_URL=postgres://... ./tests/functional/v0-83-1-revoke-public-temp-test.sh
 #
 # Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
@@ -62,7 +62,7 @@ ROLLBACK;
 SQL
 }
 
-echo "v0-82-3 revoke TEMPORARY from PUBLIC"
+echo "v0-83-1 revoke TEMPORARY from PUBLIC"
 
 run_case "PUBLIC lacks TEMPORARY and keeps CONNECT" "
 DO \$\$

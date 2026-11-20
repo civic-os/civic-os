@@ -1,10 +1,10 @@
--- Deploy civic_os:v0-82-3-revoke-public-temp
--- Requires: v0-82-2-translation-lookup-collation
+-- Deploy civic_os:v0-83-1-revoke-public-temp
+-- Requires: v0-83-0-menu-dashboard-translations
 --
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
--- v0.82.3 -- Revoke TEMPORARY on the Civic OS database from PUBLIC (CVE-2026-6460 hardening).
+-- v0.83.1 -- Revoke TEMPORARY on the Civic OS database from PUBLIC (CVE-2026-6460 hardening).
 --
 -- PostgreSQL grants TEMPORARY on every new database to PUBLIC by default, so every role that can log in
 -- can create temporary tables, including roles meant to be read-only (civic_os_mcp_readonly) and

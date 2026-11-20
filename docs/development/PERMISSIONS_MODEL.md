@@ -21,7 +21,7 @@ PostgreSQL `GRANT` statements control which database roles can access tables at 
 
 GRANTs are binary: either the role can access the table or it can't. They don't distinguish between individual users or their application-level roles.
 
-**Database-level privileges.** PostgreSQL grants `CONNECT` and `TEMPORARY` on every new database to `PUBLIC`. Since v0.82.3, core revokes `TEMPORARY` from `PUBLIC` on the Civic OS database (CVE-2026-6460 hardening): no API role creates temporary objects, the owner keeps the privilege for migrations, and a login role meant to be read-only must not be able to create objects of any kind. Don't grant `TEMPORARY` back to `PUBLIC` or to an API or read-only role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+**Database-level privileges.** PostgreSQL grants `CONNECT` and `TEMPORARY` on every new database to `PUBLIC`. Since v0.83.1, core revokes `TEMPORARY` from `PUBLIC` on the Civic OS database (CVE-2026-6460 hardening): no API role creates temporary objects, the owner keeps the privilege for migrations, and a login role meant to be read-only must not be able to create objects of any kind. Don't grant `TEMPORARY` back to `PUBLIC` or to an API or read-only role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 ### Layer 2: RBAC (Blanket Access for Roles)
 

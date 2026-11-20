@@ -19,7 +19,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { menuBranchKeys } from '@civic-os/core';
-import type { MenuEntry } from '@civic-os/core';
+import type { MenuEntry, MenuTarget } from '@civic-os/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { SIDEBAR_SECTION_KEYS, SidebarOpenStateService } from './sidebar-open-state.service';
 
@@ -27,6 +27,8 @@ export { MENU_OPEN_STORAGE_KEY } from './sidebar-open-state.service';
 
 /** `/view/:table`, `/view/:table/...`, `/create/:table`, `/edit/:table/...`: the table an entity route belongs to. */
 const ENTITY_ROUTE = /^\/(?:view|create|edit)\/([^/?#]+)/;
+/** `/dashboard/:id`: the dashboard a dashboard route shows. */
+const DASHBOARD_ROUTE = /^\/dashboard\/(\d+)(?:[/?#]|$)/;
 
 /**
  * One block of the menu's root level. A root heading is a titled section; a run of root
@@ -69,8 +71,22 @@ export function sidebarSections(entries: readonly MenuEntry[]): SidebarSection[]
 /** Instance counter: the drawer and the editor preview render the same keys on one page, so ids need a per-instance prefix. */
 let nextInstanceId = 0;
 
-function containsTable(entries: readonly MenuEntry[], table: string): boolean {
-  return entries.some(e => (e.kind === 'entity' && e.tableName === table) || containsTable(e.children, table));
+/** Whether the entry's link opens `target` (an entity's table, or a dashboard of a dashboard entry or linked heading). */
+function opens(entry: MenuEntry, target: MenuTarget): boolean {
+  return typeof target === 'string'
+    ? entry.kind === 'entity' && entry.tableName === target
+    : entry.dashboardId === target.dashboardId;
+}
+
+function containsTarget(entries: readonly MenuEntry[], target: MenuTarget): boolean {
+  return entries.some(e => opens(e, target) || containsTarget(e.children, target));
+}
+
+/** The route an entry's link opens: an entity's list, or a dashboard (a dashboard entry or a linked heading). */
+export function menuEntryLink(entry: MenuEntry): (string | number)[] | undefined {
+  if (entry.kind === 'entity' && entry.tableName !== undefined) return ['/view', entry.tableName];
+  if (entry.dashboardId !== undefined) return ['/dashboard', entry.dashboardId];
+  return undefined;
 }
 
 /**
@@ -82,8 +98,11 @@ function containsTable(entries: readonly MenuEntry[], table: string): boolean {
  * - A root heading is a section titled like About and Admin, collapsible, its entries at the root indent.
  * - Root entities after a heading (or all of them, when there is no heading) sit under a "Data" section.
  * - A nested heading is a native `<details><summary>` item.
- * - An entity entry is a link; when it has children, a separate DaisyUI `.menu-dropdown-toggle` button
- *   (`aria-expanded`, `aria-controls`) toggles a nested list.
+ * - An entity or dashboard entry is a link; when it has children, a separate DaisyUI `.menu-dropdown-toggle`
+ *   button (`aria-expanded`, `aria-controls`) toggles a nested list.
+ * - A heading that opens a dashboard cannot put its link in a `<summary>`, so its title is a link and the
+ *   toggle is that same separate button: at the root it keeps the section title style, nested it looks like
+ *   a parent entity entry. With no entries below, it is the link alone.
  * - Open state defaults from `collapsedByDefault` (Data defaults open), is remembered per key through
  *   {@link SidebarOpenStateService}, and is always open for the part that holds the active route.
  */
@@ -108,9 +127,12 @@ export class SidebarMenuComponent {
 
   protected readonly sections = computed(() => sidebarSections(this.entries()));
 
-  /** The table the current route belongs to, if it is an entity route. */
-  protected readonly activeTable = computed<string | undefined>(() => {
-    const match = ENTITY_ROUTE.exec(this.currentUrl());
+  /** What the current route shows: an entity's table, or a dashboard. */
+  protected readonly activeTarget = computed<MenuTarget | undefined>(() => {
+    const url = this.currentUrl();
+    const dashboard = DASHBOARD_ROUTE.exec(url);
+    if (dashboard) return { dashboardId: Number(dashboard[1]) };
+    const match = ENTITY_ROUTE.exec(url);
     if (!match) return undefined;
     try {
       return decodeURIComponent(match[1]);
@@ -119,10 +141,17 @@ export class SidebarMenuComponent {
     }
   });
 
-  /** Keys of the ancestors of the active entry; always rendered open. */
+  /**
+   * Keys always rendered open: the ancestors of the active entry, and the active entry itself when it is a
+   * heading (a linked heading's section holds the pages that belong to its dashboard).
+   */
   protected readonly activeBranch = computed<ReadonlySet<string>>(() => {
-    const table = this.activeTable();
-    return new Set(table ? menuBranchKeys(this.entries(), table) : []);
+    const target = this.activeTarget();
+    if (target === undefined) return new Set<string>();
+    const keys = new Set(menuBranchKeys(this.entries(), target));
+    const self = findEntry(this.entries(), target);
+    if (self?.kind === 'heading') keys.add(self.key);
+    return keys;
   });
 
   protected isOpen(entry: MenuEntry): boolean {
@@ -131,12 +160,22 @@ export class SidebarMenuComponent {
 
   /** A Data section is forced open when it holds the active route. */
   protected isSectionForced(entries: readonly MenuEntry[]): boolean {
-    const table = this.activeTable();
-    return table !== undefined && containsTable(entries, table);
+    const target = this.activeTarget();
+    return target !== undefined && containsTarget(entries, target);
   }
 
   protected isActive(entry: MenuEntry): boolean {
-    return entry.tableName !== undefined && entry.tableName === this.activeTable();
+    const target = this.activeTarget();
+    return target !== undefined && opens(entry, target);
+  }
+
+  protected link(entry: MenuEntry): (string | number)[] | undefined {
+    return menuEntryLink(entry);
+  }
+
+  /** A heading whose title opens a dashboard: rendered as a link plus a toggle, never as a `<summary>`. */
+  protected isLinkedHeading(entry: MenuEntry): boolean {
+    return entry.kind === 'heading' && entry.dashboardId !== undefined;
   }
 
   protected childrenId(entry: MenuEntry): string {
@@ -150,4 +189,13 @@ export class SidebarMenuComponent {
   protected onDetailsToggle(entry: MenuEntry, event: Event): void {
     this.openState.onDetailsToggle(entry.key, event, !entry.collapsedByDefault, this.activeBranch().has(entry.key));
   }
+}
+
+function findEntry(entries: readonly MenuEntry[], target: MenuTarget): MenuEntry | undefined {
+  for (const entry of entries) {
+    if (opens(entry, target)) return entry;
+    const found = findEntry(entry.children, target);
+    if (found) return found;
+  }
+  return undefined;
 }

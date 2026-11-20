@@ -2,6 +2,8 @@
   {
     "base_display_name": "Building Use",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Building Use",
     "icon": null,
     "is_hidden": false,
@@ -14,6 +16,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -26,6 +30,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -38,6 +44,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -50,6 +58,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -62,6 +72,8 @@
   {
     "base_display_name": "Community Data",
     "collapsed_by_default": true,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Community Data",
     "icon": null,
     "is_hidden": false,
@@ -72,8 +84,24 @@
     "target_key": null
   },
   {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "dashboard_display_name": "NEH Borrower",
+    "dashboard_id": 2,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "dashboard:2",
+    "node_kind": "dashboard",
+    "parent_node_key": "tool_lending",
+    "sort_order": 40,
+    "target_key": null
+  },
+  {
     "base_display_name": "Event Kits",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Event Kits",
     "icon": null,
     "is_hidden": false,
@@ -86,6 +114,8 @@
   {
     "base_display_name": "Inventory",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Inventory",
     "icon": null,
     "is_hidden": false,
@@ -98,6 +128,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -110,6 +142,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -122,6 +156,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -134,6 +170,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -146,6 +184,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -158,6 +198,8 @@
   {
     "base_display_name": "Tool Lending",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": 3,
     "display_name": "Tool Lending",
     "icon": null,
     "is_hidden": false,
@@ -170,6 +212,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -182,6 +226,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -194,6 +240,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
@@ -206,6 +254,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -218,6 +268,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -230,6 +282,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": true,
