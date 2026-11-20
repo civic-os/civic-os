@@ -1,5 +1,5 @@
 -- Deploy civic_os:v0-83-0-menu-dashboard-nodes
--- Requires: v0-82-1-dashboard-selector-translations
+-- Requires: v0-82-2-translation-lookup-collation
 --
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later

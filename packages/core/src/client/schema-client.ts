@@ -106,7 +106,7 @@ export interface CacheVersionCheck {
 export interface SchemaContext {
   /** Opaque cache key for "who is asking" (for example the user id, or `anonymous`). Never sent anywhere. */
   identity: string;
-  /** Sent as `Accept-Language` unless it is `en` (the default, which sends no header, like the app's interceptor). */
+  /** Sent as `Accept-Language` on every request, `en` included, like the app's interceptor. */
   locale: string;
 }
 
@@ -137,7 +137,7 @@ export interface SchemaClientOptions {
   apiUrl: string;
   /** Initial cache identity. Default `''`. */
   identity?: string;
-  /** Initial locale. Default `en`. */
+  /** Initial locale, sent as `Accept-Language` on every request. Default `en`. */
   locale?: string;
   /**
    * Called when a resource that degrades to `[]` fails (today's `console.error`).
@@ -705,8 +705,13 @@ export class SchemaClient implements HandleSource {
     return bucket;
   }
 
-  private headersFor(bucket: Bucket): Record<string, string> | undefined {
-    return bucket.locale === DEFAULT_LOCALE ? undefined : { 'Accept-Language': bucket.locale };
+  /**
+   * Always names the locale, `en` included: with no header a browser (or Node's
+   * `fetch`, which sends `*`) would supply its own, and `metadata.t()` would
+   * translate into a language this client did not ask for.
+   */
+  private headersFor(bucket: Bucket): Record<string, string> {
+    return { 'Accept-Language': bucket.locale };
   }
 
   /** Cache-or-share-or-fetch for one slot. `run` is called synchronously on a cold slot. */

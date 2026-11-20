@@ -1767,5 +1767,5 @@
       ]
     }
   },
-  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+  "transportDefaults": {"Accept": "application/json", "Accept-Language": "en", "Content-Type": "application/json"}
 }

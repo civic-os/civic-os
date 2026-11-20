@@ -27,6 +27,11 @@ import { getPostgrestUrl } from '../config/runtime';
  * (request.header.accept-language), which metadata.t() reads to determine
  * which locale's translations to return.
  *
+ * The header is sent for every locale, English included: without it the
+ * browser sends its own Accept-Language, and a user whose browser prefers a
+ * language the instance does not offer would see an English UI with that
+ * language's metadata translations.
+ *
  * Only applies to PostgREST requests — other requests (Keycloak, S3, etc.)
  * are passed through unchanged.
  */
@@ -39,14 +44,7 @@ export const localeInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  const locale = localeService.locale();
-
-  // Skip header for English (the default) — reduces request overhead
-  if (locale === 'en') {
-    return next(req);
-  }
-
   return next(req.clone({
-    setHeaders: { 'Accept-Language': locale }
+    setHeaders: { 'Accept-Language': localeService.locale() }
   }));
 };
