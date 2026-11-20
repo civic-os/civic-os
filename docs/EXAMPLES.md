@@ -67,6 +67,7 @@ Every example groups its sidebar with `metadata.menu_nodes` (v0.81.0+) in one in
 | Staff Portal | `20_staff_menu_layout.sql` | Headings by audience (My Work, People, a collapsed Administration) and a nested entity |
 | StoryMap | `07_storymap_menu_layout.sql` | One heading with a nested roster, and a root entity under Data |
 | Neighborhood Hub | `46_neh_menu_layout.sql` | Five program headings beside nodes that earlier scripts hid; the layout never writes `is_hidden`, so they stay hidden |
+| Neighborhood Hub | `47_neh_menu_dashboards.sql` | Dashboards in the menu (v0.83.0): the Tool Lending heading opens the NEH Staff dashboard, and NEH Borrower and NEH Admin sit under it as dashboard nodes. The staff and admin dashboards are role-gated, so testuser and anonymous visitors get a plain Tool Lending heading with only NEH Borrower under it |
 | Client Intake | `32_menu_layout.sql` | A heading over the entity of the same name (keyed `clients_group`, the entity labeled All Clients), nested consent records, a collapsed Reports heading over five report views, and hidden nodes from earlier scripts |
 
 The sidebar does not filter by permission: every role sees the same tree, and what each linked page shows is still decided by grants and RLS.

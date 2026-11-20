@@ -20,12 +20,12 @@ import {
 } from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { forkJoin, take } from 'rxjs';
-import { buildMenu, validateMenuTree } from '@civic-os/core';
+import { buildMenu, menuDashboardKey, validateMenuTree } from '@civic-os/core';
 import { SidebarMenuComponent } from '../../components/sidebar-menu/sidebar-menu.component';
 import { SchemaEntityTable } from '../../interfaces/entity';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../services/auth.service';
-import { MenuAdminService } from '../../services/menu-admin.service';
+import { MenuAdminService, type MenuDashboard } from '../../services/menu-admin.service';
 import { SchemaService } from '../../services/schema.service';
 import { TranslationService } from '../../services/translation.service';
 import {
@@ -40,8 +40,9 @@ export interface MenuIssue {
 }
 
 /**
- * Admin editor for the sidebar menu (`/admin/menu`): arrange headings and entities in a tree of up to
- * three levels, rename, set icons, hide or collapse entries, then save the whole tree in one call.
+ * Admin editor for the sidebar menu (`/admin/menu`): arrange headings, entities and dashboards in a tree of
+ * up to three levels, link a heading to a dashboard, rename, set icons, hide or collapse entries, then save
+ * the whole tree in one call.
  * Tree operations are pure functions in `admin-menu.tree.ts`; this page holds the draft and the I/O.
  */
 @Component({
@@ -80,12 +81,21 @@ export class AdminMenuPage {
   rows = signal<DraftRow[]>([]);
   private baseline = signal<DraftRow[]>([]);
   entities = signal<SchemaEntityTable[]>([]);
+  /** The dashboards this editor can see (every one, for an admin), with translated titles. */
+  dashboards = signal<MenuDashboard[]>([]);
 
   /** Shared aria-live announcement for keyboard moves and drops. */
   announcement = signal('');
   newHeadingLabel = signal('');
 
   private entityByTable = computed(() => new Map(this.entities().map(e => [e.table_name, e])));
+  private dashboardById = computed(() => new Map(this.dashboards().map(d => [d.id, d])));
+
+  /** Dashboards some row already holds: a dashboard row or a heading's link (one place per dashboard). */
+  private usedDashboards = computed(() => new Set(this.rows().flatMap(r => (r.dashboardId != null ? [r.dashboardId] : []))));
+
+  /** Every dashboard the editor can see that no row holds. */
+  unplacedDashboards = computed(() => this.dashboards().filter(d => !this.usedDashboards().has(d.id)));
 
   dirty = computed(() => JSON.stringify(this.rows()) !== JSON.stringify(this.baseline()));
 
@@ -107,7 +117,12 @@ export class AdminMenuPage {
     }))
   );
 
-  preview = computed(() => buildMenu(this.entities(), this.draftNodes()));
+  // The preview shows a dashboard entry or a heading link only when the editor can see the dashboard,
+  // as the sidebar does for every caller: the title comes from the editor's dashboards.
+  preview = computed(() => buildMenu(this.entities(), this.draftNodes().map(n => ({
+    ...n,
+    dashboard_display_name: n.dashboard_id != null ? this.dashboardById().get(n.dashboard_id)?.display_name ?? null : null,
+  }))));
 
   private loaded = false;
 
@@ -124,13 +139,16 @@ export class AdminMenuPage {
   load(savedNotice = false): void {
     this.loading.set(true);
     this.loadError.set(false);
-    forkJoin([this.menuAdmin.getNodes(), this.schema.getEntitiesForManagement().pipe(take(1))]).subscribe({
-      next: ([{ nodes, version }, entities]) => {
+    forkJoin([
+      this.menuAdmin.getNodes(), this.schema.getEntitiesForManagement().pipe(take(1)), this.menuAdmin.getDashboards()
+    ]).subscribe({
+      next: ([{ nodes, version }, entities, dashboards]) => {
         const rows = nodesToRows(nodes);
         this.version.set(version);
         this.conflict.set(false);
         this.saveError.set(undefined);
         this.entities.set(entities);
+        this.dashboards.set(dashboards);
         this.rows.set(rows);
         this.baseline.set(rows);
         this.saved.set(savedNotice);
@@ -146,12 +164,17 @@ export class AdminMenuPage {
 
   // ── Row display ──────────────────────────────
 
-  /** What the menu shows for a row: its label, else the entity's display name, else its key. */
+  /** What the menu shows for a row: its label, else the entity's display name or the dashboard's title, else its key. */
   rowName(key: string): string {
     const row = this.rows().find(r => r.key === key);
     if (!row) return key;
     if (row.label != null && row.label.trim() !== '') return row.label;
-    return (row.targetKey != null ? this.entityByTable().get(row.targetKey)?.display_name : undefined) ?? row.key;
+    return this.targetName(row) || row.key;
+  }
+
+  /** The dashboard's title, for a dashboard id the editor can see. */
+  dashboardName(id: number | null): string | undefined {
+    return id != null ? this.dashboardById().get(id)?.display_name : undefined;
   }
 
   /**
@@ -161,11 +184,28 @@ export class AdminMenuPage {
    * rather than blocked.
    */
   notShown(row: DraftRow): boolean {
-    return row.kind === 'entity' && row.targetKey != null && !this.entityByTable().has(row.targetKey);
+    if (row.kind === 'entity') return row.targetKey != null && !this.entityByTable().has(row.targetKey);
+    return this.dashboardNotShown(row);
   }
 
-  entityName(row: DraftRow): string {
-    return row.targetKey != null ? this.entityByTable().get(row.targetKey)?.display_name ?? row.key : '';
+  /**
+   * A dashboard row, or a heading's link, to a dashboard this editor cannot see (a non-admin menu editor).
+   * The sidebar shows it to the people who can see the dashboard; the editor's preview leaves it out.
+   */
+  dashboardNotShown(row: DraftRow): boolean {
+    return row.kind !== 'entity' && row.dashboardId != null && !this.dashboardById().has(row.dashboardId);
+  }
+
+  /** The name a row falls back to without a label: its entity's name or its dashboard's title. */
+  targetName(row: DraftRow): string {
+    if (row.kind === 'entity') return row.targetKey != null ? this.entityByTable().get(row.targetKey)?.display_name ?? row.key : '';
+    if (row.kind === 'dashboard') return this.dashboardName(row.dashboardId) ?? row.key;
+    return '';
+  }
+
+  /** The dashboards a heading may open: those no other row holds, plus its current one. */
+  linkOptions(row: DraftRow): MenuDashboard[] {
+    return this.dashboards().filter(d => d.id === row.dashboardId || !this.usedDashboards().has(d.id));
   }
 
   hasChildren(index: number): boolean {
@@ -228,7 +268,7 @@ export class AdminMenuPage {
       ?? this.host.nativeElement.querySelector<HTMLElement>('[data-unplaced-key] button'));
   }
 
-  update(key: string, patch: Partial<Pick<DraftRow, 'label' | 'icon' | 'hidden' | 'collapsed'>>): void {
+  update(key: string, patch: Partial<Pick<DraftRow, 'label' | 'icon' | 'hidden' | 'collapsed' | 'dashboardId'>>): void {
     this.rows.update(rows => rows.map(r => (r.key === key ? { ...r, ...patch } : r)));
     this.saved.set(false);
   }
@@ -239,7 +279,7 @@ export class AdminMenuPage {
     const next = (tray[at + 1] ?? tray[at - 1])?.table_name;
     this.apply(
       appendRoot(this.rows(), {
-        key: table.table_name, kind: 'entity', targetKey: table.table_name,
+        key: table.table_name, kind: 'entity', targetKey: table.table_name, dashboardId: null,
         label: null, icon: null, hidden: false, collapsed: false
       }),
       undefined
@@ -251,6 +291,24 @@ export class AdminMenuPage {
       : null) ?? this.host.nativeElement.querySelector<HTMLElement>('#menu-new-heading'));
   }
 
+  addDashboard(dashboard: MenuDashboard): void {
+    const tray = this.unplacedDashboards();
+    const at = tray.findIndex(d => d.id === dashboard.id);
+    const next = (tray[at + 1] ?? tray[at - 1])?.id;
+    this.apply(
+      appendRoot(this.rows(), {
+        key: menuDashboardKey(dashboard.id), kind: 'dashboard', targetKey: null, dashboardId: dashboard.id,
+        label: null, icon: null, hidden: false, collapsed: false
+      }),
+      undefined
+    );
+    this.announcement.set(this.translation.get('a11y.admin_menu.added', { name: dashboard.display_name }));
+    // The tray button just pressed is gone: its neighbor in the dashboards tray, else the new heading field
+    this.restoreFocus(() => (next !== undefined
+      ? this.host.nativeElement.querySelector<HTMLElement>(`[data-unplaced-dashboard="${next}"] button`)
+      : null) ?? this.host.nativeElement.querySelector<HTMLElement>('#menu-new-heading'));
+  }
+
   /** Adds a heading at the root, last. Its key is an immutable slug of the label. */
   addHeading(): void {
     const label = this.newHeadingLabel().trim();
@@ -259,7 +317,7 @@ export class AdminMenuPage {
     for (const e of this.entities()) taken.add(e.table_name);
     const key = headingKeyFromLabel(label, taken);
     this.apply(
-      appendRoot(this.rows(), { key, kind: 'heading', targetKey: null, label, icon: null, hidden: false, collapsed: false }),
+      appendRoot(this.rows(), { key, kind: 'heading', targetKey: null, dashboardId: null, label, icon: null, hidden: false, collapsed: false }),
       undefined
     );
     this.newHeadingLabel.set('');
@@ -331,6 +389,12 @@ export class AdminMenuPage {
 
   onHeadingInput(event: Event): void {
     this.newHeadingLabel.set((event.target as HTMLInputElement).value);
+  }
+
+  /** The heading's "Opens dashboard" select: a dashboard id, or empty for none. */
+  onLinkChange(key: string, event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.update(key, { dashboardId: value === '' ? null : Number(value) });
   }
 
   onCheck(key: string, field: 'collapsed', event: Event): void {

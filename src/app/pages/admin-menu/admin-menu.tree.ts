@@ -23,14 +23,16 @@
  * them with `validateMenuTree` and mirrors the database trigger.
  */
 
-import { MAX_MENU_DEPTH, MENU_HEADING_KEY, menuPlacementAllowed, type MenuNodeRow } from '@civic-os/core';
+import { MAX_MENU_DEPTH, MENU_HEADING_KEY, menuPlacementAllowed, type MenuNodeKind, type MenuNodeRow } from '@civic-os/core';
 
 export interface DraftRow {
-  /** The node key: the table name for an entity row, an immutable slug for a heading. */
+  /** The node key: the table name for an entity row, an immutable slug for a heading, `dashboard:<id>` for a dashboard row. */
   key: string;
-  kind: 'heading' | 'entity';
+  kind: MenuNodeKind;
   targetKey: string | null;
-  /** Label override; null falls back to the entity's display name (headings always have one). */
+  /** The dashboard a dashboard row links to, or the dashboard a heading's title opens; null otherwise. */
+  dashboardId: number | null;
+  /** Label override; null falls back to the entity's display name or the dashboard's title (headings always have one). */
   label: string | null;
   icon: string | null;
   hidden: boolean;
@@ -72,6 +74,7 @@ export function nodesToRows(nodes: readonly MenuNodeRow[]): DraftRow[] {
         key: n.node_key,
         kind: n.node_kind,
         targetKey: n.target_key,
+        dashboardId: n.dashboard_id ?? null,
         label: n.display_name,
         icon: n.icon,
         hidden: n.is_hidden,
@@ -87,7 +90,7 @@ export function nodesToRows(nodes: readonly MenuNodeRow[]): DraftRow[] {
     if (!visited.has(n.node_key)) {
       visited.add(n.node_key);
       rows.push({
-        key: n.node_key, kind: n.node_kind, targetKey: n.target_key, label: n.display_name,
+        key: n.node_key, kind: n.node_kind, targetKey: n.target_key, dashboardId: n.dashboard_id ?? null, label: n.display_name,
         icon: n.icon, hidden: n.is_hidden, collapsed: n.collapsed_by_default, depth: 1,
       });
       walk(n.node_key, 2);
@@ -105,7 +108,11 @@ export function parentIndex(rows: readonly DraftRow[], index: number): number {
   return -1;
 }
 
-/** Draft rows to menu nodes: parent from nesting, sort_order = position among siblings x 10. */
+/**
+ * Draft rows to menu nodes: parent from nesting, sort_order = position among siblings x 10. Only entity rows
+ * keep a target and only heading and dashboard rows a dashboard. `dashboard_display_name` is left null: the
+ * server never reads it, and the preview fills it from the editor's dashboards.
+ */
 export function rowsToNodes(rows: readonly DraftRow[]): MenuNodeRow[] {
   const stack: string[] = [];
   const counters = new Map<string | null, number>();
@@ -127,6 +134,8 @@ export function rowsToNodes(rows: readonly DraftRow[]): MenuNodeRow[] {
       sort_order: position * SORT_STEP,
       is_hidden: row.hidden,
       collapsed_by_default: row.collapsed,
+      dashboard_id: row.kind === 'entity' ? null : row.dashboardId,
+      dashboard_display_name: null,
     };
   });
 }
@@ -226,7 +235,7 @@ export function outdent(rows: readonly DraftRow[], index: number): DraftRow[] {
   return rest;
 }
 
-/** Removes the row and its whole subtree. Entities among them become unplaced (the page derives the tray). */
+/** Removes the row and its whole subtree. Entities and dashboards among them become unplaced (the page derives the trays). */
 export function removeRow(rows: readonly DraftRow[], index: number): DraftRow[] {
   return [...rows.slice(0, index), ...rows.slice(subtreeEnd(rows, index))];
 }

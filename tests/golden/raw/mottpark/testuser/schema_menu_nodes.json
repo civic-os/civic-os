@@ -2,6 +2,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -14,6 +16,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -26,6 +30,8 @@
   {
     "base_display_name": "Managers",
     "collapsed_by_default": true,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Managers",
     "icon": null,
     "is_hidden": false,
@@ -38,6 +44,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -50,6 +58,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -62,6 +72,8 @@
   {
     "base_display_name": null,
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": null,
     "icon": null,
     "is_hidden": false,
@@ -74,6 +86,8 @@
   {
     "base_display_name": "Reservations",
     "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
     "display_name": "Reservations",
     "icon": null,
     "is_hidden": false,

@@ -22,6 +22,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
 import { ConfigService } from './services/config.service';
+import { SchemaService } from './services/schema.service';
 import { AuthService } from './services/auth.service';
 import { MaintenanceService } from './services/maintenance.service';
 import { ThemeService } from './services/theme.service';
@@ -217,6 +218,30 @@ describe('AppComponent', () => {
             config.values.set({ app_title: 'Springfield Portal' });
             TestBed.tick();
             expect(document.title).toBe('Something else');
+        });
+    });
+
+    describe('menu refresh on role changes', () => {
+        it('refetches the menu when impersonation starts or stops, not on the first run', async () => {
+            TestBed.createComponent(AppComponent);
+            httpMock.match(() => true).forEach(req => {
+                if (!req.cancelled) req.flush([]);
+            });
+            const schema = TestBed.inject(SchemaService);
+            const refresh = vi.spyOn(schema, 'refreshMenuCache').mockImplementation(() => undefined);
+            TestBed.tick();
+            expect(refresh).not.toHaveBeenCalled();
+            mockImpersonationService.headerValue.set('user');
+            TestBed.tick();
+            expect(refresh).toHaveBeenCalledTimes(1);
+            mockImpersonationService.headerValue.set(null);
+            TestBed.tick();
+            expect(refresh).toHaveBeenCalledTimes(2);
+            // The role change also refetches the dashboard list (DashboardService), cancelling the earlier fetch
+            await settle();
+            httpMock.match(() => true).forEach(req => {
+                if (!req.cancelled) req.flush([]);
+            });
         });
     });
 

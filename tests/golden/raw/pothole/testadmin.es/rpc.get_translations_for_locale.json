@@ -1550,6 +1550,31 @@
     "translated_text": "Otra persona cambió el menú después de que usted lo abrió, por lo que sus cambios no se guardaron. Vuelva a cargarlo para ver el menú actual (se perderán sus cambios sin guardar)."
   },
   {
+    "source_key": "admin_menu.dashboard_badge",
+    "source_type": "ui",
+    "translated_text": "Tablero"
+  },
+  {
+    "source_key": "admin_menu.dashboard_not_shown_help",
+    "source_type": "ui",
+    "translated_text": "No puede ver este tablero, así que su vista previa lo omite. Quienes pueden verlo reciben el enlace."
+  },
+  {
+    "source_key": "admin_menu.dashboards",
+    "source_type": "ui",
+    "translated_text": "Tableros fuera del menú"
+  },
+  {
+    "source_key": "admin_menu.dashboards_empty",
+    "source_type": "ui",
+    "translated_text": "Todos los tableros que puede ver están en el menú."
+  },
+  {
+    "source_key": "admin_menu.dashboards_help",
+    "source_type": "ui",
+    "translated_text": "Un tablero aparece en el menú solo cuando lo coloca, y solo para quienes pueden verlo. Colocarlo no cambia quién puede abrirlo ni si el selector de tableros lo muestra."
+  },
+  {
     "source_key": "admin_menu.discard",
     "source_type": "ui",
     "translated_text": "Descartar cambios"
@@ -1565,9 +1590,24 @@
     "translated_text": "\"{{name}}\" está anidado dentro de sí mismo."
   },
   {
+    "source_key": "admin_menu.error.dashboard-children",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" no puede anidarse bajo un tablero."
+  },
+  {
+    "source_key": "admin_menu.error.dashboard-key",
+    "source_type": "ui",
+    "translated_text": "\"{{name}}\" tiene un enlace de tablero no válido."
+  },
+  {
     "source_key": "admin_menu.error.depth",
     "source_type": "ui",
     "translated_text": "\"{{name}}\" está anidado a más de tres niveles de profundidad."
+  },
+  {
+    "source_key": "admin_menu.error.duplicate-dashboard",
+    "source_type": "ui",
+    "translated_text": "El tablero de \"{{name}}\" ya está en el menú."
   },
   {
     "source_key": "admin_menu.error.duplicate-entity",
@@ -1653,6 +1693,21 @@
     "source_key": "admin_menu.layout",
     "source_type": "ui",
     "translated_text": "Estructura del menú"
+  },
+  {
+    "source_key": "admin_menu.links_to",
+    "source_type": "ui",
+    "translated_text": "Abre el tablero"
+  },
+  {
+    "source_key": "admin_menu.links_to_help",
+    "source_type": "ui",
+    "translated_text": "El título del encabezado abre este tablero. Quienes no pueden ver el tablero reciben un encabezado simple."
+  },
+  {
+    "source_key": "admin_menu.links_to_none",
+    "source_type": "ui",
+    "translated_text": "Ninguno (solo encabezado)"
   },
   {
     "source_key": "admin_menu.load_error",

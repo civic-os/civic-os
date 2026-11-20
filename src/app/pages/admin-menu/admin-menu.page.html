@@ -102,6 +102,8 @@
                       <span [class]="row.hidden ? 'font-semibold text-base-content/70' : 'font-semibold'">{{ rowName(row.key) }}</span>
                       @if (row.kind === 'heading') {
                         <span class="badge badge-ghost badge-sm">{{ 'admin_menu.heading_badge' | translate }}</span>
+                      } @else if (row.kind === 'dashboard') {
+                        <span class="badge badge-ghost badge-sm">{{ 'admin_menu.dashboard_badge' | translate }}</span>
                       }
                       @if (row.hidden) {
                         <span class="badge badge-ghost badge-sm">{{ 'admin_menu.hidden' | translate }}</span>
@@ -109,7 +111,7 @@
                       @if (notShown(row)) {
                         <span class="badge badge-outline badge-sm" data-testid="menu-not-shown"
                               [attr.aria-describedby]="'menu-not-shown-help-' + row.key">{{ 'admin_menu.not_shown' | translate }}</span>
-                        <span class="sr-only" [id]="'menu-not-shown-help-' + row.key">{{ 'admin_menu.not_shown_help' | translate }}</span>
+                        <span class="sr-only" [id]="'menu-not-shown-help-' + row.key">{{ (dashboardNotShown(row) ? 'admin_menu.dashboard_not_shown_help' : 'admin_menu.not_shown_help') | translate }}</span>
                       }
                       <span class="flex items-center gap-1 ms-auto">
                         <button type="button" class="btn btn-ghost btn-xs px-1" data-action="visibility"
@@ -147,7 +149,7 @@
                     </div>
 
                     @if (notShown(row) && !row.hidden) {
-                      <p class="text-xs text-base-content/70" aria-hidden="true">{{ 'admin_menu.not_shown_help' | translate }}</p>
+                      <p class="text-xs text-base-content/70" aria-hidden="true">{{ (dashboardNotShown(row) ? 'admin_menu.dashboard_not_shown_help' : 'admin_menu.not_shown_help') | translate }}</p>
                     }
                     @if (!row.hidden) {
                       <div class="flex flex-wrap items-end gap-3">
@@ -155,7 +157,7 @@
                           <label class="text-xs font-semibold" [attr.for]="'menu-label-' + row.key">{{ 'admin_menu.label' | translate }}</label>
                           <input type="text" class="input input-bordered input-sm w-48" [id]="'menu-label-' + row.key"
                                  [value]="row.label ?? ''"
-                                 [placeholder]="row.kind === 'heading' ? ('admin_menu.heading_label' | translate) : entityName(row)"
+                                 [placeholder]="row.kind === 'heading' ? ('admin_menu.heading_label' | translate) : targetName(row)"
                                  (input)="onLabelInput(row.key, $event)" />
                         </div>
                         <div class="flex flex-col">
@@ -167,6 +169,24 @@
                             <span class="material-symbols-outlined w-6" aria-hidden="true">{{ row.icon }}</span>
                           </span>
                         </div>
+                        @if (row.kind === 'heading') {
+                          <div class="flex flex-col">
+                            <label class="text-xs font-semibold" [attr.for]="'menu-link-' + row.key">{{ 'admin_menu.links_to' | translate }}</label>
+                            <select class="select select-bordered select-sm w-56" [id]="'menu-link-' + row.key"
+                                    [attr.aria-describedby]="'menu-link-help-' + row.key"
+                                    (change)="onLinkChange(row.key, $event)">
+                              <option value="" [selected]="row.dashboardId == null">{{ 'admin_menu.links_to_none' | translate }}</option>
+                              @if (dashboardNotShown(row)) {
+                                <!-- A link to a dashboard this editor cannot see: kept as is, named by its key -->
+                                <option [value]="row.dashboardId" selected>{{ 'dashboard:' + row.dashboardId }}</option>
+                              }
+                              @for (dashboard of linkOptions(row); track dashboard.id) {
+                                <option [value]="dashboard.id" [selected]="dashboard.id === row.dashboardId">{{ dashboard.display_name }}</option>
+                              }
+                            </select>
+                            <span class="sr-only" [id]="'menu-link-help-' + row.key">{{ 'admin_menu.links_to_help' | translate }}</span>
+                          </div>
+                        }
                         @if (row.kind === 'heading' || hasChildren(i)) {
                           <label class="label cursor-pointer gap-2" [attr.for]="'menu-collapsed-' + row.key">
                             <input type="checkbox" class="checkbox checkbox-sm" [id]="'menu-collapsed-' + row.key"
@@ -214,6 +234,26 @@
                   <span class="font-semibold">{{ entity.display_name }}</span>
                   <span class="badge badge-ghost badge-sm">{{ (entity.is_view ? 'admin_menu.view' : 'admin_menu.table') | translate }}</span>
                   <button type="button" class="btn btn-sm ms-auto" (click)="addEntity(entity)">
+                    {{ 'admin_menu.add_to_menu' | translate }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <!-- Dashboards tray: a dashboard is in the menu only once placed -->
+          <section aria-labelledby="menu-dashboards-title">
+            <h2 id="menu-dashboards-title" class="text-xl font-semibold mb-1">{{ 'admin_menu.dashboards' | translate }}</h2>
+            <p class="text-sm text-base-content/60 mb-2">{{ 'admin_menu.dashboards_help' | translate }}</p>
+            @if (unplacedDashboards().length === 0) {
+              <p class="text-base-content/60">{{ 'admin_menu.dashboards_empty' | translate }}</p>
+            }
+            <ul class="space-y-2" data-testid="menu-dashboards">
+              @for (dashboard of unplacedDashboards(); track dashboard.id) {
+                <li class="flex items-center gap-2 bg-base-200 rounded-box px-3 py-2" [attr.data-unplaced-dashboard]="dashboard.id">
+                  <span class="font-semibold">{{ dashboard.display_name }}</span>
+                  <span class="badge badge-ghost badge-sm">{{ 'admin_menu.dashboard_badge' | translate }}</span>
+                  <button type="button" class="btn btn-sm ms-auto" (click)="addDashboard(dashboard)">
                     {{ 'admin_menu.add_to_menu' | translate }}
                   </button>
                 </li>

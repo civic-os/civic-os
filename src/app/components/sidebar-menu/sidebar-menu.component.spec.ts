@@ -219,6 +219,78 @@ describe('SidebarMenuComponent', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
+  describe('dashboards', () => {
+    const dash = (id: number, o: Partial<MenuEntry> = {}): MenuEntry =>
+      ({ key: `dashboard:${id}`, kind: 'dashboard', label: `D${id}`, dashboardId: id, collapsedByDefault: false, children: [], ...o });
+
+    it('renders a dashboard entry as a link to the dashboard, marked current on its route', () => {
+      const el = setup([heading('ops', [leaf('issue'), dash(7)])], '/dashboard/7');
+      const link = el.querySelector('a[href="/dashboard/7"]') as HTMLAnchorElement;
+      expect(link.textContent!.trim()).toBe('D7');
+      expect(link.getAttribute('aria-current')).toBe('page');
+      expect(link.classList).toContain('menu-active');
+      expect(el.querySelector('a[href="/view/issue"]')!.getAttribute('aria-current')).toBeNull();
+    });
+
+    it('marks an entity link current on its routes, and no link on another dashboard', () => {
+      const el = setup([leaf('issue'), dash(7)], '/edit/issue/3');
+      expect(el.querySelector('a[href="/view/issue"]')!.getAttribute('aria-current')).toBe('page');
+      fixture.componentRef.setInput('currentUrl', '/dashboard/70');
+      fixture.detectChanges();
+      expect(el.querySelectorAll('[aria-current]').length).toBe(0);
+    });
+
+    it('opens the branch holding the active dashboard, and the Data section holding it', () => {
+      const el = setup([heading('ops', [leaf('cases', { children: [dash(3)], collapsedByDefault: true })], { collapsedByDefault: true }), dash(4)], '/dashboard/3');
+      expect((el.querySelector('details') as HTMLDetailsElement).open).toBe(true);
+      expect(el.querySelector('button.menu-dropdown-toggle')!.getAttribute('aria-expanded')).toBe('true');
+      fixture.componentRef.setInput('currentUrl', '/dashboard/4');
+      fixture.detectChanges();
+      const data = el.querySelectorAll('details')[1] as HTMLDetailsElement;
+      data.open = false;
+      data.dispatchEvent(new Event('toggle'));
+      fixture.detectChanges();
+      expect((el.querySelectorAll('details')[1] as HTMLDetailsElement).open).toBe(true);
+    });
+
+    it('renders a root heading that opens a dashboard as a section title link plus a toggle, not a summary', () => {
+      const el = setup([heading('mod', [leaf('issue')], { dashboardId: 5, icon: 'hub' })]);
+      expect(el.querySelector('summary')).toBeNull();
+      const title = el.querySelector('a[href="/dashboard/5"]') as HTMLAnchorElement;
+      expect(title.textContent!.trim()).toContain('MOD');
+      expect(title.classList).toContain('uppercase');
+      expect(title.querySelector('.material-symbols-outlined')!.textContent).toBe('hub');
+      const toggle = el.querySelector('button.menu-dropdown-toggle') as HTMLButtonElement;
+      expect(toggle.getAttribute('aria-label')).toBeTruthy();
+      const list = el.querySelector(`#${toggle.getAttribute('aria-controls')}`) as HTMLElement;
+      expect(list.querySelector('a[href="/view/issue"]')).toBeTruthy();
+      // The chevron toggles without navigating; the title is a separate link
+      toggle.click();
+      fixture.detectChanges();
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+      expect(list.hidden).toBe(true);
+      // Every li is a direct child of a ul (or of the host, which is the ul in the app)
+      for (const li of Array.from(el.querySelectorAll('li'))) expect(li.parentElement === el || li.parentElement!.tagName === 'UL').toBe(true);
+    });
+
+    it('keeps a linked section open on its own dashboard, and marks its title current', () => {
+      localStorage.setItem(MENU_OPEN_STORAGE_KEY, JSON.stringify({ mod: false }));
+      const el = setup([heading('mod', [leaf('issue')], { dashboardId: 5 })], '/dashboard/5');
+      expect(el.querySelector('a[href="/dashboard/5"]')!.getAttribute('aria-current')).toBe('page');
+      expect(el.querySelector('button.menu-dropdown-toggle')!.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('renders a linked heading with no entries as the link alone, and a nested one like a parent entity', () => {
+      const alone = setup([heading('mod', [], { dashboardId: 5 })]);
+      expect(alone.querySelector('a[href="/dashboard/5"]')).toBeTruthy();
+      expect(alone.querySelector('button')).toBeNull();
+      const nested = setup([heading('outer', [heading('inner', [leaf('issue')], { dashboardId: 6 })])]);
+      expect(nested.querySelectorAll('summary').length).toBe(1);
+      expect(nested.querySelector('a[href="/dashboard/6"]')).toBeTruthy();
+      expect(nested.querySelectorAll('button.menu-dropdown-toggle').length).toBe(1);
+    });
+  });
+
   describe('root sections', () => {
     const summaries = (el: HTMLElement) => Array.from(el.querySelectorAll('details > summary')).map(s => s.textContent?.trim());
 

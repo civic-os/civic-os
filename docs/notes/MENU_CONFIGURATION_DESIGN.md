@@ -1,6 +1,6 @@
 # Menu Configuration Design
 
-**Status**: Built (v0.81.0); per-caller reads, a menu permission and stale-save rejection added in v0.81.2 (see Amendment)
+**Status**: Built (v0.81.0); per-caller reads, a menu permission and stale-save rejection added in v0.81.2 (see Amendment); dashboards in the menu added in v0.83.0 (see Amendment: dashboards)
 **Created**: 2026-11-05
 
 **Related docs**:
@@ -20,7 +20,7 @@ The sidebar was one flat list of entities. An integrator could hide an entity (`
 | Column | Role |
 |--------|------|
 | `node_key` | Primary key. A table name for an entity node, a slug (`^[a-z][a-z0-9_]*$`) for a heading |
-| `node_kind` | `heading` or `entity`. A column CHECK limits it to those two, so a new kind (custom page) is a migration, and the kind cannot change on update |
+| `node_kind` | `heading`, `entity` or (v0.83.0) `dashboard`. A CHECK limits it, so a new kind (custom page) is a migration, and the kind cannot change on update |
 | `target_key` | The table or registered view an entity node links to; NULL for a heading. Unique per kind, so an entity has one node |
 | `display_name` | Label override; required for headings, optional for entity nodes |
 | `icon` | Material Symbols name |
@@ -28,6 +28,7 @@ The sidebar was one flat list of entities. An integrator could hide an entity (`
 | `sort_order` | Nullable INT, no default, like `metadata.entities.sort_order` |
 | `is_hidden` | Hides the node and its subtree |
 | `collapsed_by_default` | Initial open state for headings and parent entity nodes |
+| `dashboard_id` | (v0.83.0) The dashboard a dashboard node links to (required), or the dashboard a heading's title opens (optional). `UNIQUE`; foreign key to `metadata.dashboards` with no `ON DELETE` action (see Amendment: dashboards) |
 
 Placement rules: depth at most 3 (root is 1); headings at the root or under a heading; entity nodes at the root, under a heading or under an entity node; no cycles; an entity node's `node_key` equals its target; a target must be a `public` table or a view registered in `metadata.entities`, the same eligibility test as `public.schema_entities` (virtual entities qualify).
 
@@ -154,6 +155,57 @@ Making the save invoker exposed two more costs. Every per-node `INSERT` evaluate
 
 `verify/v0-81-0-menu-nodes.sql` now checks grants, but only properties that hold both right after v0.81.0 and once v0.81.2 is deployed, because `sqitch verify` runs every script against the current state. Functions are matched by name and checked for security properties, and a signature that may be gone is looked up with `to_regprocedure()`: a `'...'::regprocedure` literal is folded at plan time and fails even behind an existence guard.
 
+## Amendment: dashboards (v0.83.0)
+
+Migration `v0-83-0-menu-dashboard-nodes` (issue #124) lets dashboards into the tree. Before, a module's dashboards were reachable only from the navbar selector and from links inside other dashboards, so a module could not put its landing page or its management page next to its entities.
+
+### Two forms
+
+- **A dashboard node** (`node_kind = 'dashboard'`) links to `/dashboard/:id`. It is a leaf. It sits wherever an entity node may: the root, under a heading, or under an entity node.
+- **A heading may open a dashboard** (`dashboard_id` on a heading). Its title is a link to the dashboard and its chevron toggles the section.
+
+**Why a linked heading, not a dashboard node with children.** Dashboards are role-gated by design (v0.80.3), so whether a caller sees a dashboard varies by role far more often than whether they can read a table (grants, which rarely vary by role). The rule for a link node the caller cannot see is to drop it and lift its children to its parent, which works for the occasional unreadable entity but would flatten a whole module for every role that cannot see the module's dashboard. A heading keeps its place: when the caller cannot see its dashboard it is an ordinary heading, and its label is required, so no title of a dashboard the caller cannot open reaches them. It also keeps sub-headings possible, which an entity-style parent cannot hold. *Rejected:* dashboard nodes with children under the entity rules (the group falls apart for other roles, a root dashboard with children would render as an item in the Data run rather than a section, no sub-headings); leaves only at the root and under headings (a module heading could not open its dashboard).
+
+**Why leaves may sit under entity nodes.** Once grouping is a heading's job, nothing needs to nest under a dashboard node, but nothing argues for keeping it out of the places an entity link goes (a dashboard about a table's records, under that table).
+
+**Why nothing sits under a dashboard node.** A linked heading covers the "clickable group" case, and a single way to express it keeps the editor and the visibility rules simple. The rule is easy to relax later, while tightening it would break stored trees.
+
+### Target typing and keys
+
+`dashboard_id INT REFERENCES metadata.dashboards(id)`, `UNIQUE`, shared by both forms: one place in the menu per dashboard keeps the active entry and the forced-open branch unambiguous, and the unique index is the foreign key's index. `target_key` stays NULL for dashboard nodes, so it keeps meaning "a table or view". A table CHECK requires a dashboard node's key to be `dashboard:<id>`: the colon is outside the heading slug and any unquoted table name, so the key spaces cannot collide, and ids are the only stable dashboard identifier (dashboard translations key on ids too). Another CHECK keeps `dashboard_id` off entity nodes. *Rejected:* the id as text in `target_key` with triggers (re-implements a foreign key, mixes two meanings in one column); `dashboard_<id>` keys (collide with heading slugs and plausible table names); integrator-chosen keys (nothing to validate them against).
+
+**No `ON DELETE` action.** An `ON DELETE SET NULL` or `CASCADE` runs its update or delete on `menu_nodes` for every deleted dashboard, and the statement trigger that stamps the menu version fires even when no row matches (verified on PostgreSQL 17), so every dashboard delete would move the menu version and conflict open editor drafts. Instead a `BEFORE DELETE` row trigger on `metadata.dashboards` (`menu_dashboard_deleted()`, definer, so deleting a dashboard needs no menu permission) deletes the dashboard's node and clears a heading's link, only when the dashboard is in the menu; the foreign key then only guards against dangling references. A heading keeps its subtree when its dashboard goes.
+
+### Visibility
+
+This is the first per-caller filter on menu leaves: entity nodes still show regardless of permission. `menu_visible_tree()` treats a dashboard node as kept when `metadata.can_see_dashboard(id)` holds, and a heading as kept when a kept leaf (entity or dashboard) is below it or its own link is visible. `can_see_dashboard()` evaluates `dashboard_visible()`, which reads the JWT claims (`is_admin()`, `current_user_id()`, `get_user_roles()`); a `SECURITY DEFINER` function does not change those, so the walk answers for the caller without a new argument, unlike `schema_entities`, whose privilege checks would run as the owner. Stubs are unchanged: they exist because `buildMenu` lists entities without a node at the root, and dashboards without a node are never listed, so a hidden dashboard node is simply left out.
+
+`schema_menu_nodes` appends `dashboard_id` and `dashboard_display_name`, the translated title through a join on `metadata.dashboards`. The view is invoker, so the join runs under the caller's dashboards policy and the title is NULL exactly when the caller cannot see the dashboard. That NULL is the signal `buildMenu` uses: a dashboard node renders, and a heading carries `dashboardId`, only when the row has a title. Non-full readers never receive a dashboard node they cannot see; full readers (menu editors, translators) do, with a NULL title, and the editor marks those rows Not shown.
+
+`save_menu_tree()` stores `dashboard_id` and checks no visibility: a non-admin menu editor's draft can hold links to dashboards they cannot see, and must save them back.
+
+### Cache version
+
+`menu_dashboard_stamp_version()` stamps `metadata.menu_version` after a change to a dashboard that is in the menu: an update of `display_name`, `is_public` or `created_by`, and any insert, update or delete of its `dashboard_roles` rows (direct writes, `set_dashboard_roles()`, the `dashboard_role_defaults` sync, role deletes). A dashboard outside the menu changes nothing in it, so it stamps nothing; a new dashboard is outside the menu. Title translations already move the `translations` version, which refetches the menu. The app also refetches the menu on impersonation start, stop and role change and on login and logout (`AppComponent`, the trigger `DashboardService` uses), because both dashboard visibility and full-reader status follow the roles.
+
+Known cost: the editor's expected version is the same stamp, so a menu editor with an open draft gets a PT409 conflict if someone changes a placed dashboard's title or roles meanwhile. *Rejected:* a separate dashboards version folded into the `menu` row of `schema_cache_versions`, which the editor sends as its expected version, so it would conflict on every dashboard edit anyway, or need a second version source.
+
+### Core and app
+
+`MenuNodeKind` gains `dashboard`; `MenuNodeRow` gains `dashboard_id` and `dashboard_display_name`; `MenuEntry` gains `dashboardId` (dashboard entries, and headings whose link the caller can see). `buildMenu` keeps a heading with a visible link even with no entries, labels a dashboard node by its `display_name` else the dashboard title, and renders each dashboard once. `validateMenuTree` adds `dashboard-key`, `dashboard-children` and `duplicate-dashboard`. `menuPlacementAllowed` refuses any parent that is a dashboard node. `menuDashboardKey(id)` builds the key. `menuBranchKeys` accepts a table name or `{ dashboardId }`.
+
+The sidebar parses `/dashboard/:id` as well as entity routes for the active entry, marks active links with `aria-current="page"`, and forces open the branch, a linked heading itself and a Data section that holds the active dashboard. A link cannot sit inside a `<summary>`, so a linked heading uses the link plus `.menu-dropdown-toggle` pattern of parent entity nodes; at the root it keeps the section title style. With no visible entries it is the link alone.
+
+The editor reads `get_dashboards()` fresh (not `DashboardService`'s cache), lists dashboards without a row in a second tray, gives heading rows an "Opens dashboard" select limited to dashboards no other row holds, and fills `dashboard_display_name` from its own dashboards for the preview, so the preview applies the same visibility rule as the sidebar.
+
+MCP is unchanged: it does not read the menu and has no dashboard tools.
+
+### Tests
+
+`tests/functional/v0-83-0-menu-dashboard-nodes-test.sh` covers the constraints and trigger, the rows each kind of caller gets, the version stamps, deletes and saves, and checks that `buildMenu` over each caller's rows equals `buildMenu` over the full rows with that caller's dashboard visibility applied. `v0-81-2-menu-access-test.sh` applies the same masking. Both now run in CI, with `v0-81-0-menu-nodes-test.sh`, after a package build.
+
+Reverting v0.83.0 deletes dashboard nodes, clears heading links and restores the v0.81.2 functions and view.
+
 ## Revert
 
 The revert script restores `metadata.entities.show_in_sidebar` and the previous `schema_entities`, dependents, `upsert_entity_metadata` (17 parameters), `add_guided_form_step`, `schema_cache_versions` and `get_translation_defaults`, then drops the menu objects. It is lossy by design. Every eligible entity (those with a node and the unplaced ones that follow the root nodes) gets `sort_order = rank * 10`, where rank is its position in the depth-first menu order (a hidden root entity node has no place in the menu, so it ranks with the unplaced entities by its entity `sort_order`, keeping the general entity order), and `show_in_sidebar = FALSE` when its node or any ancestor is hidden. Entities without a `metadata.entities` row get one. Headings, nesting, labels, icons, collapsed flags and menu translations are lost; export `schema_menu_nodes` first.
@@ -162,8 +214,7 @@ Reverting v0.81.2 (`sqitch revert --to v0-81-1-instance-config-translation-defau
 
 ## Out of scope and future
 
-- **Custom-page nodes.** `node_kind` is a two-value CHECK today; a third kind for custom pages (`docs/notes/CUSTOM_PAGES_DESIGN.md`) is a migration plus a `buildMenu` branch.
-- **Dashboards in the menu.** Not designed.
-- **Per-role menus.** One tree for everyone; hiding is global. Role-specific visibility would need its own model (compare dashboard role visibility).
+- **Custom-page nodes.** A fourth `node_kind` for custom pages (`docs/notes/CUSTOM_PAGES_DESIGN.md`) is a migration plus a `buildMenu` branch, and a heading could open one the way it opens a dashboard.
+- **Per-role menus.** One tree for everyone; hiding is global. Dashboard nodes and heading links follow dashboard visibility (v0.83.0), but entity nodes and headings are not filtered by role. Role-specific visibility for them would need its own model.
 - **MCP grouping hint.** Not done.
 - **Plural names.** Set a node label per entity; there is no automatic pluralization.

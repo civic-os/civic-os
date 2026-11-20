@@ -22,14 +22,15 @@ import { Observable, map, of, throwError } from 'rxjs';
 import type { MenuNodeRow } from '@civic-os/core';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { AdminMenuPage } from './admin-menu.page';
-import { MenuAdminService, SaveMenuResult } from '../../services/menu-admin.service';
+import { MenuAdminService, MenuDashboard, SaveMenuResult } from '../../services/menu-admin.service';
 import { SchemaService } from '../../services/schema.service';
 import { AuthService } from '../../services/auth.service';
 import { SchemaEntityTable } from '../../interfaces/entity';
 
 const node = (key: string, over: Partial<MenuNodeRow> = {}): MenuNodeRow => ({
   node_key: key, node_kind: 'entity', target_key: key, display_name: null, icon: null,
-  parent_node_key: null, sort_order: 0, is_hidden: false, collapsed_by_default: false, ...over,
+  parent_node_key: null, sort_order: 0, is_hidden: false, collapsed_by_default: false,
+  dashboard_id: null, dashboard_display_name: null, ...over,
 });
 
 const entity = (table: string, over: Partial<SchemaEntityTable> = {}): SchemaEntityTable =>
@@ -41,6 +42,10 @@ const NODES: MenuNodeRow[] = [
   node('referrals', { parent_node_key: 'intake', sort_order: 0 }),
 ];
 const ENTITIES = [entity('issues'), entity('referrals'), entity('reports', { is_view: true }), entity('notes')];
+const DASHBOARDS: MenuDashboard[] = [
+  { id: 1, display_name: 'Overview', show_in_selector: true },
+  { id: 2, display_name: 'Staff', show_in_selector: false },
+];
 
 describe('AdminMenuPage', () => {
   let fixture: ComponentFixture<AdminMenuPage>;
@@ -49,13 +54,17 @@ describe('AdminMenuPage', () => {
   let getNodes: ReturnType<typeof vi.fn>;
   let saveTree: ReturnType<typeof vi.fn>;
   let refreshMenuCache: ReturnType<typeof vi.fn>;
+  let getDashboards: ReturnType<typeof vi.fn>;
   let permissionsLoaded: WritableSignal<boolean>;
 
   /** getNodes' reply: the nodes at a menu version. */
   const snapshot = (nodes: Observable<MenuNodeRow[]>, version = 'v1') => nodes.pipe(map(n => ({ nodes: n, version })));
 
-  async function create(options: { admin?: boolean; permissions?: string[]; loaded?: boolean; nodes?: Observable<MenuNodeRow[]> } = {}) {
+  async function create(options: {
+    admin?: boolean; permissions?: string[]; loaded?: boolean; nodes?: Observable<MenuNodeRow[]>; dashboards?: MenuDashboard[];
+  } = {}) {
     permissionsLoaded = signal(options.loaded ?? true);
+    getDashboards = vi.fn().mockReturnValue(of(options.dashboards ?? DASHBOARDS));
     getNodes = vi.fn().mockReturnValue(snapshot(options.nodes ?? of(NODES)));
     saveTree = vi.fn().mockReturnValue(of<SaveMenuResult>({ success: true }));
     refreshMenuCache = vi.fn();
@@ -65,7 +74,7 @@ describe('AdminMenuPage', () => {
         provideTranslationTesting(),
         provideZonelessChangeDetection(),
         provideRouter([]),
-        { provide: MenuAdminService, useValue: { getNodes, saveTree } },
+        { provide: MenuAdminService, useValue: { getNodes, saveTree, getDashboards } },
         { provide: SchemaService, useValue: { getEntitiesForManagement: () => of(ENTITIES), refreshMenuCache } },
         {
           provide: AuthService,
@@ -399,6 +408,109 @@ describe('AdminMenuPage', () => {
       component.update('issues', { hidden: true });
       await flush();
       expect(preview.textContent).not.toContain('Issues');
+    });
+  });
+
+  describe('dashboards', () => {
+    const dashboardNode = (id: number, over: Partial<MenuNodeRow> = {}) =>
+      node(`dashboard:${id}`, { node_kind: 'dashboard', target_key: null, dashboard_id: id, ...over });
+    const trayKeys = () => [...el.querySelectorAll('[data-unplaced-dashboard]')].map(li => li.getAttribute('data-unplaced-dashboard'));
+    const linkSelect = (key: string) => rowEl(key).querySelector('select') as HTMLSelectElement;
+
+    it('lists the dashboards no row holds, unlisted ones included, and adds one as a root dashboard row', async () => {
+      await create();
+      expect(getDashboards).toHaveBeenCalledTimes(1);
+      expect(trayKeys()).toEqual(['1', '2']);
+      (el.querySelector('[data-unplaced-dashboard="2"] button') as HTMLButtonElement).click();
+      await flush();
+      expect(draft()).toEqual(['1:issues', '1:intake', '2:referrals', '1:dashboard:2']);
+      expect(component.rows()[3]).toMatchObject({ kind: 'dashboard', dashboardId: 2, targetKey: null });
+      expect(trayKeys()).toEqual(['1']);
+      expect(rowEl('dashboard:2').textContent).toContain('Staff');
+      expect(rowEl('dashboard:2').textContent).toContain('Dashboard');
+      expect((el.querySelector('[data-testid="menu-announcement"]') as HTMLElement).textContent).toContain('Staff');
+      // No collapsed checkbox and no dashboard select on a dashboard row
+      expect(rowEl('dashboard:2').querySelector('input[type="checkbox"]')).toBeNull();
+      expect(linkSelect('dashboard:2')).toBeNull();
+    });
+
+    it('saves a dashboard row with its dashboard id and no target', async () => {
+      await create();
+      component.addDashboard(DASHBOARDS[0]);
+      await flush();
+      saveButton().click();
+      await flush();
+      const sent = saveTree.mock.calls[0][0] as MenuNodeRow[];
+      expect(sent.find(n => n.node_key === 'dashboard:1')).toMatchObject({ node_kind: 'dashboard', target_key: null, dashboard_id: 1 });
+      expect(sent.find(n => n.node_key === 'intake')).toMatchObject({ dashboard_id: null });
+      expect(sent.find(n => n.node_key === 'issues')).toMatchObject({ dashboard_id: null });
+    });
+
+    it('a dashboard row can go under an entity, and nothing can go under a dashboard row', async () => {
+      await create({ nodes: of([node('issues', { sort_order: 0 }), dashboardNode(1, { sort_order: 10 }), node('notes', { sort_order: 20 })]) });
+      expect(component.canIndent(1)).toBe(true);
+      expect(component.canIndent(2)).toBe(false);
+      expect(button('notes', 'indent').disabled).toBe(true);
+      component.indent(1);
+      await flush();
+      expect(draft()).toEqual(['1:issues', '2:dashboard:1', '1:notes']);
+    });
+
+    it('links a heading to a dashboard with its select, offering only dashboards no other row holds', async () => {
+      await create({ nodes: of([...NODES, dashboardNode(2, { sort_order: 20 })]) });
+      const select = linkSelect('intake');
+      expect([...select.options].map(o => o.value)).toEqual(['', '1']);
+      select.value = '1';
+      select.dispatchEvent(new Event('change'));
+      await flush();
+      expect(component.rows().find(r => r.key === 'intake')!.dashboardId).toBe(1);
+      expect(trayKeys()).toEqual([]);
+      expect(linkSelect('intake').value).toBe('1');
+      // The preview's heading title opens the dashboard
+      const preview = el.querySelector('[data-testid="menu-preview"]')!;
+      expect(preview.querySelector('a[href="/dashboard/1"]')!.textContent).toContain('Intake');
+      // Clearing the link returns the dashboard to the tray
+      linkSelect('intake').value = '';
+      linkSelect('intake').dispatchEvent(new Event('change'));
+      await flush();
+      expect(component.rows().find(r => r.key === 'intake')!.dashboardId).toBeNull();
+      expect(trayKeys()).toEqual(['1']);
+    });
+
+    it('names a dashboard row by its label, else the dashboard title, and previews it as a dashboard link', async () => {
+      await create({ nodes: of([dashboardNode(1), dashboardNode(2, { display_name: 'Team', sort_order: 10 })]) });
+      expect(component.rowName('dashboard:1')).toBe('Overview');
+      expect(component.rowName('dashboard:2')).toBe('Team');
+      expect((rowEl('dashboard:1').querySelector('input[type="text"]') as HTMLInputElement).placeholder).toBe('Overview');
+      const links = [...el.querySelectorAll('[data-testid="menu-preview"] a[href^="/dashboard"]')].map(a => [a.getAttribute('href'), a.textContent!.trim()]);
+      expect(links).toEqual([['/dashboard/1', 'Overview'], ['/dashboard/2', 'Team']]);
+    });
+
+    it('flags, keeps and saves back a dashboard row or heading link the editor cannot see', async () => {
+      await create({
+        admin: false, permissions: ['metadata.menu_nodes:update'], dashboards: [DASHBOARDS[0]],
+        nodes: of([node('intake', { node_kind: 'heading', target_key: null, display_name: 'Intake', dashboard_id: 2 }), dashboardNode(9, { sort_order: 10 })]),
+      });
+      const flagged = [...el.querySelectorAll('[data-testid="menu-not-shown"]')].map(b => b.closest('[data-row-key]')!.getAttribute('data-row-key'));
+      expect(flagged).toEqual(['intake', 'dashboard:9']);
+      expect(rowEl('dashboard:9').textContent).toContain('You cannot see this dashboard');
+      // The unseen link stays selected; the editor's own dashboard is offered
+      expect([...linkSelect('intake').options].map(o => [o.value, o.selected])).toEqual([['', false], ['2', true], ['1', false]]);
+      expect(component.issues()).toEqual([]);
+      // The preview leaves the unseen dashboard row out and shows the heading unlinked (it has no entries: dropped)
+      expect(el.querySelector('[data-testid="menu-preview"] a[href^="/dashboard"]')).toBeNull();
+      component.moveDown(0);
+      await flush();
+      saveButton().click();
+      await flush();
+      const sent = saveTree.mock.calls[0][0] as MenuNodeRow[];
+      expect(sent.map(n => [n.node_key, n.dashboard_id])).toEqual([['dashboard:9', 9], ['intake', 2]]);
+    });
+
+    it('reports a dashboard row with something nested under it (stored bad data)', async () => {
+      await create({ nodes: of([dashboardNode(1), node('notes', { parent_node_key: 'dashboard:1' })]) });
+      expect(component.issues().map(i => i.code)).toEqual(['dashboard-children']);
+      expect(el.querySelector('[data-testid="menu-issues"]')!.textContent).toContain('cannot be nested under a dashboard');
     });
   });
 

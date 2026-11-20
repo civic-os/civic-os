@@ -44,12 +44,14 @@ if [ ! -f "$CORE" ]; then
   exit 1
 fi
 
-# JSON export of one caller's view: its entities and its schema_menu_nodes rows, as the app reads them.
+# JSON export of one caller's view: its entities and its schema_menu_nodes rows, as the app reads them, and
+# (since v0.83.0) the ids of the dashboards it can see.
 # Prints "JSON<TAB><label><TAB><json>"; only those lines reach the buildMenu check.
 EXPORT_SQL="SELECT 'JSON', :'label', json_build_object(
   'entities', (SELECT COALESCE(json_agg(json_build_object('table_name', se.table_name, 'display_name', se.display_name,
                                                           'sort_order', se.sort_order)), '[]') FROM public.schema_entities se),
-  'rows', (SELECT COALESCE(json_agg(row_to_json(m)), '[]') FROM public.schema_menu_nodes m));"
+  'rows', (SELECT COALESCE(json_agg(row_to_json(m)), '[]') FROM public.schema_menu_nodes m),
+  'dashboards', (SELECT COALESCE(json_agg(d.id), '[]') FROM metadata.dashboards d));"
 
 # -----------------------------------------------------------------------------
 # rows, eligible, writes, version (fixture tree, rolled back)
@@ -356,8 +358,9 @@ SELECT set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 ROLLBACK;
 SQL
 
-# buildMenu over each non-full reader's rows equals buildMenu over the full rows with the same entities, and the
-# rendered tree (keys and parents, unplaced entities aside) equals the server's visible rows.
+# buildMenu over each non-full reader's rows equals buildMenu over the full rows with the same entities and the
+# reader's dashboard visibility (v0.83.0: titles of dashboards it cannot see nulled), and the rendered tree (keys
+# and parents, unplaced entities aside) equals the server's visible rows.
 grep -h '^JSON' "$OUT/fixture.out" "$OUT/example.out" | node --input-type=module -e '
 import { readFileSync } from "node:fs";
 import { isDeepStrictEqual } from "node:util";
@@ -365,10 +368,11 @@ const { buildMenu } = await import(process.argv[1]);
 const exports = new Map(readFileSync(0, "utf8").trim().split("\n").map(l => { const [, label, json] = l.split("\t"); return [label, JSON.parse(json)]; }));
 const flatten = (entries, parent, out) => { for (const e of entries) { out.push(`${e.key}:${parent ?? "-"}`); flatten(e.children, e.key, out); } return out; };
 let failed = 0, checked = 0;
-for (const [label, { entities, rows }] of exports) {
+for (const [label, { entities, rows, dashboards }] of exports) {
   const [group, caller] = label.split(":");
   if (caller === "full") continue;
-  const full = exports.get(`${group}:full`).rows;
+  const seen = new Set(dashboards);
+  const full = exports.get(`${group}:full`).rows.map(r => ({ ...r, dashboard_display_name: seen.has(r.dashboard_id) ? r.dashboard_display_name : null }));
   const mine = buildMenu(entities, rows);
   if (!isDeepStrictEqual(mine, buildMenu(entities, full))) { failed++; console.log(`FAIL: ${label}: buildMenu differs from the full rows`); }
   const keys = new Set(rows.map(r => r.node_key));

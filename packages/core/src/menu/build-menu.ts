@@ -41,13 +41,24 @@ export const MENU_HEADING_KEY = /^[a-z][a-z0-9_]*$/;
 
 /**
  * Whether a node of `kind` may sit under a parent of `parentKind` (`null` for
- * the root): a heading sits at the root or under a heading; an entity node sits
- * anywhere. Mirrors the database trigger; depth is checked separately.
+ * the root): nothing sits under a dashboard node; otherwise a heading sits at
+ * the root or under a heading, and an entity or dashboard node sits anywhere.
+ * Mirrors the database trigger; depth is checked separately.
  *
  * @consumer app
  */
 export function menuPlacementAllowed(kind: MenuNodeRow['node_kind'], parentKind: MenuNodeRow['node_kind'] | null): boolean {
+  if (parentKind === 'dashboard') return false;
   return kind !== 'heading' || parentKind === null || parentKind === 'heading';
+}
+
+/**
+ * The node key of a dashboard node, `dashboard:<id>`. Mirrors the database CHECK.
+ *
+ * @consumer app
+ */
+export function menuDashboardKey(dashboardId: number): string {
+  return `dashboard:${dashboardId}`;
 }
 
 function codePointCompare(a: string, b: string): number {
@@ -104,8 +115,11 @@ function effectiveParents(nodes: readonly MenuNodeRow[]): Map<string, string | n
  * `entities` are the caller's eligible menu entities (non-junction, in
  * `schema_entities` order). Rules:
  * - `is_hidden` removes a node and its whole subtree (an entity with a hidden node is not unplaced).
- * - An entity node whose target is not in `entities` is dropped and its children take its place.
- * - A heading with no visible descendant is dropped.
+ * - An entity node whose target is not in `entities`, or a dashboard node whose row carries no
+ *   `dashboard_display_name` (the caller cannot see the dashboard), is dropped and its children take its place.
+ * - A heading opens its dashboard (`dashboardId`) when its row carries both `dashboard_id` and
+ *   `dashboard_display_name`. A heading with no visible descendant and no such link is dropped.
+ * - Dashboards without a node are not in the menu (unlike entities).
  * - Siblings sort by (`sort_order`, key in code point order). Entities with no node follow the root
  *   nodes, sorted among themselves by (entity `sort_order`, `table_name` in database collation,
  *   which is their order in `entities`).
@@ -147,22 +161,49 @@ export function buildMenu(entities: readonly MenuEntity[], nodes: readonly MenuN
   for (const n of unique) if (n.node_kind === 'entity' && n.target_key != null) withNode.add(n.target_key);
 
   const emitted = new Set<string>();
+  const emittedDashboards = new Set<number>();
+  /** The node's dashboard, when the caller can see it and no earlier entry links to it. */
+  const visibleDashboard = (node: MenuNodeRow): number | undefined => {
+    const id = node.dashboard_id;
+    if (id == null || node.dashboard_display_name == null || emittedDashboards.has(id)) return undefined;
+    emittedDashboards.add(id);
+    return id;
+  };
   const build = (node: MenuNodeRow): MenuEntry[] => {
     if (node.is_hidden) return [];
-    const children = sortNodes(childrenOf.get(node.node_key) ?? []).flatMap(build);
     if (node.node_kind === 'heading') {
-      if (children.length === 0) return [];
+      const dashboardId = visibleDashboard(node);
+      const children = sortNodes(childrenOf.get(node.node_key) ?? []).flatMap(build);
+      if (children.length === 0 && dashboardId === undefined) return [];
       return [
         {
           key: node.node_key,
           kind: 'heading',
           label: labelOf(node.display_name, node.node_key),
+          ...(dashboardId !== undefined ? { dashboardId } : {}),
           ...(node.icon ? { icon: node.icon } : {}),
           collapsedByDefault: node.collapsed_by_default,
           children,
         },
       ];
     }
+    if (node.node_kind === 'dashboard') {
+      const dashboardId = visibleDashboard(node);
+      const children = sortNodes(childrenOf.get(node.node_key) ?? []).flatMap(build);
+      if (dashboardId === undefined) return children;
+      return [
+        {
+          key: node.node_key,
+          kind: 'dashboard',
+          label: labelOf(node.display_name, node.dashboard_display_name ?? node.node_key),
+          dashboardId,
+          ...(node.icon ? { icon: node.icon } : {}),
+          collapsedByDefault: node.collapsed_by_default,
+          children,
+        },
+      ];
+    }
+    const children = sortNodes(childrenOf.get(node.node_key) ?? []).flatMap(build);
     const target = node.target_key != null ? entityByTable.get(node.target_key) : undefined;
     if (!target || emitted.has(target.table_name)) return children;
     emitted.add(target.table_name);
@@ -213,7 +254,10 @@ export type MenuTreeErrorCode =
   | 'cycle'
   | 'depth'
   | 'duplicate-entity'
-  | 'unknown-target';
+  | 'unknown-target'
+  | 'dashboard-key'
+  | 'dashboard-children'
+  | 'duplicate-dashboard';
 
 /**
  * One structural problem found in a menu tree.
@@ -229,10 +273,14 @@ export interface MenuTreeError {
  * Checks a menu tree against the structural rules the database trigger
  * enforces, returning every violation as data (in node order), so an editor can
  * report them before saving:
- * - headings sit at the root or under a heading; entity nodes at the root, under a heading or under an entity node;
+ * - headings sit at the root or under a heading; entity and dashboard nodes at the root, under a heading or
+ *   under an entity node; nothing sits under a dashboard node (`dashboard-children`);
  * - depth at most 3 (the root level is 1), no cycles, parents must exist, node keys are unique;
  * - one node per entity, an entity node's key equals its target, a heading key matches `^[a-z][a-z0-9_]*$`
  *   and a heading has a label and no target;
+ * - a dashboard node has a `dashboard_id`, no target and the key `dashboard:<id>`, and an entity node has no
+ *   `dashboard_id` (`dashboard-key`); one node per dashboard, dashboard nodes and heading links together
+ *   (`duplicate-dashboard`);
  * - when `entities` is given, an entity node must target one of them (`unknown-target`).
  *
  * @consumer app
@@ -250,6 +298,12 @@ export function validateMenuTree(
   const known = entities ? new Set(entities.map(e => e.table_name)) : undefined;
   const seenKeys = new Set<string>();
   const seenTargets = new Set<string>();
+  const seenDashboards = new Set<number>();
+  const checkDashboard = (n: MenuNodeRow): void => {
+    if (n.dashboard_id == null) return;
+    if (seenDashboards.has(n.dashboard_id)) add('duplicate-dashboard', n.node_key);
+    seenDashboards.add(n.dashboard_id);
+  };
 
   for (const n of nodes) {
     if (seenKeys.has(n.node_key)) {
@@ -262,8 +316,15 @@ export function validateMenuTree(
       if (!MENU_HEADING_KEY.test(n.node_key)) add('heading-key', n.node_key);
       if (n.display_name == null || n.display_name.trim() === '') add('heading-label', n.node_key);
       if (n.target_key != null) add('heading-target', n.node_key);
+      checkDashboard(n);
+    } else if (n.node_kind === 'dashboard') {
+      if (n.dashboard_id == null || n.target_key != null || n.node_key !== menuDashboardKey(n.dashboard_id)) {
+        add('dashboard-key', n.node_key);
+      }
+      checkDashboard(n);
     } else {
       if (n.target_key == null || n.node_key !== n.target_key) add('entity-key', n.node_key);
+      if (n.dashboard_id != null) add('dashboard-key', n.node_key);
       if (n.target_key != null) {
         if (seenTargets.has(n.target_key)) add('duplicate-entity', n.node_key);
         seenTargets.add(n.target_key);
@@ -275,6 +336,7 @@ export function validateMenuTree(
     if (parentKey != null) {
       const parent = byKey.get(parentKey);
       if (!parent) add('unknown-parent', n.node_key);
+      else if (parent.node_kind === 'dashboard') add('dashboard-children', n.node_key);
       else if (!menuPlacementAllowed(n.node_kind, parent.node_kind)) add('parent-kind', n.node_key);
     }
 
@@ -299,16 +361,31 @@ export function validateMenuTree(
 }
 
 /**
- * The keys of the ancestors of the entry for `tableName`, outermost first, so
- * the host can open the active route's branch. Empty when the entry is at the
- * root or is not in the menu.
+ * What a menu entry opens: an entity's table name, or a dashboard (a dashboard
+ * entry, or a heading whose title opens it).
+ *
+ * @consumer typed menuBranchKeys
+ */
+export type MenuTarget = string | { dashboardId: number };
+
+/** Whether the entry opens `target`. */
+function opens(entry: MenuEntry, target: MenuTarget): boolean {
+  return typeof target === 'string'
+    ? entry.kind === 'entity' && entry.tableName === target
+    : entry.dashboardId === target.dashboardId;
+}
+
+/**
+ * The keys of the ancestors of the entry that opens `target` (a table name, or
+ * `{ dashboardId }`), outermost first, so the host can open the active route's
+ * branch. Empty when the entry is at the root or is not in the menu.
  *
  * @consumer app
  */
-export function menuBranchKeys(menu: readonly MenuEntry[], tableName: string): string[] {
+export function menuBranchKeys(menu: readonly MenuEntry[], target: MenuTarget): string[] {
   const walk = (entries: readonly MenuEntry[], trail: string[]): string[] | undefined => {
     for (const entry of entries) {
-      if (entry.kind === 'entity' && entry.tableName === tableName) return trail;
+      if (opens(entry, target)) return trail;
       const found = walk(entry.children, [...trail, entry.key]);
       if (found) return found;
     }

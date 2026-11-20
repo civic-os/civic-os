@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-19T21:22:39.340Z",
+  "capturedAt": "2026-11-20T00:17:40.299Z",
   "clockDateMasks": {
     "schema_entity_actions": {
       "field": "default_value",
@@ -150,7 +150,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "36c0bdc46bdcbfd572a52a92946f30518aa2ecf3",
+  "migrationsTreeHash": "9727a191144cd02c20e49011d671530539bd40e8",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",

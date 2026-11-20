@@ -4,5 +4,5 @@
  */
 
 /** Sidebar menu rules: build the visible tree, validate a tree, find the active branch. */
-export { buildMenu, MAX_MENU_DEPTH, MENU_HEADING_KEY, menuBranchKeys, menuPlacementAllowed, validateMenuTree } from './build-menu.js';
-export type { MenuTreeError, MenuTreeErrorCode } from './build-menu.js';
+export { buildMenu, MAX_MENU_DEPTH, MENU_HEADING_KEY, menuBranchKeys, menuDashboardKey, menuPlacementAllowed, validateMenuTree } from './build-menu.js';
+export type { MenuTarget, MenuTreeError, MenuTreeErrorCode } from './build-menu.js';
