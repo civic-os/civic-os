@@ -1015,6 +1015,48 @@
         }
       }
     },
+    "tool_categories": {
+      "createProps": ["display_name:TextShort", "parent_id:Dimension", "description:TextLong", "color:Color", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextShort", "parent_id:Dimension", "description:TextLong", "color:Color", "is_active:Boolean", "sort_order:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"color": "", "description": "", "display_name": null, "parent_id": "", "sort_order": null},
+          "editFormInput": {"color": "", "description": "", "display_name": null, "is_active": null, "parent_id": "", "sort_order": null},
+          "outputs": {
+            "*": {
+              "control": {"color": null, "description": null, "is_active": null, "parent_id": null},
+              "createApi": {"color": "", "description": "", "display_name": null, "parent_id": "", "sort_order": null},
+              "editApi": {"color": "", "description": "", "display_name": null, "is_active": null, "parent_id": "", "sort_order": null}
+            }
+          },
+          "rawRow": {"color": null, "description": null, "is_active": null, "parent_id": null}
+        },
+        "odd": {
+          "createFormInput": {"color": 42, "description": 42, "display_name": 42, "parent_id": 42, "sort_order": 7},
+          "editFormInput": {"color": 42, "description": 42, "display_name": 42, "is_active": false, "parent_id": 42, "sort_order": 7},
+          "outputs": {
+            "*": {
+              "control": {"color": "text", "description": "text", "display_name": "text", "is_active": true, "parent_id": "text", "sort_order": 7},
+              "createApi": {"color": 42, "description": 42, "display_name": 42, "parent_id": 42, "sort_order": 7},
+              "editApi": {"color": 42, "description": 42, "display_name": 42, "is_active": false, "parent_id": 42, "sort_order": 7}
+            }
+          },
+          "rawRow": {"color": "text", "description": "text", "display_name": "text", "is_active": true, "parent_id": "text", "sort_order": 7}
+        },
+        "typical": {
+          "createFormInput": {"color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "parent_id": "text", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "is_active": true, "parent_id": "text", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"color": "text", "description": "text", "display_name": "text", "is_active": true, "parent_id": "text", "sort_order": 7},
+              "createApi": {"color": "text", "description": "text", "display_name": "text", "extra_key": "kept", "parent_id": "text", "sort_order": 7},
+              "editApi": {"color": "text", "description": "text", "display_name": "text", "extra_key": "kept", "is_active": true, "parent_id": "text", "sort_order": 7}
+            }
+          },
+          "rawRow": {"color": "text", "description": "text", "display_name": "text", "is_active": true, "parent_id": "text", "sort_order": 7}
+        }
+      }
+    },
     "tool_reservation_tool_items": {
       "createProps": ["quantity:IntegerNumber", "tool_reservation_tools_id:ForeignKeyName", "tool_type_id:ForeignKeyName"],
       "editProps": ["quantity:IntegerNumber", "tool_reservation_tools_id:ForeignKeyName", "tool_type_id:ForeignKeyName"],
@@ -1234,8 +1276,8 @@
       }
     },
     "tool_types": {
-      "createProps": ["display_name:TextShort", "category_id:Category", "inventory_module_id:Category", "description:TextLong", "is_qty_managed:Boolean", "total_quantity:IntegerNumber"],
-      "editProps": ["display_name:TextShort", "category_id:Category", "inventory_module_id:Category", "description:TextLong", "is_qty_managed:Boolean", "total_quantity:IntegerNumber"],
+      "createProps": ["display_name:TextShort", "category_id:Dimension", "inventory_module_id:Category", "description:TextLong", "is_qty_managed:Boolean", "total_quantity:IntegerNumber"],
+      "editProps": ["display_name:TextShort", "category_id:Dimension", "inventory_module_id:Category", "description:TextLong", "is_qty_managed:Boolean", "total_quantity:IntegerNumber"],
       "rows": {
         "empty": {
           "createFormInput": {"category_id": "", "description": "", "display_name": null, "inventory_module_id": "", "is_qty_managed": null, "total_quantity": null},
@@ -1251,7 +1293,7 @@
         },
         "odd": {
           "createFormInput": {
-            "category_id": {"display_name": "x", "id": 3},
+            "category_id": 42,
             "description": 42,
             "display_name": 42,
             "inventory_module_id": {"display_name": "x", "id": 3},
@@ -1259,7 +1301,7 @@
             "total_quantity": 7
           },
           "editFormInput": {
-            "category_id": {"display_name": "x", "id": 3},
+            "category_id": 42,
             "description": 42,
             "display_name": 42,
             "inventory_module_id": {"display_name": "x", "id": 3},
@@ -1268,9 +1310,9 @@
           },
           "outputs": {
             "*": {
-              "control": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
+              "control": {"category_id": "text", "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
               "createApi": {
-                "category_id": {"display_name": "x", "id": 3},
+                "category_id": 42,
                 "description": 42,
                 "display_name": 42,
                 "inventory_module_id": {"display_name": "x", "id": 3},
@@ -1278,7 +1320,7 @@
                 "total_quantity": 7
               },
               "editApi": {
-                "category_id": {"display_name": "x", "id": 3},
+                "category_id": 42,
                 "description": 42,
                 "display_name": 42,
                 "inventory_module_id": {"display_name": "x", "id": 3},
@@ -1287,19 +1329,19 @@
               }
             }
           },
-          "rawRow": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
+          "rawRow": {"category_id": "text", "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
         },
         "typical": {
-          "createFormInput": {"category_id": 3, "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
-          "editFormInput": {"category_id": 3, "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "createFormInput": {"category_id": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"category_id": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
-              "createApi": {"category_id": 3, "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
-              "editApi": {"category_id": 3, "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
+              "control": {"category_id": "text", "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
+              "createApi": {"category_id": "text", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
+              "editApi": {"category_id": "text", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
             }
           },
-          "rawRow": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
+          "rawRow": {"category_id": "text", "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
         }
       }
     },

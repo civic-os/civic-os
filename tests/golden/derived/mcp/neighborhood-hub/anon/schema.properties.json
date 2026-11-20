@@ -131,6 +131,17 @@
       {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
       {"column": "work_site_parcels_m2m", "select": "work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservation_work_site!work_site_id(tool_reservations!tool_reservation_id(id,display_name)))", "type": "ManyToMany", "typeId": 17}
     ],
+    "tool_categories": [
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "parent_id", "select": "parent_id:tool_categories!parent_id(id,display_name)", "type": "Dimension", "typeId": 28},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "color", "select": "color", "type": "Color", "typeId": 13},
+      {"column": "is_active", "select": "is_active", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
     "tool_reservation_tool_items": [
       {"column": "quantity", "select": "quantity", "type": "IntegerNumber", "typeId": 8},
       {"column": "tool_reservation_tools_id", "select": "tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
@@ -176,7 +187,7 @@
     "tool_types": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
-      {"column": "category_id", "select": "category_id:categories!category_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "category_id", "select": "category_id:tool_categories!category_id(id,display_name)", "type": "Dimension", "typeId": 28},
       {"column": "inventory_module_id", "select": "inventory_module_id:categories!inventory_module_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "is_qty_managed", "select": "is_qty_managed", "type": "Boolean", "typeId": 3},

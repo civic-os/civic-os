@@ -196,6 +196,20 @@
     "target_key": "parcels"
   },
   {
+    "base_display_name": null,
+    "collapsed_by_default": false,
+    "dashboard_display_name": null,
+    "dashboard_id": null,
+    "display_name": null,
+    "icon": null,
+    "is_hidden": false,
+    "node_key": "tool_categories",
+    "node_kind": "entity",
+    "parent_node_key": "inventory",
+    "sort_order": 20,
+    "target_key": "tool_categories"
+  },
+  {
     "base_display_name": "Tool Lending",
     "collapsed_by_default": false,
     "dashboard_display_name": null,

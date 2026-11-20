@@ -6,7 +6,7 @@
       "parcel_number_formatted": {"byDisplayName": "\"Parcel Number\" -> parcel_number", "byUpperDisplayName": "\"PARCEL NUMBER\" -> parcel_number"}
     }
   },
-  "columnCounts": {"probes": 699, "resolvedToSelf": 697},
+  "columnCounts": {"probes": 726, "resolvedToSelf": 724},
   "entities": {
     "borrowers": {"byDisplayName": "borrowers", "byFirstWord": "borrowers", "byPaddedDisplayName": "borrowers", "byTableName": "borrowers", "byUpperDisplayName": "borrowers", "displayName": "Borrowers"},
     "building_use_event_details": {
@@ -107,6 +107,14 @@
       "displayName": "Project Parcels"
     },
     "projects": {"byDisplayName": "projects", "byFirstWord": "projects", "byPaddedDisplayName": "projects", "byTableName": "projects", "byUpperDisplayName": "projects", "displayName": "Projects"},
+    "tool_categories": {
+      "byDisplayName": "tool_categories",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_categories",
+      "byTableName": "tool_categories",
+      "byUpperDisplayName": "tool_categories",
+      "displayName": "Tool Categories"
+    },
     "tool_instances": {
       "byDisplayName": "tool_instances",
       "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Types\" (tool_types), \"Tool Instances\" (tool_instances)?",

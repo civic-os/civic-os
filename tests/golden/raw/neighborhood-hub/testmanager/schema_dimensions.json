@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "active_column": "is_active",
+    "default_value_id": null,
+    "dimension_key": "tool_category",
+    "display_name": "Tool Category",
+    "external_id_column": null,
+    "hide_when_single": true,
+    "key_column": "id",
+    "label_column": "display_name",
+    "parent_column": "parent_id",
+    "sort_column": "sort_order",
+    "sort_order": 0,
+    "table_name": "tool_categories",
+    "table_schema": "public"
+  }
+]

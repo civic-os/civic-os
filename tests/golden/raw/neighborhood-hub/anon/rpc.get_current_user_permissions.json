@@ -9,6 +9,10 @@
   },
   {
     "permission": "read",
+    "table_name": "tool_categories"
+  },
+  {
+    "permission": "read",
     "table_name": "tool_types"
   }
 ]

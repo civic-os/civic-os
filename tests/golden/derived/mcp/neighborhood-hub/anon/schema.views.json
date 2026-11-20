@@ -72,6 +72,12 @@
       "edit": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary", "display_name"],
       "list": ["parcel_number_formatted", "acreage", "property_class", "eligibility", "lmi_status", "land_bank_status", "display_name", "boundary"]
     },
+    "tool_categories": {
+      "create": ["display_name", "parent_id", "description", "color", "sort_order"],
+      "detail": ["display_name", "parent_id", "description", "color", "is_active", "sort_order"],
+      "edit": ["display_name", "parent_id", "description", "color", "is_active", "sort_order"],
+      "list": ["display_name", "parent_id", "is_active"]
+    },
     "tool_reservation_tool_items": {
       "create": ["quantity", "tool_reservation_tools_id", "tool_type_id"],
       "detail": ["quantity", "tool_reservation_tools_id", "tool_type_id"],

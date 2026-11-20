@@ -6,7 +6,7 @@
       "parcel_number_formatted": {"byDisplayName": "\"Parcel Number\" -> parcel_number", "byUpperDisplayName": "\"PARCEL NUMBER\" -> parcel_number"}
     }
   },
-  "columnCounts": {"probes": 456, "resolvedToSelf": 454},
+  "columnCounts": {"probes": 483, "resolvedToSelf": 481},
   "entities": {
     "building_use_event_details": {
       "byDisplayName": "building_use_event_details",
@@ -73,9 +73,17 @@
       "displayName": "Event Kit Requests"
     },
     "parcels": {"byDisplayName": "parcels", "byFirstWord": "parcels", "byPaddedDisplayName": "parcels", "byTableName": "parcels", "byUpperDisplayName": "parcels", "displayName": "Parcels"},
+    "tool_categories": {
+      "byDisplayName": "tool_categories",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Categories\" (tool_categories), \"Tool Types\" (tool_types)?",
+      "byPaddedDisplayName": "tool_categories",
+      "byTableName": "tool_categories",
+      "byUpperDisplayName": "tool_categories",
+      "displayName": "Tool Categories"
+    },
     "tool_reservation_tool_items": {
       "byDisplayName": "tool_reservation_tool_items",
-      "byFirstWord": "tool_types",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Categories\" (tool_categories), \"Tool Types\" (tool_types)?",
       "byPaddedDisplayName": "tool_reservation_tool_items",
       "byTableName": "tool_reservation_tool_items",
       "byUpperDisplayName": "tool_reservation_tool_items",
@@ -83,7 +91,7 @@
     },
     "tool_reservation_tools": {
       "byDisplayName": "tool_reservation_tools",
-      "byFirstWord": "tool_types",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Categories\" (tool_categories), \"Tool Types\" (tool_types)?",
       "byPaddedDisplayName": "tool_reservation_tools",
       "byTableName": "tool_reservation_tools",
       "byUpperDisplayName": "tool_reservation_tools",
@@ -97,8 +105,22 @@
       "byUpperDisplayName": "tool_reservation_work_site",
       "displayName": "Work Site"
     },
-    "tool_reservations": {"byDisplayName": "tool_reservations", "byFirstWord": "tool_types", "byPaddedDisplayName": "tool_reservations", "byTableName": "tool_reservations", "byUpperDisplayName": "tool_reservations", "displayName": "Tool Reservations"},
-    "tool_types": {"byDisplayName": "tool_types", "byFirstWord": "tool_types", "byPaddedDisplayName": "tool_types", "byTableName": "tool_types", "byUpperDisplayName": "tool_types", "displayName": "Tool Types"},
+    "tool_reservations": {
+      "byDisplayName": "tool_reservations",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Categories\" (tool_categories), \"Tool Types\" (tool_types)?",
+      "byPaddedDisplayName": "tool_reservations",
+      "byTableName": "tool_reservations",
+      "byUpperDisplayName": "tool_reservations",
+      "displayName": "Tool Reservations"
+    },
+    "tool_types": {
+      "byDisplayName": "tool_types",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Categories\" (tool_categories), \"Tool Types\" (tool_types)?",
+      "byPaddedDisplayName": "tool_types",
+      "byTableName": "tool_types",
+      "byUpperDisplayName": "tool_types",
+      "displayName": "Tool Types"
+    },
     "work_site_parcels": {
       "byDisplayName": "work_site_parcels",
       "byFirstWord": "ERR Ambiguous entity name \"Work\". Did you mean one of: \"Work Site Parcels\" (work_site_parcels), \"Work Site\" (tool_reservation_work_site)?",

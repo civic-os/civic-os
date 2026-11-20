@@ -38,7 +38,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | **Causal Bindings** | ✅ | ✅ | | ✅ | ✅ | | |
 | **Schema Decisions (ADR)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Scheduled Jobs (River)** | | | | ✅ | | | |
-| **Dimensions (tree select)** | | | | | ✅ | | |
+| **Dimensions (tree select)** | | | | | ✅ | | ✅ |
 | **Map Widgets** | | | | | | ✅ | |
 | **Calendar Widgets** | | ✅ | | ✅ | | | |
 | **Filtered List Widgets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
@@ -306,6 +306,7 @@ docker-compose up -d
 - **Status workflows** — borrower approval (pending/approved/rejected) and tool condition (in-service/maintenance/retired)
 - **Email notifications** — borrower approval and tool reservation notifications
 - **MEK workflow** — multi-entity coordination with training records and census block groups
+- **Nested dimension** (v0.86.0) — `tool_categories` is the registered `tool_category` dimension with up to three levels (Hand Tools › Digging & Soil › Shovels), so a tool type's Category is a searchable tree select ordered by `sort_order`, and a category's Parent field refuses cycles; `48_neh_tool_category_dimension.sql` reverses the earlier move into the Category system (31) with a superseding schema decision
 
 **Key tables:** `tool_categories`, `tool_types`, `tool_instances`, `borrowers`, `tool_reservations`, `projects`, `parcels`, `building_use_requests`, `building_use_event_details`, `building_use_room_preferences`
 

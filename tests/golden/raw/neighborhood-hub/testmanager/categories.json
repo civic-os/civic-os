@@ -363,61 +363,6 @@
     "updated_at": "__MASKED__"
   },
   {
-    "category_key": "power_tools",
-    "color": "#dc2626",
-    "created_at": "__MASKED__",
-    "description": "Motorized and electric tools",
-    "display_name": "Power Tools",
-    "entity_type": "tool_category",
-    "id": 38,
-    "sort_order": 1,
-    "updated_at": "__MASKED__"
-  },
-  {
-    "category_key": "hand_tools",
-    "color": "#22c55e",
-    "created_at": "__MASKED__",
-    "description": "Manual tools for yard and garden work",
-    "display_name": "Hand Tools",
-    "entity_type": "tool_category",
-    "id": 39,
-    "sort_order": 2,
-    "updated_at": "__MASKED__"
-  },
-  {
-    "category_key": "accessibility_tools",
-    "color": "#8b5cf6",
-    "created_at": "__MASKED__",
-    "description": "Ergonomic and adaptive tools",
-    "display_name": "Accessibility Tools",
-    "entity_type": "tool_category",
-    "id": 40,
-    "sort_order": 3,
-    "updated_at": "__MASKED__"
-  },
-  {
-    "category_key": "snow_removal",
-    "color": "#3b82f6",
-    "created_at": "__MASKED__",
-    "description": "Snow clearing equipment",
-    "display_name": "Snow Removal",
-    "entity_type": "tool_category",
-    "id": 41,
-    "sort_order": 4,
-    "updated_at": "__MASKED__"
-  },
-  {
-    "category_key": "mobile_event_kit",
-    "color": "#f59e0b",
-    "created_at": "__MASKED__",
-    "description": "Equipment for community events",
-    "display_name": "Mobile Event Kit",
-    "entity_type": "tool_category",
-    "id": 42,
-    "sort_order": 5,
-    "updated_at": "__MASKED__"
-  },
-  {
     "category_key": "zero_turn_mower",
     "color": "#dc2626",
     "created_at": "__MASKED__",

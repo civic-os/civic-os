@@ -10,7 +10,7 @@ import { defineQuery as defineCoreQuery } from '@civic-os/core';
 
 export const DOMAIN_VERSION = '0.0.0' as const;
 export const FRAMEWORK_VERSION = '0.86.0' as const;
-export const SCHEMA_HASH = 'sha256:b827fcca0965483af0c244f68eb6d35004b9b4b5e55739e6085101c40de0f40f' as const;
+export const SCHEMA_HASH = 'sha256:f0215e87bd6d8395cea0b7318585a57e8307029b7cb13cf92d222105b800c39a' as const;
 
 export interface Database {
   entities: {
@@ -818,6 +818,45 @@ export interface Database {
       Actions: {};
       Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
     };
+    tool_categories: {
+      Row: {
+        color: string | null;
+        created_at: string;
+        description: string | null;
+        display_name: string;
+        id: number;
+        is_active: boolean;
+        parent_id: number | null;
+        sort_order: number | null;
+        updated_at: string;
+      };
+      Insert: {
+        color?: string | null;
+        created_at?: string;
+        description?: string | null;
+        display_name: string;
+        id?: number;
+        is_active?: boolean;
+        parent_id?: number | null;
+        sort_order?: number | null;
+        updated_at?: string;
+      };
+      Update: Partial<Database['entities']['tool_categories']['Insert']>;
+      Embedded: {
+        parent_id: {
+          id: number;
+          display_name: string;
+        } | null;
+      };
+      Relations: {
+        parent_id: { kind: 'one'; target: 'tool_categories'; nullable: true };
+        tool_categories: { kind: 'many'; target: 'tool_categories' };
+        tool_types: { kind: 'many'; target: 'tool_types' };
+      };
+      Statuses: never;
+      Actions: {};
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
+    };
     tool_instances: {
       Row: {
         created_at: string;
@@ -1161,7 +1200,6 @@ export interface Database {
         category_id: {
           id: number;
           display_name: string;
-          color: string | null;
         };
         inventory_module_id: {
           id: number;
@@ -1170,6 +1208,7 @@ export interface Database {
         } | null;
       };
       Relations: {
+        category_id: { kind: 'one'; target: 'tool_categories'; nullable: false };
         checkout_items: { kind: 'many'; target: 'checkout_items' };
         mek_checkout_items: { kind: 'many'; target: 'mek_checkout_items' };
         mek_request_equipment_items_m2m: { kind: 'many'; target: 'mek_requests'; via: 'junction' };
