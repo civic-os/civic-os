@@ -309,6 +309,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'admin_translations.source_type.menu_node': 'Menu',
   'admin_translations.source_type.instance_config': 'Configuration',
   'admin_translations.source_type.instance_config_group': 'Configuration',
+  'admin_translations.source_type.constraint_message': 'Error messages',
 
   // Page titles (document <title>) for routes without a sidebar entry
   'title.entity_code': 'Entity Code',

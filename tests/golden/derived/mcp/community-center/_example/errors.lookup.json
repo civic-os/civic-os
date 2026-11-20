@@ -1,11 +1,13 @@
 {
   "constraintMessages": [
+    {"column_name": null, "constraint_name": "dimension_row_delete", "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.", "table_name": "*"},
     {
       "column_name": "time_slot",
       "constraint_name": "no_overlapping_reservations",
       "error_message": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
       "table_name": "reservations"
     },
+    {"column_name": null, "constraint_name": "tree_parent_cycle", "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.", "table_name": "*"},
     {"column_name": "time_slot", "constraint_name": "valid_time_slot_bounds", "error_message": "Invalid time slot: end time must be after start time.", "table_name": "reservations"}
   ],
   "results": [
@@ -145,6 +147,16 @@
       "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
     },
     {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
       "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_overlapping_reservations\""}
@@ -153,6 +165,16 @@
       "parseToHuman": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
       "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"no_overlapping_reservations\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "Invalid valid time slot bounds. Check the value and try again. (valid_time_slot_bounds)",
@@ -190,6 +212,16 @@
       "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
     },
     {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_overlapping_reservations)",
       "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_overlapping_reservations\""}
@@ -198,6 +230,16 @@
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_overlapping_reservations)",
       "parseToHumanWithLookup": "This time slot is already booked for this facility. Please select a different time or check the calendar for availability.",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_overlapping_reservations\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (valid_time_slot_bounds)",
@@ -237,12 +279,12 @@
   ],
   "unloaded": [
     {
-      "parseToHumanWithLookup": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
-      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_overlapping_reservations\""}
+      "parseToHumanWithLookup": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
     },
     {
-      "parseToHumanWithLookup": "Invalid no overlapping reservations. Check the value and try again. (no_overlapping_reservations)",
-      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_overlapping_reservations\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+      "parseToHumanWithLookup": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     }
   ]
 }

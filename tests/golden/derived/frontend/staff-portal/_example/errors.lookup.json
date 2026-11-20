@@ -1,10 +1,12 @@
 {
   "constraintMessages": [
+    {"column_name": null, "constraint_name": "dimension_row_delete", "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.", "table_name": "*"},
     {"column_name": "overall_rating", "constraint_name": "offboarding_feedback_overall_rating_check", "error_message": "Overall rating must be between 1 and 5.", "table_name": "offboarding_feedback"},
     {"column_name": "staff_member_id", "constraint_name": "offboarding_feedback_staff_member_id_key", "error_message": "Offboarding feedback has already been submitted for this staff member.", "table_name": "offboarding_feedback"},
     {"column_name": "requirement_id", "constraint_name": "staff_documents_staff_member_id_requirement_id_key", "error_message": "This document requirement has already been assigned to this staff member.", "table_name": "staff_documents"},
     {"column_name": "user_id", "constraint_name": "staff_members_user_id_unique", "error_message": "This user is already linked to a staff member.", "table_name": "staff_members"},
-    {"column_name": "end_date", "constraint_name": "time_off_requests_check", "error_message": "End date must be on or after the start date.", "table_name": "time_off_requests"}
+    {"column_name": "end_date", "constraint_name": "time_off_requests_check", "error_message": "End date must be on or after the start date.", "table_name": "time_off_requests"},
+    {"column_name": null, "constraint_name": "tree_parent_cycle", "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.", "table_name": "*"}
   ],
   "results": [
     {
@@ -143,6 +145,16 @@
       "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
     },
     {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
       "parseToHumanWithLookup": "Overall rating must be between 1 and 5.",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_overall_rating_check\""}
@@ -193,6 +205,16 @@
       "payload": {"code": "23514", "details": "Failing row violates constraint \"time_off_requests_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
       "parseToHumanWithLookup": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
@@ -216,6 +238,16 @@
       "parseToHuman": "Invalid only details. Check the value and try again. (only_details)",
       "parseToHumanWithLookup": "Invalid only details. Check the value and try again. (only_details)",
       "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (offboarding_feedback_overall_rating_check)",
@@ -268,6 +300,16 @@
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"time_off_requests_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
       "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
@@ -295,12 +337,12 @@
   ],
   "unloaded": [
     {
-      "parseToHumanWithLookup": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
-      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"offboarding_feedback_overall_rating_check\""}
+      "parseToHumanWithLookup": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
     },
     {
-      "parseToHumanWithLookup": "Invalid offboarding feedback overall rating. Check the value and try again. (offboarding_feedback_overall_rating_check)",
-      "payload": {"code": "23514", "details": "Failing row violates constraint \"offboarding_feedback_overall_rating_check\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+      "parseToHumanWithLookup": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     }
   ]
 }

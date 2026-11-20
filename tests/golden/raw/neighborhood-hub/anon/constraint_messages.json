@@ -66,6 +66,12 @@
     "table_name": "building_use_requests"
   },
   {
+    "column_name": null,
+    "constraint_name": "dimension_row_delete",
+    "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+    "table_name": "*"
+  },
+  {
     "column_name": "tool_type_id",
     "constraint_name": "mek_request_equipment_items_pkey",
     "error_message": "This equipment item has already been added",
@@ -100,5 +106,11 @@
     "constraint_name": "tool_reservations_timeslot_required_wfcheck",
     "error_message": "Choose a pickup and return time.",
     "table_name": "tool_reservations"
+  },
+  {
+    "column_name": null,
+    "constraint_name": "tree_parent_cycle",
+    "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+    "table_name": "*"
   }
 ]

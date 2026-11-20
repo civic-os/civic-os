@@ -11,12 +11,14 @@
     {"column_name": "hold_harmless_accepted", "constraint_name": "building_use_requests_hold_harmless_accepted_required_wfcheck", "error_message": "Hold harmless agreement is required", "table_name": "building_use_requests"},
     {"column_name": "photo_release_accepted", "constraint_name": "building_use_requests_photo_release_accepted_required_wfcheck", "error_message": "Photo release agreement is required", "table_name": "building_use_requests"},
     {"column_name": "time_slot", "constraint_name": "building_use_requests_time_slot_required_wfcheck", "error_message": "Event time slot is required", "table_name": "building_use_requests"},
+    {"column_name": null, "constraint_name": "dimension_row_delete", "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.", "table_name": "*"},
     {"column_name": "tool_type_id", "constraint_name": "mek_request_equipment_items_pkey", "error_message": "This equipment item has already been added", "table_name": "mek_request_equipment_items"},
     {"column_name": "pickup_date", "constraint_name": "mek_requests_pickup_date_required_wfcheck", "error_message": "Pickup date is required", "table_name": "mek_requests"},
     {"column_name": "responsibility_acknowledged", "constraint_name": "mek_requests_responsibility_acknowledged_required_wfcheck", "error_message": "You must acknowledge responsibility for the equipment", "table_name": "mek_requests"},
     {"column_name": "return_date", "constraint_name": "mek_requests_return_date_required_wfcheck", "error_message": "Return date is required", "table_name": "mek_requests"},
     {"column_name": "timeslot", "constraint_name": "mek_requests_timeslot_required_wfcheck", "error_message": "Choose a pickup and return time.", "table_name": "mek_requests"},
-    {"column_name": "timeslot", "constraint_name": "tool_reservations_timeslot_required_wfcheck", "error_message": "Choose a pickup and return time.", "table_name": "tool_reservations"}
+    {"column_name": "timeslot", "constraint_name": "tool_reservations_timeslot_required_wfcheck", "error_message": "Choose a pickup and return time.", "table_name": "tool_reservations"},
+    {"column_name": null, "constraint_name": "tree_parent_cycle", "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.", "table_name": "*"}
   ],
   "results": [
     {
@@ -265,6 +267,16 @@
       "payload": {"code": "23514", "details": "Failing row violates constraint \"building_use_requests_time_slot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "Invalid dimension row delete. Check the value and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "Invalid mek request equipment items pkey. Check the value and try again. (mek_request_equipment_items_pkey)",
       "parseToHumanWithLookup": "This equipment item has already been added",
       "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_request_equipment_items_pkey\""}
@@ -323,6 +335,16 @@
       "parseToHuman": "Invalid tool reservations timeslot required wfcheck. Check the value and try again. (tool_reservations_timeslot_required_wfcheck)",
       "parseToHumanWithLookup": "Choose a pickup and return time.",
       "payload": {"code": "23514", "details": "Failing row violates constraint \"tool_reservations_timeslot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "Invalid tree parent cycle. Check the value and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "Invalid no such constraint. Check the value and try again. (no_such_constraint)",
@@ -460,6 +482,16 @@
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"building_use_requests_time_slot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"dimension_row_delete\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (dimension_row_delete)",
+      "parseToHumanWithLookup": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"dimension_row_delete\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (mek_request_equipment_items_pkey)",
       "parseToHumanWithLookup": "This equipment item has already been added",
       "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"mek_request_equipment_items_pkey\""}
@@ -518,6 +550,16 @@
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tool_reservations_timeslot_required_wfcheck)",
       "parseToHumanWithLookup": "Choose a pickup and return time.",
       "payload": {"code": "23P01", "details": "Failing row violates constraint \"tool_reservations_timeslot_required_wfcheck\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tree_parent_cycle\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (tree_parent_cycle)",
+      "parseToHumanWithLookup": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"tree_parent_cycle\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
     },
     {
       "parseToHuman": "This conflicts with an existing record. Please check your input and try again. (no_such_constraint)",
