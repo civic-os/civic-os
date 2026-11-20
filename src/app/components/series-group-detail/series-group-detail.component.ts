@@ -219,7 +219,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                             <span class="material-symbols-outlined text-sm" aria-hidden="true">person</span>
                             {{ resolved.display }}
                           </span>
-                        } @else if (resolved.type === EntityPropertyType.ForeignKeyName) {
+                        } @else if (resolved.type === EntityPropertyType.ForeignKeyName || resolved.type === EntityPropertyType.Dimension) {
                           <span class="link link-hover text-primary">{{ resolved.display }}</span>
                         } @else if (resolved.type === EntityPropertyType.Boolean) {
                           @if (resolved.raw) {
@@ -818,7 +818,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
         );
       }
       // Handle ForeignKeyName type - fetch display_name from related table
-      else if (propType === EntityPropertyType.ForeignKeyName && prop.join_table) {
+      else if ((propType === EntityPropertyType.ForeignKeyName || propType === EntityPropertyType.Dimension) && prop.join_table) {
         fetchObservables.push(
           this.dataService.getData({
             key: prop.join_table,

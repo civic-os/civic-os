@@ -112,6 +112,7 @@ export type {
   SchemaRlsPolicy,
 } from './introspection.js';
 export type { MenuNodeKind, MenuNodeRow, MenuEntry } from './menu.js';
+export type { SchemaDimension } from './dimension.js';
 export type {
   FilterCriteria,
   PaginationParams,

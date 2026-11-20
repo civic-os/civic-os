@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-20T00:15:50.554Z",
+  "capturedAt": "2026-11-20T17:48:19.920Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -121,6 +121,12 @@
       "file": "schema_menu_nodes",
       "method": "GET",
       "path": "schema_menu_nodes"
+    },
+    {
+      "consumer": "core schema-client getDimensions() (frontend schema.service + mcp schema-cache Dimension typing, v0.86.0)",
+      "file": "schema_dimensions",
+      "method": "GET",
+      "path": "schema_dimensions"
     }
   ],
   "example": "neighborhood-hub",
@@ -139,7 +145,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "9727a191144cd02c20e49011d671530539bd40e8",
+  "migrationsTreeHash": "19e2cf6ba4426659f41406e9c811ab23b73c1ffd",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
@@ -220,6 +226,14 @@
       "serverKeys": null,
       "tieKeys": [
         "cache_name"
+      ]
+    },
+    "schema_dimensions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "dimension_key"
       ]
     },
     "schema_entities": {
@@ -366,7 +380,6 @@
         "parcel_eligibility",
         "parcel_land_bank",
         "parcel_property_class",
-        "tool_category",
         "training_type"
       ],
       "files": [
@@ -383,7 +396,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility.json",
         "rpc.get_categories_for_entity.parcel_land_bank.json",
         "rpc.get_categories_for_entity.parcel_property_class.json",
-        "rpc.get_categories_for_entity.tool_category.json",
         "rpc.get_categories_for_entity.training_type.json",
         "rpc.get_current_user_permissions.json",
         "rpc.get_status_transitions_for_entity.borrowers.json",
@@ -405,6 +417,7 @@
         "rpc.get_statuses_for_entity.tool_reservations.json",
         "rpc.get_statuses_for_entity.training_records.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -446,7 +459,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility": 200,
         "rpc.get_categories_for_entity.parcel_land_bank": 200,
         "rpc.get_categories_for_entity.parcel_property_class": 200,
-        "rpc.get_categories_for_entity.tool_category": 200,
         "rpc.get_categories_for_entity.training_type": 200,
         "rpc.get_current_user_permissions": 200,
         "rpc.get_status_transitions_for_entity.borrowers": 200,
@@ -468,6 +480,7 @@
         "rpc.get_statuses_for_entity.tool_reservations": 200,
         "rpc.get_statuses_for_entity.training_records": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -497,7 +510,6 @@
         "parcel_eligibility",
         "parcel_land_bank",
         "parcel_property_class",
-        "tool_category",
         "training_type"
       ],
       "files": [
@@ -514,7 +526,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility.json",
         "rpc.get_categories_for_entity.parcel_land_bank.json",
         "rpc.get_categories_for_entity.parcel_property_class.json",
-        "rpc.get_categories_for_entity.tool_category.json",
         "rpc.get_categories_for_entity.training_type.json",
         "rpc.get_current_user_permissions.json",
         "rpc.get_status_transitions_for_entity.borrowers.json",
@@ -536,6 +547,7 @@
         "rpc.get_statuses_for_entity.tool_reservations.json",
         "rpc.get_statuses_for_entity.training_records.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -578,7 +590,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility": 200,
         "rpc.get_categories_for_entity.parcel_land_bank": 200,
         "rpc.get_categories_for_entity.parcel_property_class": 200,
-        "rpc.get_categories_for_entity.tool_category": 200,
         "rpc.get_categories_for_entity.training_type": 200,
         "rpc.get_current_user_permissions": 200,
         "rpc.get_status_transitions_for_entity.borrowers": 200,
@@ -600,6 +611,7 @@
         "rpc.get_statuses_for_entity.tool_reservations": 200,
         "rpc.get_statuses_for_entity.training_records": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -629,7 +641,6 @@
         "parcel_eligibility",
         "parcel_land_bank",
         "parcel_property_class",
-        "tool_category",
         "training_type"
       ],
       "files": [
@@ -646,7 +657,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility.json",
         "rpc.get_categories_for_entity.parcel_land_bank.json",
         "rpc.get_categories_for_entity.parcel_property_class.json",
-        "rpc.get_categories_for_entity.tool_category.json",
         "rpc.get_categories_for_entity.training_type.json",
         "rpc.get_current_user_permissions.json",
         "rpc.get_status_transitions_for_entity.borrowers.json",
@@ -668,6 +678,7 @@
         "rpc.get_statuses_for_entity.tool_reservations.json",
         "rpc.get_statuses_for_entity.training_records.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -710,7 +721,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility": 200,
         "rpc.get_categories_for_entity.parcel_land_bank": 200,
         "rpc.get_categories_for_entity.parcel_property_class": 200,
-        "rpc.get_categories_for_entity.tool_category": 200,
         "rpc.get_categories_for_entity.training_type": 200,
         "rpc.get_current_user_permissions": 200,
         "rpc.get_status_transitions_for_entity.borrowers": 200,
@@ -732,6 +742,7 @@
         "rpc.get_statuses_for_entity.tool_reservations": 200,
         "rpc.get_statuses_for_entity.training_records": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -761,7 +772,6 @@
         "parcel_eligibility",
         "parcel_land_bank",
         "parcel_property_class",
-        "tool_category",
         "training_type"
       ],
       "files": [
@@ -778,7 +788,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility.json",
         "rpc.get_categories_for_entity.parcel_land_bank.json",
         "rpc.get_categories_for_entity.parcel_property_class.json",
-        "rpc.get_categories_for_entity.tool_category.json",
         "rpc.get_categories_for_entity.training_type.json",
         "rpc.get_current_user_permissions.json",
         "rpc.get_status_transitions_for_entity.borrowers.json",
@@ -800,6 +809,7 @@
         "rpc.get_statuses_for_entity.tool_reservations.json",
         "rpc.get_statuses_for_entity.training_records.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -842,7 +852,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility": 200,
         "rpc.get_categories_for_entity.parcel_land_bank": 200,
         "rpc.get_categories_for_entity.parcel_property_class": 200,
-        "rpc.get_categories_for_entity.tool_category": 200,
         "rpc.get_categories_for_entity.training_type": 200,
         "rpc.get_current_user_permissions": 200,
         "rpc.get_status_transitions_for_entity.borrowers": 200,
@@ -864,6 +873,7 @@
         "rpc.get_statuses_for_entity.tool_reservations": 200,
         "rpc.get_statuses_for_entity.training_records": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -893,7 +903,6 @@
         "parcel_eligibility",
         "parcel_land_bank",
         "parcel_property_class",
-        "tool_category",
         "training_type"
       ],
       "files": [
@@ -910,7 +919,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility.json",
         "rpc.get_categories_for_entity.parcel_land_bank.json",
         "rpc.get_categories_for_entity.parcel_property_class.json",
-        "rpc.get_categories_for_entity.tool_category.json",
         "rpc.get_categories_for_entity.training_type.json",
         "rpc.get_current_user_permissions.json",
         "rpc.get_status_transitions_for_entity.borrowers.json",
@@ -932,6 +940,7 @@
         "rpc.get_statuses_for_entity.tool_reservations.json",
         "rpc.get_statuses_for_entity.training_records.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -974,7 +983,6 @@
         "rpc.get_categories_for_entity.parcel_eligibility": 200,
         "rpc.get_categories_for_entity.parcel_land_bank": 200,
         "rpc.get_categories_for_entity.parcel_property_class": 200,
-        "rpc.get_categories_for_entity.tool_category": 200,
         "rpc.get_categories_for_entity.training_type": 200,
         "rpc.get_current_user_permissions": 200,
         "rpc.get_status_transitions_for_entity.borrowers": 200,
@@ -996,6 +1004,7 @@
         "rpc.get_statuses_for_entity.tool_reservations": 200,
         "rpc.get_statuses_for_entity.training_records": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,

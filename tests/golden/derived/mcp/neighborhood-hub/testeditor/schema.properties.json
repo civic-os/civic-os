@@ -216,6 +216,17 @@
       },
       {"column": "project_parcels_m2m", "select": "project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name))", "type": "ManyToMany", "typeId": 17}
     ],
+    "tool_categories": [
+      {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "parent_id", "select": "parent_id:tool_categories!parent_id(id,display_name)", "type": "Dimension", "typeId": 28},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "color", "select": "color", "type": "Color", "typeId": 13},
+      {"column": "is_active", "select": "is_active", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
     "tool_instances": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
@@ -293,7 +304,7 @@
     "tool_types": [
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextShort", "typeId": 1},
-      {"column": "category_id", "select": "category_id:categories!category_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "category_id", "select": "category_id:tool_categories!category_id(id,display_name)", "type": "Dimension", "typeId": 28},
       {"column": "inventory_module_id", "select": "inventory_module_id:categories!inventory_module_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "is_qty_managed", "select": "is_qty_managed", "type": "Boolean", "typeId": 3},

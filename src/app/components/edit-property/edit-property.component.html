@@ -1,3 +1,4 @@
+@if (!hideSingleDimension()) {
 <div [class]="compact() ? 'w-full' : 'mb-4 w-full'" [formGroup]="form()">
   @if (!compact()) {
     <label class="label" [attr.for]="isCustomWidget() ? null : prop().column_name">
@@ -91,6 +92,18 @@
         <span class="boolean-label boolean-no" [class.active]="!form().get(prop().column_name)?.value">{{ 'form.no' | translate }}</span>
       </span>
     </label>
+  }
+  @if (propType() == EntityPropertyType.Dimension) {
+    <!-- Dimension (v0.86.0): hierarchical tree select over the registered dimension's rows -->
+    <app-tree-select
+      [formControlName]="prop().column_name"
+      [inputId]="prop().column_name"
+      [options]="dimensionOptions()"
+      [nullable]="prop().is_nullable"
+      [disabledIds]="dimensionDisabledIds()"
+      [ariaDescribedby]="describedBy()"
+      [ariaInvalid]="isErrorShown(prop().column_name)"
+      [ariaRequired]="isRequired()" />
   }
   @if (propType() == EntityPropertyType.ForeignKeyName || propType() == EntityPropertyType.User) {
     @if (useFkSearchModal()) {
@@ -459,3 +472,4 @@
     }
   }
 </div>
+}

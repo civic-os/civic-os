@@ -13,10 +13,10 @@
       "list": ["display_name", "requires_approval"]
     },
     "sites": {
-      "create": ["display_name", "address"],
-      "detail": ["display_name", "lead_id", "address", "updated_at", "created_at"],
-      "edit": ["display_name", "lead_id", "address"],
-      "list": ["display_name", "lead_id", "address"]
+      "create": ["display_name", "address", "sort_order"],
+      "detail": ["display_name", "lead_id", "address", "is_active", "sort_order", "updated_at", "created_at"],
+      "edit": ["display_name", "lead_id", "address", "is_active", "sort_order"],
+      "list": ["display_name", "lead_id", "address", "is_active"]
     },
     "staff_roles": {
       "create": ["display_name", "description", "sort_order", "document_requirement_roles_m2m"],

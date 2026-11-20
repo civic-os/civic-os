@@ -22,7 +22,8 @@ import type {
   SchemaEntityProperty,
   SchemaEntityTable,
 } from '../model/entity.js';
-import { getPropertyType } from '../schema/property-type.js';
+import type { SchemaDimension } from '../model/dimension.js';
+import { dimensionFor, getPropertyType } from '../schema/property-type.js';
 import { validationRules } from '../schema/validation.js';
 import type { ValidationRuleSpec } from '../schema/validation.js';
 
@@ -36,6 +37,8 @@ export interface HandleSource {
   peekEntities(): readonly SchemaEntityTable[] | undefined;
   peekProperties(): readonly SchemaEntityProperty[] | undefined;
   peekEntityActions(tableName: string): readonly EntityAction[] | undefined;
+  /** Rows of `schema_dimensions`, when loaded (v0.86.0); without them a Dimension types as ForeignKeyName. */
+  peekDimensions?(): readonly SchemaDimension[] | undefined;
 }
 
 /**
@@ -56,6 +59,8 @@ export interface PropertySchemaTruth {
   readonly joinColumn: string | null;
   readonly statusEntityType: string | null;
   readonly categoryEntityType: string | null;
+  /** The registered dimension the column's FK points at (v0.86.0), or null. */
+  readonly dimensionKey: string | null;
 }
 
 /**
@@ -212,7 +217,7 @@ export class PropertyHandle {
     const p = this.row();
     if (!p) return undefined;
     return Object.freeze({
-      type: getPropertyType(p),
+      type: getPropertyType(p, this.source.peekDimensions?.()),
       validators: Object.freeze(validationRules(p)),
       dataType: p.data_type,
       udtName: p.udt_name,
@@ -224,6 +229,7 @@ export class PropertyHandle {
       joinColumn: p.join_column || null,
       statusEntityType: p.status_entity_type ?? null,
       categoryEntityType: p.category_entity_type ?? null,
+      dimensionKey: dimensionFor(p, this.source.peekDimensions?.())?.dimension_key ?? null,
     });
   }
 

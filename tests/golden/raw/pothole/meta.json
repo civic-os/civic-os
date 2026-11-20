@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-20T14:15:50.747Z",
+  "capturedAt": "2026-11-20T16:00:47.661Z",
   "clockDateMasks": {},
   "endpoints": [
     {
@@ -121,6 +121,12 @@
       "file": "schema_menu_nodes",
       "method": "GET",
       "path": "schema_menu_nodes"
+    },
+    {
+      "consumer": "core schema-client getDimensions() (frontend schema.service + mcp schema-cache Dimension typing, v0.86.0)",
+      "file": "schema_dimensions",
+      "method": "GET",
+      "path": "schema_dimensions"
     }
   ],
   "example": "pothole",
@@ -135,7 +141,7 @@
       "updated_at"
     ]
   },
-  "migrationsTreeHash": "9c9f702ae7078f243fd11e621cf9d43236caa39f",
+  "migrationsTreeHash": "019a524b61c812e46cba0d4435a108747a76a413",
   "ordering": {
     "categories": {
       "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
@@ -214,6 +220,14 @@
       "serverKeys": null,
       "tieKeys": [
         "cache_name"
+      ]
+    },
+    "schema_dimensions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "dimension_key"
       ]
     },
     "schema_entities": {
@@ -362,6 +376,7 @@
         "rpc.get_statuses_for_entity.issue.json",
         "rpc.get_statuses_for_entity.work_package.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -395,6 +410,7 @@
         "rpc.get_statuses_for_entity.issue": 200,
         "rpc.get_statuses_for_entity.work_package": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -427,6 +443,7 @@
         "rpc.get_statuses_for_entity.work_package.json",
         "rpc.get_translations_for_locale.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -461,6 +478,7 @@
         "rpc.get_statuses_for_entity.work_package": 200,
         "rpc.get_translations_for_locale": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -492,6 +510,7 @@
         "rpc.get_statuses_for_entity.issue.json",
         "rpc.get_statuses_for_entity.work_package.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -526,6 +545,7 @@
         "rpc.get_statuses_for_entity.issue": 200,
         "rpc.get_statuses_for_entity.work_package": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -558,6 +578,7 @@
         "rpc.get_statuses_for_entity.work_package.json",
         "rpc.get_translations_for_locale.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -593,6 +614,7 @@
         "rpc.get_statuses_for_entity.work_package": 200,
         "rpc.get_translations_for_locale": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -624,6 +646,7 @@
         "rpc.get_statuses_for_entity.issue.json",
         "rpc.get_statuses_for_entity.work_package.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -658,6 +681,7 @@
         "rpc.get_statuses_for_entity.issue": 200,
         "rpc.get_statuses_for_entity.work_package": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -690,6 +714,7 @@
         "rpc.get_statuses_for_entity.work_package.json",
         "rpc.get_translations_for_locale.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -725,6 +750,7 @@
         "rpc.get_statuses_for_entity.work_package": 200,
         "rpc.get_translations_for_locale": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -756,6 +782,7 @@
         "rpc.get_statuses_for_entity.issue.json",
         "rpc.get_statuses_for_entity.work_package.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -790,6 +817,7 @@
         "rpc.get_statuses_for_entity.issue": 200,
         "rpc.get_statuses_for_entity.work_package": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -822,6 +850,7 @@
         "rpc.get_statuses_for_entity.work_package.json",
         "rpc.get_translations_for_locale.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -857,6 +886,7 @@
         "rpc.get_statuses_for_entity.work_package": 200,
         "rpc.get_translations_for_locale": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -888,6 +918,7 @@
         "rpc.get_statuses_for_entity.issue.json",
         "rpc.get_statuses_for_entity.work_package.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -922,6 +953,7 @@
         "rpc.get_statuses_for_entity.issue": 200,
         "rpc.get_statuses_for_entity.work_package": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,
@@ -954,6 +986,7 @@
         "rpc.get_statuses_for_entity.work_package.json",
         "rpc.get_translations_for_locale.json",
         "schema_cache_versions.json",
+        "schema_dimensions.json",
         "schema_domain_version.json",
         "schema_entities.json",
         "schema_entities.mcp.json",
@@ -989,6 +1022,7 @@
         "rpc.get_statuses_for_entity.work_package": 200,
         "rpc.get_translations_for_locale": 200,
         "schema_cache_versions": 200,
+        "schema_dimensions": 200,
         "schema_domain_version": 200,
         "schema_entities": 200,
         "schema_entities.mcp": 200,

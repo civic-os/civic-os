@@ -16,7 +16,7 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { Component, input, signal, computed, ChangeDetectionStrategy, ViewChild } from '@angular/core';
+import { Component, input, signal, computed, inject, Injector, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { SchemaEntityProperty, EntityPropertyType, FileReference, GalleryImage } from '../../interfaces/entity';
 import { RouterModule } from '@angular/router';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
@@ -34,6 +34,10 @@ import { MarkdownModule } from 'ngx-markdown';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 import { compareBySortOrder } from '@civic-os/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { of, switchMap } from 'rxjs';
+import { DimensionService } from '../../services/dimension.service';
+import { formatTreeLabel } from '../../utils/tree-path';
 
 @Component({
     selector: 'app-display-property',
@@ -67,8 +71,34 @@ export class DisplayPropertyComponent {
   showLabel = input<boolean>(true);
   compact = input<boolean>(false);
   highlightTerms = input<string[]>([]);
+  /**
+   * Dimension values only (v0.86.0): show the row's ancestors after its label, "Shovels (Hand Tools › Digging
+   * & Soil)". Detail turns it on; List and other compact contexts keep the label alone. The label renders at
+   * once and the ancestors follow from one flat request for the dimension table.
+   */
+  showPath = input<boolean>(false);
 
   propType = computed(() => this.prop().type);
+
+  // Resolved only when a Dimension path is shown, so contexts that never show one need no HTTP providers
+  private readonly injector = inject(Injector);
+  private readonly ancestorLabels = toSignal(
+    toObservable(
+      computed(() => ({ prop: this.prop(), id: this.datum()?.id, on: this.showPath() }), {
+        equal: (a, b) => a.prop === b.prop && a.id === b.id && a.on === b.on,
+      }),
+    ).pipe(
+      switchMap(({ prop, id, on }) =>
+        on && prop.type === EntityPropertyType.Dimension
+          ? this.injector.get(DimensionService).getAncestorLabels(prop, id)
+          : of([]),
+      ),
+    ),
+    { initialValue: [] as string[] },
+  );
+
+  /** A Dimension value's display text: its label, then its ancestors in parentheses when showPath is on. */
+  readonly dimensionText = computed(() => formatTreeLabel(this.datum()?.display_name ?? '', this.ancestorLabels()));
   displayCoordinates = signal<[number, number] | null>(null);
 
   // Gallery lightbox state (v0.47.0)

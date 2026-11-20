@@ -241,6 +241,22 @@
   },
   {
     "permission": "create",
+    "table_name": "tool_categories"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_categories"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_categories"
+  },
+  {
+    "permission": "create",
     "table_name": "tool_instances"
   },
   {

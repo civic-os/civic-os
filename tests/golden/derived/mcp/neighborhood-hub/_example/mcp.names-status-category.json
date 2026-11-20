@@ -53,13 +53,6 @@
       "15 Industrial": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byUpperDisplayName": "15"},
       "16 Agricultural": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byUpperDisplayName": "16"}
     },
-    "tool_category": {
-      "38 Power Tools": {"byDisplayName": "38", "byPaddedDisplayName": "38", "byUpperDisplayName": "38"},
-      "39 Hand Tools": {"byDisplayName": "39", "byPaddedDisplayName": "39", "byUpperDisplayName": "39"},
-      "40 Accessibility Tools": {"byDisplayName": "40", "byPaddedDisplayName": "40", "byUpperDisplayName": "40"},
-      "41 Snow Removal": {"byDisplayName": "41", "byPaddedDisplayName": "41", "byUpperDisplayName": "41"},
-      "42 Mobile Event Kit": {"byDisplayName": "42", "byPaddedDisplayName": "42", "byUpperDisplayName": "42"}
-    },
     "training_type": {
       "6 Zero-Turn Mower": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byUpperDisplayName": "6"},
       "7 Brush Hog": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byUpperDisplayName": "7"},

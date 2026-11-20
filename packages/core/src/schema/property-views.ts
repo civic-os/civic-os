@@ -135,7 +135,8 @@ const FILTERABLE_TYPES: readonly EntityPropertyType[] = [
   EntityPropertyType.Money,
   EntityPropertyType.User,
   EntityPropertyType.Status,  // Status uses same filter pattern as ForeignKeyName
-  EntityPropertyType.Category  // Category uses same filter pattern as Status (v0.34.0)
+  EntityPropertyType.Category,  // Category uses same filter pattern as Status (v0.34.0)
+  EntityPropertyType.Dimension  // Dimension filters like ForeignKeyName (v0.86.0)
 ];
 
 /**

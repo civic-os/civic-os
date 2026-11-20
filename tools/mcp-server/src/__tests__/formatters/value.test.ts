@@ -156,6 +156,15 @@ describe('formatValue() DateTimeLocal', () => {
 // ForeignKeyName
 // ---------------------------------------------------------------------------
 
+describe('formatValue() Dimension (v0.86.0)', () => {
+  const prop = makeProp({ type: EntityPropertyType.Dimension, join_table: 'programs', join_column: 'id' });
+
+  it('formats like a foreign key', () => {
+    expect(formatValue({ id: 3, display_name: 'Teens' }, prop)).toBe('Teens');
+    expect(formatValue(3, prop)).toBe('3');
+  });
+});
+
 describe('formatValue() ForeignKeyName', () => {
   const prop = makeProp({
     type: EntityPropertyType.ForeignKeyName,
@@ -536,6 +545,11 @@ describe('getTypeLabel()', () => {
 
   it('returns "Decimal" for DecimalNumber', () => {
     expect(getTypeLabel(makeProp({ type: EntityPropertyType.DecimalNumber }))).toBe('Decimal');
+  });
+
+  it('labels Dimension with its table and the default-fill note (v0.86.0)', () => {
+    const prop = makeProp({ type: EntityPropertyType.Dimension, join_table: 'programs' });
+    expect(getTypeLabel(prop)).toBe("Dimension → programs (hierarchical lookup; an empty value is filled with the dimension's default on create)");
   });
 
   it('returns "Foreign Key → tableName" for ForeignKeyName with join_table', () => {

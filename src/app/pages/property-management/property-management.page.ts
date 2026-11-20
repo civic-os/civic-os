@@ -479,6 +479,7 @@ export class PropertyManagementPage {
       [EntityPropertyType.IntegerNumber]: 'Integer',
       [EntityPropertyType.DecimalNumber]: 'Decimal',
       [EntityPropertyType.ForeignKeyName]: 'Foreign Key',
+      [EntityPropertyType.Dimension]: 'Dimension',
       [EntityPropertyType.User]: 'User',
       [EntityPropertyType.GeoPoint]: 'Geo Point',
       [EntityPropertyType.Color]: 'Color',
@@ -526,7 +527,8 @@ export class PropertyManagementPage {
       7,  // Money
       11, // User
       22, // Status
-      23  // Category
+      23, // Category
+      28  // Dimension
     ];
     return filterableTypes.includes(property.type);
   }

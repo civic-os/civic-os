@@ -6,7 +6,7 @@
       "parcel_number_formatted": {"byDisplayName": "\"Parcel Number\" -> parcel_number", "byUpperDisplayName": "\"PARCEL NUMBER\" -> parcel_number"}
     }
   },
-  "columnCounts": {"probes": 699, "resolvedToSelf": 697},
+  "columnCounts": {"probes": 726, "resolvedToSelf": 724},
   "entities": {
     "borrowers": {"byDisplayName": "borrowers", "byFirstWord": "borrowers", "byPaddedDisplayName": "borrowers", "byTableName": "borrowers", "byUpperDisplayName": "borrowers", "displayName": "Borrowers"},
     "building_use_event_details": {
@@ -100,9 +100,17 @@
       "displayName": "Project Parcels"
     },
     "projects": {"byDisplayName": "projects", "byFirstWord": "projects", "byPaddedDisplayName": "projects", "byTableName": "projects", "byUpperDisplayName": "projects", "displayName": "Projects"},
+    "tool_categories": {
+      "byDisplayName": "tool_categories",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Tool Categories\" (tool_categories), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
+      "byPaddedDisplayName": "tool_categories",
+      "byTableName": "tool_categories",
+      "byUpperDisplayName": "tool_categories",
+      "displayName": "Tool Categories"
+    },
     "tool_instances": {
       "byDisplayName": "tool_instances",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Tool Categories\" (tool_categories), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_instances",
       "byTableName": "tool_instances",
       "byUpperDisplayName": "tool_instances",
@@ -118,7 +126,7 @@
     },
     "tool_reservation_tool_items": {
       "byDisplayName": "tool_reservation_tool_items",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Tool Categories\" (tool_categories), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_reservation_tool_items",
       "byTableName": "tool_reservation_tool_items",
       "byUpperDisplayName": "tool_reservation_tool_items",
@@ -126,7 +134,7 @@
     },
     "tool_reservation_tools": {
       "byDisplayName": "tool_reservation_tools",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Tool Categories\" (tool_categories), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_reservation_tools",
       "byTableName": "tool_reservation_tools",
       "byUpperDisplayName": "tool_reservation_tools",
@@ -142,7 +150,7 @@
     },
     "tool_reservations": {
       "byDisplayName": "tool_reservations",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Tool Categories\" (tool_categories), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_reservations",
       "byTableName": "tool_reservations",
       "byUpperDisplayName": "tool_reservations",
@@ -150,7 +158,7 @@
     },
     "tool_types": {
       "byDisplayName": "tool_types",
-      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Tool\". Did you mean one of: \"Tool Items\" (tool_reservation_tool_items), \"Tool Reservations\" (tool_reservations), \"Tool Categories\" (tool_categories), \"Checkouts\" (tool_reservation_checkouts), \"Tool Selection\" (tool_reservation_tools), \"Tool Types\" (tool_types), \"Work Site\" (tool_reservation_work_site), \"Tool Instances\" (tool_instances)?",
       "byPaddedDisplayName": "tool_types",
       "byTableName": "tool_types",
       "byUpperDisplayName": "tool_types",

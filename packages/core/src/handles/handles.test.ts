@@ -79,6 +79,7 @@ function world() {
     entities: [entity()],
     properties: [prop()],
     actions: [action()],
+    dimensions: [] as unknown[],
   };
   const transport: Transport = {
     request(req: TransportRequest): Promise<TransportResponse> {
@@ -89,7 +90,9 @@ function world() {
           ? data.properties
           : path.startsWith('schema_entity_actions')
             ? data.actions
-            : [];
+            : path.startsWith('schema_dimensions')
+              ? data.dimensions
+              : [];
       return Promise.resolve({ status: 200, headers: {}, text: JSON.stringify(body) });
     },
   };
@@ -252,5 +255,19 @@ describe('liveness', () => {
     expect(h.exists).toBe(false);
     client.use({ identity: '' });
     expect(h.exists).toBe(true);
+  });
+});
+
+describe('PropertyHandle with the dimensions registry (v0.86.0)', () => {
+  it('types a BIGINT FK to a registered table as Dimension once the registry is loaded', async () => {
+    const w = world();
+    w.data.properties = [prop({ column_name: 'program_id', udt_name: 'int8', data_type: 'bigint',
+      join_schema: 'public', join_table: 'programs', join_column: 'id' })];
+    w.data.dimensions = [{ dimension_key: 'program', table_schema: 'public', table_name: 'programs', key_column: 'id' }];
+    await Promise.all([w.client.getEntities(), w.client.getProperties()]);
+    const p = w.client.entity('issues')!.property('program_id')!;
+    expect(p.schema).toMatchObject({ type: EntityPropertyType.ForeignKeyName, dimensionKey: null });
+    await w.client.getDimensions();
+    expect(p.schema).toMatchObject({ type: EntityPropertyType.Dimension, dimensionKey: 'program' });
   });
 });

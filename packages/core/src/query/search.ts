@@ -113,7 +113,7 @@ export function buildHybridSearchParams(
 export function buildOrderField(property: Pick<SchemaEntityProperty, 'type' | 'column_name'>): string {
   // For foreign key columns, order by the embedded resource's display_name
   // The embedded resource name is the column name (without _id suffix for FKs)
-  if (property.type === EntityPropertyType.ForeignKeyName) {
+  if (property.type === EntityPropertyType.ForeignKeyName || property.type === EntityPropertyType.Dimension) {
     return `${property.column_name}(display_name)`;
   }
 

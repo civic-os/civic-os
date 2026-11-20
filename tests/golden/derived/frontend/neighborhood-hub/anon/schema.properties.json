@@ -230,6 +230,17 @@
         "typeId": 17
       }
     ],
+    "tool_categories": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "parent_id", "columnSpan": 1, "defaultValue": null, "select": "parent_id:tool_categories!parent_id(id,display_name)", "selectForEdit": "parent_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
+      {"column": "description", "columnSpan": 2, "defaultValue": null, "select": "description", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2},
+      {"column": "color", "columnSpan": 1, "defaultValue": null, "select": "color", "selectForEdit": "=", "selectForList": "=", "type": "Color", "typeId": 13},
+      {"column": "is_active", "columnSpan": 1, "defaultValue": false, "select": "is_active", "selectForEdit": "=", "selectForList": "=", "type": "Boolean", "typeId": 3},
+      {"column": "sort_order", "columnSpan": 1, "defaultValue": null, "select": "sort_order", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
     "tool_reservation_tool_items": [
       {"column": "quantity", "columnSpan": 1, "defaultValue": null, "select": "quantity", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {
@@ -356,7 +367,7 @@
     "tool_types": [
       {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
-      {"column": "category_id", "columnSpan": 1, "defaultValue": null, "select": "category_id:categories!category_id(id,display_name,color)", "selectForEdit": "category_id", "selectForList": "=", "type": "Category", "typeId": 23},
+      {"column": "category_id", "columnSpan": 1, "defaultValue": null, "select": "category_id:tool_categories!category_id(id,display_name)", "selectForEdit": "category_id", "selectForList": "=", "type": "Dimension", "typeId": 28},
       {
         "column": "inventory_module_id",
         "columnSpan": 1,
@@ -519,6 +530,7 @@
       "property_class:Category",
       "updated_at:DateTimeLocal"
     ],
+    "tool_categories": ["color:Color", "created_at:DateTimeLocal", "description:TextLong", "display_name:TextShort", "id:IntegerNumber", "is_active:Boolean", "parent_id:Dimension", "sort_order:IntegerNumber", "updated_at:DateTimeLocal"],
     "tool_reservation_tool_items": ["created_at:DateTimeLocal", "quantity:IntegerNumber", "tool_reservation_tools_id:ForeignKeyName", "tool_type_id:ForeignKeyName"],
     "tool_reservation_tools": ["created_at:DateTimeLocal", "guided_form_status_id:ForeignKeyName", "id:IntegerNumber", "tool_notes:TextLong", "tool_reservation_id:ForeignKeyName", "updated_at:DateTimeLocal"],
     "tool_reservation_work_site": ["created_at:DateTimeLocal", "guided_form_status_id:ForeignKeyName", "id:IntegerNumber", "site_description:TextLong", "tool_reservation_id:ForeignKeyName", "updated_at:DateTimeLocal"],
@@ -541,7 +553,7 @@
       "workflow_status_id:Status"
     ],
     "tool_types": [
-      "category_id:Category",
+      "category_id:Dimension",
       "created_at:DateTimeLocal",
       "description:TextLong",
       "display_name:TextShort",

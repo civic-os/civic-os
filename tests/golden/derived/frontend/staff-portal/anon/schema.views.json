@@ -54,27 +54,32 @@
       }
     },
     "sites": {
-      "create": ["display_name", "address"],
-      "detail": ["display_name", "lead_id", "address", "updated_at", "created_at"],
-      "edit": ["display_name", "lead_id", "address"],
+      "create": ["display_name", "address", "sort_order"],
+      "detail": ["display_name", "lead_id", "address", "is_active", "sort_order", "updated_at", "created_at"],
+      "edit": ["display_name", "lead_id", "address", "is_active", "sort_order"],
       "filter": [],
-      "list": ["display_name", "lead_id", "address"],
+      "list": ["display_name", "lead_id", "address", "is_active"],
       "renderables": {
         "create": [
           {"column": "display_name", "kind": "property", "span": 1},
-          {"column": "address", "kind": "property", "span": 2}
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "sort_order", "kind": "property", "span": 1}
         ],
         "detail": [
           {"column": "display_name", "kind": "property", "span": 1},
           {"column": "lead_id", "kind": "property", "span": 1},
           {"column": "address", "kind": "property", "span": 2},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1},
           {"column": "updated_at", "kind": "property", "span": 1},
           {"column": "created_at", "kind": "property", "span": 1}
         ],
         "edit": [
           {"column": "display_name", "kind": "property", "span": 1},
           {"column": "lead_id", "kind": "property", "span": 1},
-          {"column": "address", "kind": "property", "span": 2}
+          {"column": "address", "kind": "property", "span": 2},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1}
         ]
       }
     },

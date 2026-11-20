@@ -41,6 +41,10 @@ import { PhotoGalleryEditorComponent } from '../photo-gallery-editor/photo-galle
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TreeSelectComponent, TreeSelectOption } from '../tree-select/tree-select.component';
+import { DimensionService } from '../../services/dimension.service';
+import { buildTree } from '@civic-os/core';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-edit-property',
@@ -61,6 +65,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
     PhotoGalleryEditorComponent,
     MarkdownEditorComponent,
     FileThumbnailComponent,
+    TreeSelectComponent,
     TranslatePipe
 ],
     providers: [
@@ -72,6 +77,7 @@ export class EditPropertyComponent {
   private fileUpload = inject(FileUploadService);
   private schema = inject(SchemaService);
   private galleryService = inject(GalleryService);
+  private dimensions = inject(DimensionService);
   private destroyRef = inject(DestroyRef);
 
   /** Reference to gallery editor for deferred reorder save (v0.47.0) */
@@ -104,6 +110,25 @@ export class EditPropertyComponent {
   });
 
   propType = computed(() => this.prop().type);
+
+  // Dimension property type (v0.86.0): the registered dimension's rows for the tree select
+  public dimensionOptions = signal<TreeSelectOption[]>([]);
+  /**
+   * hide_when_single: the dimension has exactly one active row, so the field is hidden and holds that row.
+   * Every report still has the axis; nobody has to pick the only choice.
+   */
+  public hideSingleDimension = signal(false);
+  /** A record cannot be placed under itself or a descendant: disable both when editing a dimension's own parent. */
+  public dimensionDisabledIds = computed<ReadonlySet<number>>(() => {
+    const prop = this.prop();
+    const self = Number(this.entityId());
+    if (this.propType() !== EntityPropertyType.Dimension || !this.entityId() || !Number.isFinite(self)
+        || prop.join_table !== prop.table_name) {
+      return new Set<number>();
+    }
+    const tree = buildTree(this.dimensionOptions(), { key: 'id', parent: 'parent_id' });
+    return new Set<number>([self, ...tree.descendants(self).map(Number)]);
+  });
 
   // FK search modal state (v0.45.0)
   showFkSearchModal = signal(false);
@@ -165,8 +190,39 @@ export class EditPropertyComponent {
 
   public EntityPropertyType = EntityPropertyType;
 
+  /**
+   * Loads a Dimension's registry row and rows. On an empty control (a new record) the dimension's active
+   * default is preselected, so a required column validates and the user sees the value the server would
+   * fill. With hide_when_single and exactly one active row, the field is hidden and set to that row.
+   */
+  private loadDimension(prop: SchemaEntityProperty): void {
+    this.dimensions.getDimensionFor(prop).pipe(
+      switchMap(dim => {
+        if (!dim) return of({ dim, rows: [] as TreeSelectOption[] });
+        return this.dimensions.getOptions(dim).pipe(map(rows => ({ dim, rows })));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(({ dim, rows }) => {
+      this.dimensionOptions.set(rows);
+      if (!dim) return;
+      const control = this.form().get(prop.column_name);
+      const empty = control?.value === null || control?.value === undefined || control?.value === '';
+      const active = rows.filter(r => r.active);
+      if (dim.hide_when_single && active.length === 1 && (empty || control?.value === active[0].id)) {
+        if (empty) control?.setValue(active[0].id);
+        this.hideSingleDimension.set(true);
+      } else if (empty && dim.default_value_id !== null && active.some(r => r.id === dim.default_value_id)) {
+        control?.setValue(dim.default_value_id);
+      }
+    });
+  }
+
   ngOnInit() {
     const prop = this.prop();
+
+    if (this.propType() === EntityPropertyType.Dimension) {
+      this.loadDimension(prop);
+    }
 
     // Load FK options — branch on fk_search_modal (v0.45.0) > options_source_rpc (v0.44.0) > default
     if(this.propType() == EntityPropertyType.ForeignKeyName || this.propType() == EntityPropertyType.User) {

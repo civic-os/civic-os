@@ -141,6 +141,14 @@
       "all": [],
       "excluding": []
     },
+    "tool_categories": {
+      "afterExclude": ["tool_types"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "parent_id", "sourceColumnDisplayName": "Parent", "sourceTable": "tool_categories", "sourceTableDisplayName": "Tool Categories"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "category_id", "sourceColumnDisplayName": "Category", "sourceTable": "tool_types", "sourceTableDisplayName": "Tool Types"}
+      ],
+      "excluding": ["tool_categories"]
+    },
     "tool_instances": {
       "afterExclude": ["mek_checkout_items"],
       "all": [
@@ -263,6 +271,7 @@
     "tool_reservations",
     "borrowers",
     "training_records",
+    "tool_categories",
     "tool_reservation_checkouts",
     "tool_reservation_tools",
     "tool_reservation_work_site",
@@ -275,5 +284,5 @@
     "parcels",
     "census_block_groups"
   ],
-  "menu": ["tool_reservations", "borrowers", "training_records", "tool_types", "tool_instances", "building_use_requests", "building_use_rooms", "mek_requests", "projects", "parcels", "census_block_groups"]
+  "menu": ["tool_reservations", "borrowers", "training_records", "tool_types", "tool_instances", "tool_categories", "building_use_requests", "building_use_rooms", "mek_requests", "projects", "parcels", "census_block_groups"]
 }

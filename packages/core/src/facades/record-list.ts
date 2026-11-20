@@ -551,7 +551,7 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
         chips.push({ kind: 'lte', column, label, value: lte.value });
       } else {
         for (const f of group) {
-          if ((p?.type === EntityPropertyType.ForeignKeyName || p?.type === EntityPropertyType.User) && f.operator === 'in') {
+          if ((p?.type === EntityPropertyType.ForeignKeyName || p?.type === EntityPropertyType.User || p?.type === EntityPropertyType.Dimension) && f.operator === 'in') {
             const ids = String(f.value).match(/\(([^)]+)\)/);
             chips.push({ kind: 'selected', column, label, operator: f.operator, value: f.value, count: ids ? ids[1].split(',').length : 1 });
           } else if (p?.type === EntityPropertyType.Boolean) {

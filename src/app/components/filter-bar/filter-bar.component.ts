@@ -152,7 +152,7 @@ export class FilterBarComponent {
       const newOptions = new Map(this.filterOptions());
 
       props.forEach(prop => {
-        if (prop.type === EntityPropertyType.ForeignKeyName && prop.join_table) {
+        if ((prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.Dimension) && prop.join_table) {
           // FK: Use subscription-based loading with duplicate prevention
           if (!this.loadedColumns.has(prop.column_name)) {
             this.loadFilterOptions(prop.column_name, prop.join_table);
@@ -265,6 +265,7 @@ export class FilterBarComponent {
           break;
 
         case EntityPropertyType.ForeignKeyName:
+        case EntityPropertyType.Dimension:
         case EntityPropertyType.User:
         case EntityPropertyType.Status:
         case EntityPropertyType.Category:
@@ -342,6 +343,7 @@ export class FilterBarComponent {
     this.properties().forEach(prop => {
       switch (prop.type) {
         case EntityPropertyType.ForeignKeyName:
+        case EntityPropertyType.Dimension:
         case EntityPropertyType.User:
         case EntityPropertyType.Status:
         case EntityPropertyType.Category:

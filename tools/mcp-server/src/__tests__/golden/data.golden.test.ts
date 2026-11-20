@@ -207,6 +207,7 @@ function syntheticRoutes() {
   return routesFrom({
     'schema_entities': SYNTHETIC.entities,
     'schema_m2m_properties': [],
+    'schema_dimensions': [],
       'schema_properties': SYNTHETIC.properties,
     'schema_entity_actions?order=table_name.asc,sort_order.asc': [],
     'statuses?order=entity_type.asc,sort_order.asc,display_name.asc': [],

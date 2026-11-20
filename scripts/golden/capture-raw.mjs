@@ -71,6 +71,7 @@ const STATIC_ENDPOINTS = [
   { file: 'rpc.get_current_user_permissions', path: 'rpc/get_current_user_permissions', body: {}, consumer: 'frontend auth.service' },
   { file: 'schema_domain_version', path: 'schema_domain_version', consumer: 'core getDomainVersion() + cli gen types (v0.77.0)' },
   { file: 'schema_menu_nodes', path: 'schema_menu_nodes', consumer: 'core schema-client getMenuNodes() (frontend schema.service menu) + core buildMenu (v0.81.0)' },
+  { file: 'schema_dimensions', path: 'schema_dimensions', consumer: 'core schema-client getDimensions() (frontend schema.service + mcp schema-cache Dimension typing, v0.86.0)' },
 ];
 
 /**
@@ -112,6 +113,7 @@ const ORDER = {
   'rpc.get_translations_for_locale': { server: null, tie: ['source_type', 'source_key'] },
   // view has no ORDER BY; buildMenu orders by sort_order itself. node_key is the primary key.
   schema_menu_nodes: { server: null, tie: ['node_key'] },
+  schema_dimensions: { server: null, tie: ['dimension_key'] },
 };
 /** Dynamic per-entity-type RPC fixtures. */
 function orderFor(file) {

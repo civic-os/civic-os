@@ -58,6 +58,11 @@ const SECTION_MARKERS: Record<string, { start: string; end: string; keywords: st
     end: '## ',
     keywords: ['category', 'categorize', 'classification', 'enum', 'type'],
   },
+  dimensions: {
+    start: '#### Dimensions',
+    end: '### ',
+    keywords: ['dimension', 'program', 'programs', 'hierarchy', 'hierarchical', 'tree', 'department', 'ward', 'site', 'reporting axis'],
+  },
   validation: {
     start: '## Validation System',
     end: '## ',
@@ -128,7 +133,8 @@ export async function getRelevantSections(features: string[]): Promise<string[]>
 
     // Find the next section header after the start
     const afterStart = startIdx + config.start.length;
-    const nextSection = guide.indexOf('\n## ', afterStart);
+    // Ends at the next heading of the configured level (every entry but dimensions uses '## ')
+    const nextSection = guide.indexOf('\n' + config.end, afterStart);
     const endIdx = nextSection !== -1 ? nextSection : guide.length;
 
     const section = guide.substring(startIdx, endIdx).trim();

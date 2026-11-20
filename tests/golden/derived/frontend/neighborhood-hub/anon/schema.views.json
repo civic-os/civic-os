@@ -340,6 +340,38 @@
         ]
       }
     },
+    "tool_categories": {
+      "create": ["display_name", "parent_id", "description", "color", "sort_order"],
+      "detail": ["display_name", "parent_id", "description", "color", "is_active", "sort_order"],
+      "edit": ["display_name", "parent_id", "description", "color", "is_active", "sort_order"],
+      "filter": [],
+      "list": ["display_name", "parent_id", "is_active"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 1},
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "description", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1},
+          {"column": "is_active", "kind": "property", "span": 1},
+          {"column": "sort_order", "kind": "property", "span": 1}
+        ]
+      }
+    },
     "tool_reservation_tool_items": {
       "create": ["quantity", "tool_reservation_tools_id", "tool_type_id"],
       "detail": ["quantity", "tool_reservation_tools_id", "tool_type_id"],

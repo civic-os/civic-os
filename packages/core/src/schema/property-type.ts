@@ -4,16 +4,39 @@
  */
 
 import { EntityPropertyType } from '../model/index.js';
-import type { SchemaEntityProperty } from '../model/index.js';
+import type { SchemaDimension, SchemaEntityProperty } from '../model/index.js';
 import { isSystemType } from './system-types.js';
+
+/** The slice of a registry row that identifies a dimension's table and key. */
+type DimensionTarget = Pick<SchemaDimension, 'table_schema' | 'table_name' | 'key_column'>;
+
+/**
+ * The registered dimension a property's foreign key points at (v0.86.0): the FK targets, in `public`, the
+ * table and key column of a row of `schema_dimensions`. A dimension outside `public` has no API path, so an
+ * FK to it is not a Dimension. Undefined when the property is not an FK to a registered table.
+ *
+ * @consumer app
+ */
+export function dimensionFor<D extends DimensionTarget>(
+  val: Pick<SchemaEntityProperty, 'join_schema' | 'join_table' | 'join_column'>,
+  dimensions: readonly D[] | undefined,
+): D | undefined {
+  if (!dimensions || !val.join_table || !val.join_column) return undefined;
+  if (val.join_schema && val.join_schema !== 'public') return undefined;
+  return dimensions.find(d => d.table_schema === 'public' && d.table_name === val.join_table && d.key_column === val.join_column);
+}
 
 /**
  * Determine the {@link EntityPropertyType} of a raw `schema_properties` row from its
  * PostgreSQL type and metadata. Pure: the caller assigns the result to `prop.type`.
  *
+ * `dimensions` are the rows of `schema_dimensions`: a BIGINT FK to a registered table is a `Dimension`
+ * (v0.86.0). Without them, such a column is a `ForeignKeyName`, which behaves the same except for the
+ * edit control.
+ *
  * @consumer app
  */
-export function getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
+export function getPropertyType(val: SchemaEntityProperty, dimensions?: readonly DimensionTarget[]): EntityPropertyType {
   // T-01: a foreign key needs both join_table and join_column (join_column alone cannot be embedded or offered as options)
   const hasFK = !!val.join_table && !!val.join_column;
 
@@ -27,6 +50,13 @@ export function getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
   // Like Status but for non-guidedForm categorization (rich enums). Must come before ForeignKeyName.
   if (val.category_entity_type && ['int4', 'int8'].includes(val.udt_name) && hasFK) {
     return EntityPropertyType.Category;
+  }
+
+  // Dimension detection (v0.86.0): a BIGINT FK to a table registered in the dimensions registry, like the
+  // system types below are an FK to a known table. Must come before ForeignKeyName; Status and Category
+  // above win when a column is configured as either.
+  if (hasFK && val.udt_name === 'int8' && dimensionFor(val, dimensions)) {
+    return EntityPropertyType.Dimension;
   }
 
   // System type detection: foreign keys to metadata tables (File, User, Payment types)

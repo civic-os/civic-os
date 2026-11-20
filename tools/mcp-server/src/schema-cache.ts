@@ -311,19 +311,21 @@ export class SchemaCache {
    * Properties are typed by core and enriched with M:M relations; ordering that
    * the server used to apply (`order=`) is applied here, because core reads the
    * views unordered. Entity and property failures reject (PT503 as MaintenanceError);
-   * constraint messages and M:M metadata degrade to empty, as in core.
+   * constraint messages, M:M metadata and the dimensions registry degrade to empty, as in core.
    */
   private async loadSchema(sc: SchemaClient): Promise<LoadedSchema> {
     try {
-      const [entityRows, propertyRows, m2m, constraintMessages] = await Promise.all([
+      const [entityRows, propertyRows, m2m, constraintMessages, dimensions] = await Promise.all([
         sc.getEntities(),
         sc.getProperties(),
         sc.getM2mMetadata(),
         sc.getConstraintMessages(),
+        sc.getDimensions(),
       ]);
       const entities = [...entityRows].sort(compareEntities);
       for (const prop of propertyRows) {
-        prop.type = getPropertyType(prop);
+        // A BIGINT FK to a registered dimension is a Dimension (v0.86.0); the registry degrades to empty
+        prop.type = getPropertyType(prop, dimensions);
       }
       // T-12: core enriches in the order of the entities it is given, so pass them as served (the frontend does)
       // and let the stable sort keep that order for properties with an equal sort_order.

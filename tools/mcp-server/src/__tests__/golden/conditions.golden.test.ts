@@ -312,6 +312,7 @@ describe('golden (mcp): condition evaluator', () => {
     const ctx = await bootMcp(routesFrom({
       'schema_entities': SYN.entities,
       'schema_m2m_properties': [],
+      'schema_dimensions': [],
       'schema_properties': SYN.properties,
       'schema_entity_actions?order=table_name.asc,sort_order.asc': SYN.actions,
       'statuses?order=entity_type.asc,sort_order.asc,display_name.asc': SYN.statuses,

@@ -404,6 +404,7 @@ function validateProperty(
       return validateDateTime(prop, value, rowNumber, displayName, rowErrors);
 
     case EntityPropertyType.ForeignKeyName:
+    case EntityPropertyType.Dimension:
     case EntityPropertyType.User:
     case EntityPropertyType.Status:
     case EntityPropertyType.Category:
