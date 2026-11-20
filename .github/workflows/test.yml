@@ -137,9 +137,13 @@ jobs:
           ./tests/functional/v0-82-0-dashboard-show-in-selector-test.sh
           ./tests/functional/v0-82-0-dashboards-not-null-test.sh
           ./tests/functional/v0-82-2-current-locale-test.sh
-          ./tests/functional/v0-83-1-revoke-public-temp-test.sh
+          ./tests/functional/v0-84-0-install-path-test.sh
+          ./tests/functional/v0-84-0-compare-interface-test.sh
+          ./tests/functional/v0-84-1-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
+          # no PostgREST or Keycloak in this job; the install path test's API section runs in E2E verification
+          SKIP_API: "1"
 
       # The menu tests compare the server's per-caller rows with @civic-os/core's buildMenu, so they need
       # the built package.
@@ -287,7 +291,7 @@ jobs:
 
       - name: Verify the owner revoked TEMPORARY from PUBLIC (as restricted user)
         # The test switches roles with SET ROLE, so it connects as the superuser; doadmin owns the database and ran the revoke.
-        run: ./tests/functional/v0-83-1-revoke-public-temp-test.sh
+        run: ./tests/functional/v0-84-1-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 

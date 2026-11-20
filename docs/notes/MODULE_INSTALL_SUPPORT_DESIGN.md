@@ -1,6 +1,6 @@
 # Module Install Support Design
 
-**Status**: Directional design, not scheduled. No code.
+**Status**: Scheduled in issue #135: steps 1 and 2 in v0.84.0, step 3 in v0.85.0 (see Phasing).
 **Date**: 2026-11-05
 **Audience**: Civic OS contributors building the module registry and the Woven module line; integrators who script changes to an instance.
 
@@ -264,9 +264,9 @@ Both features belong to Impact Reporting Phase 1 and must exist before the first
 
 | Step | Scope | Depends on |
 |---|---|---|
-| 1 | `_is_db_admin()` guard on `set_domain_version()` and `create_schema_decision()`; `bump_domain_version()` | Domain Version (built) |
-| 2 | `compare_interface()` and `assert_interface()` for `table` and `rpc` elements | Nothing new |
-| 3 | `dimension` and `module` elements | Dimensions and module registries (Impact Reporting Phase 1), which use the same guard from the start |
+| 1 (v0.84.0) | `_is_db_admin()` guard on `set_domain_version()` and `create_schema_decision()`; `bump_domain_version()` | Domain Version (built) |
+| 2 (v0.84.0) | `compare_interface()` and `assert_interface()` for `table` and `rpc` elements; `dimension` and `module` elements are validated and reported as `missing_core_feature` until step 3 | Nothing new |
+| 3 (v0.85.0) | `dimension` and `module` elements | Dimensions and module registries (Impact Reporting Phase 1), which use the same guard from the start |
 
 Documentation ships with the build per the documentation rules: an Integrator Guide section ("Scripting instance changes") covering both functions, the install sequence and the type rules, and a CLAUDE.md index entry update.
 

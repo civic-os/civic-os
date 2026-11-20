@@ -281,6 +281,8 @@ New strings under the existing prefixes: the Table and Tree toggle labels, Expan
 |---|---|---|
 | 1 | Metadata columns and `schema_entities` exposure; `upsert_entity_metadata()` parameters; core `tree` module (`buildTree`, `flattenTree`); `recordList` tree view with skeleton, match and chunked display requests, row cache and commands; List page tree grid with toggle, expand and collapse, counts, inactive and orphan marks, sibling limit and focus; generalized guard, `enable_tree_parent_guard()` and the `tree_parent_cycle` constraint message; Entities admin settings, row-count hint and missing-guard warning; Integrator Guide section (sizing, parent index, `options_source_rpc` recipe); translations | Nothing new |
 | 1b | `register_dimension()` installs the generalized guard; the `Dimension` property type and `TreeSelectComponent` on the shared module | `metadata.dimensions` (Impact Reporting Phase 1) |
+
+*Scheduling note (2026-11-19, issue #135).* The generalized guard, `enable_tree_parent_guard()` and the `tree_parent_cycle` constraint message ship ahead of the rest of Phase 1, in v0.85.0 with the dimensions registry, which installs the guard. Phase 1b's `Dimension` property type and `TreeSelectComponent` follow in v0.86.0 with `buildTree` and `flattenTree` from the core `tree` module, so the module's first consumer is the `Dimension` control rather than the List page. The rest of Phase 1 (the List page tree grid) is not scheduled.
 | 2 | Tree editor (drag and Move dialog); skeleton paging for trees above 1,000 rows, moving the fallback to a higher cap; sibling reorder by drag; optional path column in Excel export | Demand after Phase 1; an instance with a tree above 1,000 rows |
 
 ## Non-goals

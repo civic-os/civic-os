@@ -1,6 +1,6 @@
 # Impact Reporting Design
 
-**Status**: Directional design, not scheduled. No code.
+**Status**: Directional design. The dimensions and module registries and the `Dimension` property type are scheduled in issue #135 (v0.85.0, v0.86.0); the rest is not scheduled. No code yet.
 **Date**: 2026-11-02
 **Audience**: Civic OS contributors building the Woven module line; integrators who will install report packs.
 
@@ -89,7 +89,7 @@ CREATE TABLE metadata.dimensions (
     key_column         NAME NOT NULL DEFAULT 'id', -- must be BIGINT; register_dimension() refuses any other type
     label_column       NAME NOT NULL DEFAULT 'display_name',
     parent_column      NAME,                      -- NULL for a flat dimension
-    active_column      NAME,                      -- NULL if rows are never retired
+    active_column      NAME NOT NULL,             -- rows are retired, never deleted (amendment 2026-11-19)
     external_id_column NAME,                      -- e.g. the QuickBooks Class id; accounting reads it
     default_value_id   BIGINT,                    -- the row new records point at when the user chooses nothing
     hide_when_single   BOOLEAN NOT NULL DEFAULT TRUE, -- one active row: no dropdown, every report still has the axis
@@ -107,9 +107,9 @@ What registration gives the engine:
 - **Axes from FKs.** Every FK from any entity to a registered dimension table is a reporting axis, read from `schema_properties` with no per-measure configuration. A measure's entity with FKs to `programs` and `sites` is cut by both.
 - **Hierarchy.** `dimension_subtree(p_key TEXT, p_value_id BIGINT) RETURNS SETOF BIGINT` walks `parent_column` with a recursive CTE built by dynamic SQL. No `ltree`: trees are small and the extension question goes away.
 - **Rollup columns.** Generated VIEWs carry the value and its ancestors (`program_id`, `program_l1_id`, `program_l2_id`) so a widget groups at any level with an ordinary `filters` entry.
-- **Defaults and ergonomics.** `default_value_id` is applied by the Create page to an empty FK; `hide_when_single` hides the dropdown for a one-program organization. Woven seeds a **General** program on install.
+- **Defaults and ergonomics.** `default_value_id` is filled into an empty FK by a server-side trigger on each referencing table, so the Create page, import, MCP and SQL inserts all get it (amendment 2026-11-19, below); `hide_when_single` hides the dropdown for a one-program organization. Woven seeds a **General** program on install.
 - **A `Dimension` property type.** A FK whose target is a registered dimension renders as a hierarchical dropdown instead of a flat `ForeignKeyName` list. One generic type, keyed on the registry, replaces a Program-specific one. `schema_properties` exposes `dimension_key` on such columns.
-- **Delete guard.** `register_dimension()` installs a BEFORE DELETE trigger on the table that refuses to remove a row still referenced by accounting slots (see below). Rows are retired through `active_column`, not deleted.
+- **Delete guard.** `register_dimension()` installs a BEFORE DELETE trigger on the table that refuses to remove any row (amendment 2026-11-19; first designed to refuse only rows still referenced by accounting slots, see below). Rows are retired through `active_column`, not deleted.
 - **Parent-cycle guard.** On a hierarchical dimension, `register_dimension()` also installs a trigger that refuses to make a row its own ancestor, so every tree stays walkable. See Parent-cycle guard below.
 
 #### Parent-cycle guard
@@ -124,6 +124,20 @@ What registration gives the engine:
 - **Defensive reads.** `dimension_subtree()` and the rollup-column generation also use the `CYCLE` clause, so a cycle introduced after someone drops the trigger yields a bounded result instead of an endless query.
 
 Like the delete guard, this protects row data, not schema. It never refuses a change to columns, tables or metadata, and an instance owner may drop the trigger.
+
+#### Build amendments (2026-11-19)
+
+*Decided while planning issue #135, before any code.* Each changes or fills in the design above:
+
+- **Defaults are filled by the server.** The MCP server and Excel import do not run the Create page's code, so a default applied only there would leave their records without a program. `register_dimension()` therefore installs a `BEFORE INSERT` row trigger, `dimension_default_fill`, on every table with a FK column to the registered table. It fills only on insert, only a FK left NULL, never a value the caller set, and never on update. Like the parent-cycle guard it reads the row through `to_jsonb(NEW)` and takes the column name as a trigger argument with no column list, so dropping or renaming the FK column still succeeds. The Create page shows the dropdown empty and the server fills it; the frontend does not copy the default.
+- **Re-registration picks up new referencing tables.** `register_dimension()` is idempotent and looks for referencing FK columns on every call, installing the fill trigger on new ones. An install script that adds a table with a FK to a registered dimension re-registers the dimension afterwards. There is no event trigger (they need a superuser and are refused on some managed databases).
+- **A retired default is skipped, not cleared.** The fill trigger skips a default whose `active_column` is false; the registry keeps `default_value_id`, so reactivating the row restores the default.
+- **The default can be changed after install.** `set_dimension_default(p_key TEXT, p_value_id BIGINT)`, guarded by `metadata._is_db_admin()`, sets or clears it. It refuses a row that does not exist or is inactive. It generates no DDL, so the admin JWT path needs no narrowing. An admin page control is deferred.
+- **Registered rows are never deleted.** The delete guard refuses every `DELETE` on a registered table, not only rows referenced by accounting slots, which do not exist yet. A row added by mistake is retired. An instance owner may still drop the trigger.
+- **An active column is required.** Since no row can be deleted, `register_dimension()` refuses a table without `active_column`.
+- **API scope until accounting exists.** Over the API, `register_dimension()` accepts only base tables in `public` that `schema_entities` lists, and installs the fill trigger only on referencing tables that `schema_entities` lists; referencing tables in other schemas get it only when the deployment role registers. Framework schemas (`accounting`) join the allowed list when they exist.
+- **Contract hash.** `schema_properties` exposes `dimension_key`, and `metadata.schema_contract_hash()` includes it on every property, as it does `status_entity_type`. This changes every instance's hash once, at that release; typed clients under the `block` policy must be regenerated, and the release notes say so.
+- **Type precedence and one-row dimensions.** A column configured as Status or Category stays that type even when it references a registered table. `hide_when_single` hides the control on Create and Edit when the dimension has exactly one active row (the server fills it); Detail and List still show the value.
 
 The dimensions this design expects Woven to register:
 
@@ -345,6 +359,10 @@ Phase 1 needs no new widget types. Phase 2 needs:
 | 7 | Hierarchy integrity | `register_dimension()` installs the generalized `tree_parent_guard` trigger (column names as trigger arguments, `USING CONSTRAINT = 'tree_parent_cycle'`), with no column list so the parent column can still be dropped, serialized per table by an advisory lock. The same trigger serves non-dimension trees (Tree List View design). **Decided 2026-11-05.** | A `CHECK` or exclusion constraint cannot see ancestors. An `ltree` path column would need maintenance triggers and the extension this design avoided. |
 | 8 | Pack versions | Packs register in `metadata.modules` as `pack:<pack_key>` with their own version, and record a decision and raise the domain version only when absent or older; otherwise they re-create VIEWs and upsert rows silently. **Decided 2026-11-06.** | A separate pack registry: `module_installed()` never sees packs, but a second table with the same shape and a second version check for interface `module` elements. |
 | 9 | DDL from definer functions | `register_report_measure()` accepts a non-NULL `row_filter` only from a deployer session (`metadata._is_deployer()`); `register_dimension()` over the API installs its fixed guards only on listed `public` tables or framework schemas. **Decided 2026-11-06.** | `_is_db_admin()` alone: simpler, but an application admin could inject DDL that runs as the function owner. |
+| 10 | Where `default_value_id` is filled | A `BEFORE INSERT` trigger on each referencing table, installed and refreshed by `register_dimension()`; a retired default is skipped. **Decided 2026-11-19.** | The Create page only: no DDL on referencing tables, but import, MCP and SQL inserts get no default. A column `DEFAULT`: simple, but static, so it ignores later default changes and retirements. |
+| 11 | Deleting dimension rows | Refused for every row; rows are retired through a required `active_column`. **Decided 2026-11-19.** | Refuse only rows referenced by accounting slots: allows cleanup of mistakes, but protects nothing until accounting exists. |
+| 12 | Changing the default | `set_dimension_default()` RPC; admin UI deferred. **Decided 2026-11-19.** | Re-run `register_dimension()` with a new default: works, but couples a data change to a registration that also installs triggers. |
+| 13 | `dimension_key` in the contract hash | Included on every property; every instance's hash changes once. **Decided 2026-11-19.** | Only when non-NULL: no hash change for instances without dimensions, but an irregular contract shape. |
 
 ## Phasing
 
