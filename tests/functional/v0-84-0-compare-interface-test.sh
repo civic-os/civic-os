@@ -14,7 +14,8 @@
 #   - writes: true -> missing_default for an undeclared NOT NULL column without a default, nothing for
 #     defaults, identity and generated columns;
 #   - missing_rpc and type_mismatch on returns (scalar, SETOF, TABLE), type aliases normalized;
-#   - dimension and module elements report missing_core_feature (registries arrive in v0.85.0);
+#   - dimension and module elements report missing_core_feature without the registries (before v0.85.0)
+#     and missing_dimension / missing_module with them;
 #   - malformed declarations raise 22023;
 #   - row order, template and source echoed;
 #   - assert_interface(): silent on a match, NOTICE on info rows only, 55000 with a counted message and
@@ -224,16 +225,22 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- dimension and module: no registries yet
+-- dimension and module: missing_core_feature before v0.85.0, registry lookups since
 -- ---------------------------------------------------------------------------
 DO $$
 BEGIN
-  ASSERT pg_temp.el('{"element":"dimension","key":"program","table":"public.programs","columns":{"key":"id","parent":"parent_id"}}')
-    = 'missing_core_feature:error', 'dimension elements need metadata.dimensions';
-  ASSERT pg_temp.el('{"element":"module","key":"people_served","version":"1.2"}') = 'missing_core_feature:error',
-    'module elements need metadata.modules';
-  ASSERT (SELECT name || '|' || expected FROM public.compare_interface('{"elements":[{"element":"module","key":"people_served"}]}'))
-    = 'people_served|metadata.modules', 'the row names the key and the missing feature';
+  IF to_regclass('metadata.dimensions') IS NULL THEN
+    ASSERT pg_temp.el('{"element":"dimension","key":"ci_none","table":"public.programs","columns":{"key":"id","parent":"parent_id"}}')
+      = 'missing_core_feature:error', 'dimension elements need metadata.dimensions';
+    ASSERT pg_temp.el('{"element":"module","key":"ci_none","version":"1.2"}') = 'missing_core_feature:error',
+      'module elements need metadata.modules';
+  ELSE
+    -- covered in depth by the v0.85.0 registry tests
+    ASSERT pg_temp.el('{"element":"dimension","key":"ci_none","table":"public.programs","columns":{"key":"id","parent":"parent_id"}}')
+      = 'missing_dimension:error', 'an unregistered dimension';
+    ASSERT pg_temp.el('{"element":"module","key":"ci_none","version":"1.2"}') = 'missing_module:error',
+      'an unregistered module';
+  END IF;
 END $$;
 
 -- ---------------------------------------------------------------------------

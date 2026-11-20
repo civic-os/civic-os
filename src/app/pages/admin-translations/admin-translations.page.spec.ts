@@ -465,6 +465,7 @@ describe('AdminTranslationsPage', () => {
             expect(component.sourceTypeLabel('menu_node')).toBe('Menu');
             expect(component.sourceTypeLabel('instance_config')).toBe('Configuration');
             expect(component.sourceTypeLabel('instance_config_group')).toBe('Configuration');
+            expect(component.sourceTypeLabel('constraint_message')).toBe('Error messages');
         });
 
         it('should have an English label for every labeled source type, and every filter type is labeled', () => {

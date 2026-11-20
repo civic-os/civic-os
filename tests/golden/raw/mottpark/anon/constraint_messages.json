@@ -18,6 +18,12 @@
     "table_name": "reservation_requests"
   },
   {
+    "column_name": null,
+    "constraint_name": "dimension_row_delete",
+    "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+    "table_name": "*"
+  },
+  {
     "column_name": "time_slot",
     "constraint_name": "max_advance_booking",
     "error_message": "Reservations cannot be made more than 1 year in advance.",
@@ -40,6 +46,12 @@
     "constraint_name": "policy_must_be_agreed",
     "error_message": "You must agree to the Facility and Parkland Use Policy to submit a reservation request.",
     "table_name": "reservation_requests"
+  },
+  {
+    "column_name": null,
+    "constraint_name": "tree_parent_cycle",
+    "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+    "table_name": "*"
   },
   {
     "column_name": "time_slot",

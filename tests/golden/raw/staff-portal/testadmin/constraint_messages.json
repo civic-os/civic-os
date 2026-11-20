@@ -1,5 +1,11 @@
 [
   {
+    "column_name": null,
+    "constraint_name": "dimension_row_delete",
+    "error_message": "This record is used for reporting and cannot be deleted. Mark it inactive instead.",
+    "table_name": "*"
+  },
+  {
     "column_name": "overall_rating",
     "constraint_name": "offboarding_feedback_overall_rating_check",
     "error_message": "Overall rating must be between 1 and 5.",
@@ -28,5 +34,11 @@
     "constraint_name": "time_off_requests_check",
     "error_message": "End date must be on or after the start date.",
     "table_name": "time_off_requests"
+  },
+  {
+    "column_name": null,
+    "constraint_name": "tree_parent_cycle",
+    "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
+    "table_name": "*"
   }
 ]
