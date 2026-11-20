@@ -1,0 +1,3 @@
+# Deliberate definer views for tests/functional/view-security-guard-test.sh, one "view|reason" per line.
+# Empty: every public view over an RLS-protected table in this example is security_invoker,
+# including the Mott Fest views (current_festival, feedback_submissions and the two summaries).

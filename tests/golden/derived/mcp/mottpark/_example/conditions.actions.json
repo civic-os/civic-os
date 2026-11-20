@@ -1,6 +1,114 @@
 {
   "conditions": [
     {
+      "condition": {
+        "and": [
+          {
+            "field": "status_id",
+            "operator": "in",
+            "value": [27]
+          },
+          {"field": "preferred_payment_method_id", "operator": "neq", "value": 18}
+        ]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"preferred_payment_method_id\":\"18\"}": false,
+        "{\"preferred_payment_method_id\":18,\"status_id\":27}": false,
+        "{\"preferred_payment_method_id\":18}": false,
+        "{\"preferred_payment_method_id\":19,\"status_id\":\"__not_in__\"}": false,
+        "{\"preferred_payment_method_id\":19}": false,
+        "{\"preferred_payment_method_id\":null}": false,
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": false,
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":19}}": false,
+        "{\"preferred_payment_method_id\":{\"id\":null}}": false,
+        "{\"preferred_payment_method_id\":{\"other\":1}}": false,
+        "{\"status_id\":\"27\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":27}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":27,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["vendor_application.enable_online_payment:enabled_condition", "vendor_application.enable_online_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "and": [
+          {
+            "field": "status_id",
+            "operator": "in",
+            "value": [33]
+          },
+          {"field": "preferred_payment_method_id", "operator": "neq", "value": 18}
+        ]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"preferred_payment_method_id\":\"18\"}": false,
+        "{\"preferred_payment_method_id\":18,\"status_id\":33}": false,
+        "{\"preferred_payment_method_id\":18}": false,
+        "{\"preferred_payment_method_id\":19,\"status_id\":\"__not_in__\"}": false,
+        "{\"preferred_payment_method_id\":19}": false,
+        "{\"preferred_payment_method_id\":null}": false,
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": false,
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":19}}": false,
+        "{\"preferred_payment_method_id\":{\"id\":null}}": false,
+        "{\"preferred_payment_method_id\":{\"other\":1}}": false,
+        "{\"status_id\":\"33\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":33}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":33,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["food_truck_application.enable_online_payment:enabled_condition", "food_truck_application.enable_online_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "and": [
+          {
+            "field": "status_id",
+            "operator": "in",
+            "value": [38]
+          },
+          {"field": "preferred_payment_method_id", "operator": "neq", "value": 18}
+        ]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"preferred_payment_method_id\":\"18\"}": false,
+        "{\"preferred_payment_method_id\":18,\"status_id\":38}": false,
+        "{\"preferred_payment_method_id\":18}": false,
+        "{\"preferred_payment_method_id\":19,\"status_id\":\"__not_in__\"}": false,
+        "{\"preferred_payment_method_id\":19}": false,
+        "{\"preferred_payment_method_id\":null}": false,
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": false,
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":19}}": false,
+        "{\"preferred_payment_method_id\":{\"id\":null}}": false,
+        "{\"preferred_payment_method_id\":{\"other\":1}}": false,
+        "{\"status_id\":\"38\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":38}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":38,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["sponsorship_application.enable_online_payment:enabled_condition", "sponsorship_application.enable_online_payment:visibility_condition"]
+    },
+    {
       "condition": {"field": "can_record_payment", "operator": "eq", "value": true},
       "results": {
         "<null data>": false,
@@ -87,6 +195,321 @@
         "{}": false
       },
       "usedBy": ["reservation_requests.close:enabled_condition", "reservation_requests.close:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [22, 24]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"22\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":22}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":22,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["festival.open_applications:enabled_condition", "festival.open_applications:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [23]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"23\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":23}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":23,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["festival.close_applications:enabled_condition", "festival.close_applications:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [24]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"24\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":24}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":24,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["festival.mark_completed:enabled_condition", "festival.mark_completed:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [26, 27, 28, 29]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"26\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":26}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":26,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["vendor_application.withdraw:enabled_condition", "vendor_application.withdraw:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [26, 27]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"26\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":26}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":26,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["vendor_application.deny:enabled_condition", "vendor_application.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [26]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"26\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":26}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":26,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["vendor_application.approve:enabled_condition", "vendor_application.approve:visibility_condition", "vendor_application.waive_and_approve:enabled_condition", "vendor_application.waive_and_approve:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [27]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"27\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":27}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":27,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["vendor_application.record_payment:enabled_condition", "vendor_application.record_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [32, 33, 34]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"32\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":32}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":32,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["food_truck_application.withdraw:enabled_condition", "food_truck_application.withdraw:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [32, 33]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"32\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":32}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":32,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["food_truck_application.deny:enabled_condition", "food_truck_application.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [32]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"32\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":32}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":32,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["food_truck_application.approve:enabled_condition", "food_truck_application.approve:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [33]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"33\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":33}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":33,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["food_truck_application.record_payment:enabled_condition", "food_truck_application.record_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [37, 38, 39, 40]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"37\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":37}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":37,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["sponsorship_application.withdraw:enabled_condition", "sponsorship_application.withdraw:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [37, 38]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"37\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":37}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":37,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["sponsorship_application.deny:enabled_condition", "sponsorship_application.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [37]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"37\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":37}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":37,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["sponsorship_application.approve:enabled_condition", "sponsorship_application.approve:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [38]
+      },
+      "results": {
+        "<null data>": false,
+        "<undefined data>": false,
+        "{\"status_id\":\"38\"}": false,
+        "{\"status_id\":\"__not_in__\"}": false,
+        "{\"status_id\":38}": true,
+        "{\"status_id\":null}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": false,
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":38,\"status_key\":\"k\"}}": true,
+        "{\"status_id\":{\"id\":null}}": false,
+        "{\"status_id\":{\"other\":1}}": false,
+        "{}": false
+      },
+      "usedBy": ["sponsorship_application.record_payment:enabled_condition", "sponsorship_application.record_payment:visibility_condition"]
     },
     {
       "condition": {

@@ -1,0 +1,18 @@
+[
+  {
+    "category_key": "retail",
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Retail Vendor",
+    "id": 8,
+    "sort_order": 1
+  },
+  {
+    "category_key": "nonprofit",
+    "color": "#22C55E",
+    "description": null,
+    "display_name": "Nonprofit / Resource Group",
+    "id": 9,
+    "sort_order": 2
+  }
+]

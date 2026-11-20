@@ -13,6 +13,7 @@ Derived from post-design corrections to the Neighborhood Engagement Hub (NEH) in
 
 ## Entity Architecture
 
+- [ ] Table names for new work: singular snake_case (`work_order`, `vendor_application`), matching the singular entity display name. An existing instance keeps its style: never rename a table for this, since the table name is in URLs, API paths, saved filters, feeds and exports; change `metadata.entities.display_name` and the menu node label instead. — *Why: One noun form from table to page title; plural menu labels come from `metadata.menu_nodes`, not the table name.*
 - [ ] Does this entity use a guided form? → It needs TWO status columns: `guided_form_status_id` (framework-managed) + `status_id` or `workflow_status_id` (business workflow). — *Why: A single status_id served two masters — framework RPCs and staff workflow. Separation required ALTER TABLE, new column, trigger rewrites, and dashboard re-mapping.*
 - [ ] Is there a fulfillment/checkout phase separate from the request phase? → Extract to a child entity with its own status lifecycle. — *Why: Checkout details (specific instances, photos, notes) were originally on the reservation. Extraction required CREATE TABLE, column migration, new triggers, and permissions — essentially building a second entity from scratch.*
 - [ ] For item tracking: does the domain have both serialized units AND bulk quantities? → Use nullable `instance_id` (serial when set, qty-managed when NULL). — *Why: This schema choice is very hard to retrofit after data exists.*

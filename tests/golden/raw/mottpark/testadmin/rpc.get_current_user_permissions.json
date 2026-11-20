@@ -12,6 +12,70 @@
     "table_name": "civic_os_users_private"
   },
   {
+    "permission": "read",
+    "table_name": "current_festival"
+  },
+  {
+    "permission": "create",
+    "table_name": "feedback_response"
+  },
+  {
+    "permission": "delete",
+    "table_name": "feedback_response"
+  },
+  {
+    "permission": "read",
+    "table_name": "feedback_response"
+  },
+  {
+    "permission": "update",
+    "table_name": "feedback_response"
+  },
+  {
+    "permission": "create",
+    "table_name": "feedback_submission"
+  },
+  {
+    "permission": "create",
+    "table_name": "festival"
+  },
+  {
+    "permission": "delete",
+    "table_name": "festival"
+  },
+  {
+    "permission": "read",
+    "table_name": "festival"
+  },
+  {
+    "permission": "update",
+    "table_name": "festival"
+  },
+  {
+    "permission": "create",
+    "table_name": "food_truck_application"
+  },
+  {
+    "permission": "delete",
+    "table_name": "food_truck_application"
+  },
+  {
+    "permission": "read",
+    "table_name": "food_truck_application"
+  },
+  {
+    "permission": "update",
+    "table_name": "food_truck_application"
+  },
+  {
+    "permission": "create",
+    "table_name": "food_truck_application:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "food_truck_application:notes"
+  },
+  {
     "permission": "create",
     "table_name": "manager_events"
   },
@@ -132,6 +196,14 @@
     "table_name": "metadata.translations"
   },
   {
+    "permission": "read",
+    "table_name": "mottfest_current_summary"
+  },
+  {
+    "permission": "read",
+    "table_name": "mottfest_revenue_summary"
+  },
+  {
     "permission": "create",
     "table_name": "payment_refunds"
   },
@@ -245,6 +317,30 @@
   },
   {
     "permission": "create",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "permission": "delete",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "permission": "read",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "permission": "update",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "permission": "create",
+    "table_name": "sponsorship_application:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "sponsorship_application:notes"
+  },
+  {
+    "permission": "create",
     "table_name": "static_assets"
   },
   {
@@ -306,5 +402,29 @@
   {
     "permission": "update",
     "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "vendor_application"
+  },
+  {
+    "permission": "delete",
+    "table_name": "vendor_application"
+  },
+  {
+    "permission": "read",
+    "table_name": "vendor_application"
+  },
+  {
+    "permission": "update",
+    "table_name": "vendor_application"
+  },
+  {
+    "permission": "create",
+    "table_name": "vendor_application:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "vendor_application:notes"
   }
 ]

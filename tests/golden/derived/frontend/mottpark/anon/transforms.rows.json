@@ -1,5 +1,350 @@
 {
   "entities": {
+    "current_festival": {
+      "createProps": [],
+      "editProps": ["display_name:TextShort"],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {}
+            }
+          },
+          "rawRow": {}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"extra_key": "kept"}
+            }
+          },
+          "rawRow": {}
+        }
+      }
+    },
+    "festival": {
+      "createProps": [
+        "display_name:TextShort",
+        "event_date:Date",
+        "event_hours:TextShort",
+        "location:TextShort",
+        "applications_open_at:DateTimeLocal",
+        "applications_close_at:DateTimeLocal",
+        "vendor_fee:Money",
+        "food_truck_fee:Money",
+        "vendor_capacity:IntegerNumber",
+        "food_truck_capacity:IntegerNumber"
+      ],
+      "editProps": [
+        "display_name:TextShort",
+        "event_date:Date",
+        "event_hours:TextShort",
+        "location:TextShort",
+        "applications_open_at:DateTimeLocal",
+        "applications_close_at:DateTimeLocal",
+        "vendor_fee:Money",
+        "food_truck_fee:Money",
+        "vendor_capacity:IntegerNumber",
+        "food_truck_capacity:IntegerNumber",
+        "status_id:Status"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"applications_close_at": "", "applications_open_at": null, "display_name": null, "event_date": null, "event_hours": "", "food_truck_capacity": "", "food_truck_fee": null, "location": null, "vendor_capacity": "", "vendor_fee": null},
+          "editFormInput": {"applications_close_at": "", "applications_open_at": null, "display_name": null, "event_date": null, "event_hours": "", "food_truck_capacity": "", "food_truck_fee": null, "location": null, "vendor_capacity": "", "vendor_fee": null},
+          "outputs": {
+            "*": {
+              "control": {"applications_close_at": null, "event_hours": null, "food_truck_capacity": null, "vendor_capacity": null},
+              "createApi": {"applications_close_at": "", "applications_open_at": null, "display_name": null, "event_date": null, "event_hours": "", "food_truck_capacity": "", "food_truck_fee": null, "location": null, "vendor_capacity": "", "vendor_fee": null},
+              "editApi": {"applications_close_at": "", "applications_open_at": null, "display_name": null, "event_date": null, "event_hours": "", "food_truck_capacity": "", "food_truck_fee": null, "location": null, "vendor_capacity": "", "vendor_fee": null}
+            }
+          },
+          "rawRow": {"applications_close_at": null, "event_hours": null, "food_truck_capacity": null, "vendor_capacity": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "applications_close_at": "abcdefghijklmnop",
+            "applications_open_at": "abcdefghijklmnop",
+            "display_name": 42,
+            "event_date": "2026-07-04",
+            "event_hours": 42,
+            "food_truck_capacity": 7,
+            "food_truck_fee": "$1,234.50",
+            "location": 42,
+            "vendor_capacity": 7,
+            "vendor_fee": "$1,234.50"
+          },
+          "editFormInput": {
+            "applications_close_at": "abcdefghijklmnop",
+            "applications_open_at": "abcdefghijklmnop",
+            "display_name": 42,
+            "event_date": "2026-07-04",
+            "event_hours": 42,
+            "food_truck_capacity": 7,
+            "food_truck_fee": "$1,234.50",
+            "location": 42,
+            "vendor_capacity": 7,
+            "vendor_fee": "$1,234.50"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "applications_close_at": "",
+                "applications_open_at": "",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "food_truck_capacity": 7,
+                "food_truck_fee": null,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": null
+              },
+              "createApi": null,
+              "editApi": null
+            }
+          },
+          "rawRow": {
+            "applications_close_at": "garbage",
+            "applications_open_at": "garbage",
+            "display_name": "text",
+            "event_date": "2026-07-04",
+            "event_hours": "text",
+            "food_truck_capacity": 7,
+            "food_truck_fee": "abc",
+            "location": "text",
+            "vendor_capacity": 7,
+            "vendor_fee": "abc"
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "applications_close_at": "2026-07-04T17:30",
+            "applications_open_at": "2026-07-04T17:30",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "event_date": "2026-07-04",
+            "event_hours": "text",
+            "extra_key": "kept",
+            "food_truck_capacity": 7,
+            "food_truck_fee": 1234.5,
+            "location": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "vendor_capacity": 7,
+            "vendor_fee": 1234.5
+          },
+          "editFormInput": {
+            "applications_close_at": "2026-07-04T17:30",
+            "applications_open_at": "2026-07-04T17:30",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "event_date": "2026-07-04",
+            "event_hours": "text",
+            "extra_key": "kept",
+            "food_truck_capacity": 7,
+            "food_truck_fee": 1234.5,
+            "location": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "vendor_capacity": 7,
+            "vendor_fee": 1234.5
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "applications_close_at": "2026-07-04T13:30",
+                "applications_open_at": "2026-07-04T13:30",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "createApi": {
+                "applications_close_at": "2026-07-04T21:30:00.000Z",
+                "applications_open_at": "2026-07-04T21:30:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "editApi": {
+                "applications_close_at": "2026-07-04T21:30:00.000Z",
+                "applications_open_at": "2026-07-04T21:30:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "applications_close_at": "2026-07-04T23:00",
+                "applications_open_at": "2026-07-04T23:00",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "createApi": {
+                "applications_close_at": "2026-07-04T12:00:00.000Z",
+                "applications_open_at": "2026-07-04T12:00:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "editApi": {
+                "applications_close_at": "2026-07-04T12:00:00.000Z",
+                "applications_open_at": "2026-07-04T12:00:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "applications_close_at": "2026-07-05T04:00",
+                "applications_open_at": "2026-07-05T04:00",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "createApi": {
+                "applications_close_at": "2026-07-04T07:00:00.000Z",
+                "applications_open_at": "2026-07-04T07:00:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "editApi": {
+                "applications_close_at": "2026-07-04T07:00:00.000Z",
+                "applications_open_at": "2026-07-04T07:00:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              }
+            },
+            "UTC": {
+              "control": {
+                "applications_close_at": "2026-07-04T17:30",
+                "applications_open_at": "2026-07-04T17:30",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "createApi": {
+                "applications_close_at": "2026-07-04T17:30:00.000Z",
+                "applications_open_at": "2026-07-04T17:30:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              },
+              "editApi": {
+                "applications_close_at": "2026-07-04T17:30:00.000Z",
+                "applications_open_at": "2026-07-04T17:30:00.000Z",
+                "display_name": "text",
+                "event_date": "2026-07-04",
+                "event_hours": "text",
+                "extra_key": "kept",
+                "food_truck_capacity": 7,
+                "food_truck_fee": 1234.5,
+                "location": "text",
+                "vendor_capacity": 7,
+                "vendor_fee": 1234.5
+              }
+            }
+          },
+          "rawRow": {
+            "applications_close_at": "2026-07-04T17:30:00+00:00",
+            "applications_open_at": "2026-07-04T17:30:00+00:00",
+            "display_name": "text",
+            "event_date": "2026-07-04",
+            "event_hours": "text",
+            "food_truck_capacity": 7,
+            "food_truck_fee": "$1,234.50",
+            "location": "text",
+            "vendor_capacity": 7,
+            "vendor_fee": "$1,234.50"
+          }
+        }
+      }
+    },
     "holiday_rules": {
       "createProps": [
         "display_name:TextShort",

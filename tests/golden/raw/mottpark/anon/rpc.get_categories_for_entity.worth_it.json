@@ -1,0 +1,26 @@
+[
+  {
+    "category_key": "yes",
+    "color": "#22C55E",
+    "description": null,
+    "display_name": "Yes",
+    "id": 16,
+    "sort_order": 1
+  },
+  {
+    "category_key": "no",
+    "color": "#EF4444",
+    "description": null,
+    "display_name": "No",
+    "id": 17,
+    "sort_order": 2
+  },
+  {
+    "category_key": "other",
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "Other",
+    "id": 18,
+    "sort_order": 3
+  }
+]

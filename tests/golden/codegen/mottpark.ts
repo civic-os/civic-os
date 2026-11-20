@@ -10,10 +10,354 @@ import { defineQuery as defineCoreQuery } from '@civic-os/core';
 
 export const DOMAIN_VERSION = '0.0.0' as const;
 export const FRAMEWORK_VERSION = '__MASKED__' as const;
-export const SCHEMA_HASH = 'sha256:782135e5ab020ad223b0813ddf72a07c8cc76a30022800f6a5247d49b2bf2a28' as const;
+export const SCHEMA_HASH = 'sha256:ef312bd843f520fa162982f69bc2918974629484b1185e700bb07051a96f741b' as const;
 
 export interface Database {
   entities: {
+    current_festival: {
+      Row: {
+        applications_close_at: string | null;
+        applications_open_at: string | null;
+        display_name: string | null;
+        event_date: string | null;
+        event_hours: string | null;
+        food_truck_fee: number | null;
+        id: number | null;
+        location: string | null;
+        payment_due_date: string | null;
+        vendor_fee: number | null;
+      };
+      Insert: {
+        applications_close_at?: string | null;
+        applications_open_at?: string | null;
+        display_name?: string | null;
+        event_date?: string | null;
+        event_hours?: string | null;
+        food_truck_fee?: number | null;
+        id?: number | null;
+        location?: string | null;
+        payment_due_date?: string | null;
+        vendor_fee?: number | null;
+      };
+      Update: Partial<Database['entities']['current_festival']['Insert']>;
+      Embedded: {};
+      Relations: {};
+      Statuses: never;
+      Actions: {};
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
+    };
+    feedback_response: {
+      Row: {
+        created_at: string;
+        display_name: string | null;
+        festival_id: number;
+        id: number;
+        updated_at: string;
+        what_did_not_go_well: string | null;
+        what_worked_well: string | null;
+        worth_it_financially_id: number | null;
+        worth_it_financially_other: string | null;
+        worth_it_non_financially_id: number | null;
+        worth_it_non_financially_other: string | null;
+      };
+      Insert: {
+        created_at?: string;
+        festival_id?: number;
+        id?: number;
+        updated_at?: string;
+        what_did_not_go_well?: string | null;
+        what_worked_well?: string | null;
+        worth_it_financially_id?: number | null;
+        worth_it_financially_other?: string | null;
+        worth_it_non_financially_id?: number | null;
+        worth_it_non_financially_other?: string | null;
+      };
+      Update: Partial<Database['entities']['feedback_response']['Insert']>;
+      Embedded: {
+        festival_id: {
+          id: number;
+          display_name: string;
+        };
+        worth_it_financially_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        } | null;
+        worth_it_non_financially_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        } | null;
+      };
+      Relations: {
+        festival_id: { kind: 'one'; target: 'festival'; nullable: false };
+      };
+      Statuses: never;
+      Actions: {};
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
+    };
+    feedback_submission: {
+      Row: {
+        created_at: string | null;
+        display_name: string | null;
+        festival_id: number | null;
+        id: number | null;
+        what_did_not_go_well: string | null;
+        what_worked_well: string | null;
+        worth_it_financially_id: number | null;
+        worth_it_financially_other: string | null;
+        worth_it_non_financially_id: number | null;
+        worth_it_non_financially_other: string | null;
+      };
+      Insert: {
+        created_at?: string | null;
+        display_name?: string | null;
+        festival_id?: number | null;
+        id?: number | null;
+        what_did_not_go_well?: string | null;
+        what_worked_well?: string | null;
+        worth_it_financially_id?: number | null;
+        worth_it_financially_other?: string | null;
+        worth_it_non_financially_id?: number | null;
+        worth_it_non_financially_other?: string | null;
+      };
+      Update: Partial<Database['entities']['feedback_submission']['Insert']>;
+      Embedded: {
+        festival_id: {
+          id: number;
+          display_name: string;
+        } | null;
+        worth_it_financially_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        } | null;
+        worth_it_non_financially_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        } | null;
+      };
+      Relations: {
+        festival_id: { kind: 'one'; target: 'festival'; nullable: true };
+      };
+      Statuses: never;
+      Actions: {};
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
+    };
+    festival: {
+      Row: {
+        applications_close_at: string;
+        applications_open_at: string;
+        created_at: string;
+        display_name: string;
+        event_date: string;
+        event_hours: string | null;
+        food_truck_capacity: number | null;
+        food_truck_fee: number;
+        id: number;
+        location: string | null;
+        payment_due_date: string | null;
+        status_id: number;
+        updated_at: string;
+        vendor_capacity: number | null;
+        vendor_fee: number;
+      };
+      Insert: {
+        applications_close_at: string;
+        applications_open_at: string;
+        created_at?: string;
+        display_name: string;
+        event_date: string;
+        event_hours?: string | null;
+        food_truck_capacity?: number | null;
+        food_truck_fee?: number;
+        id?: number;
+        location?: string | null;
+        status_id?: number;
+        updated_at?: string;
+        vendor_capacity?: number | null;
+        vendor_fee?: number;
+      };
+      Update: Partial<Database['entities']['festival']['Insert']>;
+      Embedded: {
+        status_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: FestivalStatusKey;
+        };
+      };
+      Relations: {
+        feedback_response: { kind: 'many'; target: 'feedback_response' };
+        feedback_submission: { kind: 'many'; target: 'feedback_submission' };
+        food_truck_application: { kind: 'many'; target: 'food_truck_application' };
+        sponsorship_application: { kind: 'many'; target: 'sponsorship_application' };
+        vendor_application: { kind: 'many'; target: 'vendor_application' };
+      };
+      Statuses: FestivalStatusKey;
+      Actions: {
+        close_applications: { params: {} };
+        mark_completed: { params: {} };
+        open_applications: { params: {} };
+      };
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
+    };
+    food_truck_application: {
+      Row: {
+        amount_due: number;
+        applicant_id: string;
+        business_name: string;
+        coi_file: string | null;
+        contact_name: string;
+        created_at: string;
+        denial_reason: string | null;
+        display_name: string | null;
+        email: string;
+        festival_id: number;
+        health_permit_file: string | null;
+        id: number;
+        menu_description: string;
+        paid_amount: number | null;
+        payment_date: string | null;
+        payment_method_id: number | null;
+        payment_reference: string | null;
+        payment_transaction_id: string | null;
+        phone: string;
+        preferred_payment_method_id: number;
+        promoted_on_social: string | null;
+        reviewed_at: string | null;
+        reviewed_by: string | null;
+        setup_needs: string | null;
+        social_media: string | null;
+        status_id: number;
+        updated_at: string;
+        website: string | null;
+        withdrawal_reason: string | null;
+      };
+      Insert: {
+        amount_due?: number;
+        applicant_id?: string;
+        business_name: string;
+        coi_file?: string | null;
+        contact_name: string;
+        created_at?: string;
+        denial_reason?: string | null;
+        email: string;
+        festival_id?: number;
+        health_permit_file?: string | null;
+        id?: number;
+        menu_description: string;
+        paid_amount?: number | null;
+        payment_date?: string | null;
+        payment_method_id?: number | null;
+        payment_reference?: string | null;
+        payment_transaction_id?: string | null;
+        phone: string;
+        preferred_payment_method_id: number;
+        promoted_on_social?: string | null;
+        reviewed_at?: string | null;
+        reviewed_by?: string | null;
+        setup_needs?: string | null;
+        social_media?: string | null;
+        status_id?: number;
+        updated_at?: string;
+        website?: string | null;
+        withdrawal_reason?: string | null;
+      };
+      Update: Partial<Database['entities']['food_truck_application']['Insert']>;
+      Embedded: {
+        applicant_id: {
+          id: string;
+          display_name: string;
+          full_name: string | null;
+          phone: string | null;
+          email: string | null;
+        };
+        coi_file: {
+          id: string;
+          file_name: string;
+          file_type: string;
+          file_size: number;
+          s3_key_prefix: string;
+          s3_original_key: string;
+          s3_thumbnail_small_key: string | null;
+          s3_thumbnail_medium_key: string | null;
+          s3_thumbnail_large_key: string | null;
+          thumbnail_status: string;
+          thumbnail_error: string | null;
+          created_at: string;
+        } | null;
+        festival_id: {
+          id: number;
+          display_name: string;
+        };
+        health_permit_file: {
+          id: string;
+          file_name: string;
+          file_type: string;
+          file_size: number;
+          s3_key_prefix: string;
+          s3_original_key: string;
+          s3_thumbnail_small_key: string | null;
+          s3_thumbnail_medium_key: string | null;
+          s3_thumbnail_large_key: string | null;
+          thumbnail_status: string;
+          thumbnail_error: string | null;
+          created_at: string;
+        } | null;
+        payment_method_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: FoodTruckApplicationStatusKey;
+        } | null;
+        payment_transaction_id: {
+          id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          effective_status: string;
+          total_refunded: number;
+          refund_count: number;
+          pending_refund_count: number;
+          display_name: string;
+          error_message: string | null;
+          created_at: string;
+        } | null;
+        preferred_payment_method_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: FoodTruckApplicationStatusKey;
+        };
+        reviewed_by: {
+          id: string;
+          display_name: string;
+          full_name: string | null;
+          phone: string | null;
+          email: string | null;
+        } | null;
+        status_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: FoodTruckApplicationStatusKey;
+        };
+      };
+      Relations: {
+        festival_id: { kind: 'one'; target: 'festival'; nullable: false };
+      };
+      Statuses: FoodTruckApplicationStatusKey;
+      Actions: {
+        approve: { params: {} };
+        deny: { params: { p_denial_reason: string } };
+        enable_online_payment: { params: {} };
+        record_payment: { params: { p_payment_date?: string; p_payment_method_id: unknown; p_payment_reference?: string } };
+        withdraw: { params: { p_withdrawal_reason: string } };
+      };
+      Features: { notes: true; calendar: false; map: false; payment: true; guidedForm: false; recurring: false };
+    };
     holiday_rules: {
       Row: {
         created_at: string;
@@ -108,6 +452,92 @@ export interface Database {
       Statuses: ManagerEventsStatusKey;
       Actions: {};
       Features: { notes: false; calendar: true; map: false; payment: false; guidedForm: false; recurring: false };
+    };
+    mottfest_current_summary: {
+      Row: {
+        approved_unpaid: number | null;
+        capacity: number | null;
+        committed: number | null;
+        denied: number | null;
+        in_kind: number | null;
+        in_kind_value: number | null;
+        paid: number | null;
+        pending: number | null;
+        pipeline: string | null;
+        pipeline_no: number | null;
+        submitted: number | null;
+        total_paid: number | null;
+        waived: number | null;
+        withdrawn: number | null;
+      };
+      Insert: {
+        approved_unpaid?: number | null;
+        capacity?: number | null;
+        committed?: number | null;
+        denied?: number | null;
+        in_kind?: number | null;
+        in_kind_value?: number | null;
+        paid?: number | null;
+        pending?: number | null;
+        pipeline?: string | null;
+        pipeline_no?: number | null;
+        submitted?: number | null;
+        total_paid?: number | null;
+        waived?: number | null;
+        withdrawn?: number | null;
+      };
+      Update: Partial<Database['entities']['mottfest_current_summary']['Insert']>;
+      Embedded: {};
+      Relations: {};
+      Statuses: never;
+      Actions: {};
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
+    };
+    mottfest_revenue_summary: {
+      Row: {
+        approved_unpaid: number | null;
+        capacity: number | null;
+        committed: number | null;
+        denied: number | null;
+        festival_id: number | null;
+        festival_name: string | null;
+        id: number | null;
+        in_kind: number | null;
+        in_kind_value: number | null;
+        paid: number | null;
+        pending: number | null;
+        pipeline: string | null;
+        pipeline_no: number | null;
+        submitted: number | null;
+        total_paid: number | null;
+        waived: number | null;
+        withdrawn: number | null;
+      };
+      Insert: {
+        approved_unpaid?: number | null;
+        capacity?: number | null;
+        committed?: number | null;
+        denied?: number | null;
+        festival_id?: number | null;
+        festival_name?: string | null;
+        id?: number | null;
+        in_kind?: number | null;
+        in_kind_value?: number | null;
+        paid?: number | null;
+        pending?: number | null;
+        pipeline?: string | null;
+        pipeline_no?: number | null;
+        submitted?: number | null;
+        total_paid?: number | null;
+        waived?: number | null;
+        withdrawn?: number | null;
+      };
+      Update: Partial<Database['entities']['mottfest_revenue_summary']['Insert']>;
+      Embedded: {};
+      Relations: {};
+      Statuses: never;
+      Actions: {};
+      Features: { notes: false; calendar: false; map: false; payment: false; guidedForm: false; recurring: false };
     };
     public_calendar_events: {
       Row: {
@@ -371,6 +801,316 @@ export interface Database {
       };
       Features: { notes: true; calendar: true; map: false; payment: false; guidedForm: false; recurring: true };
     };
+    sponsorship_application: {
+      Row: {
+        agreed_at: string | null;
+        agreed_to_terms: boolean;
+        amount_due: number;
+        applicant_id: string;
+        contact_name: string;
+        created_at: string;
+        custom_amount: number | null;
+        denial_reason: string | null;
+        display_name: string | null;
+        email: string;
+        festival_id: number;
+        id: number;
+        in_kind_description: string | null;
+        in_kind_value: number | null;
+        logo_file: string | null;
+        mailing_address: string;
+        paid_amount: number | null;
+        payment_date: string | null;
+        payment_method_id: number | null;
+        payment_reference: string | null;
+        payment_transaction_id: string | null;
+        phone: string;
+        preferred_payment_method_id: number | null;
+        promoted_on_social: string | null;
+        reviewed_at: string | null;
+        reviewed_by: string | null;
+        sponsor_name: string;
+        status_id: number;
+        thank_you_sent: string | null;
+        tier_id: number;
+        tshirt_size_id: number | null;
+        updated_at: string;
+        website: string | null;
+        withdrawal_reason: string | null;
+      };
+      Insert: {
+        agreed_at?: string | null;
+        agreed_to_terms?: boolean;
+        amount_due?: number;
+        applicant_id?: string;
+        contact_name: string;
+        created_at?: string;
+        custom_amount?: number | null;
+        denial_reason?: string | null;
+        email: string;
+        festival_id?: number;
+        id?: number;
+        in_kind_description?: string | null;
+        in_kind_value?: number | null;
+        logo_file?: string | null;
+        mailing_address: string;
+        paid_amount?: number | null;
+        payment_date?: string | null;
+        payment_method_id?: number | null;
+        payment_reference?: string | null;
+        payment_transaction_id?: string | null;
+        phone: string;
+        preferred_payment_method_id?: number | null;
+        promoted_on_social?: string | null;
+        reviewed_at?: string | null;
+        reviewed_by?: string | null;
+        sponsor_name: string;
+        status_id?: number;
+        thank_you_sent?: string | null;
+        tier_id: number;
+        tshirt_size_id?: number | null;
+        updated_at?: string;
+        website?: string | null;
+        withdrawal_reason?: string | null;
+      };
+      Update: Partial<Database['entities']['sponsorship_application']['Insert']>;
+      Embedded: {
+        applicant_id: {
+          id: string;
+          display_name: string;
+          full_name: string | null;
+          phone: string | null;
+          email: string | null;
+        };
+        festival_id: {
+          id: number;
+          display_name: string;
+        };
+        logo_file: {
+          id: string;
+          file_name: string;
+          file_type: string;
+          file_size: number;
+          s3_key_prefix: string;
+          s3_original_key: string;
+          s3_thumbnail_small_key: string | null;
+          s3_thumbnail_medium_key: string | null;
+          s3_thumbnail_large_key: string | null;
+          thumbnail_status: string;
+          thumbnail_error: string | null;
+          created_at: string;
+        } | null;
+        payment_method_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: SponsorshipApplicationStatusKey;
+        } | null;
+        payment_transaction_id: {
+          id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          effective_status: string;
+          total_refunded: number;
+          refund_count: number;
+          pending_refund_count: number;
+          display_name: string;
+          error_message: string | null;
+          created_at: string;
+        } | null;
+        preferred_payment_method_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: SponsorshipApplicationStatusKey;
+        } | null;
+        reviewed_by: {
+          id: string;
+          display_name: string;
+          full_name: string | null;
+          phone: string | null;
+          email: string | null;
+        } | null;
+        status_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: SponsorshipApplicationStatusKey;
+        };
+        tier_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        };
+        tshirt_size_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        } | null;
+      };
+      Relations: {
+        festival_id: { kind: 'one'; target: 'festival'; nullable: false };
+      };
+      Statuses: SponsorshipApplicationStatusKey;
+      Actions: {
+        approve: { params: {} };
+        deny: { params: { p_denial_reason: string } };
+        enable_online_payment: { params: {} };
+        record_payment: { params: { p_payment_date?: string; p_payment_method_id: unknown; p_payment_reference?: string } };
+        withdraw: { params: { p_withdrawal_reason: string } };
+      };
+      Features: { notes: true; calendar: false; map: false; payment: true; guidedForm: false; recurring: false };
+    };
+    vendor_application: {
+      Row: {
+        amount_due: number;
+        applicant_id: string;
+        business_name: string;
+        coi_file: string | null;
+        contact_name: string;
+        created_at: string;
+        denial_reason: string | null;
+        description: string;
+        display_name: string | null;
+        email: string;
+        festival_id: number;
+        id: number;
+        paid_amount: number | null;
+        payment_date: string | null;
+        payment_method_id: number | null;
+        payment_reference: string | null;
+        payment_transaction_id: string | null;
+        phone: string;
+        placement_request: string | null;
+        preferred_payment_method_id: number;
+        promoted_on_social: string | null;
+        reviewed_at: string | null;
+        reviewed_by: string | null;
+        social_media: string | null;
+        status_id: number;
+        updated_at: string;
+        vendor_type_id: number;
+        waiver_reason: string | null;
+        website: string | null;
+        withdrawal_reason: string | null;
+      };
+      Insert: {
+        amount_due?: number;
+        applicant_id?: string;
+        business_name: string;
+        coi_file?: string | null;
+        contact_name: string;
+        created_at?: string;
+        denial_reason?: string | null;
+        description: string;
+        email: string;
+        festival_id?: number;
+        id?: number;
+        paid_amount?: number | null;
+        payment_date?: string | null;
+        payment_method_id?: number | null;
+        payment_reference?: string | null;
+        payment_transaction_id?: string | null;
+        phone: string;
+        placement_request?: string | null;
+        preferred_payment_method_id: number;
+        promoted_on_social?: string | null;
+        reviewed_at?: string | null;
+        reviewed_by?: string | null;
+        social_media?: string | null;
+        status_id?: number;
+        updated_at?: string;
+        vendor_type_id: number;
+        waiver_reason?: string | null;
+        website?: string | null;
+        withdrawal_reason?: string | null;
+      };
+      Update: Partial<Database['entities']['vendor_application']['Insert']>;
+      Embedded: {
+        applicant_id: {
+          id: string;
+          display_name: string;
+          full_name: string | null;
+          phone: string | null;
+          email: string | null;
+        };
+        coi_file: {
+          id: string;
+          file_name: string;
+          file_type: string;
+          file_size: number;
+          s3_key_prefix: string;
+          s3_original_key: string;
+          s3_thumbnail_small_key: string | null;
+          s3_thumbnail_medium_key: string | null;
+          s3_thumbnail_large_key: string | null;
+          thumbnail_status: string;
+          thumbnail_error: string | null;
+          created_at: string;
+        } | null;
+        festival_id: {
+          id: number;
+          display_name: string;
+        };
+        payment_method_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: VendorApplicationStatusKey;
+        } | null;
+        payment_transaction_id: {
+          id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          effective_status: string;
+          total_refunded: number;
+          refund_count: number;
+          pending_refund_count: number;
+          display_name: string;
+          error_message: string | null;
+          created_at: string;
+        } | null;
+        preferred_payment_method_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: VendorApplicationStatusKey;
+        };
+        reviewed_by: {
+          id: string;
+          display_name: string;
+          full_name: string | null;
+          phone: string | null;
+          email: string | null;
+        } | null;
+        status_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+          status_key: VendorApplicationStatusKey;
+        };
+        vendor_type_id: {
+          id: number;
+          display_name: string;
+          color: string | null;
+        };
+      };
+      Relations: {
+        festival_id: { kind: 'one'; target: 'festival'; nullable: false };
+      };
+      Statuses: VendorApplicationStatusKey;
+      Actions: {
+        approve: { params: {} };
+        deny: { params: { p_denial_reason: string } };
+        enable_online_payment: { params: {} };
+        record_payment: { params: { p_payment_date?: string; p_payment_method_id: unknown; p_payment_reference?: string } };
+        waive_and_approve: { params: { p_waiver_reason?: string } };
+        withdraw: { params: { p_withdrawal_reason: string } };
+      };
+      Features: { notes: true; calendar: false; map: false; payment: true; guidedForm: false; recurring: false };
+    };
   };
 }
 
@@ -380,6 +1120,12 @@ export function defineQuery<E extends keyof Database['entities'] & string>() {
 }
 
 /** data-derived */
+export type FestivalStatusKey = 'closed' | 'completed' | 'open' | 'planning';
+
+/** data-derived */
+export type FoodTruckApplicationStatusKey = 'approved' | 'cash' | 'cashapp' | 'check' | 'credit_card' | 'denied' | 'money_order' | 'paid' | 'pending' | 'withdrawn';
+
+/** data-derived */
 export type ManagerEventsStatusKey = 'approved' | 'cancelled' | 'closed' | 'completed' | 'denied' | 'pending' | 'secured';
 
 /** data-derived */
@@ -387,3 +1133,9 @@ export type ReservationPaymentsStatusKey = 'cancelled' | 'cash' | 'cashapp' | 'c
 
 /** data-derived */
 export type ReservationRequestsStatusKey = 'approved' | 'cancelled' | 'closed' | 'completed' | 'denied' | 'pending' | 'secured';
+
+/** data-derived */
+export type SponsorshipApplicationStatusKey = 'approved' | 'cash' | 'cashapp' | 'check' | 'credit_card' | 'denied' | 'in_kind' | 'money_order' | 'paid' | 'pending' | 'withdrawn';
+
+/** data-derived */
+export type VendorApplicationStatusKey = 'approved' | 'cash' | 'cashapp' | 'check' | 'credit_card' | 'denied' | 'money_order' | 'paid' | 'pending' | 'waived' | 'withdrawn';

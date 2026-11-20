@@ -1,5 +1,78 @@
 {
   "entities": {
+    "current_festival": {
+      "create": [],
+      "detail": ["display_name", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "payment_due_date", "vendor_fee", "food_truck_fee"],
+      "edit": ["display_name"],
+      "list": ["display_name", "event_date", "event_hours", "location", "applications_close_at", "payment_due_date", "vendor_fee", "food_truck_fee"]
+    },
+    "feedback_response": {
+      "create": ["what_worked_well", "what_did_not_go_well", "worth_it_financially_id", "worth_it_financially_other", "worth_it_non_financially_id", "worth_it_non_financially_other"],
+      "detail": ["display_name", "festival_id", "what_worked_well", "what_did_not_go_well", "worth_it_financially_id", "worth_it_financially_other", "worth_it_non_financially_id", "worth_it_non_financially_other", "created_at"],
+      "edit": ["festival_id", "what_worked_well", "what_did_not_go_well", "worth_it_financially_id", "worth_it_financially_other", "worth_it_non_financially_id", "worth_it_non_financially_other", "display_name"],
+      "list": ["display_name", "festival_id", "worth_it_financially_id", "worth_it_non_financially_id", "created_at"]
+    },
+    "feedback_submission": {
+      "create": ["what_worked_well", "what_did_not_go_well", "worth_it_financially_id", "worth_it_financially_other", "worth_it_non_financially_id", "worth_it_non_financially_other"],
+      "detail": ["display_name", "festival_id", "what_worked_well", "what_did_not_go_well", "worth_it_financially_id", "worth_it_financially_other", "worth_it_non_financially_id", "worth_it_non_financially_other"],
+      "edit": ["display_name"],
+      "list": ["display_name", "festival_id"]
+    },
+    "festival": {
+      "create": ["display_name", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "vendor_fee", "food_truck_fee", "vendor_capacity", "food_truck_capacity"],
+      "detail": ["display_name", "status_id", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "payment_due_date", "vendor_fee", "food_truck_fee", "vendor_capacity", "food_truck_capacity"],
+      "edit": ["display_name", "event_date", "event_hours", "location", "applications_open_at", "applications_close_at", "vendor_fee", "food_truck_fee", "vendor_capacity", "food_truck_capacity", "status_id"],
+      "list": ["display_name", "status_id", "event_date", "applications_open_at", "applications_close_at", "payment_due_date"]
+    },
+    "food_truck_application": {
+      "create": ["business_name", "menu_description", "contact_name", "email", "phone", "website", "social_media", "setup_needs", "health_permit_file", "coi_file", "preferred_payment_method_id"],
+      "detail": [
+        "display_name",
+        "status_id",
+        "festival_id",
+        "amount_due",
+        "menu_description",
+        "contact_name",
+        "email",
+        "phone",
+        "website",
+        "social_media",
+        "setup_needs",
+        "health_permit_file",
+        "coi_file",
+        "preferred_payment_method_id",
+        "payment_transaction_id",
+        "paid_amount",
+        "payment_method_id",
+        "payment_date",
+        "payment_reference",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "withdrawal_reason",
+        "promoted_on_social",
+        "applicant_id",
+        "created_at"
+      ],
+      "edit": [
+        "festival_id",
+        "business_name",
+        "menu_description",
+        "contact_name",
+        "email",
+        "phone",
+        "website",
+        "social_media",
+        "setup_needs",
+        "health_permit_file",
+        "coi_file",
+        "preferred_payment_method_id",
+        "promoted_on_social",
+        "display_name",
+        "status_id"
+      ],
+      "list": ["display_name", "status_id", "festival_id", "amount_due", "contact_name", "preferred_payment_method_id", "created_at"]
+    },
     "holiday_rules": {
       "create": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
       "detail": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order", "created_at", "updated_at"],
@@ -11,6 +84,18 @@
       "detail": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "status_id", "created_at", "updated_at"],
       "edit": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "display_name", "status_id"],
       "list": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id"]
+    },
+    "mottfest_current_summary": {
+      "create": [],
+      "detail": ["pipeline_no", "pipeline", "submitted", "pending", "approved_unpaid", "paid", "waived", "in_kind", "denied", "withdrawn", "total_paid", "in_kind_value", "capacity", "committed"],
+      "edit": [],
+      "list": ["pipeline_no", "pipeline", "submitted", "pending", "approved_unpaid", "paid", "waived", "in_kind", "denied", "withdrawn", "total_paid", "in_kind_value", "capacity", "committed"]
+    },
+    "mottfest_revenue_summary": {
+      "create": [],
+      "detail": ["festival_id", "pipeline", "submitted", "pending", "approved_unpaid", "paid", "waived", "in_kind", "denied", "withdrawn", "total_paid", "in_kind_value", "capacity", "committed"],
+      "edit": [],
+      "list": ["festival_id", "pipeline", "submitted", "pending", "approved_unpaid", "paid", "waived", "in_kind", "denied", "withdrawn", "total_paid", "in_kind_value", "capacity", "committed"]
     },
     "public_calendar_events": {
       "create": [],
@@ -81,6 +166,113 @@
         "request_age_days",
         "days_until_event"
       ]
+    },
+    "sponsorship_application": {
+      "create": ["sponsor_name", "mailing_address", "contact_name", "email", "phone", "website", "tier_id", "custom_amount", "in_kind_description", "in_kind_value", "tshirt_size_id", "logo_file", "preferred_payment_method_id", "agreed_to_terms"],
+      "detail": [
+        "display_name",
+        "status_id",
+        "festival_id",
+        "amount_due",
+        "mailing_address",
+        "contact_name",
+        "email",
+        "phone",
+        "website",
+        "tier_id",
+        "custom_amount",
+        "in_kind_description",
+        "in_kind_value",
+        "tshirt_size_id",
+        "logo_file",
+        "preferred_payment_method_id",
+        "agreed_to_terms",
+        "agreed_at",
+        "payment_transaction_id",
+        "paid_amount",
+        "payment_method_id",
+        "payment_date",
+        "payment_reference",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "withdrawal_reason",
+        "promoted_on_social",
+        "thank_you_sent",
+        "applicant_id",
+        "created_at"
+      ],
+      "edit": [
+        "festival_id",
+        "sponsor_name",
+        "mailing_address",
+        "contact_name",
+        "email",
+        "phone",
+        "website",
+        "tier_id",
+        "custom_amount",
+        "in_kind_description",
+        "in_kind_value",
+        "tshirt_size_id",
+        "logo_file",
+        "preferred_payment_method_id",
+        "promoted_on_social",
+        "thank_you_sent",
+        "display_name",
+        "status_id"
+      ],
+      "list": ["display_name", "status_id", "festival_id", "amount_due", "contact_name", "tier_id", "preferred_payment_method_id", "thank_you_sent", "created_at"]
+    },
+    "vendor_application": {
+      "create": ["business_name", "vendor_type_id", "description", "contact_name", "email", "phone", "website", "social_media", "placement_request", "coi_file", "preferred_payment_method_id"],
+      "detail": [
+        "display_name",
+        "status_id",
+        "festival_id",
+        "amount_due",
+        "vendor_type_id",
+        "description",
+        "contact_name",
+        "email",
+        "phone",
+        "website",
+        "social_media",
+        "placement_request",
+        "coi_file",
+        "preferred_payment_method_id",
+        "payment_transaction_id",
+        "paid_amount",
+        "payment_method_id",
+        "payment_date",
+        "payment_reference",
+        "waiver_reason",
+        "reviewed_by",
+        "reviewed_at",
+        "denial_reason",
+        "withdrawal_reason",
+        "promoted_on_social",
+        "applicant_id",
+        "created_at"
+      ],
+      "edit": [
+        "festival_id",
+        "business_name",
+        "vendor_type_id",
+        "description",
+        "contact_name",
+        "email",
+        "phone",
+        "website",
+        "social_media",
+        "placement_request",
+        "coi_file",
+        "preferred_payment_method_id",
+        "promoted_on_social",
+        "display_name",
+        "status_id"
+      ],
+      "list": ["display_name", "status_id", "festival_id", "amount_due", "vendor_type_id", "contact_name", "preferred_payment_method_id", "created_at"]
     }
   }
 }

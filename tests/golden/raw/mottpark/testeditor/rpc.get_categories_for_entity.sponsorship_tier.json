@@ -1,0 +1,58 @@
+[
+  {
+    "category_key": "individual_100",
+    "color": "#94A3B8",
+    "description": null,
+    "display_name": "Individual — $100",
+    "id": 1,
+    "sort_order": 1
+  },
+  {
+    "category_key": "corporate_250",
+    "color": "#60A5FA",
+    "description": null,
+    "display_name": "Corporate — $250",
+    "id": 2,
+    "sort_order": 2
+  },
+  {
+    "category_key": "corporate_500",
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Corporate — $500",
+    "id": 3,
+    "sort_order": 3
+  },
+  {
+    "category_key": "corporate_1000",
+    "color": "#2563EB",
+    "description": null,
+    "display_name": "Corporate — $1,000",
+    "id": 4,
+    "sort_order": 4
+  },
+  {
+    "category_key": "presenting_2500",
+    "color": "#F59E0B",
+    "description": null,
+    "display_name": "Presenting Sponsor — $2,500",
+    "id": 5,
+    "sort_order": 5
+  },
+  {
+    "category_key": "custom",
+    "color": "#14B8A6",
+    "description": null,
+    "display_name": "Custom Amount",
+    "id": 6,
+    "sort_order": 6
+  },
+  {
+    "category_key": "in_kind",
+    "color": "#A855F7",
+    "description": null,
+    "display_name": "In-Kind Gift",
+    "id": 7,
+    "sort_order": 7
+  }
+]
