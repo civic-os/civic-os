@@ -1,6 +1,6 @@
 # LLM-Generated Release Notes — AWS Setup Guide
 
-The CI/CD pipeline generates release notes using Claude Sonnet 5.5 via AWS Bedrock, authenticated through OIDC federation (zero stored secrets). This document covers the one-time AWS setup.
+The CI/CD pipeline generates release notes using Claude Sonnet 4.6 via AWS Bedrock, authenticated through OIDC federation (zero stored secrets). This document covers the one-time AWS setup.
 
 ## Architecture
 
@@ -9,7 +9,7 @@ GitHub Actions (tag push)
   └─ Mints OIDC JWT (ephemeral, per-run)
        └─ AWS STS AssumeRoleWithWebIdentity
             └─ 15-minute temp credentials
-                 └─ bedrock:InvokeModel (Claude Sonnet 5.5, us-east-1)
+                 └─ bedrock:InvokeModel (Claude Sonnet 4.6, us-east-1)
                       └─ Release notes → GitHub Release
 ```
 
@@ -101,7 +101,7 @@ In the AWS Console:
 
 1. Navigate to **Amazon Bedrock** → **Model access** (us-east-1 region)
 2. Click **Manage model access**
-3. Enable **Anthropic** → **Claude Sonnet 5.5** (`anthropic.claude-sonnet-5-5`)
+3. Enable **Anthropic** → **Claude Sonnet 4.6** (`anthropic.claude-sonnet-4-6`)
 4. Submit the access request (usually approved instantly)
 
 > **Model updates**: When Anthropic releases new Sonnet versions, update both the IAM policy resource ARN and the `--model-id` in `.github/workflows/build-containers.yml`.
@@ -165,4 +165,4 @@ aws iam get-role --role-name civic-os-release-notes \
 **Model version changes**: If the model ID changes (new Sonnet version), update both:
 1. `.github/workflows/build-containers.yml` — `--model-id` parameter
 2. IAM policy — `Resource` ARN
-3. The request body in the same step — check the new model's breaking changes. Sonnet 5.5, for example, rejects `temperature`, thinks by default (thinking counts toward `max_tokens`, and the response can start with a `thinking` block, so text is read by block type), and takes `output_config.effort`.
+3. The request body in the same step — check the new model's breaking changes. Sonnet 5.5, for example, rejects `temperature`, thinks by default (thinking counts toward `max_tokens`, and the response can start with a `thinking` block, so text is read by block type), and takes `output_config.effort`. Confirm the account has access to the new model with a local `aws bedrock-runtime invoke-model` call before switching: the workflow falls back silently when Bedrock refuses.
