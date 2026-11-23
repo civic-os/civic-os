@@ -665,6 +665,13 @@ req "$O" GET "/rpc/get_dashboard?p_dashboard_id=$(q "SELECT id FROM metadata.das
 expect_ok "organizer loads the Management dashboard [S8]"
 eq "the organizer sees the Thank-Yous Due list [S8]" "$(jq '[.. | objects | select(.config?.filters? // [] | any(.column == "thank_you_sent"))] | length' <<<"$BODY")" 1
 
+# Dashboard links are nav_buttons widgets (routerLink, no page reload), never
+# HTML anchors in markdown.
+eq "Mott Fest dashboards link through nav_buttons, not HTML" "$(q "SELECT count(*) FILTER (WHERE w.widget_type = 'nav_buttons') || ',' ||
+       count(*) FILTER (WHERE w.config->>'content' ~* '<a[[:space:]]')
+     FROM metadata.dashboard_widgets w JOIN metadata.dashboards d ON d.id = w.dashboard_id
+     WHERE d.display_name IN ('Mott Fest', 'Mott Fest Management', 'Thanks for your feedback')")" "4,0"
+
 # ---------------------------------------------------------------------------
 # Staged launch: the dashboards script shows Mott Fest to organizers only;
 # the launch script (example 40, production 37) shows it to everyone. The
@@ -675,7 +682,8 @@ section "Staged launch"
 MF_ID=$(q "SELECT id FROM metadata.dashboards WHERE display_name = 'Mott Fest' ORDER BY id LIMIT 1")
 TH_ID=$(q "SELECT id FROM metadata.dashboards WHERE display_name = 'Thanks for your feedback' ORDER BY id LIMIT 1")
 MAIN_ID=$(q "SELECT id FROM metadata.dashboards WHERE display_name = 'Mott Park Clubhouse Reservations' ORDER BY id LIMIT 1")
-BANNERS=$(q "SELECT count(*) FROM metadata.dashboard_widgets WHERE dashboard_id = $MAIN_ID AND config->>'content' LIKE '%/dashboard/$MF_ID\"%'")
+BANNERS=$(q "SELECT count(*) FROM metadata.dashboard_widgets WHERE dashboard_id = $MAIN_ID
+     AND (config->'buttons' @> '[{\"url\": \"/dashboard/$MF_ID\"}]' OR config->>'content' LIKE '%/dashboard/$MF_ID\"%')")
 seen() { rpc "$1" get_dashboards '{}'; jq --argjson d "$2" '[.[] | select(.id == $d)] | length' <<<"$BODY"; }
 eq "the organizer sees the Mott Fest dashboard" "$(seen "$O" "$MF_ID")" 1
 eq "the organizer may open the Thanks page" "$(q "SELECT count(*) FROM metadata.dashboard_roles dr JOIN metadata.roles r ON r.id = dr.role_id

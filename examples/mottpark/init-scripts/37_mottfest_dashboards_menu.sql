@@ -81,16 +81,17 @@ BEGIN
               USING v_thanks_id;
         END IF;
 
-        INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
-        VALUES (v_thanks_id, 'markdown', NULL, jsonb_build_object(
-            'enableHtml', TRUE,
-            'content',
+        -- Buttons are nav_buttons widgets, never HTML links in markdown: a
+        -- routerLink keeps the app loaded, where <a href> reloads the page.
+        INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height) VALUES
+        (v_thanks_id, 'markdown', NULL, jsonb_build_object('content',
 '## 🎪 Thanks for your feedback!
 
-Your answers help us plan next year''s Mott Fest. They are anonymous: we don''t record who sent them.
-
-<a href="/" class="btn btn-primary">Back to home</a>'),
-            1, 2, 1);
+Your answers help us plan next year''s Mott Fest. They are anonymous: we don''t record who sent them.'),
+            1, 2, 1),
+        (v_thanks_id, 'nav_buttons', NULL, jsonb_build_object('buttons', jsonb_build_array(
+            jsonb_build_object('text', 'Back to home', 'url', '/', 'icon', 'home', 'variant', 'primary'))),
+            2, 2, 1);
     END IF;
 
     -- Organizers until launch; the launch script adds the user row.
@@ -128,22 +129,19 @@ Mott Fest is Mott Park''s neighborhood summer festival in Flint, celebrating our
             'emptyMessage', 'Applications aren''t open yet. Check back soon!',
             'showSeeMore', FALSE),
             2, 2, 1),
-        (v_mottfest_id, 'markdown', NULL, 'Apply', jsonb_build_object('enableHtml', TRUE, 'content',
-'<a href="/create/vendor_application" class="btn btn-primary w-full mb-2">🛍️ Apply as a Booth Vendor</a>
-<a href="/create/food_truck_application" class="btn btn-primary w-full mb-2">🚚 Apply as a Food Truck</a>
-<a href="/create/sponsorship_application" class="btn btn-secondary w-full mb-2">🤝 Become a Sponsor</a>
-
-You''ll be asked to sign in or create a free account. Prefer paper? Mail the sponsorship form with a check to Mott Park Recreation Association, 2401 Nolen Dr., Flint, MI 48504.'),
+        (v_mottfest_id, 'nav_buttons', NULL, 'Apply', jsonb_build_object(
+            'description', 'You''ll be asked to sign in or create a free account. Prefer paper? Mail the sponsorship form with a check to Mott Park Recreation Association, 2401 Nolen Dr., Flint, MI 48504.',
+            'buttons', jsonb_build_array(
+                jsonb_build_object('text', 'Apply as a Booth Vendor', 'url', '/create/vendor_application', 'icon', 'storefront', 'variant', 'primary'),
+                jsonb_build_object('text', 'Apply as a Food Truck', 'url', '/create/food_truck_application', 'icon', 'local_shipping', 'variant', 'primary'),
+                jsonb_build_object('text', 'Become a Sponsor', 'url', '/create/sponsorship_application', 'icon', 'handshake', 'variant', 'secondary'))),
             3, 1, 1),
-        (v_mottfest_id, 'markdown', NULL, 'Already Applied?', jsonb_build_object('enableHtml', TRUE, 'content',
-'<a href="/view/vendor_application" class="btn btn-outline w-full mb-2">My Booth Vendor Applications</a>
-<a href="/view/food_truck_application" class="btn btn-outline w-full mb-2">My Food Truck Applications</a>
-<a href="/view/sponsorship_application" class="btn btn-outline w-full mb-2">My Sponsorships</a>
-
-#### How it works
-1. Submit your application.
-2. Our committee reviews it and emails you.
-3. Pay online or by check — due one month before the festival.'),
+        (v_mottfest_id, 'nav_buttons', NULL, 'Already Applied?', jsonb_build_object(
+            'description', 'Our committee reviews each application and emails you. Pay online or by check, due one month before the festival.',
+            'buttons', jsonb_build_array(
+                jsonb_build_object('text', 'My Booth Vendor Applications', 'url', '/view/vendor_application', 'icon', 'storefront'),
+                jsonb_build_object('text', 'My Food Truck Applications', 'url', '/view/food_truck_application', 'icon', 'local_shipping'),
+                jsonb_build_object('text', 'My Sponsorships', 'url', '/view/sponsorship_application', 'icon', 'handshake'))),
             4, 1, 1),
         (v_mottfest_id, 'markdown', NULL, 'Sponsorship Levels', jsonb_build_object('content',
 '| Level | Recognition |
@@ -236,16 +234,16 @@ You''ll be asked to sign in or create a free account. Prefer paper? Mail the spo
             'yAxisLabel', 'Applications'),
             8, 1, 2),
         -- Row 4: organizer links
-        (v_mgmt_id, 'markdown', NULL, 'Organizer Links', jsonb_build_object('enableHtml', TRUE, 'content', format(
-'<a href="/view/mottfest_revenue_summary" class="btn btn-outline mb-2">Revenue Summary (all festivals)</a>
-<a href="/view/festival" class="btn btn-outline mb-2">Festivals</a>
-<a href="/view/feedback_response" class="btn btn-outline mb-2">Feedback</a>
-
-#### Feedback survey link
-After the festival, email this link to vendors, food trucks and sponsors. Answers are anonymous.
+        (v_mgmt_id, 'nav_buttons', NULL, 'Organizer Links', jsonb_build_object('buttons', jsonb_build_array(
+            jsonb_build_object('text', 'Revenue Summary (all festivals)', 'url', '/view/mottfest_revenue_summary', 'icon', 'payments'),
+            jsonb_build_object('text', 'Festivals', 'url', '/view/festival', 'icon', 'festival'),
+            jsonb_build_object('text', 'Feedback', 'url', '/view/feedback_response', 'icon', 'reviews'))),
+            9, 2, 1),
+        (v_mgmt_id, 'markdown', NULL, 'Feedback Survey Link', jsonb_build_object('content', format(
+'After the festival, email this link to vendors, food trucks and sponsors. Answers are anonymous.
 
 `<your site address>/create/feedback_submission?returnTo=/dashboard/%s`', v_thanks_id)),
-            9, 2, 1);
+            10, 2, 1);
     END IF;
 
     -- Thank-yous due (story S8): paid or in-kind sponsorships with no

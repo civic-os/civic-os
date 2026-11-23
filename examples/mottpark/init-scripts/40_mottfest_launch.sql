@@ -10,7 +10,8 @@
 --   1. "Mott Fest" dashboard becomes public (anonymous visitors included).
 --   2. "Thanks for your feedback" dashboard gets a show row for the user
 --      role, so every signed-in survey respondent lands on it.
---   3. A Mott Fest banner goes on the default clubhouse dashboard, beside
+--   3. A Mott Fest banner (a nav_buttons widget, so the link navigates
+--      without a page reload) goes on the default clubhouse dashboard, beside
 --      its welcome header: header and banner sit side by side as one column
 --      each, so the header drops to one column here, once, when the banner
 --      is added.
@@ -64,7 +65,8 @@ BEGIN
     IF v_main_id IS NOT NULL AND NOT EXISTS (
         SELECT 1 FROM metadata.dashboard_widgets
          WHERE dashboard_id = v_main_id
-           AND config->>'content' LIKE '%/dashboard/' || v_mottfest_id || '"%'
+           AND (config->'buttons' @> jsonb_build_array(jsonb_build_object('url', '/dashboard/' || v_mottfest_id))
+                OR config->>'content' LIKE '%/dashboard/' || v_mottfest_id || '"%')
     ) THEN
         -- The welcome header is the first untitled markdown widget; the
         -- banner goes right after it (or first, if there is none).
@@ -84,12 +86,12 @@ BEGIN
            AND widget_type = 'markdown' AND COALESCE(title, '') = '' AND width = 2;
 
         INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
-        VALUES (v_main_id, 'markdown', NULL, jsonb_build_object('enableHtml', TRUE, 'content', format(
-'## 🎪 Mott Fest
-
-Vendors, food trucks, and sponsors: apply for Mott Fest right here.
-
-<a href="/dashboard/%s" class="btn btn-secondary">Mott Fest info & applications</a>', v_mottfest_id)),
+        VALUES (v_main_id, 'nav_buttons', NULL, jsonb_build_object(
+            'header', '🎪 Mott Fest',
+            'description', 'Vendors, food trucks, and sponsors: apply for Mott Fest right here.',
+            'buttons', jsonb_build_array(jsonb_build_object(
+                'text', 'Mott Fest info & applications', 'url', '/dashboard/' || v_mottfest_id,
+                'icon', 'festival', 'variant', 'secondary'))),
             v_after + 1, 1, 1);
     END IF;
 END $$;
@@ -125,7 +127,7 @@ SELECT
     'Mott Fest banner on the default clubhouse dashboard',
     'accepted',
     'Most visitors land on the clubhouse dashboard and would not find the Mott Fest dashboard in the selector. Dashboards cannot be menu nodes.',
-    'Insert a one-column markdown banner, headed like the clubhouse welcome header, linking to the Mott Fest dashboard directly after that header, shifting later widgets down by one, and narrow the header to one column so the two sit side by side. Find the dashboard by title and the header as its first untitled markdown widget; skip the insert when a widget already links to the Mott Fest dashboard.',
+    'Insert a one-column nav_buttons banner (header, one line of text, one button) linking to the Mott Fest dashboard directly after that header, shifting later widgets down by one, and narrow the header to one column so the two sit side by side. Find the dashboard by title and the header as its first untitled markdown widget; skip the insert when a widget already links to the Mott Fest dashboard.',
     'The banner is the shortest path from the landing page to the applications, for anonymous visitors too. Finding widgets by title and content, never by id, keeps the script working on production, where ids differ.',
     'Admins can edit or delete the banner. A re-run re-adds it only if no widget links to the Mott Fest dashboard any more.',
     CURRENT_DATE
