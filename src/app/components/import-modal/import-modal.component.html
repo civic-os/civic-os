@@ -88,11 +88,11 @@
       @if (partialSuccessCount() > 0) {
         <div class="alert alert-success mb-2">
           <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-          <span>{{ partialSuccessCount() }} users created successfully.</span>
+          <span>{{ (partialSuccessCount() === 1 ? 'import_modal.partial_success_one' : 'import_modal.partial_success_other') | translate:{ count: partialSuccessCount() } }}</span>
         </div>
         <div role="alert" class="alert alert-warning">
           <span class="material-symbols-outlined" aria-hidden="true">warning</span>
-          <span>{{ errorSummary()?.totalErrors }} failed with errors:</span>
+          <span>{{ 'import_modal.partial_failed' | translate:{ count: errorSummary()?.totalErrors ?? 0 } }}</span>
         </div>
 
         @if (errorSummary(); as summary) {
@@ -101,9 +101,9 @@
               <table class="table table-sm table-zebra">
                 <thead>
                   <tr>
-                    <th>Row</th>
-                    <th>Identifier</th>
-                    <th>Error</th>
+                    <th>{{ 'import_modal.col_row' | translate }}</th>
+                    <th>{{ 'import_modal.col_identifier' | translate }}</th>
+                    <th>{{ 'import_modal.col_error' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -179,7 +179,7 @@
         <div class="alert alert-warning">
           <span class="material-symbols-outlined" aria-hidden="true">info</span>
           @if (customImport) {
-            <span>This will import {{ validRowCount() }} {{ customImport.itemLabel || 'rows' }}.</span>
+            <span>{{ (validRowCount() === 1 ? 'import_modal.confirm_import_one' : 'import_modal.confirm_import_other') | translate:{ count: validRowCount(), itemLabel: itemLabelFor(validRowCount()) } }}</span>
           } @else {
             <span>{{ 'import_modal.confirm_insert' | translate:{ count: validRowCount() } }}</span>
           }
@@ -205,7 +205,7 @@
   @if (currentStep() === 'importing') {
     <div class="space-y-4">
       @if (customImport) {
-        <p>Importing {{ validRowCount() }} {{ customImport.itemLabel || 'rows' }}...</p>
+        <p>{{ 'import_modal.importing_items' | translate:{ count: validRowCount(), itemLabel: itemLabelFor(validRowCount()) } }}</p>
         <div class="flex justify-center py-4">
           <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
         </div>
@@ -233,7 +233,7 @@
       <div class="alert alert-success">
         <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
         @if (customImport) {
-          <span>Successfully imported {{ importedCount() }} {{ customImport.itemLabel || 'rows' }}!</span>
+          <span>{{ (importedCount() === 1 ? 'import_modal.success_items_one' : 'import_modal.success_items_other') | translate:{ count: importedCount(), itemLabel: itemLabelFor(importedCount()) } }}</span>
         } @else {
           <span>{{ 'import_modal.success' | translate:{ count: importedCount() } }}</span>
         }
