@@ -31,7 +31,7 @@
 
 import path from 'node:path';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord, fieldName } from '../lib/ui.ts';
 import { writePng, writePdf } from '../lib/files.mjs';
 
 test.describe.configure({ mode: 'serial' });
@@ -151,7 +151,7 @@ test('03 create issue with FK, user and location, then tags', async ({ harness }
 
   await harness.step('fill and save', async () => {
     await page.getByRole('textbox', { name: 'Display Name' }).fill(ISSUE_NAME);
-    await page.getByRole('textbox', { name: 'Description' }).fill('Deep pothole near the bus stop, about 40 cm wide.');
+    await page.getByRole('textbox', { name: fieldName('Description') }).fill('Deep pothole near the bus stop, about 40 cm wide.');
     await page.getByRole('textbox', { name: 'Contact Email' }).fill('reporter@example.com');
     await page.getByRole('textbox', { name: 'Contact Phone' }).fill('8105551234');
     await page.getByRole('combobox', { name: 'Status' }).selectOption({ label: 'New' });
@@ -196,7 +196,7 @@ test('04 edit issue with photo and gallery', async ({ harness }) => {
   });
 
   await harness.step('upload photo', async () => {
-    await page.getByRole('button', { name: 'Photo', exact: true }).setInputFiles(PHOTO);
+    await page.getByRole('button', { name: fieldName('Photo') }).setInputFiles(PHOTO);
     await expect(page.getByText('Uploaded: pothole-photo.png')).toBeVisible({ timeout: 45_000 });
   });
 
@@ -237,7 +237,7 @@ test('05 work package detail with related issues and report', async ({ harness }
 
   await harness.step('edit and attach final report', async () => {
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
-    await page.getByRole('button', { name: 'Final Report', exact: true }).setInputFiles(REPORT);
+    await page.getByRole('button', { name: fieldName('Final Report') }).setInputFiles(REPORT);
     await expect(page.getByText('Uploaded: final-report.pdf')).toBeVisible({ timeout: 45_000 });
   });
 
@@ -584,7 +584,7 @@ test('11 create page: errors on touch, invalid submit, prefill, gallery draft, c
   await harness.step('query-param prefill fills empty fields and marks them touched', async () => {
     await page.goto(`/create/Issue?display_name=Harness%20Prefilled%20Issue&description=too%20short&status=${newStatusId}`);
     await expect(name).toHaveValue('Harness Prefilled Issue');
-    await expect(page.getByRole('textbox', { name: 'Description' })).toHaveValue('too short');
+    await expect(page.getByRole('textbox', { name: fieldName('Description') })).toHaveValue('too short');
     await expect(status.locator('option:checked')).toHaveText('New');
     // Touched by the prefill, so the minimum-length error shows without any interaction.
     await expect(page.locator('#description-error')).toBeVisible();
