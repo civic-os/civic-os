@@ -1,7 +1,7 @@
 # File Reconcile: Staged Uploads, Claiming and Orphan Cleanup
 
 **Status**: design (issue #141), target v0.87.0. Step 1 (the `_new` staging key) is built in the same PR; steps 2 to 4 wait for review of this document.
-**Decided with the maintainer (2026-11-24)**: stage uploads made before a record exists under `_new`, then move them to the record's folder from a periodic reconcile job, which also deletes files nothing references. Per-table triggers were the rejected alternative (see Alternatives).
+**Decided with the maintainer (2026-11-24)**: stage uploads made before a record exists under `_new`, then move them to the record's folder from a periodic reconcile job, which also deletes files nothing references. Per-table triggers were the rejected alternative (see Alternatives). The open questions were settled the same day (see Decisions).
 
 ## Problem
 
@@ -32,7 +32,7 @@ When `entity_id` is empty, the presign worker writes `{entity_type}/_new/{file_i
 
 1. Unclaimed files are those with `entity_id = ''` and `entity_type <> 'photo_gallery'`, served by a partial index `WHERE entity_id = ''`.
 2. Every FK column in `public` that references `metadata.files(id)` is read from `pg_constraint`. For each, the function selects the referencing table's single-column primary key from rows whose column holds an unclaimed id. This is a dynamic `UNION ALL` built with `format('%I')`, skipping tables without a single-column primary key.
-3. It returns only files referenced by exactly one row. A file referenced twice (for example a record copied with its file id) is reported once in the log, and its row is skipped and left unclaimed.
+3. A file referenced by more than one row (for example a record copied with its file id before the first was claimed) is claimed for the first owner: the referencing table that sorts first by name, then its lowest primary key. The other references keep pointing at the same file, which is no longer an orphan. The job logs the shared file once.
 
 `entity_type` is taken from the referencing table, not from the file row, so a file uploaded for one entity and attached to another moves to its real owner.
 
@@ -53,16 +53,17 @@ Failure leaves nothing broken. A crash after step 2 leaves unreferenced copies u
 
 The same tick deletes what nothing will claim, oldest first, in batches:
 
-- **Unreferenced staged files.** Rows with `entity_id = ''` that no FK references and are older than `FILE_ORPHAN_TTL` (default 24 h): delete the objects, then the row.
+- **Unreferenced staged files.** Rows with `entity_id = ''` that no FK references and are older than `FILE_ORPHAN_TTL` (default 7 days): delete the objects, then the row.
 - **Stray objects.** Objects under `{type}/_new/` whose file row is claimed or gone, older than the TTL: delete them. This finishes interrupted moves.
 - **Stale upload requests.** `metadata.file_upload_requests` rows older than 24 hours, as the table comment already promises but nothing does.
 
-Deleting objects for rows removed by `delete_file_record()` (claimed files) is a separate change: it needs a tombstone, because the row is gone.
+Deleting objects for rows removed by `delete_file_record()` (claimed files) is a separate change, issue #165: it needs a tombstone, because the row is gone.
 
 ### Migration and configuration
 
 - **Migration:** `v0-87-0-file-reconcile` adds the partial index, `unclaimed_file_references()`, `claim_file()` and `orphaned_staged_files(p_ttl interval, p_limit int)`, all worker-only (EXECUTE revoked from PUBLIC, `SET search_path`).
-- **Worker environment:** `FILE_RECONCILE_INTERVAL` (default `5m`, `0` disables the job) and `FILE_ORPHAN_TTL` (default `24h`).
+- **Worker environment:** `FILE_RECONCILE_INTERVAL` (default `5m`, `0` disables the job) and `FILE_ORPHAN_TTL` (default `168h`, 7 days).
+- **Expired attachment on save.** A Create page left open longer than the TTL references a deleted file, and its save fails with a foreign-key violation (`23503`) on a column that references `metadata.files`. Core's error classification maps that case to a translated message on the field ("This attachment expired. Upload it again."), a new key seeded in the six core locales, instead of the generic constraint error.
 - **Logs:** files claimed, moved, skipped (pending thumbnails, multiple references) and deleted per tick.
 
 ### Testing
@@ -81,8 +82,8 @@ Deleting objects for rows removed by `delete_file_record()` (claimed files) is a
 - **Drop the entity id from the key** (`{type}/{file_id}/…`). Simpler, but two key layouts would coexist, and the bucket would no longer group a record's files. Not chosen.
 - **Placeholder only** (step 1 alone). It fixes the upload failure but never links staged files to their records or cleans up. Not chosen as the end state, though step 1 ships first.
 
-## Open questions
+## Decisions (2026-11-24)
 
-1. **TTL versus long-open forms.** A Create page left open longer than `FILE_ORPHAN_TTL` before saving references a deleted file, and the save fails on the foreign key. Is 24 h enough, or should the Create page re-check its staged files before saving?
-2. **Multiple references.** Should a file referenced by two rows be copied per owner rather than skipped?
-3. **Deleting claimed files' objects** after `delete_file_record()` or a record delete (see step 4): in this design, or a follow-up with tombstones?
+1. **TTL versus long-open forms.** `FILE_ORPHAN_TTL` defaults to 7 days, long enough for a tab left open over a weekend; orphans cost little storage. A save that still hits a deleted staged file gets a clear, translated "upload it again" message (see Migration and configuration). No re-check before save. Rejected: a 24 h TTL with the Create page re-checking its staged files before every save (an extra request and client logic on every save with files).
+2. **Multiple references.** Claim for the first owner (step 2), not skip-and-log (the file would never get a real key, and cleanup could never remove it because it is referenced) and not copy-per-owner (the worker would write to instance tables with superuser rights).
+3. **Deleting claimed files' objects** after `delete_file_record()` or a record delete is a follow-up, issue #165, not part of #141: it needs a tombstone, since the row is gone by the time a job could act, and a decision about record deletes, which today keep their file rows.
