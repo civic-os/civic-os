@@ -74,6 +74,13 @@ function toFilterChip(chip: ListFilterChip): FilterChip {
       return { column: chip.column, columnLabel: chip.label, displayValue: chip.count === 1 ? '1 selected' : `${chip.count} selected` };
     case 'boolean':
       return { column: chip.column, columnLabel: chip.label, displayValue: chip.yes ? 'Yes' : 'No' };
+    case 'named':
+      // Status and Category values by name (issue #72): the first two, then "+N"
+      return {
+        column: chip.column,
+        columnLabel: chip.label,
+        displayValue: chip.names.length > 2 ? `${chip.names.slice(0, 2).join(', ')} +${chip.names.length - 2}` : chip.names.join(', '),
+      };
     default:
       return { column: chip.column, columnLabel: chip.label, displayValue: String(chip.value) };
   }

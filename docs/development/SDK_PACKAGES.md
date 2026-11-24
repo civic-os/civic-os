@@ -212,7 +212,7 @@ A facade is a page's behavior without its layout. Three are built, in `packages/
 
 | Facade | Serves | Owns |
 |---|---|---|
-| `recordList(deps, entity, options?)` | List page | The normalized list state (page, size, sort, search, filters, calendar range), the request each state sends, latest-wins loading, filter chips, map and calendar projections |
+| `recordList(deps, entity, options?)` | List page | The normalized list state (page, size, sort, search, filters, calendar range), the request each state sends, latest-wins loading, filter chips (Status and Category values by name as `named` chips when `deps.schema.optionNames` is given, v0.86.4), map and calendar projections |
 | `recordViewer(deps, entity, recordId, options?)` | Detail page | The record and its detail properties, action handles (`visible`, `enabled`, `openParams`, `run`) with parameter options and dependency re-fetch, inverse previews, series membership, guided-form context, delete with series scopes, payment initiation, guided-form submit |
 | `recordEditor(deps, entity, { mode: 'create' \| 'edit', ... })` | Create and Edit pages | The form (a store over a `FormBackend`), prefill, the transforms, plain and coordinated save, scoped series saves, guided-form steps and autosave (edit), galleries and many-to-many diffs |
 

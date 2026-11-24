@@ -21,6 +21,13 @@ export interface FacadeSchema {
    * in `compareBySortOrder` order. Rejects when the schema cannot load.
    */
   properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+  /**
+   * Display names of a Status or Category property's values, keyed by id
+   * (as a string, the form filter values take), in the current locale.
+   * Optional: without it, or when it rejects, `recordList` shows Status and
+   * Category filters as `value` chips with their ids instead of `named` ones.
+   */
+  optionNames?(property: SchemaEntityProperty): Promise<ReadonlyMap<string, string>>;
 }
 
 /**

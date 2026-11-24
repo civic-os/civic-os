@@ -47,6 +47,16 @@ export function createFacadeDeps(parts: { data: DataService; schema: SchemaServi
     schema: {
       properties: (entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]> =>
         firstValueFrom(parts.schema.getPropertiesForEntity(entity)),
+      // Status and Category names for the List page's filter chips (issue #72), from the same cached,
+      // translated options the filter bar and the status badges use.
+      optionNames: async (property: SchemaEntityProperty): Promise<ReadonlyMap<string, string>> => {
+        const options = property.status_entity_type
+          ? await firstValueFrom(parts.schema.getStatusesForEntity(property.status_entity_type))
+          : property.category_entity_type
+            ? await firstValueFrom(parts.schema.getCategoriesForEntity(property.category_entity_type))
+            : [];
+        return new Map(options.map(o => [String(o.id), o.display_name]));
+      },
       // The record viewer's reads, over the calls the detail page always made.
       renderables: (entity: EntityHandle): Promise<readonly RenderableItem[]> =>
         firstValueFrom(parts.schema.getDetailRenderables(entity.liveRow!)),
