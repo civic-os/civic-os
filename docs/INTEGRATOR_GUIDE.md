@@ -4361,7 +4361,7 @@ The scheduled jobs system uses a **Scheduler + Executor pattern**:
    - Updates `last_run_at` on the job configuration
    - Logs success/failure with timing
 
-**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. Duplicate prevention via `unique_key` ensures the same scheduled time is never executed twice.
+**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. River's unique jobs (by job and scheduled time, in every job state) ensure the same scheduled time is never executed twice.
 
 > **Scaling Note**: The scheduled jobs scheduler runs in a single consolidated-worker instance. If you scale to multiple instances, the scheduler runs on each, but job deduplication prevents duplicate execution. For large-scale deployments, see `docs/notes/SCHEDULED_JOBS_DESIGN.md` for guidance on River leader election configuration.
 

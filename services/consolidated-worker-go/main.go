@@ -446,7 +446,9 @@ func main() {
 		log.Printf("[Init] Warning: failed to insert initial parse job: %v", err)
 	}
 
-	// Start the scheduled job scheduler (Go ticker, not River periodic)
+	// Start the scheduled job scheduler (Go ticker, not River periodic); it queues
+	// executions through the River client so River's unique jobs dedupe them
+	scheduledJobScheduler.inserter = riverClient
 	scheduledJobScheduler.Start(ctx)
 
 	// Start the gallery cleanup cron (daily at ~3 AM)
