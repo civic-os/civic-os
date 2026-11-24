@@ -1,6 +1,6 @@
 # File Reconcile: Staged Uploads, Claiming and Orphan Cleanup
 
-**Status**: design (issue #141), target v0.87.0. Step 1 (the `_new` staging key) is built in the same PR; steps 2 to 4 wait for review of this document.
+**Status**: design (issue #141), target v0.87.0. Step 1 (the `_new` staging key) is built (v0.86.5). Steps 2 to 4 are designed, with their decisions recorded, and not yet built.
 **Decided with the maintainer (2026-11-24)**: stage uploads made before a record exists under `_new`, then move them to the record's folder from a periodic reconcile job, which also deletes files nothing references. Per-table triggers were the rejected alternative (see Alternatives). The open questions were settled the same day (see Decisions).
 
 ## Problem
@@ -22,7 +22,7 @@ A file attached on a Create page is uploaded before its record exists, so `EditP
 
 ## Design
 
-### Step 1: staging key (built in this PR)
+### Step 1: staging key (built, v0.86.5)
 
 When `entity_id` is empty, the presign worker writes `{entity_type}/_new/{file_id}/original.{ext}`. `entity_id` stays `''` in `metadata.files`: the empty id remains the "unclaimed" marker, so no migration is needed and existing rows keep their meaning. Uploads on Create pages work against RustFS, and production stops creating id-less prefixes.
 
