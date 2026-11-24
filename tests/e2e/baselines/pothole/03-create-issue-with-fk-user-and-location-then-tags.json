@@ -389,6 +389,7 @@
             "display_name": "Harness Pothole on Saginaw St",
             "location": "SRID=4326;POINT(-83.6929 43.0186)",
             "observed_at": "2031-03-15T08:45:00",
+            "photo": null,
             "severity_level": "4",
             "status": "5",
             "work_package": "<WorkPackage:1>"
@@ -397,7 +398,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"description\":\"Deep pothole near the bus stop, about 40 cm wide.\",\"contact_email\":\"reporter@example.com\",\"contact_phone\":\"8105551234\",\"display_name\":\"Harness Pothole on Saginaw St\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":\"<WorkPackage:1>\",\"location\":\"SRID=4326;POINT(-83.6929 43.0186)\",\"severity_level\":\"4\",\"observed_at\":\"2031-03-15T08:45:00\"}",
+              "body": "{\"description\":\"Deep pothole near the bus stop, about 40 cm wide.\",\"contact_email\":\"reporter@example.com\",\"contact_phone\":\"8105551234\",\"display_name\":\"Harness Pothole on Saginaw St\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":\"<WorkPackage:1>\",\"location\":\"SRID=4326;POINT(-83.6929 43.0186)\",\"severity_level\":\"4\",\"observed_at\":\"2031-03-15T08:45:00\",\"photo\":null}",
               "url": "/Issue"
             }
           ]
