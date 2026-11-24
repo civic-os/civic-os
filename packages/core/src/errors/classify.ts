@@ -86,6 +86,8 @@ export interface ErrorParams {
   constraintName?: string;
   column?: string;
   expectedType?: string;
+  /** 23503: the table the missing key was looked up in (`files` for an attachment, issue #141). */
+  referencedTable?: string;
 }
 
 /**
@@ -128,7 +130,7 @@ export function classifyPostgrestError(err: PostgrestErrorShape): ClassifiedPost
     const column = err.message?.match(/column "([^"]+)"/)?.[1];
     return { kind: 'notNull', params: column === undefined ? {} : { column } };
   } else if (err.code == '23503') {
-    return { kind: 'foreignKey', params: {} };
+    return { kind: 'foreignKey', params: foreignKeyParams(err) };
   } else if (err.code == '23514') {
     return { kind: 'check', params: constraintParams(err) };
   } else if (err.code == '23P01') {
@@ -150,6 +152,17 @@ export function classifyPostgrestError(err: PostgrestErrorShape): ClassifiedPost
     return { kind: 'raise', params: err.message === undefined ? {} : { message: err.message } };
   }
   return { kind: 'system', params: {} };
+}
+
+/**
+ * 'Key (photo)=(<id>) is not present in table "files".' names the column and the referenced table. A caller
+ * without SELECT on the referencing columns (any API role) gets 'Key is not present in table "files".': the
+ * table only.
+ */
+function foreignKeyParams(err: PostgrestErrorShape): { column?: string; referencedTable?: string } {
+  const match = err.details?.match(/^Key (?:\(([^)]+)\)=\(.*\) )?is not present in table "([^"]+)"/s);
+  if (!match || !match[2]) return {};
+  return match[1] ? { column: match[1], referencedTable: match[2] } : { referencedTable: match[2] };
 }
 
 function constraintParams(err: PostgrestErrorShape): { constraintName?: string } {

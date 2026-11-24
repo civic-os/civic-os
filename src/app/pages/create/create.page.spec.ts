@@ -376,6 +376,81 @@ describe('CreatePage', () => {
             logged.mockRestore();
         });
 
+        it('names the field to upload again when its staged file was deleted (issue #141)', async () => {
+            const photo = createMockProperty({ column_name: 'photo', display_name: 'Photo', udt_name: 'uuid', type: EntityPropertyType.FileImage });
+            formRenderables.mockResolvedValue([MOCK_PROPERTIES.textShort, photo].map(p => ({ ...p, itemType: 'property' })));
+            await mount({ props: [MOCK_PROPERTIES.textShort, photo] });
+            createData.mockRejectedValue(httpError(409, {
+                code: '23503',
+                message: 'insert or update on table "Issue" violates foreign key constraint "Issue_photo_fkey"',
+                details: 'Key (photo)=(0190a1b2-0000-7000-8000-000000000001) is not present in table "files".'
+            }));
+            const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            fill({ name: 'Test', photo: '0190a1b2-0000-7000-8000-000000000001' });
+            await submit();
+
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()).toEqual(expect.objectContaining({
+                code: '23503',
+                humanMessage: 'Photo: this attachment is no longer available. Upload the file again.'
+            }));
+            logged.mockRestore();
+        });
+
+        it('finds the field from the constraint name when the detail omits the key, as it does for API roles (issue #141)', async () => {
+            const photo = createMockProperty({ column_name: 'photo', display_name: 'Photo', udt_name: 'uuid', type: EntityPropertyType.FileImage });
+            const doc = createMockProperty({ column_name: 'doc', display_name: 'Document', udt_name: 'uuid', type: EntityPropertyType.File });
+            formRenderables.mockResolvedValue([MOCK_PROPERTIES.textShort, photo, doc].map(p => ({ ...p, itemType: 'property' })));
+            await mount({ props: [MOCK_PROPERTIES.textShort, photo, doc] });
+            createData.mockRejectedValue(httpError(409, {
+                code: '23503',
+                message: 'insert or update on table "Issue" violates foreign key constraint "Issue_photo_fkey"',
+                details: 'Key is not present in table "files".'
+            }));
+            const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            fill({ name: 'Test', photo: '0190a1b2-0000-7000-8000-000000000001', doc: '0190a1b2-0000-7000-8000-000000000002' });
+            await submit();
+
+            expect(component.currentError()!.humanMessage).toBe('Photo: this attachment is no longer available. Upload the file again.');
+            logged.mockRestore();
+        });
+
+        it('falls back to the file fields that hold a value when the constraint has a custom name', async () => {
+            const photo = createMockProperty({ column_name: 'photo', display_name: 'Photo', udt_name: 'uuid', type: EntityPropertyType.FileImage });
+            const doc = createMockProperty({ column_name: 'doc', display_name: 'Document', udt_name: 'uuid', type: EntityPropertyType.File });
+            formRenderables.mockResolvedValue([MOCK_PROPERTIES.textShort, photo, doc].map(p => ({ ...p, itemType: 'property' })));
+            await mount({ props: [MOCK_PROPERTIES.textShort, photo, doc] });
+            createData.mockRejectedValue(httpError(409, {
+                code: '23503',
+                message: 'insert or update on table "Issue" violates foreign key constraint "issue_attachment_ref"',
+                details: 'Key is not present in table "files".'
+            }));
+            const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            fill({ name: 'Test', doc: '0190a1b2-0000-7000-8000-000000000002' });
+            await submit();
+
+            expect(component.currentError()!.humanMessage).toBe('Document: this attachment is no longer available. Upload the file again.');
+            logged.mockRestore();
+        });
+
+        it('keeps the generic message for a foreign-key error on another table', async () => {
+            createData.mockRejectedValue(httpError(409, {
+                code: '23503',
+                message: 'insert or update on table "Issue" violates foreign key constraint "Issue_status_id_fkey"',
+                details: 'Key (status_id)=(99) is not present in table "statuses".'
+            }));
+            const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            fill({ name: 'Test' });
+            await submit();
+
+            expect(component.currentError()!.humanMessage).toBe('This record is linked to another record that does not exist or is still in use. Check the linked record and try again.');
+            logged.mockRestore();
+        });
+
         it('shows the System Error modal for an unexpected failure', async () => {
             createData.mockRejectedValue(new TypeError('boom'));
             const logged = vi.spyOn(console, 'error').mockImplementation(() => {});

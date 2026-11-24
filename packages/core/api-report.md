@@ -795,7 +795,7 @@ interface DataRequestOptions {
 Kind: const. Consumer: mcp.
 
 ```ts
-const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
+const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: ({ params }: ErrorMessageContext) => string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
 ```
 
 ### `defaultColumns`
@@ -1456,6 +1456,7 @@ interface ErrorParams {
   constraintName?: string | undefined;
   column?: string | undefined;
   expectedType?: string | undefined;
+  referencedTable?: string | undefined;
 }
 ```
 

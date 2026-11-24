@@ -104,4 +104,14 @@ describe('humanizeError', () => {
     expect(none).not.toContain('0 rows');
     expect(humanizeError({ code: 'PT503', httpCode: 503, message: 'maintenance' })).toBe('System Error');
   });
+
+  it('issue #141: a missing metadata.files row says the attachment is gone and names the column', () => {
+    const shape = { code: '23503', httpCode: 409, message: 'insert or update on table "Issue" violates foreign key constraint "Issue_photo_fkey"' };
+    expect(humanizeError({ ...shape, details: 'Key (photo)=(0190a1b2-0000-7000-8000-000000000001) is not present in table "files".' }))
+      .toBe('The attachment in "photo" is no longer available. Upload the file again.');
+    expect(humanizeError({ ...shape, details: 'Key is not present in table "files".' }))
+      .toBe('This attachment is no longer available. Upload the file again.');
+    expect(DEFAULT_ERROR_MESSAGES.foreignKey({ params: { referencedTable: 'files' }, error: shape }))
+      .toBe('This attachment is no longer available. Upload the file again.');
+  });
 });

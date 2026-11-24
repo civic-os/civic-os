@@ -52,7 +52,8 @@ const PG_TYPE_NAMES: Record<string, string> = {
  * Default English wording for every {@link ErrorKind}, built from the frontend's
  * strings (E-01). Constraint fallbacks end with the raw constraint name so a
  * report can be traced to the constraint (E-03); 23502, 22P02, 22007/8 and 412
- * name the problem (F-04); 23503 and PGRST116 are friendly (F-17); an empty or
+ * name the problem (F-04); 23503 and PGRST116 are friendly (F-17), and a 23503 on
+ * metadata.files says the attachment is gone (issue #141); an empty or
  * missing RAISE message gets a generic sentence (F-15); the unrecognized
  * `system` error stays "System Error" (E-04). PT503 is not here: the
  * maintenance interceptor handles it.
@@ -65,8 +66,10 @@ export const DEFAULT_ERROR_MESSAGES = {
   unique: 'Record must be unique',
   notNull: ({ params }) =>
     params.column === undefined ? 'A required field is missing.' : `Required field "${params.column}" is missing.`,
-  foreignKey:
-    'This record is linked to another record that does not exist or is still in use. Check the linked record and try again.',
+  foreignKey: ({ params }) =>
+    params.referencedTable === 'files'
+      ? `${params.column === undefined ? 'This attachment' : `The attachment in "${params.column}"`} is no longer available. Upload the file again.`
+      : 'This record is linked to another record that does not exist or is still in use. Check the linked record and try again.',
   check: ({ params }) =>
     params.constraintName === undefined
       ? 'Validation failed. Check the value and try again.'

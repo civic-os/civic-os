@@ -38,6 +38,7 @@ func main() {
 	log.Println("    - Source Code Parser")
 	log.Println("    - User Provisioning Worker (Keycloak)")
 	log.Println("    - Gallery Cleanup Cron")
+	log.Println("    - File Reconcile Cron")
 	log.Println("    - Tracking HTTP Server")
 	log.Println("========================================")
 
@@ -403,6 +404,11 @@ func main() {
 	}
 	log.Println("[Init] ✓ GalleryCleanupCron initialized (daily at ~3:00 AM)")
 
+	// File Reconcile Cron - claims staged Create-page uploads for their records and deletes orphans (issue #141)
+	fileReconcileInterval, fileOrphanTTL := fileReconcileConfig(os.Getenv)
+	fileReconcileCron := NewFileReconcileCron(dbPool, s3Clients.S3Client, s3Bucket, fileReconcileInterval, fileOrphanTTL)
+	log.Printf("[Init] ✓ FileReconcileCron initialized (every %s, orphan TTL %s)", fileReconcileInterval, fileOrphanTTL)
+
 	// ===========================================================================
 	// 7. Create River Client (SINGLE CLIENT WITH MULTIPLE QUEUES)
 	// ===========================================================================
@@ -453,6 +459,9 @@ func main() {
 
 	// Start the gallery cleanup cron (daily at ~3 AM)
 	galleryCleanupCron.Start(ctx)
+
+	// Start the file reconcile cron (FILE_RECONCILE_INTERVAL, 0 disables)
+	fileReconcileCron.Start(ctx)
 
 	// Start the tracking HTTP server (for open/click/unsubscribe callbacks)
 	var trackingServer *TrackingServer
@@ -515,6 +524,7 @@ func main() {
 
 	// Stop cron jobs
 	galleryCleanupCron.Stop()
+	fileReconcileCron.Stop()
 	scheduledJobScheduler.Stop()
 
 	if err := riverClient.Stop(shutdownCtx); err != nil {

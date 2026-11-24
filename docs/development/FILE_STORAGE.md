@@ -14,7 +14,8 @@ This document provides a comprehensive guide to implementing file storage featur
 - **Consolidated Worker**: Single Go microservice (v0.11.0+) combining S3 Signer, Thumbnail Worker, and Notification Worker with shared database connection pool (4 connections vs 12)
   - **S3 Signer**: Generates presigned upload URLs using River job queue with automatic retries
   - **Thumbnail Worker**: Processes uploaded images (3 sizes: 150x150, 400x400, 800x800) and PDFs (first page) using bimg (libvips) and pdftoppm with white background letterboxing
-- **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails; a file uploaded before its record exists (Create page) is staged as `{entity_type}/_new/{file_id}/…` with `entity_id = ''` (since v0.86.5, issue #141; claiming and cleanup are designed in `docs/notes/FILE_RECONCILE_DESIGN.md`)
+  - **File Reconcile Cron** (v0.87.0): Moves files staged on Create pages to their record's folder and deletes staged files nothing references (see Staged Uploads and File Reconcile below)
+- **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails; a file uploaded before its record exists (Create page) is staged as `{entity_type}/_new/{file_id}/…` with `entity_id = ''` (since v0.86.5, issue #141); the file reconcile job moves it to its record's folder once the record is saved (v0.87.0, see Staged Uploads and File Reconcile below)
 - **UUIDv7**: Time-ordered UUIDs improve B-tree index performance
 
 ## Property Type Detection
@@ -43,7 +44,7 @@ if (column.udt_name === 'uuid' && column.join_table === 'files') {
 `EditPropertyComponent` provides file input with drag-drop, validates type/size, uploads immediately on selection, shows progress
 
 ### Create Forms
-File properties are filtered out of Create forms (files require existing entity ID)
+File properties are on Create forms (since v0.86.5). A file chosen there is uploaded before the record exists, staged under `{entity_type}/_new/`, and its id is saved with the record; the file reconcile job then moves it to the record's folder (v0.87.0).
 
 ### Validation
 Frontend validates before upload; backend enforces via validation metadata
@@ -152,6 +153,13 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000  # LOCAL ONLY - omit for AWS S3
 S3_ENDPOINT=http://s3:9000  # LOCAL ONLY - omit for AWS S3
 ```
 
+#### File Reconcile (v0.87.0, consolidated worker)
+
+```bash
+FILE_RECONCILE_INTERVAL=5m   # Go duration between ticks; 0 disables the job
+FILE_ORPHAN_TTL=168h         # unreferenced staged files older than this are deleted (at least 1h)
+```
+
 ⚠️ **Critical**: `S3_PUBLIC_ENDPOINT` and `S3_ENDPOINT` are **only for local RustFS development**. Do NOT set these variables in production with AWS S3 - the services will automatically use correct AWS endpoints.
 
 **Bucket CORS**: Browsers upload straight to the store with a presigned PUT, so the bucket needs a CORS rule. MinIO allowed every origin by default; RustFS allows none until a rule is set. The `s3-init` service in each example compose file sets the rule (any origin; GET, PUT and HEAD; all headers; `ETag` exposed) together with the public-read policy, using `curl --aws-sigv4` from the RustFS image, so no separate client image is needed. If you build your own compose file around RustFS, copy that service. Root credentials come from `S3_ROOT_USER` and `S3_ROOT_PASSWORD` (both default to `minioadmin`).
@@ -191,7 +199,8 @@ The services require the following S3 permissions:
       "Action": [
         "s3:PutObject",
         "s3:GetObject",
-        "s3:PutObjectAcl"
+        "s3:PutObjectAcl",
+        "s3:DeleteObject"
       ],
       "Resource": "arn:aws:s3:::your-bucket-name/*"
     },
@@ -203,6 +212,8 @@ The services require the following S3 permissions:
   ]
 }
 ```
+
+`s3:DeleteObject` is new in v0.87.0: the file reconcile job deletes the staged copy after moving a file, and orphaned staged files. Without it those deletes fail (logged by the worker) and the objects stay in the bucket; claiming still works. `s3:ListBucket` lets the job find objects left under `{type}/_new/`.
 
 **Security Best Practice**: Use IAM roles (EC2/ECS task roles) instead of access keys when possible.
 
@@ -383,6 +394,21 @@ See `examples/pothole/init-scripts/07_add_file_fields.sql` for complete example 
 - `Issue.photo` (image field)
 - `WorkPackage.report_pdf` (PDF field)
 
+## Staged Uploads and File Reconcile (v0.87.0)
+
+A file attached on a Create page is uploaded before its record exists. It is staged as `{entity_type}/_new/{file_id}/…` with `metadata.files.entity_id = ''`, and the record's file column holds its id once the record is saved. `FileReconcileCron` in the consolidated worker runs every `FILE_RECONCILE_INTERVAL` (default 5 minutes) and:
+
+1. **Claims** staged files that a public table references. It reads the foreign keys to `metadata.files(id)` from `pg_constraint`, so no per-table setup is needed. It copies the original and its thumbnails to `{entity_type}/{entity_id}/{file_id}/`, claims the row in one guarded statement, then deletes the old objects. A file whose thumbnail job is still queued, running or retrying waits for the next tick. A file several rows reference is claimed for the first (table name, then lowest key); the others keep pointing at it. Legacy rows with an id-less `{type}//{file_id}` key are repaired the same way.
+2. **Deletes orphans**: staged files that nothing references, in any schema, once older than `FILE_ORPHAN_TTL` (default 7 days). The row goes first, then its objects.
+3. **Sweeps** objects left under `{type}/_new/` by an interrupted move, or by an upload whose row was never created (after the TTL).
+4. **Deletes** `metadata.file_upload_requests` rows older than 24 hours.
+
+A Create page left open longer than the TTL saves an id whose row is gone; the save fails with a foreign-key violation and the page says which field to upload again (`error.attachment_expired`).
+
+Deleting the objects of files that were already claimed, when their row or record is deleted, is not done yet (issue #165). Uploads are `public-read`, so such a file stays readable at its URL.
+
+The worker calls `metadata.unclaimed_file_references()`, `claim_file()`, `delete_orphaned_staged_files()`, `staged_file_states()` and `delete_stale_upload_requests()`; none is exposed through PostgREST. See `docs/notes/FILE_RECONCILE_DESIGN.md` for the design and its amendments.
+
 ## File Administration (v0.39.0)
 
 Admin page at `/admin/files` provides centralized file browsing with two modes:
@@ -415,7 +441,7 @@ The PhotoGallery property type builds on the file storage system to manage order
 | Ordering | N/A | `sort_order` on `photo_gallery_files` |
 | Per-file metadata | None (just the file record) | `caption`, `alt_text` per image |
 | S3 key prefix | `{entity_type}/{entity_id}/{file_id}/` | `photo_gallery/{gallery_id}/{file_id}/` |
-| Create page behavior | Uploaded before the record exists, staged under `_new`, id saved with the record (v0.86.5) | Draft gallery pattern (create gallery first, link after) |
+| Create page behavior | Uploaded before the record exists, staged under `_new`, id saved with the record (v0.86.5), moved to the record's folder by the reconcile job (v0.87.0) | Draft gallery pattern (create gallery first, link after) |
 
 See `docs/notes/PHOTO_GALLERY_DESIGN.md` for the full architecture, lifecycle, and RPC reference.
 
