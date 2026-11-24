@@ -405,6 +405,10 @@ jobs:
       - name: Lockstep versions
         run: npm run check:versions
 
+      # sync-versions also checks src/app/config/version.ts (issue #106); this runs it against drifted copies.
+      - name: Lockstep versions self-test
+        run: npm run versions:selftest
+
       - name: Dependency boundaries
         run: npm run check:boundaries
 

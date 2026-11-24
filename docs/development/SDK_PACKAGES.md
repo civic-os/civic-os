@@ -26,7 +26,7 @@ How each consumer resolves core:
 
 - **Dependency direction is a license boundary.** Apache packages never import the AGPL app, `tools/**` or another AGPL package; core imports only relative paths; every runtime dependency of an Apache package must carry a permissive license. Enforced twice: `npm run check:boundaries` (manifests and imports) and the `packages/**` blocks of `eslint.config.js` (`npm run lint` runs `eslint packages`).
 - **SPDX headers.** Every source file under `packages/` carries `Copyright (C) 2023-YYYY Civic OS, L3C` and `SPDX-License-Identifier: Apache-2.0`. No file outside `packages/` may carry the Apache identifier. `npm run check:spdx`.
-- **Lockstep versions.** The root `package.json` version is the source of truth for the root app, every `packages/*` package and `tools/mcp-server`. Internal `@civic-os/*` dependency specs are pinned to exactly that version. `npm run check:versions` reports drift; `npm run sync-versions` rewrites manifests and lockfiles (it runs from the `postversion` hook).
+- **Lockstep versions.** The root `package.json` version is the source of truth for the root app, every `packages/*` package and `tools/mcp-server`. Internal `@civic-os/*` dependency specs are pinned to exactly that version. The About modal's `src/app/config/version.ts` records the same version. `npm run check:versions` reports drift in any of them (CI fails on a stale `version.ts`, issue #106); `npm run sync-versions` rewrites manifests, lockfiles and `version.ts` (it runs from the `postversion` hook), so a bump made by editing the manifests is finished by running it. `npm run versions:selftest` tests both modes against drifted copies.
 
 ## Building and testing
 
