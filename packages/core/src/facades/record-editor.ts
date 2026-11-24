@@ -46,7 +46,7 @@ import type {
 } from '../model/index.js';
 import type { FacadeDeps, FacadeSchema } from './deps.js';
 import { editEditor } from './record-editor-edit.js';
-import { FILE_TYPES, buildPlan, isInlineManyToMany, liveFields, publishWhenChanged, toApiError } from './record-editor-shared.js';
+import { buildPlan, isInlineManyToMany, liveFields, publishWhenChanged, toApiError } from './record-editor-shared.js';
 
 /**
  * The schema as the editor reads it, beyond {@link FacadeSchema.properties}.
@@ -159,7 +159,10 @@ export interface RecordEditorSnapshot<B extends FormBackend> {
   readonly loading: boolean;
   /** The schema load's failure, or `undefined`. */
   readonly error: unknown;
-  /** The create properties: `propsForCreate` minus non-inline many-to-many and file properties. */
+  /**
+   * The create properties: `propsForCreate` minus non-inline many-to-many. File properties stay, as in edit: an upload
+   * made before the record exists is staged under `_new` and its id saved with the record (issue #141).
+   */
   readonly properties: readonly SchemaEntityProperty[];
   /** The inline many-to-many properties (`show_inline`), which the form does not hold as fields. */
   readonly inlineManyToMany: readonly SchemaEntityProperty[];
@@ -777,7 +780,7 @@ function createEditor<B extends FormBackend>(
         nextProps = propsForCreate(all);
       }
       const isInline = isInlineManyToMany;
-      const nextForm = nextProps.filter(p => p.type !== EntityPropertyType.ManyToMany && !FILE_TYPES.has(p.type));
+      const nextForm = nextProps.filter(p => p.type !== EntityPropertyType.ManyToMany);
       let nextBackend: B | null = null;
       let nextStore: FormStore | null = null;
       if (row) {
@@ -792,7 +795,7 @@ function createEditor<B extends FormBackend>(
       }
       const previous = formStore;
       const previousStop = stopForm;
-      properties = nextProps.filter(p => p.type !== EntityPropertyType.ManyToMany || isInline(p)).filter(p => !FILE_TYPES.has(p.type));
+      properties = nextProps.filter(p => p.type !== EntityPropertyType.ManyToMany || isInline(p));
       formProps = nextForm;
       inlineManyToMany = nextProps.filter(isInline);
       renderables = nextRenderables;

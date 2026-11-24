@@ -329,9 +329,17 @@ describe('transformValuesForApi', () => {
     const run = (values: any, props: TransformProp[]) =>
       transformValuesForApi(deepFreeze(values), props, { mode: 'create' });
 
-    it('file values are passed through untouched', () => {
-      const obj = { id: 'u-1' };
-      expect(run({ f: obj }, [prop('f', T.File)]).f).toBe(obj);
+    it.each([T.File, T.FileImage, T.FilePDF])('type %s: object with truthy id becomes the id (issue #141)', type => {
+      expect(run({ f: { id: 'u-1', name: 'x' } }, [prop('f', type)]).f).toBe('u-1');
+    });
+
+    it('file: a string id from an upload, an object without id, and one with a falsy id are kept', () => {
+      const p = [prop('f', T.File)];
+      expect(run({ f: 'u-1' }, p).f).toBe('u-1');
+      const noId = { name: 'x' };
+      expect(run({ f: noId }, p).f).toBe(noId);
+      const zero = { id: 0 };
+      expect(run({ f: zero }, p).f).toBe(zero);
     });
 
     it('PhotoGallery key is deleted when it has a value', () => {
@@ -598,6 +606,17 @@ describe('oracle: core agrees with the pre-move page methods wherever no ledger 
     return out;
   };
 
+  /** Issue #141: create mode carries file fields, so a file object becomes its id there as in edit. */
+  const fileIdsOnCreate = (props: TransformProp[], out: any) => {
+    for (const p of props) {
+      const v = out[p.column_name];
+      if ((p.type === T.File || p.type === T.FileImage || p.type === T.FilePDF) && v && typeof v === 'object' && v.id) {
+        out[p.column_name] = v.id;
+      }
+    }
+    return out;
+  };
+
   const sameKeysAndValues = (actual: any, expected: any) => {
     expect(Object.keys(actual)).toEqual(Object.keys(expected));
     expect(actual).toStrictEqual(expected);
@@ -610,7 +629,7 @@ describe('oracle: core agrees with the pre-move page methods wherever no ledger 
         const frozenForm = deepFreeze(clone(form));
         sameKeysAndValues(
           transformValuesForApi(frozenForm, props, { mode: 'create' }),
-          omitGalleries(props, oracleCreate(props, clone(form)))
+          fileIdsOnCreate(props, omitGalleries(props, oracleCreate(props, clone(form))))
         );
       }),
       { numRuns: 3000 }

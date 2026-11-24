@@ -1,6 +1,6 @@
 # File Reconcile: Staged Uploads, Claiming and Orphan Cleanup
 
-**Status**: design (issue #141), target v0.87.0. Step 1 (the `_new` staging key) is built (v0.86.5). Steps 2 to 4 are designed, with their decisions recorded, and not yet built.
+**Status**: design (issue #141), target v0.87.0. Step 0 (Create pages save the staged file's id) and step 1 (the `_new` staging key) are built (v0.86.5). Steps 2 to 4 are designed, with their decisions recorded, and not yet built.
 **Decided with the maintainer (2026-11-24)**: stage uploads made before a record exists under `_new`, then move them to the record's folder from a periodic reconcile job, which also deletes files nothing references. Per-table triggers were the rejected alternative (see Alternatives). The open questions were settled the same day (see Decisions).
 
 ## Problem
@@ -21,6 +21,12 @@ A file attached on a Create page is uploaded before its record exists, so `EditP
 - S3 has no atomic move: a move is copy, then delete.
 
 ## Design
+
+### Step 0: Create pages save the file's id (built, v0.86.5)
+
+Every later step finds a staged file through the foreign key of the record that saved it, so that key must be set. Before v0.86.5 it never was: the Create page showed File, FileImage and FilePDF inputs (its renderables come from `propsForCreate`, which keeps them, since v0.17.0), but `recordEditor` left those properties out of the create form, so the upload's id had no form field to land in (`EditPropertyComponent` writes it with `form.get(column)?.setValue`, a no-op without a control). The user saw "Uploaded", the save succeeded, and the record's file column stayed NULL.
+
+`recordEditor` now keeps file properties in the create form, as edit always has, and `transformValuesForApi` maps a file object to its id in both modes. A required file column is now required on Create too. An untouched file field is sent as `null`, like any other empty field.
 
 ### Step 1: staging key (built, v0.86.5)
 

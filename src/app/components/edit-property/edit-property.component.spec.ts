@@ -31,6 +31,7 @@ import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { settleLazyComponents } from '../../testing/lazy-components';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { DimensionService, SchemaDimension } from '../../services/dimension.service';
+import { FileUploadService } from '../../services/file-upload.service';
 
 describe('EditPropertyComponent', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -2557,6 +2558,49 @@ describe('EditPropertyComponent', () => {
             setup(undefined, []);
             expect(component.dimensionOptions()).toEqual([]);
             expect(fixture.debugElement.query(By.css('app-tree-select'))).toBeTruthy();
+        });
+    });
+    describe('File upload on a Create page (issue #141)', () => {
+        const fileProp = () => createMockProperty({ column_name: 'photo', display_name: 'Photo', type: EntityPropertyType.FileImage, udt_name: 'uuid', data_type: 'uuid' });
+        const selectFile = (name = 'pic.png') => {
+            const input = document.createElement('input');
+            Object.defineProperty(input, 'files', { value: [new File(['x'], name, { type: 'image/png' })] });
+            return { target: input } as unknown as Event;
+        };
+
+        it('uploads with an empty entity id and writes the file id into the form control', async () => {
+            const uploads = TestBed.inject(FileUploadService);
+            const upload = vi.spyOn(uploads, 'uploadFile').mockResolvedValue({ id: 'f-1', file_name: 'pic.png' } as any);
+            const formGroup = new FormGroup({ photo: new FormControl(null) });
+            fixture.componentRef.setInput('property', fileProp());
+            fixture.componentRef.setInput('formGroup', formGroup);
+            fixture.componentRef.setInput('entityType', 'Issue');
+            fixture.componentRef.setInput('entityId', '');
+            component.ngOnInit();
+            fixture.detectChanges();
+
+            await component.onFileSelected(selectFile(), 'photo');
+
+            expect(upload).toHaveBeenCalledWith(expect.any(File), 'Issue', '', true, 'photo');
+            expect(formGroup.get('photo')!.value).toBe('f-1');
+            expect(formGroup.get('photo')!.dirty).toBe(true);
+            expect(component.uploadError()).toBeNull();
+        });
+
+        it('leaves the control empty and shows the error when the upload fails', async () => {
+            const uploads = TestBed.inject(FileUploadService);
+            vi.spyOn(uploads, 'uploadFile').mockRejectedValue(new Error('Upload failed: Invalid object key'));
+            const formGroup = new FormGroup({ photo: new FormControl(null) });
+            fixture.componentRef.setInput('property', fileProp());
+            fixture.componentRef.setInput('formGroup', formGroup);
+            fixture.componentRef.setInput('entityId', '');
+            component.ngOnInit();
+            fixture.detectChanges();
+
+            await component.onFileSelected(selectFile(), 'photo');
+
+            expect(formGroup.get('photo')!.value).toBeNull();
+            expect(component.uploadError()).toBe('Upload failed: Invalid object key');
         });
     });
 });

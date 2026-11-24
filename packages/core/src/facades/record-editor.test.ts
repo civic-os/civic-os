@@ -345,15 +345,30 @@ describe('recordEditor: the form', () => {
     expect(snap(w).form).not.toBeNull();
   });
 
-  it('serves the properties for the create form, minus files and non-inline many-to-many (ported 143)', async () => {
+  it('serves the properties for the create form, files included, minus non-inline many-to-many (ported 143, issue #141)', async () => {
     const hidden = prop('internal', T.TextShort, { show_on_create: false });
     const stamp = prop('created_at', T.DateTimeLocal);
     const generated = prop('computed', T.TextShort, { is_generated: true });
     const readonly = prop('locked', T.TextShort, { is_updatable: false });
     const files = [prop('doc', T.File), prop('pic', T.FileImage), prop('pdf', T.FilePDF)];
     const w = await ready({ props: [...BASE, hidden, stamp, generated, readonly, ...files, m2m('plain', false), TAGS] });
-    expect(snap(w).properties.map(p => p.column_name)).toEqual(['name', 'count', 'active', 'tags']);
+    expect(snap(w).properties.map(p => p.column_name)).toEqual(['name', 'count', 'active', 'doc', 'pic', 'pdf', 'tags']);
     expect(w.state.propertiesCalls).toEqual([w.handle.liveRow]);
+  });
+
+  it('holds a form field for each file property, so an upload made before the record exists is kept (issue #141)', async () => {
+    const w = await ready({ props: [P.name, prop('doc', T.File), prop('pic', T.FileImage), prop('pdf', T.FilePDF)] });
+    expect(Object.keys(snap(w).form!.fields)).toEqual(['name', 'doc', 'pic', 'pdf']);
+    expect(backend(w).registered).toEqual(['name', 'doc', 'pic', 'pdf']);
+    expect(value(w, 'pic')).toBeNull();
+  });
+
+  it('requires a non-nullable file property like any other field (issue #141)', async () => {
+    const w = await ready({ props: [P.name, prop('pic', T.FileImage, { is_nullable: false })] });
+    setName(w);
+    expect(snap(w).form!.fields['pic']!.errors).toEqual([{ kind: 'required' }]);
+    expect((await w.editor.save()).status).toBe('invalid');
+    expect(sent(w)).toHaveLength(0);
   });
 
   it('lists the inline many-to-many properties apart and keeps them out of the form fields', async () => {
@@ -778,6 +793,20 @@ describe('recordEditor: the payload', () => {
     setName(w);
     await w.editor.save();
     expect(Object.keys(posts(w, 'issues')[0]!.body)).toEqual(['name']);
+  });
+
+  it('sends the id of a file uploaded before the record exists (issue #141)', async () => {
+    const w = await ready({ props: [P.name, prop('pic', T.FileImage), prop('pdf', T.FilePDF), prop('doc', T.File)] });
+    setName(w);
+    backend(w).setValue('pic', '0190a1b2-0000-7000-8000-000000000001');
+    backend(w).setValue('pdf', { id: '0190a1b2-0000-7000-8000-000000000002', file_name: 'report.pdf' });
+    expect((await w.editor.save()).status).toBe('created');
+    expect(posts(w, 'issues')[0]!.body).toEqual({
+      name: 'Test Issue',
+      pic: '0190a1b2-0000-7000-8000-000000000001',
+      pdf: '0190a1b2-0000-7000-8000-000000000002',
+      doc: null,
+    });
   });
 
   it('never sends many-to-many keys', async () => {
