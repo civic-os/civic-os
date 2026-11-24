@@ -46,10 +46,13 @@ import { MaintenanceService } from '../../services/maintenance.service';
 import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { HelpToggletipComponent } from '../../components/help-toggletip/help-toggletip.component';
 import { TranslationService } from '../../services/translation.service';
 import { ConfigService } from '../../services/config.service';
 import { ApiError } from '../../interfaces/api';
+import { EntityPropertyType } from '../../interfaces/entity';
 import {
+  classifyPostgrestError,
   recordEditor,
   type EditorContinueResult,
   type EditorStep,
@@ -77,10 +80,14 @@ import { switchingStore } from '../../sdk/switching-store';
     ReactiveFormsModule,
     CosModalComponent,
     RouterModule,
-    TranslatePipe
+    TranslatePipe,
+    HelpToggletipComponent
 ]
 })
 export class CreatePage {
+  /** Whether the entity description is shown under the title (the title's help toggletip, issue #130). */
+  readonly descriptionOpen = signal(false);
+
   /** The route entity's core handle, from `entityResolver` through route input binding. The `recordEditor` facade is made from it (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
   readonly entityHandle = input<EntityHandle | undefined>();
 
@@ -261,7 +268,7 @@ export class CreatePage {
           hint: result.error?.hint,
           humanMessage: result.error?.humanMessage
         });
-        this.currentError.set(result.error);
+        this.currentError.set(this.withAttachmentMessage(result.error));
         this.showErrorModal.set(true);
         return;
       case 'created':
@@ -502,6 +509,26 @@ export class CreatePage {
     this.handleContinueResult(result);
   }
 
+  /**
+   * Issue #141: a file attached here is staged until the record saves, and the file reconcile job deletes a
+   * staged file nothing references after FILE_ORPHAN_TTL. A page left open that long saves an id whose row is
+   * gone (23503 on metadata.files); say which field to upload again, in the user's language.
+   */
+  private withAttachmentMessage(error: ApiError): ApiError {
+    const { kind, params } = classifyPostgrestError(error);
+    if (kind !== 'foreignKey' || params.referencedTable !== 'files') return error;
+    // API roles get the detail without the column ('Key is not present in table "files"'): find the field from
+    // the constraint name (<table>_<column>_fkey by default), else from the file fields that hold a value.
+    const fileFields = (this.snapshot()?.properties ?? []).filter(p =>
+      (p.type === EntityPropertyType.File || p.type === EntityPropertyType.FileImage || p.type === EntityPropertyType.FilePDF));
+    const constraint = error.message?.match(/constraint "([^"]+)"/)?.[1];
+    const named = fileFields.filter(p =>
+      p.column_name === params.column || (constraint !== undefined && constraint.endsWith(`_${p.column_name}_fkey`)));
+    const candidates = named.length > 0 ? named : fileFields.filter(p => !!this.createForm()?.get(p.column_name)?.value);
+    const field = candidates.map(p => p.display_name).join(', ') || params.column || '';
+    return { ...error, humanMessage: this.translation.get('error.attachment_expired', { field }) };
+  }
+
   private handleContinueResult(result: EditorContinueResult): void {
     switch (result.status) {
       case 'ignored':
@@ -516,7 +543,7 @@ export class CreatePage {
         this.showSessionExpired();
         return;
       case 'failed':
-        this.currentError.set(result.error);
+        this.currentError.set(this.withAttachmentMessage(result.error));
         this.showErrorModal.set(true);
         return;
       case 'created':

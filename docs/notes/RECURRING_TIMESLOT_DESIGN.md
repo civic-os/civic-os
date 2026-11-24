@@ -2530,7 +2530,7 @@ INSERT INTO metadata.settings (key, value) VALUES
 
 ## RLS-Respecting Occurrence Writes (Issue #18)
 
-**Status**: research, not scheduled. Recommendation only; nothing here is built.
+**Status**: research, not scheduled. Recommendation only; nothing here is built, except one write: since v0.86.3 (issue #57) the edited occurrence of a split is written with the caller's rights (Option 2's shape, see the table).
 
 ### Problem
 
@@ -2540,7 +2540,7 @@ The series functions write entity rows with definer rights, so the instance's ow
 |----------|-----------|------|--------------------------|
 | `create_recurring_series` | `v0-76-5-revoke-public-execute` | DEFINER | `has_permission(table, 'create')`; writes only bookkeeping rows and enqueues the worker job |
 | `update_series_template` | `v0-76-9-split-applies-new-schedule` | DEFINER | `has_permission(table, 'update')`; Status columns stripped |
-| `split_series_from_date` and its helper `metadata.apply_split_to_future_instances` | `v0-76-9-split-applies-new-schedule` | DEFINER (helper runs under the caller's definer context) | `has_permission(table, 'update')`; Status columns stripped from the template, not from `p_edited_values` |
+| `split_series_from_date` and its helper `metadata.apply_split_to_future_instances` | `v0-86-3-split-invoker` (bookkeeping from `v0-76-9-split-applies-new-schedule`) | INVOKER wrapper over DEFINER `metadata._split_series_from_date` (v0.86.3) | `has_permission(table, 'update')` in the definer part; Status columns stripped from the template. The edited occurrence (`p_edited_values`, Status included) is written by the invoker wrapper with the caller's rights, so RLS and column grants apply and a refusal (or zero rows changed) rolls the whole split back with `42501`. Following occurrences still move with definer rights |
 | `end_series_from_date`, `delete_series_with_instances`, `delete_series_group`, `cancel_series_occurrence` | `v0-78-1-end-series-from-date` | DEFINER | `has_permission(table, 'delete')` |
 | `reschedule_occurrence` | `v0-76-5-revoke-public-execute` | DEFINER | `has_permission(table, 'update')` for non-series rows; series owner or admin otherwise |
 | Expansion worker insert | `services/consolidated-worker-go/expand_recurring_series_worker.go` | superuser connection | none (see below) |

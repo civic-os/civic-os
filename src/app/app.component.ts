@@ -178,35 +178,34 @@ export class AppComponent implements AfterViewInit {
     return entities?.some(e => e.payment_initiation_rpc) ?? false;
   });
 
-  // Permission signals for feature access (v0.25.1)
-  // These check if the user has read permission on the underlying tables
-  public hasRecurringSchedulePermission = computed(() => this.auth.hasPermission('time_slot_series', 'read'));
+  // Permission signals for feature access (v0.25.1). Tracked through auth.permission(), so a link
+  // appears once the permissions load (issue #148).
+  public hasRecurringSchedulePermission = this.auth.permission('time_slot_series', 'read');
 
-  public hasPaymentPermission = computed(() => this.auth.hasPermission('payment_transactions', 'read'));
+  public hasPaymentPermission = this.auth.permission('payment_transactions', 'read');
 
   public hasUserManagementPermission = computed(() => this.userManagement.hasUserManagementAccess());
 
   public hasStaticAssetPermission = computed(() => this.staticAssets.hasStaticAssetAccess());
 
-  public hasFilePermission = computed(() => this.auth.hasPermission('files', 'read'));
+  public hasFilePermission = this.auth.permission('files', 'read');
 
   public hasGalleryAdminPermission = computed(() => this.auth.isAdmin());
 
-  public hasStatusAdminPermission = computed(() => this.auth.hasPermission('metadata.statuses', 'update'));
+  public hasStatusAdminPermission = this.auth.permission('metadata.statuses', 'update');
 
-  public hasConfigAdminPermission = computed(() => this.auth.hasPermission('metadata.instance_config', 'update'));
+  public hasConfigAdminPermission = this.auth.permission('metadata.instance_config', 'update');
 
-  public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
+  public hasCategoryAdminPermission = this.auth.permission('metadata.categories', 'update');
 
-  // The menu editor: admins always (is_admin() escape valve), others through the permission. hasPermission()
-  // reads its cache untracked, so permissionsLoaded() is what re-runs this once the permissions arrive.
+  // The menu editor: admins always (is_admin() escape valve), others through the permission.
   public hasMenuAdminPermission = computed(() =>
-    this.auth.isAdmin() || (this.auth.permissionsLoaded() && this.auth.hasPermission('metadata.menu_nodes', 'update'))
+    this.auth.isAdmin() || this.auth.permission('metadata.menu_nodes', 'update')()
   );
 
   // Show Translations link when user has translation permissions AND multiple locales are configured
   public hasTranslationAdminPermission = computed(() =>
-    this.auth.hasPermission('metadata.translations', 'update') && this.localeService.supportedLocales().length > 1
+    this.auth.permission('metadata.translations', 'update')() && this.localeService.supportedLocales().length > 1
   );
 
   // Show Admin section if user is admin OR has access to feature-specific pages

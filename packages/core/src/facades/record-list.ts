@@ -104,7 +104,7 @@ export interface ListStateInput {
  * each filter is a chip. `label` is the display name of the column's property
  * in `columns` or `filterColumns`; a column in neither (hidden from the list
  * and not filterable, or unknown) gives the column name and a `value` chip.
- * The caller words the value (`≥ 4`, `2 selected`, `Yes`).
+ * The caller words the value (`≥ 4`, `2 selected`, `Yes`, `Pending, Approved`).
  *
  * @consumer typed recordList
  */
@@ -113,6 +113,13 @@ export type ListFilterChip =
   | { readonly kind: 'gte' | 'lte'; readonly column: string; readonly label: string; readonly value: unknown }
   /** An `in` filter on a foreign-key or user column; `count` is the number of ids in `(a,b,c)`, or 1. */
   | { readonly kind: 'selected'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly count: number }
+  /**
+   * An `eq` or `in` filter on a Status or Category column, once its names have
+   * loaded through `FacadeSchema.optionNames`: `names` follow the filter's ids
+   * in order, an id where no name is known. Until then (or without
+   * `optionNames`) the filter is a `value` chip.
+   */
+  | { readonly kind: 'named'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly names: readonly string[] }
   /** A filter on a Boolean column; `yes` is `value === 'true'`. */
   | { readonly kind: 'boolean'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly yes: boolean }
   | { readonly kind: 'value'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown };
@@ -416,6 +423,27 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
   /** Bumped by every request, so a load started earlier knows it is stale. */
   let generation = 0;
   let controller: AbortControllerLike | undefined;
+  /**
+   * Status and Category names per column, from `deps.schema.optionNames`: a map
+   * once loaded, `null` while loading or after a failure (the chip shows ids).
+   */
+  const optionNames = new Map<string, ReadonlyMap<string, string> | null>();
+  /** The names for `p`'s chip, starting their load the first time; null until they arrive. */
+  const namesFor = (p: SchemaEntityProperty): ReadonlyMap<string, string> | null => {
+    if (optionNames.has(p.column_name)) return optionNames.get(p.column_name) ?? null;
+    const load = deps.schema.optionNames;
+    if (!load) return null;
+    optionNames.set(p.column_name, null);
+    load.call(deps.schema, p).then(
+      names => {
+        if (disposed) return;
+        optionNames.set(p.column_name, names);
+        publish();
+      },
+      () => { /* the chip keeps showing ids */ },
+    );
+    return null;
+  };
 
   /** The columns, the filter columns and the views, read from the live entity row. */
   const derive = () => {
@@ -554,6 +582,15 @@ export function recordList(deps: FacadeDeps, entity: EntityHandle, options: Reco
           if ((p?.type === EntityPropertyType.ForeignKeyName || p?.type === EntityPropertyType.User || p?.type === EntityPropertyType.Dimension) && f.operator === 'in') {
             const ids = String(f.value).match(/\(([^)]+)\)/);
             chips.push({ kind: 'selected', column, label, operator: f.operator, value: f.value, count: ids ? ids[1].split(',').length : 1 });
+          } else if ((p?.type === EntityPropertyType.Status || p?.type === EntityPropertyType.Category) && (f.operator === 'eq' || f.operator === 'in')) {
+            const names = namesFor(p);
+            if (names) {
+              const list = String(f.value).match(/^\((.*)\)$/);
+              const ids = list ? list[1].split(',').map(id => id.trim()).filter(id => id !== '') : [String(f.value)];
+              chips.push({ kind: 'named', column, label, operator: f.operator, value: f.value, names: ids.map(id => names.get(id) ?? id) });
+            } else {
+              chips.push({ kind: 'value', column, label, operator: f.operator, value: f.value });
+            }
           } else if (p?.type === EntityPropertyType.Boolean) {
             chips.push({ kind: 'boolean', column, label, operator: f.operator, value: f.value, yes: f.value === 'true' });
           } else {

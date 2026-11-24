@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,12 +16,12 @@
  */
 
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
-import { of, switchMap, map, catchError, BehaviorSubject } from 'rxjs';
+import { of, switchMap, map, catchError, BehaviorSubject, filter, take } from 'rxjs';
 import { NgxCurrency } from '@dintecom/ngx-currency';
 import { AuthService } from '../../services/auth.service';
 import { getPostgrestUrl } from '../../config/runtime';
@@ -112,9 +112,9 @@ export class AdminPaymentsPage {
   private router = inject(Router);
 
   // Permission checks
-  canViewPayments = computed(() => this.auth.hasPermission('payment_transactions', 'read'));
+  canViewPayments = this.auth.permission('payment_transactions', 'read');
 
-  canCreateRefunds = computed(() => this.auth.hasPermission('payment_refunds', 'create'));
+  canCreateRefunds = this.auth.permission('payment_refunds', 'create');
 
   // UI state
   loading = signal(true);
@@ -154,9 +154,15 @@ export class AdminPaymentsPage {
   refundHistory = signal<RefundDetail[]>([]);
   refundHistoryLoading = signal(false);
 
-  // Load payments data
+  // Load payments data. The first load waits for the permissions, so a page opened before they arrive
+  // does not report a missing permission (issue #148).
+  private permissionsReady$ = this.auth.permissionsLoaded()
+    ? of(true)
+    : toObservable(this.auth.permissionsLoaded).pipe(filter(Boolean), take(1));
+
   payments = toSignal(
-    this.reloadTrigger.pipe(
+    this.permissionsReady$.pipe(
+      switchMap(() => this.reloadTrigger),
       switchMap(() => {
         if (!this.auth.hasPermission('payment_transactions', 'read')) {
           this.loading.set(false);

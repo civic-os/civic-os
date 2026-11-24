@@ -94,6 +94,7 @@ interface MakeOptions {
   props?: SchemaEntityProperty[];
   respond?: (req: TransportRequest) => Promise<TransportResponse>;
   options?: RecordListOptions;
+  optionNames?: FacadeDeps['schema']['optionNames'];
 }
 
 function make(opts: MakeOptions = {}): World {
@@ -115,7 +116,7 @@ function make(opts: MakeOptions = {}): World {
   );
   const deps: FacadeDeps = {
     data,
-    schema: { properties: async () => props },
+    schema: { properties: async () => props, ...(opts.optionNames ? { optionNames: opts.optionNames } : {}) },
     clock: createFakeClock('2026-10-21T12:00:00Z'),
   };
   const list = recordList(deps, handle, opts.options);
@@ -817,6 +818,58 @@ describe('recordList: filters and chips', () => {
       { kind: 'selected', column: 'status_id', label: 'Status', operator: 'in', value: '(1,2,3)', count: 3 },
       { kind: 'selected', column: 'assignee_id', label: 'Assignee', operator: 'in', value: '7', count: 1 },
     ]);
+  });
+
+  // Issue #72: Status and Category chips showed raw ids, "Status ((22,23))"
+  describe('Status and Category chips', () => {
+    const state = prop('state_id', T.Status, { display_name: 'State', filterable: true, status_entity_type: 'issue' });
+    const kind = prop('kind_id', T.Category, { display_name: 'Kind', filterable: true, category_entity_type: 'issue' });
+    const named = [P.name, state, kind];
+    const names = (property: SchemaEntityProperty) =>
+      Promise.resolve(new Map(property.column_name === 'state_id' ? [['22', 'Pending'], ['23', 'Approved']] : [['4', 'Youth']]));
+
+    it('names the values of in and eq filters once the names load, in filter order, keeping unknown ids', async () => {
+      const optionNames = vi.fn(names);
+      const w = make({
+        props: named,
+        optionNames,
+        options: { initial: { filters: [{ column: 'state_id', operator: 'in', value: '(23,22,99)' }, { column: 'kind_id', operator: 'eq', value: '4' }] } },
+      });
+      await flush();
+      expect(w.list.getSnapshot().chips).toEqual([
+        { kind: 'named', column: 'state_id', label: 'State', operator: 'in', value: '(23,22,99)', names: ['Approved', 'Pending', '99'] },
+        { kind: 'named', column: 'kind_id', label: 'Kind', operator: 'eq', value: '4', names: ['Youth'] },
+      ]);
+      expect(optionNames).toHaveBeenCalledTimes(2);
+      expect(optionNames.mock.calls.map(c => c[0].column_name).sort()).toEqual(['kind_id', 'state_id']);
+    });
+
+    it('loads each column\'s names once', async () => {
+      const optionNames = vi.fn(names);
+      const w = make({ props: named, optionNames, options: { initial: { filters: [{ column: 'state_id', operator: 'eq', value: '22' }] } } });
+      await flush();
+      w.list.set({ filters: [{ column: 'state_id', operator: 'in', value: '(22,23)' }] });
+      await flush();
+      expect(optionNames).toHaveBeenCalledTimes(1);
+      expect(w.list.getSnapshot().chips[0]).toMatchObject({ kind: 'named', names: ['Pending', 'Approved'] });
+    });
+
+    it('shows ids as a value chip without optionNames, or when the names fail to load', async () => {
+      const filters = [{ column: 'state_id', operator: 'in', value: '(22,23)' }];
+      const plain = make({ props: named, options: { initial: { filters } } });
+      await flush();
+      expect(plain.list.getSnapshot().chips).toEqual([{ kind: 'value', column: 'state_id', label: 'State', operator: 'in', value: '(22,23)' }]);
+
+      const failing = make({ props: named, optionNames: () => Promise.reject(new Error('offline')), options: { initial: { filters } } });
+      await flush();
+      expect(failing.list.getSnapshot().chips[0]).toMatchObject({ kind: 'value', value: '(22,23)' });
+    });
+
+    it('keeps other operators on a Status column as value chips', async () => {
+      const w = make({ props: named, optionNames: names, options: { initial: { filters: [{ column: 'state_id', operator: 'neq', value: '22' }] } } });
+      await flush();
+      expect(w.list.getSnapshot().chips).toEqual([{ kind: 'value', column: 'state_id', label: 'State', operator: 'neq', value: '22' }]);
+    });
   });
 
   it('marks a Boolean filter yes or no', async () => {

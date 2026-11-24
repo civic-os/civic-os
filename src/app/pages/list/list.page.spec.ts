@@ -30,7 +30,7 @@ import { NotesService } from '../../services/notes.service';
 import { BehaviorSubject, of } from 'rxjs';
 import type { EntityHandle, FacadeDeps } from '@civic-os/core';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
-import { SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { FACADE_DEPS } from '../../sdk/facade-deps';
 import { LIST_PAGE_SIZE_STORAGE_KEY } from '../../sdk/list-url';
 import { TimeSlotCalendarComponent } from '../../components/time-slot-calendar/time-slot-calendar.component';
@@ -657,6 +657,27 @@ describe('ListPage', () => {
                 `${MOCK_PROPERTIES.user.display_name} (≥ 2)`
             ]);
             expect(component.isFiltered()).toBe(true);
+        });
+
+        // Issue #72: Status and Category chips name their values instead of showing ids
+        it('names Status values, the first two then +N', async () => {
+            const state = createMockProperty({
+                column_name: 'state_id', display_name: 'State', type: EntityPropertyType.Status,
+                status_entity_type: 'issue', filterable: true, show_on_list: true
+            });
+            mockSchemaService.getStatusOptionsSync = vi.fn(() => []);
+            mockSchemaService.ensureStatusOptionsLoaded = vi.fn();
+            (TestBed.inject(FACADE_DEPS) as any).schema.optionNames = () =>
+                Promise.resolve(new Map([['22', 'Pending'], ['23', 'Approved'], ['24', 'Denied']]));
+            queryParams.next({ f0_col: 'state_id', f0_op: 'in', f0_val: '(22,23,24)' });
+            await mount(MOCK_ENTITIES.issue, [MOCK_PROPERTIES.textShort, state]);
+            await advanceTime(10);
+
+            expect(component.filterChips().map(c => `${c.columnLabel} (${c.displayValue})`)).toEqual(['State (Pending, Approved +1)']);
+
+            queryParams.next({ f0_col: 'state_id', f0_op: 'eq', f0_val: '23' });
+            await advanceTime(10);
+            expect(component.filterChips().map(c => c.displayValue)).toEqual(['Approved']);
         });
     });
 

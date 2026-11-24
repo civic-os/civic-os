@@ -487,6 +487,8 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
 - PostgreSQL with River tables (`metadata.river_job`, `metadata.river_leader`)
 - Environment variables: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `DB_MAX_CONNS`
 
+**Files attached on Create pages** (v0.86.5, v0.87.0): a file chosen before the record exists is uploaded at once and staged under `{entity_type}/_new/{file_id}/`; the record saves its id like any other column. The consolidated worker's file reconcile job then moves it to `{entity_type}/{entity_id}/{file_id}/` and deletes staged files no record references after `FILE_ORPHAN_TTL` (default 7 days). It finds file columns from their foreign keys to `metadata.files(id)`, so a new file column needs nothing beyond that foreign key (and its index). Configure it with `FILE_RECONCILE_INTERVAL` (default `5m`, `0` disables) and `FILE_ORPHAN_TTL` on the worker. On AWS the worker's IAM policy needs `s3:DeleteObject` (new in v0.87.0). See `docs/development/FILE_STORAGE.md` (Staged Uploads and File Reconcile).
+
 **Implementation Guide**: See `docs/development/FILE_STORAGE.md` for complete setup instructions including adding file properties to your schema, validation configuration, and deployment examples.
 
 **Signed File Access URLs** (designed, ready to build): Currently, S3 files use `public-read` ACL and access relies on UUID obscurity. A planned upgrade will generate SigV4 presigned URLs directly in the `public.files` VIEW using `pgcrypto`, enforcing RLS before granting file access with 15-minute URL expiry. Private-by-default with opt-in `is_public` flag per file. Phase 2 will also move upload URL signing into PostgreSQL, eliminating the async polling workflow. See `docs/notes/SIGNED_FILE_URLS_DESIGN.md` for the full design and `docs/notes/SIGV4_SIGNING_REFERENCE.md` for the signing algorithm reference.
@@ -665,6 +667,8 @@ Fields:
 - the user created it (`created_by` is the real signed-in user id);
 - `is_public` is true;
 - the user holds a role with a `dashboard_roles` row for it, in either mode.
+
+A direct link to a dashboard the caller may not see (or one that does not exist; the page does not tell them apart, so ids do not leak) shows "This dashboard isn't available" with a link to the home dashboard, and a Log In button for anonymous visitors, not a load failure (v0.86.4).
 
 Rows only grant; **`is_public = false` is the only restriction switch**. Modes: `show` lets a role see the dashboard; `default` also makes it that role's landing dashboard. They are separate rows (primary key `dashboard_id, role_id, mode`), so a role can hold both on one dashboard; a default grants visibility too, so a role with a default needs no show row. `priority` orders defaults when a user holds several roles (higher wins). A role has at most one default dashboard. Roles are matched on `role_key` against `get_user_roles()`, which reads the JWT roles, honors role impersonation, and returns `anonymous` for signed-out visitors.
 
@@ -3075,7 +3079,7 @@ SELECT create_recurring_series(
 | `reschedule_occurrence()` | Reschedule single occurrence |
 | `delete_series_with_instances()` | Delete one series version and its records |
 
-**Series edits and permissions (v0.76.9+)**: `split_series_from_date()` and `update_series_template()` require `update` permission on the entity table as well as series ownership (or admin). Status columns never propagate through a template, so change workflow state with actions. An occurrence edited directly (from its own Edit page, an action or SQL) becomes an exception: `rescheduled` if its time slot changed, otherwise `modified`. Later series edits leave it alone. `time_slot_series.timezone` must be an exact IANA name from `pg_timezone_names`, for example `America/New_York`; offsets and wrong-case names are rejected.
+**Series edits and permissions (v0.76.9+)**: `split_series_from_date()` and `update_series_template()` require `update` permission on the entity table as well as series ownership (or admin). Status columns never propagate through a template, so change workflow state with actions. Since v0.86.3 the occurrence edited in a "this and following" split is saved with the caller's own rights: your RLS UPDATE policies and column grants apply to it as they do to a direct edit, and if they refuse the change (or hide the row) the whole split is rolled back with a permission error. An occurrence edited directly (from its own Edit page, an action or SQL) becomes an exception: `rescheduled` if its time slot changed, otherwise `modified`. Later series edits leave it alone. `time_slot_series.timezone` must be an exact IANA name from `pg_timezone_names`, for example `America/New_York`; offsets and wrong-case names are rejected.
 
 **Series deletes (v0.78.1+)**: deleting a series record from its Detail page asks for a scope. "This occurrence only" deletes that record; "This and future occurrences" ends the series on the day before and deletes that record and every later one, including records edited on their own and every later version from a "this and future" edit; "All occurrences" deletes the whole group. Every delete RPC requires `delete` permission on the entity table as well as series ownership (or admin). These are **hard deletes**: the framework has no soft delete yet, so a deleted record can only be restored from a backup. If another table references the records with a restricting foreign key (`ON DELETE RESTRICT` or `NO ACTION`, the default), the delete fails as a whole and nothing is removed; add `ON DELETE CASCADE` or `SET NULL` where dependent rows should follow, or clear them first.
 
@@ -4373,7 +4377,7 @@ The scheduled jobs system uses a **Scheduler + Executor pattern**:
    - Updates `last_run_at` on the job configuration
    - Logs success/failure with timing
 
-**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. Duplicate prevention via `unique_key` ensures the same scheduled time is never executed twice.
+**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. River's unique jobs (by job and scheduled time, in every job state) ensure the same scheduled time is never executed twice.
 
 > **Scaling Note**: The scheduled jobs scheduler runs in a single consolidated-worker instance. If you scale to multiple instances, the scheduler runs on each, but job deduplication prevents duplicate execution. For large-scale deployments, see `docs/notes/SCHEDULED_JOBS_DESIGN.md` for guidance on River leader election configuration.
 

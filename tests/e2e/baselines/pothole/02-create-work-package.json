@@ -67,6 +67,25 @@
         },
         {
           "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_entities",
           "query": {},
           "headers": {
@@ -287,16 +306,18 @@
             "authorization": "Bearer <present>"
           },
           "body": {
+            "attachment": null,
             "cost": 1250.5,
             "display_name": "Harness Resurfacing Package",
             "quote_due_date": "2031-03-14T18:30:00.000Z",
+            "report_pdf": null,
             "status": "14"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"display_name\":\"Harness Resurfacing Package\",\"quote_due_date\":\"2031-03-14T18:30:00.000Z\",\"status\":\"14\",\"cost\":1250.5}",
+              "body": "{\"display_name\":\"Harness Resurfacing Package\",\"quote_due_date\":\"2031-03-14T18:30:00.000Z\",\"status\":\"14\",\"cost\":1250.5,\"report_pdf\":null,\"attachment\":null}",
               "url": "/WorkPackage"
             }
           ]

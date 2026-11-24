@@ -150,8 +150,11 @@ export class CalendarWidgetComponent {
         return;
       }
 
-      // Check permission asynchronously
-      this.checkCreatePermission(entityKey);
+      // The widget can render before get_current_user_permissions returns (issue #148), and
+      // hasPermission() reads its cache untracked, so permissionsLoaded() is what re-runs this. It
+      // starts no requests. While a refresh is in flight the last result is kept.
+      if (!this.authService.permissionsLoaded()) return;
+      untracked(() => this.checkCreatePermission(entityKey));
     });
   }
 

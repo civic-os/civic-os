@@ -27,7 +27,7 @@
 import path from 'node:path';
 import type { Page } from '@playwright/test';
 import { test, expect, ARTIFACT_DIR } from '../lib/harness.ts';
-import { listRow, topPagination, expectHeading, saveEdit, backToRecord, withResponse, pgResponse, actionParam, routeId } from '../lib/ui.ts';
+import { listRow, topPagination, expectHeading, saveEdit, backToRecord, withResponse, pgResponse, actionParam, routeId, fieldName } from '../lib/ui.ts';
 import { POSTGREST_ORIGIN } from '../lib/config.mjs';
 import { writePng } from '../lib/files.mjs';
 
@@ -140,7 +140,7 @@ test('03 project with parcels and gallery', async ({ harness }) => {
 
   await harness.step('fill and save', async () => {
     await page.getByRole('textbox', { name: 'Display Name' }).fill(PROJECT);
-    await page.getByRole('textbox', { name: 'Description' }).fill('Clear debris from the alley behind Main St.');
+    await page.getByRole('textbox', { name: fieldName('Description') }).fill('Clear debris from the alley behind Main St.');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByRole('button', { name: /^View / })).toBeVisible();
   });
@@ -198,11 +198,11 @@ test('04 borrower address action and photo ID upload', async ({ harness }) => {
 
   await harness.step('open edit form', async () => {
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Photo ID', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: fieldName('Photo ID') })).toBeVisible();
   });
 
   await harness.step('upload photo ID', async () => {
-    await page.getByRole('button', { name: 'Photo ID', exact: true }).setInputFiles(PHOTO_ID);
+    await page.getByRole('button', { name: fieldName('Photo ID') }).setInputFiles(PHOTO_ID);
     await expect(page.getByText('Uploaded: photo-id.png')).toBeVisible({ timeout: 45_000 });
   });
 
@@ -328,13 +328,14 @@ test('07 list URL state, chips and page size', async ({ harness }) => {
     await page.getByRole('button', { name: 'Filters' }).click();
     await page.getByRole('checkbox', { name: 'Residential' }).check();
     await expect(page).toHaveURL(/f0_col=property_class&f0_op=in&f0_val=\(\d+\)/);
-    await expect(page.getByText(/^Property Class \(\(\d+\)\)$/)).toBeVisible();
+    // Category chips name their values (issue #72)
+    await expect(page.getByText('Property Class (Residential)', { exact: true })).toBeVisible();
   });
 
   await harness.step('add a second property class', async () => {
     await page.getByRole('checkbox', { name: 'Commercial' }).check();
     await expect(page).toHaveURL(/f0_val=\(\d+(,|%2C)\d+\)/);
-    await expect(page.getByText(/^Property Class \(\(\d+,\d+\)\)$/)).toBeVisible();
+    await expect(page.getByText(/^Property Class \((Residential, Commercial|Commercial, Residential)\)$/)).toBeVisible();
   });
 
   await harness.step('clear all from the filter bar', async () => {
@@ -673,7 +674,7 @@ test('10 edit pages: stored values, invalid submit, coordinated save, returnTo, 
   await harness.step('project edit shows the stored values', async () => {
     await page.goto(`/edit/projects/${ids.project}`);
     await expect(name).toHaveValue(PROJECT_NAME);
-    await expect(page.getByRole('textbox', { name: 'Description' })).toHaveValue('Harness edit description.');
+    await expect(page.getByRole('textbox', { name: fieldName('Description') })).toHaveValue('Harness edit description.');
     for (const n of PARCELS_BEFORE) await expect(page.getByText(n, { exact: true })).toBeVisible();
     await expect(photos).toContainText('0 / 10 images');
     await expect(fieldErrors).toHaveCount(0);

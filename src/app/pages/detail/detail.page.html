@@ -4,8 +4,9 @@
     <!-- Entity found in schema - try to load data (let RLS determine access) -->
     @if (snapshot(); as snap) {
       @if (record(); as data) {
-          <!-- Header row (clean, just back button + title) -->
-        <div class="flex items-center gap-4 mb-2 mt-4">
+          <!-- Header row (back button + title, then the admin's source link, which wraps under
+               the title when the row is too narrow, as at phone width) -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-2 mt-4" data-testid="detail-header-row">
           <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button" [attr.aria-label]="'action.back' | translate">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>

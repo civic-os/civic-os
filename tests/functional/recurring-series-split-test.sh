@@ -15,6 +15,8 @@
 #      moves the following non-exception occurrences, keeps COUNT a series total,
 #      and refuses a second split of the same series on the same date.
 #   5. time_slot_series.timezone must be an exact pg_timezone_names name.
+#   6. The edited occurrence of a split is written with the caller's rights: a
+#      change the caller's RLS refuses rolls the whole split back (v0.86.3, #57).
 #
 # Usage:
 #   ./tests/functional/recurring-series-split-test.sh
@@ -163,6 +165,53 @@ for tz in "america/new_york" "+05:30" "EST5EDT_bogus"; do
 done
 R=$(rpc "$ADMIN_TOKEN" create_recurring_series "{\"p_group_name\":\"rsst-tz\",\"p_group_description\":null,\"p_group_color\":null,\"p_entity_table\":\"reservation_requests\",\"p_entity_template\":{\"purpose\":\"rsst-tz\"},\"p_rrule\":\"FREQ=WEEKLY;COUNT=1\",\"p_dtstart\":\"2026-11-04T10:00:00\",\"p_duration\":\"01:00:00\",\"p_timezone\":\"America/New_York\",\"p_time_slot_property\":\"time_slot\",\"p_expand_now\":false,\"p_skip_conflicts\":false}")
 check "timezone 'America/New_York' is accepted" "2" "${R:0:1}"
+
+# -----------------------------------------------------------------------------
+section "6. The edited occurrence is written with the caller's rights (v0.86.3, issue #57)"
+# Every write here happens in one psql transaction that is rolled back: the restrictive
+# policies stand in for an instance whose RLS is narrower than has_permission(), and the
+# calls run as authenticated with testeditor's real JWT claims (never as postgres).
+S6=$(create_series "$EDITOR_TOKEN" "rsst-invoker" "FREQ=WEEKLY;BYDAY=WE;COUNT=3" "2026-11-04T08:00:00")
+wait_instances "$S6" 3
+E6=$(entity_on "$S6" 2026-11-11)
+EDITOR_CLAIMS=$(echo "$EDITOR_TOKEN" | cut -d. -f2 | python3 -c "import sys,base64;s=sys.stdin.read().strip();s+='='*(-len(s)%4);print(base64.urlsafe_b64decode(s).decode())")
+split6() { # edited values json -> SQLSTATE of the split ('ok' on success)
+  echo "DO \$x\$ BEGIN
+    PERFORM split_series_from_date($S6, '2026-11-11', '2026-11-11T08:00:00', NULL, NULL, $E6, '$1'::jsonb);
+    RAISE NOTICE 'RESULT ok';
+  EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'RESULT %', SQLSTATE; END \$x\$;"
+}
+OUT=$(psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDB" -Atq 2>&1 <<SQL
+BEGIN;
+CREATE POLICY rsst_no_approve ON reservation_requests AS RESTRICTIVE FOR UPDATE
+  USING (true) WITH CHECK (status_id IS DISTINCT FROM $APPROVED);
+CREATE POLICY rsst_hide_occurrence ON reservation_requests AS RESTRICTIVE FOR UPDATE
+  USING (id <> $E6);
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims', '$EDITOR_CLAIMS', true);
+$(split6 "{\"status_id\":$APPROVED}")
+RESET ROLE;
+DROP POLICY rsst_no_approve ON reservation_requests;
+SET LOCAL ROLE authenticated;
+$(split6 '{"purpose":"rsst-invoker-hidden"}')
+RESET ROLE;
+SELECT 'VERSIONS ' || count(*) FROM metadata.time_slot_series WHERE group_id = (SELECT group_id FROM metadata.time_slot_series WHERE id = $S6) OR id = $S6;
+DROP POLICY rsst_hide_occurrence ON reservation_requests;
+SET LOCAL ROLE authenticated;
+$(split6 '{"purpose":"rsst-invoker-allowed"}')
+RESET ROLE;
+SELECT 'PURPOSE ' || purpose FROM reservation_requests WHERE id = $E6;
+ROLLBACK;
+SQL
+)
+RESULTS=$(echo "$OUT" | grep -o 'RESULT [0-9a-z]*' | cut -d' ' -f2 | tr '\n' ' ')
+check "a status change the caller's RLS forbids is refused (42501)" "42501" "$(echo "$RESULTS" | cut -d' ' -f1)"
+check "an occurrence the caller's RLS hides from UPDATE is refused, not split silently (42501)" "42501" "$(echo "$RESULTS" | cut -d' ' -f2)"
+check "the refused splits rolled back their series bookkeeping" "1" "$(echo "$OUT" | grep -o 'VERSIONS [0-9]*' | cut -d' ' -f2)"
+check "a change the caller's RLS allows still saves with the split" "ok|rsst-invoker-allowed" \
+  "$(echo "$RESULTS" | cut -d' ' -f3)|$(echo "$OUT" | grep -o 'PURPOSE .*' | cut -d' ' -f2)"
+check "nothing from the rolled-back transaction persisted" "pending|1" \
+  "$(q "select s.status_key from reservation_requests r join metadata.statuses s on s.id=r.status_id where r.id=$E6")|$(q "select count(*) from metadata.time_slot_series where id=$S6 or group_id=(select group_id from metadata.time_slot_series where id=$S6)")"
 
 echo ""
 echo "Passed: $PASS  Failed: $FAIL"

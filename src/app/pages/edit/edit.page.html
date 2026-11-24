@@ -19,17 +19,14 @@
             </div>
           }
         } @else {
-          <div class="flex items-center gap-4 mb-4">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4">
             <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button" [attr.aria-label]="'action.back' | translate">
               <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             </button>
             <h1 class="mb-0">
               {{ entity.display_name }}: {{ data.display_name || '#' + data.id }} <sub>(Id: {{entityId}})</sub>
               @if (entity.description) {
-                <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description" aria-hidden="true">
-                  <span class="material-symbols-outlined text-info cursor-help ms-2 text-xl align-middle">help_outline</span>
-                </div>
-                <span class="sr-only">{{ entity.description }}</span>
+                <app-help-toggletip class="ms-2" size="title" [text]="entity.description" [subject]="entity.display_name" panelId="entity-description" [(open)]="descriptionOpen" />
               }
             </h1>
             @if (seriesMembership()?.is_member) {
@@ -39,6 +36,9 @@
               </a>
             }
           </div>
+          @if (entity.description) {
+            <div id="entity-description" class="not-prose text-sm text-base-content/80 bg-base-200 rounded-box px-4 py-3 mb-4 whitespace-pre-line" [hidden]="!descriptionOpen()">{{ entity.description }}</div>
+          }
         }
         @if (loading()) {
           <div class="flex justify-center my-8">

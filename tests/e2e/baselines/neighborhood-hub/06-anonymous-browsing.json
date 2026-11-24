@@ -64,6 +64,24 @@
         },
         {
           "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_entities",
           "query": {},
           "headers": {
@@ -209,7 +227,7 @@
           "path": "/tool_types",
           "query": {
             "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -224,7 +242,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -282,6 +300,24 @@
             {
               "body": null,
               "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
             }
           ]
         },
@@ -393,7 +429,7 @@
           "query": {
             "display_name": "ilike.*mower*",
             "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -408,7 +444,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*mower*"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*mower*"
             }
           ]
         }
@@ -478,11 +514,10 @@
         },
         {
           "method": "GET",
-          "path": "/tool_types",
+          "path": "/tool_categories",
           "query": {
-            "id": "eq.16",
-            "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id"
+            "order": "sort_order.asc.nullslast,display_name.asc,id.asc",
+            "select": "id:id,label:display_name,parent_id:parent_id,active:is_active"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -494,7 +529,29 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id&order=display_name.asc,id.asc&id=eq.16"
+              "url": "/tool_categories?select=id:id,label:display_name,parent_id:parent_id,active:is_active&order=sort_order.asc.nullslast,display_name.asc,id.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/tool_types",
+          "query": {
+            "id": "eq.16",
+            "order": "display_name.asc,id.asc",
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_request_equipment!mek_request_equipment_id(mek_requests!mek_request_id(id,display_name))),tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name))),id&order=display_name.asc,id.asc&id=eq.16"
             }
           ]
         }

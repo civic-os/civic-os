@@ -376,6 +376,6 @@ export class UserManagementService {
    * The user management RPCs enforce the same rule server-side (`OR is_admin()`).
    */
   hasUserManagementAccess(): boolean {
-    return this.auth.hasPermission('civic_os_users_private', 'update') || this.auth.isAdmin();
+    return this.auth.permission('civic_os_users_private', 'update')() || this.auth.isAdmin();
   }
 }

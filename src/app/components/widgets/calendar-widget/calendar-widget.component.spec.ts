@@ -130,7 +130,8 @@ describe('CalendarWidgetComponent', () => {
             resolveWidgetFilters: vi.fn((filters: unknown[] | undefined) => of(filters ?? [])).mockName("SchemaService.resolveWidgetFilters")
         };
         mockAuthService = {
-            hasPermission: vi.fn().mockName("AuthService.hasPermission")
+            hasPermission: vi.fn().mockName("AuthService.hasPermission"),
+            permissionsLoaded: signal(true)
         };
         mockRouter = {
             navigate: vi.fn().mockName("Router.navigate"),
@@ -534,6 +535,54 @@ describe('CalendarWidgetComponent', () => {
 
         await advanceTime(10);
         expect(mockAuthService.hasPermission).toHaveBeenCalledWith('appointments', 'create');
+    });
+
+    describe('permissions that load after the widget (issue #148)', () => {
+        const widgetWithButton: DashboardWidget = {
+            ...mockWidget,
+            config: { ...mockWidget.config, showCreateButton: true }
+        };
+
+        function createButton(): HTMLButtonElement | undefined {
+            return Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+                .find(b => b.textContent?.includes('Create'));
+        }
+
+        it('shows the create button once permissions load', async () => {
+            mockAuthService.permissionsLoaded.set(false);
+            mockAuthService.hasPermission.mockReturnValue(false);
+            fixture.componentRef.setInput('widget', widgetWithButton);
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expect(component.canShowCreateButton()).toBe(false);
+            expect(createButton()).toBeUndefined();
+
+            mockAuthService.hasPermission.mockReturnValue(true);
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expect(component.canShowCreateButton()).toBe(true);
+            expect(createButton()).toBeDefined();
+        });
+
+        it('does not refetch events when permissions load', async () => {
+            mockAuthService.permissionsLoaded.set(false);
+            fixture.componentRef.setInput('widget', widgetWithButton);
+            fixture.detectChanges();
+            await advanceTime(10);
+            const fetches = mockDataService.getData.mock.calls.length;
+            expect(fetches).toBeGreaterThan(0);
+
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(mockDataService.getData).toHaveBeenCalledTimes(fetches);
+        });
     });
 
     describe('Filter Application', () => {

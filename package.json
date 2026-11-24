@@ -1,6 +1,6 @@
 {
   "name": "civic-os",
-  "version": "0.86.1",
+  "version": "0.86.4",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "workspaces": [
@@ -63,6 +63,7 @@
     "test:leaks": "node scripts/detect-async-leaks.mjs",
     "test:ledger:self": "node --test scripts/test-ledger.test.mjs",
     "nightly:selftest": "node --test scripts/nightly-report.test.mjs",
+    "versions:selftest": "node --test scripts/sync-versions.test.mjs",
     "golden:selftest": "node --test scripts/golden/volatile.test.mjs scripts/golden/ledger-decisions.test.mjs scripts/golden/approved-diff.test.mjs scripts/golden/interpreter-diff.test.mjs",
     "golden:interpreter": "node scripts/golden/interpreter-diff.mjs",
     "e2e:install": "npm --prefix tests/e2e ci && npx --prefix tests/e2e playwright install chromium",

@@ -47,6 +47,11 @@ data:
   # Scale based on your workload and available resources
   THUMBNAIL_MAX_WORKERS: "5"
 
+  # File reconcile (v0.87.0): claims files staged on Create pages for their records and deletes
+  # unreferenced staged files after FILE_ORPHAN_TTL. Go durations; FILE_RECONCILE_INTERVAL "0" disables.
+  FILE_RECONCILE_INTERVAL: "5m"
+  FILE_ORPHAN_TTL: "168h"
+
   # Notification Configuration (v0.11.0+)
   # Public URL for links in notification emails, and the base of the paid
   # record's link (civic_os_record_url) on Stripe objects (v0.81.4+)

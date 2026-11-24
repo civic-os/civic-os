@@ -31,6 +31,7 @@
       @for (entity of entities(); track entity.table_name; let i = $index) {
         <div
           class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
+          [attr.data-row-key]="entity.table_name"
           cdkDrag>
           <div class="card-body p-4">
             <div class="flex items-center gap-4">
@@ -44,6 +45,7 @@
                     type="button"
                     class="btn btn-ghost btn-xs px-1"
                     [disabled]="i === 0"
+                    data-action="up"
                     (click)="moveUp(i)"
                     [attr.aria-label]="'a11y.move_up' | translate:{ name: getEntityName(entity) }">
                     <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
@@ -52,6 +54,7 @@
                     type="button"
                     class="btn btn-ghost btn-xs px-1"
                     [disabled]="i === entities().length - 1"
+                    data-action="down"
                     (click)="moveDown(i)"
                     [attr.aria-label]="'a11y.move_down' | translate:{ name: getEntityName(entity) }">
                     <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>

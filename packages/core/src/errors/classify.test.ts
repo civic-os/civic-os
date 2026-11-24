@@ -94,6 +94,15 @@ describe('classifyPostgrestError', () => {
     expect(classifyPostgrestError({ code: '22008' }).kind).toBe('invalidDate');
     expect(classifyPostgrestError({ httpCode: 412 }).kind).toBe('preconditionFailed');
     expect(classifyPostgrestError({ code: '23503', httpCode: 409 }).kind).toBe('foreignKey');
+    // Issue #141: the column and the referenced table, from PostgreSQL's detail line.
+    expect(classifyPostgrestError({ code: '23503', httpCode: 409, details: 'Key (photo)=(0190a1b2-0000-7000-8000-000000000001) is not present in table "files".' }))
+      .toEqual({ kind: 'foreignKey', params: { column: 'photo', referencedTable: 'files' } });
+    expect(classifyPostgrestError({ code: '23503', details: 'Key (status_id)=(9) is not present in table "statuses".' }).params)
+      .toEqual({ column: 'status_id', referencedTable: 'statuses' });
+    // An API role sees the redacted form: the table only.
+    expect(classifyPostgrestError({ code: '23503', details: 'Key is not present in table "files".' }).params).toEqual({ referencedTable: 'files' });
+    // A delete blocked by a reference has another detail line: no params.
+    expect(classifyPostgrestError({ code: '23503', details: 'Key (id)=(3) is still referenced from table "Issue".' }).params).toEqual({});
     expect(classifyPostgrestError({ code: 'PGRST116', httpCode: 406 }).kind).toBe('noRows');
     // PT503 stays with the maintenance interceptor: no kind of its own.
     expect(classifyPostgrestError({ code: 'PT503', httpCode: 503 }).kind).toBe('system');

@@ -795,7 +795,7 @@ interface DataRequestOptions {
 Kind: const. Consumer: mcp.
 
 ```ts
-const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
+const DEFAULT_ERROR_MESSAGES: { network: string; permission: string; unique: string; notNull: ({ params }: ErrorMessageContext) => string; foreignKey: ({ params }: ErrorMessageContext) => string; check: ({ params }: ErrorMessageContext) => string; exclusion: ({ params }: ErrorMessageContext) => string; invalidInput: ({ params }: ErrorMessageContext) => string; invalidDate: string; noRows: string; notFound: string; sessionExpired: string; preconditionFailed: string; raise: ({ params }: ErrorMessageContext) => string; system: string; };
 ```
 
 ### `defaultColumns`
@@ -1000,6 +1000,7 @@ interface EditorSchema {
   formRenderables(entity: EntityHandle, mode: 'create' | 'edit'): Promise<readonly RenderableItem[]>;
   constraintMessages(): readonly ConstraintMessage[] | undefined;
   properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+  optionNames?: ((property: SchemaEntityProperty) => Promise<ReadonlyMap<string, string>>) | undefined;
 }
 ```
 
@@ -1455,6 +1456,7 @@ interface ErrorParams {
   constraintName?: string | undefined;
   column?: string | undefined;
   expectedType?: string | undefined;
+  referencedTable?: string | undefined;
 }
 ```
 
@@ -1509,6 +1511,7 @@ Kind: interface. Consumer: typed FacadeDeps.
 ```ts
 interface FacadeSchema {
   properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+  optionNames?: ((property: SchemaEntityProperty) => Promise<ReadonlyMap<string, string>>) | undefined;
 }
 ```
 
@@ -2241,7 +2244,7 @@ interface ListCalendarEvent {
 Kind: type. Consumer: typed recordList.
 
 ```ts
-type ListFilterChip = { readonly kind: 'range'; readonly column: string; readonly label: string; readonly min: unknown; readonly max: unknown; } | { readonly kind: 'gte' | 'lte'; readonly column: string; readonly label: string; readonly value: unknown; } | { readonly kind: 'selected'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly count: number; } | { readonly kind: 'boolean'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly yes: boolean; } | { readonly kind: 'value'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; };
+type ListFilterChip = { readonly kind: 'range'; readonly column: string; readonly label: string; readonly min: unknown; readonly max: unknown; } | { readonly kind: 'gte' | 'lte'; readonly column: string; readonly label: string; readonly value: unknown; } | { readonly kind: 'selected'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly count: number; } | { readonly kind: 'named'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly names: readonly string[]; } | { readonly kind: 'boolean'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; readonly yes: boolean; } | { readonly kind: 'value'; readonly column: string; readonly label: string; readonly operator: string; readonly value: unknown; };
 ```
 
 ### `ListMapFeature`
@@ -4623,6 +4626,7 @@ interface ViewerSchema {
   inverseRelationships(entity: EntityHandle, excludeTables?: ReadonlySet<string>): Promise<readonly InverseRelationshipMeta[]>;
   entities(): Promise<readonly SchemaEntityTable[]>;
   properties(entity: SchemaEntityTable): Promise<readonly SchemaEntityProperty[]>;
+  optionNames?: ((property: SchemaEntityProperty) => Promise<ReadonlyMap<string, string>>) | undefined;
 }
 ```
 

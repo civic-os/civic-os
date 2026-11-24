@@ -73,7 +73,7 @@ export class AdminFilesPage implements OnInit, OnDestroy {
   private readonly apiUrl = getPostgrestUrl();
 
   // Permission
-  canViewFiles = computed(() => this.auth.hasPermission('files', 'read'));
+  canViewFiles = this.auth.permission('files', 'read');
 
   // Data + loading
   loading = signal(true);
