@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, signal, inject, ChangeDetectionStrategy, effect, computed, output } from '@angular/core';
+import { Component, input, signal, inject, ChangeDetectionStrategy, effect, computed, output, untracked } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -64,7 +64,10 @@ export class EntityNotesComponent {
   error = signal<string | undefined>(undefined);
   canRead = signal(false);
   canCreate = signal(false);
-  isAdmin = signal(false);
+  /** Tracked through the roles signal, so it follows late role loads and impersonation. */
+  isAdmin = computed(() => this.authService.isAdmin());
+  /** Set once the permissions have loaded and been read, so notes never load on the defaults. */
+  private permissionsChecked = signal(false);
 
   // New note form
   newNoteContent = signal('');
@@ -110,14 +113,31 @@ export class EntityNotesComponent {
   }
 
   constructor() {
-    // Load notes and check permissions when inputs change OR refresh is triggered
+    // Notes permissions. The component can render before get_current_user_permissions returns
+    // (issue #148), and hasPermission() reads its cache untracked, so permissionsLoaded() is what
+    // re-runs this. It starts no requests. While a refresh is in flight the cache is empty, so the
+    // last result is kept until it loads again.
+    effect(() => {
+      const entityType = this.entityType();
+      if (!entityType || !this.authService.permissionsLoaded()) return;
+      untracked(() => {
+        this.canRead.set(this.authService.hasPermission(entityType + ':notes', 'read'));
+        this.canCreate.set(this.authService.hasPermission(entityType + ':notes', 'create'));
+        this.permissionsChecked.set(true);
+      });
+    });
+
+    // Load notes when inputs change, refresh is triggered, or read access changes. Signals skip
+    // equal writes, so a permissions refresh that keeps read access sends no request.
     effect(() => {
       const entityType = this.entityType();
       const entityId = this.entityId();
-      const trigger = this.refreshTrigger();  // Track refresh trigger signal
+      this.refreshTrigger();  // Track refresh trigger signal
+      if (!this.permissionsChecked()) return;
+      this.canRead();
 
       if (entityType && entityId) {
-        this.loadNotesAndPermissions();
+        untracked(() => this.loadNotes());
       }
     });
 
@@ -134,21 +154,13 @@ export class EntityNotesComponent {
     }
   }
 
-  private async loadNotesAndPermissions() {
+  private async loadNotes() {
     this.loading.set(true);
     this.error.set(undefined);
 
     try {
-      // Check permissions (synchronous cache lookup) and admin status
-      const hasRead = this.authService.hasPermission(this.entityType() + ':notes', 'read');
-      const hasCreate = this.authService.hasPermission(this.entityType() + ':notes', 'create');
-
-      this.canRead.set(hasRead);
-      this.canCreate.set(hasCreate);
-      this.isAdmin.set(this.authService.isAdmin());
-
       // Only load notes if user has read permission
-      if (hasRead) {
+      if (this.canRead()) {
         const notes = await firstValueFrom(
           this.notesService.getNotes(this.entityType(), this.entityId())
         );
@@ -180,7 +192,7 @@ export class EntityNotesComponent {
         this.newNoteContent.set('');
         this.showAddForm.set(false);
         // Reload notes to get the new note with author info
-        await this.loadNotesAndPermissions();
+        await this.loadNotes();
         this.notesChanged.emit();
       } else {
         this.error.set(result.error?.humanMessage || 'Failed to add note');

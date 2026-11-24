@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy, effect, untracked } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -295,20 +295,41 @@ export class SeriesGroupManagementPage implements OnInit {
   // Computed filtered list
   filteredGroups = signal<SeriesGroup[]>([]);
 
+  /** Set once the permissions have loaded and been read, so the load effect never runs on the defaults. */
+  private permissionsChecked = signal(false);
+
+  constructor() {
+    // The page can open before get_current_user_permissions returns (issue #148), and hasPermission()
+    // reads its cache untracked, so permissionsLoaded() is what re-runs this. It starts no requests.
+    // While a refresh is in flight the cache is empty, so the last result is kept until it loads again.
+    effect(() => {
+      if (!this.authService.permissionsLoaded()) return;
+      untracked(() => {
+        this.hasPermission.set(this.authService.hasPermission('time_slot_series_groups', 'read'));
+        this.hasCreatePermission.set(this.authService.hasPermission('time_slot_series_groups', 'create'));
+        this.permissionsChecked.set(true);
+      });
+    });
+
+    // Loads when read access is known, and again only if it changes (signals skip equal writes),
+    // so a permissions refresh that keeps read access sends no requests.
+    effect(() => {
+      if (!this.permissionsChecked()) return;
+      const hasRead = this.hasPermission();
+      untracked(() => {
+        if (hasRead) {
+          this.loadGroups();
+          this.loadRecurringEntities();
+        } else {
+          this.groups.set([]);
+          this.updateFilteredGroups();
+          this.loading.set(false);
+        }
+      });
+    });
+  }
+
   ngOnInit(): void {
-    // Check permissions (synchronous cache lookup)
-    const hasRead = this.authService.hasPermission('time_slot_series_groups', 'read');
-    const hasCreate = this.authService.hasPermission('time_slot_series_groups', 'create');
-    this.hasPermission.set(hasRead);
-    this.hasCreatePermission.set(hasCreate);
-
-    if (hasRead) {
-      this.loadGroups();
-      this.loadRecurringEntities();
-    } else {
-      this.loading.set(false);
-    }
-
     // Check for groupId in route
     this.route.params.subscribe(params => {
       if (params['groupId']) {

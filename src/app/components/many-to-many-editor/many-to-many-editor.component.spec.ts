@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { ManyToManyEditorComponent } from './many-to-many-editor.component';
 import { DataService } from '../../services/data.service';
@@ -47,7 +47,8 @@ describe('ManyToManyEditorComponent', () => {
         };
 
         mockAuthService = {
-            hasPermission: vi.fn().mockName("AuthService.hasPermission")
+            hasPermission: vi.fn().mockName("AuthService.hasPermission"),
+            permissionsLoaded: signal(true)
         };
 
         // Default mock return values
@@ -168,6 +169,53 @@ describe('ManyToManyEditorComponent', () => {
 
             await advanceTime(10);
             expect(component.canEdit()).toBe(false);
+        });
+    });
+
+    describe('permissions that load after the editor (issue #148)', () => {
+        function editButton(): HTMLButtonElement | null {
+            return fixture.nativeElement.querySelector('button.btn-outline');
+        }
+
+        it('shows the edit button once permissions load', async () => {
+            mockAuthService.permissionsLoaded.set(false);
+            mockAuthService.hasPermission.mockReturnValue(false);
+            fixture.componentRef.setInput('entityId', 1);
+            fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+            fixture.componentRef.setInput('currentValues', []);
+
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expect(component.canEdit()).toBe(false);
+            expect(editButton()).toBeNull();
+
+            mockAuthService.hasPermission.mockReturnValue(true);
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expect(component.canEdit()).toBe(true);
+            expect(editButton()).not.toBeNull();
+        });
+
+        it('does not reload options when permissions load', async () => {
+            mockAuthService.permissionsLoaded.set(false);
+            fixture.componentRef.setInput('entityId', 1);
+            fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+            fixture.componentRef.setInput('currentValues', []);
+
+            fixture.detectChanges();
+            await advanceTime(10);
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await advanceTime(10);
+
+            expect(mockDataService.getData).toHaveBeenCalledTimes(1);
         });
     });
 

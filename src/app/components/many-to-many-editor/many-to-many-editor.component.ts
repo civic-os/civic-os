@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, signal, inject, output, ChangeDetectionStrategy, effect, computed } from '@angular/core';
+import { Component, input, signal, inject, output, ChangeDetectionStrategy, effect, computed, untracked } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -135,8 +135,17 @@ export class ManyToManyEditorComponent {
         // No per-component RPC call needed.
         this.resolvedOptionsSourceRpc.set(prop.options_source_rpc ?? null);
         this.loadAvailableOptions();
-        this.checkPermissions();
       }
+    });
+
+    // Edit permission, kept out of the options effect so it never re-fires that request. The editor can
+    // render before get_current_user_permissions returns (issue #148), and hasPermission() reads its cache
+    // untracked, so permissionsLoaded() is what re-runs this. While a refresh is in flight the cache is
+    // empty, so the last result is kept until it loads again.
+    effect(() => {
+      const meta = this.property()?.many_to_many_meta;
+      if (!meta || !this.authService.permissionsLoaded()) return;
+      untracked(() => this.checkPermissions(meta.junctionTable));
     });
 
     // Refresh effect: reload available options when parent triggers refresh
@@ -152,12 +161,9 @@ export class ManyToManyEditorComponent {
     });
   }
 
-  private checkPermissions() {
-    const meta = this.property().many_to_many_meta;
-    if (!meta) return;
-
-    const hasCreate = this.authService.hasPermission(meta.junctionTable, 'create');
-    const hasDelete = this.authService.hasPermission(meta.junctionTable, 'delete');
+  private checkPermissions(junctionTable: string) {
+    const hasCreate = this.authService.hasPermission(junctionTable, 'create');
+    const hasDelete = this.authService.hasPermission(junctionTable, 'delete');
     this.canEdit.set(hasCreate && hasDelete);
   }
 
