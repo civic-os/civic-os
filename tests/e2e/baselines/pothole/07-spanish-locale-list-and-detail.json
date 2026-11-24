@@ -51,7 +51,8 @@
           "path": "/notification_preferences",
           "query": {
             "order": "channel.asc",
-            "select": "*"
+            "select": "*",
+            "user_id": "eq.<user:testadmin>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -64,7 +65,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/notification_preferences?select=*&order=channel.asc"
+              "url": "/notification_preferences?select=*&user_id=eq.<user:testadmin>&order=channel.asc"
             }
           ]
         },
@@ -1122,7 +1123,8 @@
           "path": "/notification_preferences",
           "query": {
             "order": "channel.asc",
-            "select": "*"
+            "select": "*",
+            "user_id": "eq.<user:testadmin>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1135,7 +1137,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/notification_preferences?select=*&order=channel.asc"
+              "url": "/notification_preferences?select=*&user_id=eq.<user:testadmin>&order=channel.asc"
             }
           ]
         },

@@ -1046,6 +1046,7 @@
             "display_name": "Harness Gallery Draft Issue",
             "location": null,
             "observed_at": null,
+            "photo": null,
             "severity_level": null,
             "status": "5",
             "work_package": null
@@ -1054,7 +1055,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"description\":null,\"contact_email\":null,\"contact_phone\":null,\"display_name\":\"Harness Gallery Draft Issue\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":null,\"location\":null,\"severity_level\":null,\"observed_at\":null}",
+              "body": "{\"description\":null,\"contact_email\":null,\"contact_phone\":null,\"display_name\":\"Harness Gallery Draft Issue\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":null,\"location\":null,\"severity_level\":null,\"observed_at\":null,\"photo\":null}",
               "url": "/Issue"
             }
           ]
@@ -1466,6 +1467,7 @@
             "display_name": "Harness Create Another Issue",
             "location": null,
             "observed_at": null,
+            "photo": null,
             "severity_level": null,
             "status": "5",
             "work_package": null
@@ -1474,7 +1476,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"description\":null,\"contact_email\":null,\"contact_phone\":null,\"display_name\":\"Harness Create Another Issue\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":null,\"location\":null,\"severity_level\":null,\"observed_at\":null}",
+              "body": "{\"description\":null,\"contact_email\":null,\"contact_phone\":null,\"display_name\":\"Harness Create Another Issue\",\"status\":\"5\",\"created_user\":\"<user:testadmin>\",\"work_package\":null,\"location\":null,\"severity_level\":null,\"observed_at\":null,\"photo\":null}",
               "url": "/Issue"
             }
           ]
