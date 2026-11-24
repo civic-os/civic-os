@@ -19,12 +19,6 @@ import type { PlanItem, RenderPlan } from '../plan/types.js';
 import { getColumnSpan } from '../schema/property-views.js';
 import { TransportError } from '../transport/errors.js';
 
-export const FILE_TYPES: ReadonlySet<EntityPropertyType> = new Set([
-  EntityPropertyType.File,
-  EntityPropertyType.FileImage,
-  EntityPropertyType.FilePDF,
-]);
-
 /** An inline many-to-many property (`show_inline`): edited on the form's page, not held as a form field. */
 export const isInlineManyToMany = (p: SchemaEntityProperty): boolean => p.type === EntityPropertyType.ManyToMany && p.show_inline === true;
 

@@ -415,7 +415,7 @@ The PhotoGallery property type builds on the file storage system to manage order
 | Ordering | N/A | `sort_order` on `photo_gallery_files` |
 | Per-file metadata | None (just the file record) | `caption`, `alt_text` per image |
 | S3 key prefix | `{entity_type}/{entity_id}/{file_id}/` | `photo_gallery/{gallery_id}/{file_id}/` |
-| Create page behavior | Filtered out (requires entity ID) | Draft gallery pattern (create gallery first, link after) |
+| Create page behavior | Uploaded before the record exists, staged under `_new`, id saved with the record (v0.86.5) | Draft gallery pattern (create gallery first, link after) |
 
 See `docs/notes/PHOTO_GALLERY_DESIGN.md` for the full architecture, lifecycle, and RPC reference.
 

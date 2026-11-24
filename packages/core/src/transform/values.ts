@@ -231,8 +231,8 @@ export function transformValuesForApi(
     const value = transformed[prop.column_name];
     if (value === null || value === undefined) return;
 
-    // File types (edit only): Extract UUID from file object or uploaded file reference
-    if (isEdit && [EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
+    // File types: Extract UUID from file object or uploaded file reference (create too since issue #141)
+    if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
       if (typeof value === 'object' && value.id) {
         // Either embedded file object from initial load, or FileReference from upload
         transformed[prop.column_name] = value.id;
