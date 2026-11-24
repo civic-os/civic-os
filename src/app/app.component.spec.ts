@@ -30,7 +30,7 @@ import { AnalyticsService } from './services/analytics.service';
 import { ImpersonationService } from './services/impersonation.service';
 import { SwUpdate } from '@angular/service-worker';
 import { Location } from '@angular/common';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { settle } from './testing/await-http';
 
 const LATE_REQUEST_URLS = /\/(schema_properties|schema_m2m_properties|schema_dimensions|schema_menu_nodes|notification_preferences|rpc\/get_dashboards)(\?|$)/;
@@ -50,6 +50,8 @@ describe('AppComponent', () => {
             authenticated: vi.fn().mockName("AuthService.authenticated"),
             hasPermission: vi.fn().mockName("AuthService.hasPermission"),
             isRealAdmin: vi.fn().mockName("AuthService.isRealAdmin"),
+            // The settings modal reads notification preferences for the current user (#127).
+            getCurrentUserId: vi.fn().mockName("AuthService.getCurrentUserId").mockReturnValue(of(null)),
             permissionsLoaded: signal(true),
             userRoles: []
         };
