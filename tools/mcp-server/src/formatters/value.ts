@@ -137,11 +137,14 @@ function formatMoney(value: unknown): string {
   return String(value);
 }
 
-/** Format date string to readable format */
+/**
+ * Format date string to readable format. A date-only string parses as UTC midnight,
+ * so it is rendered in UTC: the server's zone would show the previous day west of UTC.
+ */
 function formatDate(value: string): string {
   try {
     const d = new Date(value);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
   } catch {
     return value;
   }
