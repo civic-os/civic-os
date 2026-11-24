@@ -16,7 +16,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { computed, effect, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
@@ -398,6 +398,60 @@ describe('AuthService', () => {
             // Value changed, but callers holding the old boolean aren't re-notified
             // (that's by design — callers use computed() for reactivity)
             expect(service.hasPermission('issues', 'read')).toBe(false);
+        });
+
+        describe('permission() tracked signal (issue #148)', () => {
+            async function loadPermissions(rows: { table_name: string; permission: string }[]) {
+                keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+                TestBed.flushEffects();
+                httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions')).flush(rows);
+                await settle();
+            }
+
+            it('updates a computed() created before the permissions load', async () => {
+                const canRead = computed(() => service.permission('issues', 'read')());
+                expect(canRead()).toBe(false);
+
+                await loadPermissions([{ table_name: 'issues', permission: 'read' }]);
+
+                expect(canRead()).toBe(true);
+            });
+
+            it('follows a refresh and a logout', async () => {
+                const canDelete = service.permission('issues', 'delete');
+                await loadPermissions([{ table_name: 'issues', permission: 'read' }]);
+                expect(canDelete()).toBe(false);
+
+                service.refreshPermissions();
+                httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'))
+                    .flush([{ table_name: 'issues', permission: 'delete' }]);
+                await settle();
+                expect(canDelete()).toBe(true);
+
+                keycloakEventSignal.set({ type: KeycloakEventType.AuthLogout, args: undefined });
+                TestBed.flushEffects();
+                expect(canDelete()).toBe(false);
+            });
+
+            it('returns one signal per table and permission', () => {
+                expect(service.permission('issues', 'read')).toBe(service.permission('issues', 'read'));
+                expect(service.permission('issues', 'read')).not.toBe(service.permission('issues', 'create'));
+                expect(service.permission('issues:notes', 'read')).not.toBe(service.permission('issues', 'notes:read'));
+            });
+
+            it('does not re-fire the permissions request when an effect reads it', async () => {
+                const seen: boolean[] = [];
+                const ref = TestBed.runInInjectionContext(() =>
+                    effect(() => { seen.push(service.permission('issues', 'read')()); }));
+                TestBed.flushEffects();
+
+                await loadPermissions([{ table_name: 'issues', permission: 'read' }]);
+                TestBed.flushEffects();
+
+                httpTesting.expectNone(r => r.url.includes('rpc/get_current_user_permissions'));
+                expect(seen).toEqual([false, true]);
+                ref.destroy();
+            });
         });
     });
 });

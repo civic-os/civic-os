@@ -76,7 +76,7 @@ export class StaticAssetsService {
    * Follows the same pattern as UserManagementService.hasUserManagementAccess().
    */
   hasStaticAssetAccess(): boolean {
-    return this.auth.hasPermission('static_assets', 'create');
+    return this.auth.permission('static_assets', 'create')();
   }
 
   /**
