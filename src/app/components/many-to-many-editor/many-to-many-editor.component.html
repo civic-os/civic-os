@@ -63,7 +63,7 @@
           Edit {{ property().display_name }}
         </button>
       }
-    } @else if (!readOnly()) {
+    } @else if (!readOnly() && permissionsChecked()) {
       <div class="text-sm text-base-content/60 italic">
         You don't have permission to edit {{ property().display_name }}
       </div>
