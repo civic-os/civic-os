@@ -317,6 +317,45 @@ describe('EntityManagementPage', () => {
             expect(component.entities()[0].table_name).toBe('Issue');
             expect(mockEntityManagementService.updateEntitiesOrder).not.toHaveBeenCalled();
         });
+
+        // Issue #90: the keyed @for re-inserts the moved row's element, which blurred the pressed button.
+        describe('keyboard focus', () => {
+            const button = (key: string, action: 'up' | 'down') =>
+                fixture.nativeElement.querySelector(`[data-row-key="${key}"] button[data-action="${action}"]`) as HTMLButtonElement;
+
+            async function render() {
+                mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+                mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+                mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({ success: true }));
+                fixture = TestBed.createComponent(EntityManagementPage);
+                component = fixture.componentInstance;
+                fixture.detectChanges();
+                await advanceTime(100);
+                fixture.detectChanges();
+            }
+
+            async function press(b: HTMLButtonElement) {
+                b.focus();
+                b.click();
+                fixture.detectChanges();
+                await fixture.whenStable();
+            }
+
+            it('keeps focus on Move up of the moved row', async () => {
+                await render();
+                await press(button('Bid', 'up'));
+                expect(component.entities()[1].table_name).toBe('Bid');
+                expect(document.activeElement).toBe(button('Bid', 'up'));
+            });
+
+            it('moves focus to Move down when the row reaches the top', async () => {
+                await render();
+                await press(button('WorkPackage', 'up'));
+                expect(component.entities()[0].table_name).toBe('WorkPackage');
+                expect(button('WorkPackage', 'up').disabled).toBe(true);
+                expect(document.activeElement).toBe(button('WorkPackage', 'down'));
+            });
+        });
     });
 
     describe('Metadata Saving', () => {
