@@ -137,13 +137,30 @@ Label each triaged issue with its lane (`triage:direct`, `triage:review`, `triag
 
 ## 6. Carry out the plan
 
+### Test stacks
+
+Browser, migration and SQL checks need a running example stack. The maintainer may already have one up, holding data they care about, and every example hardcodes its container names and host ports, so a second copy started as-is collides with it. Run the skill's own stack beside theirs, under its own project name and ports moved up by 10000, and remove it when you are done with it.
+
+1. Pick the example the batch needs (the one an issue's repro names, else `pothole`) and work in `examples/<example>/` of the triage worktree. Its `.env` is untracked: copy it from the main checkout's `examples/<example>/.env` if the worktree has none.
+2. Write an override to the scratchpad that renames every container (`triage_` prefix) and moves every published port up by 10000 (15432 → 25432, 3000 → 13000, 8082 → 18082, 9000 → 19000, and so on). Generate it from the resolved config, so it covers every service the example has:
+   ```bash
+   docker compose config --format json | python3 -I <worktree>/.claude/skills/issue-triage/offset-compose.py > <scratchpad>/triage-override.yml
+   ```
+   Check it took: `docker compose -p civic-os-triage -f docker-compose.yml -f <scratchpad>/triage-override.yml config` lists only `triage_` container names and moved ports.
+3. Let that stack's Keycloak accept the triage frontend on port 14200: copy `examples/keycloak/` to the scratchpad, add `http://localhost:14200/*` to `civic-os-dev-client`'s `redirectUris` and `http://localhost:14200` to its `webOrigins`, and give `keycloak` in the override `volumes: !override` with that copy mounted at `/opt/keycloak/data/import:ro` plus the theme mount from the example's file.
+4. Start it: `S3_PUBLIC_ENDPOINT=http://localhost:19000 SITE_URL=http://localhost:14200 docker compose -p civic-os-triage -f docker-compose.yml -f <scratchpad>/triage-override.yml up -d --build`. The project name keeps its network and volumes apart from the maintainer's.
+5. Point the worktree's dev frontend at it: set PostgREST 13000, Swagger 18080, Keycloak 18082 and S3 19000 in `src/environments/environment.development.ts`, then `npx ng serve --port 14200`. That edit is local only: restore it (`git checkout -- src/environments/environment.development.ts`) before every commit, and stage files by name rather than with `git add -A`. Use the moved ports in every `docs/development/E2E_VERIFICATION.md` command (psql on 25432, curl on 13000, Keycloak on 18082).
+6. Tear it down as soon as the batch's checks are done, before opening its PR, and also when a run stops early or a check fails: stop `ng serve`, then `docker compose -p civic-os-triage -f docker-compose.yml -f <scratchpad>/triage-override.yml down -v`. Its volumes belong to the run. Confirm with `docker ps` that no `triage_` container is left.
+
+If the parallel stack cannot start (a moved port is taken too, Docker runs out of memory, a healthcheck never passes), tear down whatever came up, leave that batch's PR unopened with its issues labeled, and say in the report which step failed.
+
 ### Direct lane
 
 For each Direct fix, one at a time:
 
 1. Branch from fresh `origin/main` as `fix/<issue>-<slug>`.
 2. Write the failing regression test first and watch it fail. Then fix.
-3. Verify locally: `npm run test:headless`, `npm run lint`, plus `npm run test:packages` if `packages/` changed and `npm run build` if a template changed. For UI fixes, check the change in the browser (`docs/development/E2E_VERIFICATION.md`, Playwright layer). Save test output to a scratch file rather than re-running to search it.
+3. Verify locally: `npm run test:headless`, `npm run lint`, plus `npm run test:packages` if `packages/` changed and `npm run build` if a template changed. For UI fixes, check the change in the browser (`docs/development/E2E_VERIFICATION.md`, Playwright layer) on the skill's own stack (Test stacks above), then tear it down. Save test output to a scratch file rather than re-running to search it.
 4. One commit, following CLAUDE.md's Git Commit Guidelines, with `Fixes #N` in the body.
 5. Push and open the PR. Its body states the root cause, the fix and the test, and says it is a Direct-lane fix that will be self-merged once CI passes.
 6. Wait for checks: `gh pr checks <M> --watch --fail-fast`, run in the background.
@@ -158,7 +175,7 @@ For each batch:
 
 1. Branch from fresh `origin/main` as `patch/vX.Y.Z[-theme]` (or `fix/<issue>-<slug>` for a hotfix).
 2. One commit per issue, each with `Fixes #N` in its body and its regression test. A golden recapture, if any, is a final commit of its own.
-3. Verify the whole branch per CLAUDE.md's five layers (`docs/development/E2E_VERIFICATION.md`), scaled to what changed: Docker migrations and SQL checks only when the batch has a migration.
+3. Verify the whole branch per CLAUDE.md's five layers (`docs/development/E2E_VERIFICATION.md`), scaled to what changed: Docker migrations and SQL checks only when the batch has a migration. Run them on the skill's own stack (Test stacks above) and tear it down before step 5.
 4. Bump `package.json` (`npm run check:versions` must pass) only in the batch that will be tagged, as its own final commit, so batches can be reordered without version conflicts.
 5. Push and open the PR. The body lists each issue with its root cause and its test, so the maintainer can review commit by commit, and asks for a **rebase merge** so each fix stays a separate, revertible commit on `main`.
 6. Never merge a Review-lane PR.
@@ -169,7 +186,9 @@ For each batch:
 - Self-merge anything but a Direct-lane PR whose checks all passed.
 - Tag a release or bump the version on `main` without the maintainer asking for that release.
 - Comment on or close an issue (closing happens only through `Fixes #N` in a merged PR).
+- Stop, restart, reset or write to a Docker stack the run did not start. If verification needs the default ports and the parallel stack failed, report that as the blocker.
+- End a run with a `triage_` container still running.
 
 ## 7. Wrap up
 
-End with the report, updated: Direct PRs merged, Direct PRs moved to Review and why, Review PRs opened, what waits on the maintainer (Needs input questions, Review PRs), and the release recommendation.
+End with the report, updated: Direct PRs merged, Direct PRs moved to Review and why, Review PRs opened, what waits on the maintainer (Needs input questions, Review PRs), which checks ran on the skill's own stack and that it was torn down, and the release recommendation.
