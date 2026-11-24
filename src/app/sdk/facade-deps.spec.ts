@@ -18,7 +18,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
-import type { DataClient, EntityHandle, SchemaEntityTable } from '@civic-os/core';
+import type { DataClient, EntityHandle, SchemaEntityProperty, SchemaEntityTable } from '@civic-os/core';
 import { DataService } from '../services/data.service';
 import { SchemaService } from '../services/schema.service';
 import { CLOCK } from './clock';
@@ -47,6 +47,26 @@ describe('facade deps', () => {
 
     await expect(deps.schema.properties(entity)).resolves.toBe(props);
     expect(getPropertiesForEntity).toHaveBeenCalledWith(entity);
+  });
+
+  // Issue #72: Status and Category filter chips name their values
+  it('names Status and Category values through the cached SchemaService options', async () => {
+    const getStatusesForEntity = vi.fn(() => of([{ id: 22, display_name: 'Pending', color: null }, { id: 23, display_name: 'Approved', color: null }]));
+    const getCategoriesForEntity = vi.fn(() => of([{ id: 4, display_name: 'Youth', color: null }]));
+    const deps = createFacadeDeps({
+      data: {} as DataService,
+      schema: { getStatusesForEntity, getCategoriesForEntity } as unknown as SchemaService,
+      clock: { now: () => new Date(0) },
+    });
+    const status = { column_name: 'status_id', status_entity_type: 'issue' } as SchemaEntityProperty;
+    const category = { column_name: 'kind_id', category_entity_type: 'issue' } as SchemaEntityProperty;
+    const other = { column_name: 'name' } as SchemaEntityProperty;
+
+    expect([...(await deps.schema.optionNames!(status))]).toEqual([['22', 'Pending'], ['23', 'Approved']]);
+    expect(getStatusesForEntity).toHaveBeenCalledWith('issue');
+    expect([...(await deps.schema.optionNames!(category))]).toEqual([['4', 'Youth']]);
+    expect(getCategoriesForEntity).toHaveBeenCalledWith('issue');
+    expect((await deps.schema.optionNames!(other)).size).toBe(0);
   });
 
   it('loads the record viewer reads through the SchemaService calls the detail page always made', async () => {
