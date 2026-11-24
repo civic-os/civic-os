@@ -50,6 +50,31 @@ describe('NotificationService', () => {
     httpMock.verify();
   });
 
+  // Issue #127: an admin may read every user's preferences, so an unfiltered read returned other users' rows.
+  describe('getUserPreferences', () => {
+    it('should filter the read by the current user', async () => {
+      let result: any;
+      service.getUserPreferences().subscribe(r => (result = r));
+
+      const req = httpMock.expectOne(r => r.url.includes('notification_preferences'));
+      expect(req.request.method).toBe('GET');
+      expect(req.request.url).toContain('user_id=eq.11111111-1111-1111-1111-111111111111');
+      req.flush([{ channel: 'email', enabled: true }]);
+      await settle();
+
+      expect(result).toEqual([{ channel: 'email', enabled: true }]);
+    });
+
+    it('should return no preferences without a request when there is no authenticated user', () => {
+      currentUserId = null;
+      let result: any;
+      service.getUserPreferences().subscribe(r => (result = r));
+
+      httpMock.expectNone(r => r.url.includes('notification_preferences'));
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('updatePreference', () => {
     it('should filter the PATCH by the current user as well as the channel', async () => {
       let result: any;
