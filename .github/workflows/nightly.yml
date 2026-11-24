@@ -50,6 +50,7 @@ jobs:
               postgrest-api-regression-test.sh
               v0-71-0-ical-http-caching-test.sh
               v0-76-5-revoke-public-execute-test.sh
+              v0-87-0-file-reconcile-test.sh
           - example: community-center
             functional: >-
               v0-78-1-end-series-from-date-test.sh

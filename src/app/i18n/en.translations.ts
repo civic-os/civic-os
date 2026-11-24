@@ -536,6 +536,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'error.timeout': 'Request timed out',
   'error.unknown_category': 'Unknown error',
   'error.series_split_failed': 'Could not apply the change to this and following occurrences. Nothing was saved.',
+  'error.attachment_expired': '{{field}}: this attachment is no longer available. Upload the file again.',
 
   'list.title_suffix': 'List',
   'list.search_placeholder': 'Search {{entity}}...',

@@ -830,6 +830,11 @@
     "translated_text": "Encabezado 3"
   },
   {
+    "source_key": "a11y.hide_description",
+    "source_type": "ui",
+    "translated_text": "Ocultar la descripción de {{name}}"
+  },
+  {
     "source_key": "a11y.horizontal_rule",
     "source_type": "ui",
     "translated_text": "Línea horizontal"
@@ -1113,6 +1118,11 @@
     "source_key": "a11y.select_version",
     "source_type": "ui",
     "translated_text": "Seleccionar esta versión"
+  },
+  {
+    "source_key": "a11y.show_description",
+    "source_type": "ui",
+    "translated_text": "Mostrar la descripción de {{name}}"
   },
   {
     "source_key": "a11y.show_instructions",
@@ -2112,7 +2122,7 @@
   {
     "source_key": "auth.about",
     "source_type": "ui",
-    "translated_text": "Acerca de {{appTitle}}"
+    "translated_text": "Acerca de Civic OS"
   },
   {
     "source_key": "auth.account_settings",
@@ -2260,6 +2270,11 @@
     "translated_text": "Este widget filtra por \"{{key}}\", que no existe para {{column}}."
   },
   {
+    "source_key": "dashboard.loading",
+    "source_type": "ui",
+    "translated_text": "Cargando el panel..."
+  },
+  {
     "source_key": "dashboard.loading_list",
     "source_type": "ui",
     "translated_text": "Cargando tableros..."
@@ -2288,6 +2303,26 @@
     "source_key": "dashboard.select",
     "source_type": "ui",
     "translated_text": "Seleccionar Tablero"
+  },
+  {
+    "source_key": "dashboard.unavailable.go_home",
+    "source_type": "ui",
+    "translated_text": "Ir al panel de inicio"
+  },
+  {
+    "source_key": "dashboard.unavailable.message",
+    "source_type": "ui",
+    "translated_text": "Puede que se haya eliminado o que no tenga acceso a él."
+  },
+  {
+    "source_key": "dashboard.unavailable.sign_in_message",
+    "source_type": "ui",
+    "translated_text": "Puede que se haya eliminado o que necesite iniciar sesión para verlo."
+  },
+  {
+    "source_key": "dashboard.unavailable.title",
+    "source_type": "ui",
+    "translated_text": "Este panel no está disponible"
   },
   {
     "source_key": "dashboard.unnamed",
@@ -2433,6 +2468,11 @@
     "source_key": "entity_management.order_help",
     "source_type": "ui",
     "translated_text": "Arrastre las entidades para definir su orden predeterminado, que se usa en las secciones relacionadas y para las entidades que no están en el menú lateral. Los cambios se guardan automáticamente."
+  },
+  {
+    "source_key": "error.attachment_expired",
+    "source_type": "ui",
+    "translated_text": "{{field}}: este archivo adjunto ya no está disponible. Vuelva a subir el archivo."
   },
   {
     "source_key": "error.constraint",
@@ -3000,6 +3040,11 @@
     "translated_text": "Error"
   },
   {
+    "source_key": "import_modal.col_identifier",
+    "source_type": "ui",
+    "translated_text": "Identificador"
+  },
+  {
     "source_key": "import_modal.col_row",
     "source_type": "ui",
     "translated_text": "Fila"
@@ -3008,6 +3053,16 @@
     "source_key": "import_modal.col_value",
     "source_type": "ui",
     "translated_text": "Valor"
+  },
+  {
+    "source_key": "import_modal.confirm_import_one",
+    "source_type": "ui",
+    "translated_text": "Se importará {{count}} {{itemLabel}}."
+  },
+  {
+    "source_key": "import_modal.confirm_import_other",
+    "source_type": "ui",
+    "translated_text": "Se importarán {{count}} {{itemLabel}}."
   },
   {
     "source_key": "import_modal.confirm_insert",
@@ -3040,9 +3095,84 @@
     "translated_text": "o arrastre y suelte su archivo aquí"
   },
   {
+    "source_key": "import_modal.err_boolean",
+    "source_type": "ui",
+    "translated_text": "Debe ser true/false, yes/no, 1/0 o y/n"
+  },
+  {
+    "source_key": "import_modal.err_invalid_email",
+    "source_type": "ui",
+    "translated_text": "Formato de correo electrónico no válido"
+  },
+  {
+    "source_key": "import_modal.err_phone_digits",
+    "source_type": "ui",
+    "translated_text": "El teléfono debe tener 10 dígitos"
+  },
+  {
+    "source_key": "import_modal.err_required",
+    "source_type": "ui",
+    "translated_text": "{{column}} es obligatorio"
+  },
+  {
+    "source_key": "import_modal.error_all_rows_failed",
+    "source_type": "ui",
+    "translated_text": "Error al importar: las {{count}} filas tenían errores"
+  },
+  {
+    "source_key": "import_modal.error_associations_failed",
+    "source_type": "ui",
+    "translated_text": "Se importaron {{count}} registros. Las asociaciones de relaciones fallaron: {{detail}}"
+  },
+  {
+    "source_key": "import_modal.error_associations_partial",
+    "source_type": "ui",
+    "translated_text": "Se importaron {{count}} registros. Algunas asociaciones de relaciones fallaron: {{detail}}"
+  },
+  {
+    "source_key": "import_modal.error_file_too_large",
+    "source_type": "ui",
+    "translated_text": "Archivo demasiado grande"
+  },
+  {
+    "source_key": "import_modal.error_import_failed",
+    "source_type": "ui",
+    "translated_text": "Error al importar: {{detail}}"
+  },
+  {
+    "source_key": "import_modal.error_import_failed_plain",
+    "source_type": "ui",
+    "translated_text": "Error al importar"
+  },
+  {
+    "source_key": "import_modal.error_parse_failed",
+    "source_type": "ui",
+    "translated_text": "No se pudo leer el archivo"
+  },
+  {
     "source_key": "import_modal.error_summary_header",
     "source_type": "ui",
     "translated_text": "Resumen de Errores (mostrando los primeros 100):"
+  },
+  {
+    "source_key": "import_modal.error_template_failed",
+    "source_type": "ui",
+    "translated_text": "Error al descargar la plantilla: {{detail}}"
+  },
+  {
+    "source_key": "import_modal.error_unknown",
+    "source_type": "ui",
+    "translated_text": "Error desconocido"
+  },
+  {
+    "source_key": "import_modal.error_validation_failed",
+    "source_type": "ui",
+    "translated_text": "La validación falló: {{detail}}"
+  },
+  {
+    "source_key": "import_modal.error_worker",
+    "source_type": "ui",
+    "translated_text": "Error del proceso en segundo plano"
   },
   {
     "source_key": "import_modal.errors_found",
@@ -3055,6 +3185,16 @@
     "translated_text": "Solo archivos Excel (.xlsx, .xls) - Máx 10MB"
   },
   {
+    "source_key": "import_modal.import_progress",
+    "source_type": "ui",
+    "translated_text": "Progreso de la importación"
+  },
+  {
+    "source_key": "import_modal.importing_items",
+    "source_type": "ui",
+    "translated_text": "Importando {{count}} {{itemLabel}}..."
+  },
+  {
     "source_key": "import_modal.importing_records",
     "source_type": "ui",
     "translated_text": "Importando {{count}} registros..."
@@ -3065,9 +3205,34 @@
     "translated_text": "... y {{count}} errores más"
   },
   {
+    "source_key": "import_modal.partial_failed",
+    "source_type": "ui",
+    "translated_text": "{{count}} fallaron con errores:"
+  },
+  {
+    "source_key": "import_modal.partial_success_one",
+    "source_type": "ui",
+    "translated_text": "{{count}} usuario creado correctamente."
+  },
+  {
+    "source_key": "import_modal.partial_success_other",
+    "source_type": "ui",
+    "translated_text": "{{count}} usuarios creados correctamente."
+  },
+  {
     "source_key": "import_modal.proceed",
     "source_type": "ui",
     "translated_text": "Proceder con la Importación"
+  },
+  {
+    "source_key": "import_modal.rows_one",
+    "source_type": "ui",
+    "translated_text": "fila"
+  },
+  {
+    "source_key": "import_modal.rows_other",
+    "source_type": "ui",
+    "translated_text": "filas"
   },
   {
     "source_key": "import_modal.start_over",
@@ -3075,14 +3240,59 @@
     "translated_text": "Empezar de Nuevo"
   },
   {
+    "source_key": "import_modal.step_complete",
+    "source_type": "ui",
+    "translated_text": "Importación completada"
+  },
+  {
+    "source_key": "import_modal.step_importing",
+    "source_type": "ui",
+    "translated_text": "Importando"
+  },
+  {
+    "source_key": "import_modal.step_results",
+    "source_type": "ui",
+    "translated_text": "Resultados de la validación"
+  },
+  {
+    "source_key": "import_modal.step_validating",
+    "source_type": "ui",
+    "translated_text": "Validando archivo"
+  },
+  {
     "source_key": "import_modal.success",
     "source_type": "ui",
     "translated_text": "¡Se importaron exitosamente {{count}} registros!"
   },
   {
+    "source_key": "import_modal.success_items_one",
+    "source_type": "ui",
+    "translated_text": "¡Se importó correctamente {{count}} {{itemLabel}}!"
+  },
+  {
+    "source_key": "import_modal.success_items_other",
+    "source_type": "ui",
+    "translated_text": "¡Se importaron correctamente {{count}} {{itemLabel}}!"
+  },
+  {
     "source_key": "import_modal.title",
     "source_type": "ui",
     "translated_text": "Importar {{entity}}"
+  },
+  {
+    "source_key": "import_modal.type_invalid_format",
+    "source_type": "ui",
+    "translated_text": "Formato no válido"
+  },
+  {
+    "source_key": "import_modal.type_required",
+    "source_type": "ui",
+    "translated_text": "Obligatorio"
+  },
+  {
+    "source_key": "import_modal.type_server_error",
+    "source_type": "ui",
+    "translated_text": "Error del servidor"
   },
   {
     "source_key": "import_modal.upload_file",
@@ -3098,6 +3308,11 @@
     "source_key": "import_modal.validating",
     "source_type": "ui",
     "translated_text": "Validando sus datos..."
+  },
+  {
+    "source_key": "import_modal.validation_progress",
+    "source_type": "ui",
+    "translated_text": "Progreso de la validación"
   },
   {
     "source_key": "import_modal.validation_success",

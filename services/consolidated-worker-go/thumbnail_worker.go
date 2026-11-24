@@ -107,8 +107,13 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 
 	if err != nil {
 		log.Printf("[Job %d] Error generating thumbnails: %v", job.ID, err)
-		// Update database with error status
-		w.updateThumbnailStatus(ctx, job.Args.FileID, "error", nil)
+		// River retries the job; only the last attempt records the failure. ('error' is not an allowed
+		// status, so this used to fail silently and leave the file 'pending' for good.)
+		if job.Attempt >= job.MaxAttempts {
+			if uerr := w.updateThumbnailStatus(ctx, job.Args.FileID, "failed", nil); uerr != nil {
+				log.Printf("[Job %d] Error recording failed status: %v", job.ID, uerr)
+			}
+		}
 		return fmt.Errorf("failed to generate thumbnails: %w", err)
 	}
 

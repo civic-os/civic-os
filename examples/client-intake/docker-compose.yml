@@ -165,6 +165,9 @@ services:
 
       # Thumbnail Worker Configuration
       - THUMBNAIL_MAX_WORKERS=${THUMBNAIL_MAX_WORKERS:-3}
+      # File reconcile (v0.87.0): claims staged Create-page uploads, deletes orphans; 0 disables
+      - FILE_RECONCILE_INTERVAL=${FILE_RECONCILE_INTERVAL:-5m}
+      - FILE_ORPHAN_TTL=${FILE_ORPHAN_TTL:-168h}
 
       # Notification Worker Configuration
       - SITE_URL=${SITE_URL:-http://localhost:4200}

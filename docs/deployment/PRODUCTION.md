@@ -41,6 +41,7 @@ Civic OS uses a containerized architecture with five main components:
 5. **Consolidated Worker** - Go microservice combining:
    - S3 presigned URL generation for file uploads
    - Thumbnail generation for images and PDFs
+   - File reconcile: moves files staged on Create pages to their record's folder and deletes unreferenced ones (v0.87.0)
    - Email/SMS notification delivery
    - Stripe payment processing with HTTP webhook endpoint (port 8080, optional — requires `STRIPE_API_KEY` and `STRIPE_WEBHOOK_SECRET`)
    - User provisioning via Keycloak service account
@@ -251,6 +252,11 @@ S3_ENDPOINT=  # Leave empty for real AWS S3, set for S3-compatible storage such 
 # Thumbnail Worker Configuration
 THUMBNAIL_MAX_WORKERS=5  # Concurrent workers (tune based on CPU/memory)
 # Tuning: Low memory (512Mi)=2-3, Medium (1Gi)=5-7, High (2Gi)=10-12
+
+# File Reconcile (v0.87.0): claims files staged on Create pages for their records, deletes
+# unreferenced staged files after the TTL. Needs s3:DeleteObject in the worker's IAM policy.
+FILE_RECONCILE_INTERVAL=5m  # Go duration; 0 disables
+FILE_ORPHAN_TTL=168h        # at least 1h
 
 # ======================================
 # Notification Configuration
@@ -858,6 +864,10 @@ docker-compose -f docker-compose.prod.yml up migrations
 # 4. Restart application services
 docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 ```
+
+#### Upgrading to v0.87.0 (file reconcile)
+
+The consolidated worker starts a file reconcile job (every `FILE_RECONCILE_INTERVAL`, default `5m`). Before upgrading on AWS S3, add `s3:DeleteObject` on `arn:aws:s3:::<bucket>/*` to the worker's IAM policy (see `docs/development/FILE_STORAGE.md`, IAM Permissions); without it the job still claims files but cannot delete the staged copies or orphans, and logs each failure. The first ticks also repair files attached on Create pages before v0.86.5 (rows with `entity_id = ''`), and delete staged files no record references that are older than `FILE_ORPHAN_TTL` (default 7 days). To hold that cleanup back, set `FILE_RECONCILE_INTERVAL=0` and enable it later.
 
 #### Upgrading to v0.76.9 from v0.76.8 or earlier (recurring schedules)
 

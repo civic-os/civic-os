@@ -1,6 +1,6 @@
 # File Reconcile: Staged Uploads, Claiming and Orphan Cleanup
 
-**Status**: design (issue #141), target v0.87.0. Step 0 (Create pages save the staged file's id) and step 1 (the `_new` staging key) are built (v0.86.5). Steps 2 to 4 are designed, with their decisions recorded, and not yet built.
+**Status**: built (issue #141). Step 0 (Create pages save the staged file's id) and step 1 (the `_new` staging key) in v0.86.5; steps 2 to 4 (the reconcile job) in v0.87.0, with the changes recorded in Amendments after build.
 **Decided with the maintainer (2026-11-24)**: stage uploads made before a record exists under `_new`, then move them to the record's folder from a periodic reconcile job, which also deletes files nothing references. Per-table triggers were the rejected alternative (see Alternatives). The open questions were settled the same day (see Decisions).
 
 ## Problem
@@ -32,7 +32,7 @@ Every later step finds a staged file through the foreign key of the record that 
 
 When `entity_id` is empty, the presign worker writes `{entity_type}/_new/{file_id}/original.{ext}`. `entity_id` stays `''` in `metadata.files`: the empty id remains the "unclaimed" marker, so no migration is needed and existing rows keep their meaning. Uploads on Create pages work against RustFS, and production stops creating id-less prefixes.
 
-### Step 2: discover references (SQL, migration)
+### Step 2: discover references (SQL, migration; built, v0.87.0)
 
 `metadata.unclaimed_file_references(p_limit int)`, SECURITY DEFINER, with EXECUTE revoked from PUBLIC (worker only), returns `(file_id, entity_type, entity_id)` rows:
 
@@ -44,7 +44,7 @@ When `entity_id` is empty, the presign worker writes `{entity_type}/_new/{file_i
 
 Legacy rows (`entity_id = ''` with a `{type}//{file_id}` key, uploaded on AWS before step 1) are claimed the same way, which repairs them.
 
-### Step 3: claim and move (Go, consolidated worker)
+### Step 3: claim and move (Go, consolidated worker; built, v0.87.0)
 
 `FileReconcileCron` follows `GalleryCleanupCron`: a Go ticker in the consolidated worker only, every `FILE_RECONCILE_INTERVAL` (default 5 min), not River periodic jobs (see `docs/notes/SCHEDULED_JOBS_DESIGN.md` for why). Each tick:
 
@@ -55,7 +55,7 @@ Legacy rows (`entity_id = ''` with a `{type}//{file_id}` key, uploaded on AWS be
 
 Failure leaves nothing broken. A crash after step 2 leaves unreferenced copies under the new prefix. A crash after step 3 leaves the old objects under `_new/`. The sweep in step 4 removes both. Readers build URLs from the row's keys at read time, so the only visible effect is that a page opened before the move can get a 404 on a stale thumbnail URL until it reloads.
 
-### Step 4: orphan cleanup
+### Step 4: orphan cleanup (built, v0.87.0)
 
 The same tick deletes what nothing will claim, oldest first, in batches:
 
@@ -93,3 +93,28 @@ Deleting objects for rows removed by `delete_file_record()` (claimed files) is a
 1. **TTL versus long-open forms.** `FILE_ORPHAN_TTL` defaults to 7 days, long enough for a tab left open over a weekend; orphans cost little storage. A save that still hits a deleted staged file gets a clear, translated "upload it again" message (see Migration and configuration). No re-check before save. Rejected: a 24 h TTL with the Create page re-checking its staged files before every save (an extra request and client logic on every save with files).
 2. **Multiple references.** Claim for the first owner (step 2), not skip-and-log (the file would never get a real key, and cleanup could never remove it because it is referenced) and not copy-per-owner (the worker would write to instance tables with superuser rights).
 3. **Deleting claimed files' objects** after `delete_file_record()` or a record delete is a follow-up, issue #165, not part of #141: it needs a tombstone, since the row is gone by the time a job could act, and a decision about record deletes, which today keep their file rows.
+
+## Amendments after build (v0.87.0, 2026-11-24)
+
+Building steps 2 to 4 changed these points. Each closes a gap found while building, and the rest of the design stands.
+
+1. **A live thumbnail job holds a file back, not `thumbnail_status`.** The thumbnail worker never writes `processing`, and on failure it wrote `'error'`, which the CHECK constraint rejects. So a file whose thumbnail fails stayed `pending` through 25 retries and then forever, and the status rule would never claim it. The worker reads `s3_original_key` each time it runs, so the real hazard is a job that may still run. `metadata._file_thumbnail_job_live()` looks for a `thumbnail_generate` River job for the file in `available`, `pending`, `retryable`, `running` or `scheduled` (through the existing GIN index on `args`). The thumbnail worker now writes `failed` on its last attempt.
+2. **`claim_file()` returns an outcome, not a boolean, and checks more.** Its parameters are the file, the owner's table and column, the record id, the `updated_at` that `unclaimed_file_references()` read, and the four new keys; the `p_keys jsonb` of the design became typed parameters. It returns:
+   - `claimed`;
+   - `claimed_elsewhere`: already claimed with the same keys. Two workers copy to the same keys, so the loser must keep, not delete, the copies;
+   - `stale`: the row changed or went away since it was read;
+   - `unreferenced`: the record no longer references the file. It is re-checked under `FOR KEY SHARE`, so a record deleted between discovery and claim does not get the file.
+
+   It refuses (22023) a column that is not a single-column foreign key from a public table with a single-column primary key. The worker deletes its copies only on `stale` and `unreferenced`.
+3. **Orphans: row first, then objects, and references in every schema.** The design deleted objects, then the row. If the row delete then failed (the file was referenced in the meantime), the record would point at a file with no objects. `metadata.delete_orphaned_staged_files(p_ttl, p_limit)` (the design's `orphaned_staged_files`) deletes each row under `FOR UPDATE SKIP LOCKED`, skips one that turns out to be referenced (`foreign_key_violation`), and returns the keys for the worker to delete. An object left behind is swept later. The reference check covers foreign keys in every schema, not only `public`, because a `CASCADE` or `SET NULL` reference (for example from a `metadata` table) would otherwise be hit silently. The TTL must be at least 1 hour.
+4. **The limit applies to references, not to staged rows.** Limiting staged rows first would let a backlog of unreferenced uploads, all waiting for the TTL, hide every referenced one.
+5. **Stray objects.** `metadata.staged_file_states(ids)` tells the sweep which ids under `{type}/_new/` still have a row and whether it is claimed. Objects of a claimed row are deleted at once (an interrupted move). Objects without a row are deleted once older than the TTL, since an upload may still be creating its row. The sweep lists `{type}/` prefixes with a delimiter, then each `{type}/_new/`, up to 1,000 objects a tick.
+6. **One case is not swept: a crash after copying but before claiming, when the record is then deleted.** A later tick normally re-copies and claims (the copy is idempotent). If the reference disappears first, the copies under `{type}/{id}/{file}/` stay, because only `_new/` prefixes are listed. Listing every record prefix would cost a full bucket scan per tick, so this rare leak is accepted.
+7. **The expired-attachment message is shown in the Create page's error modal, naming the field**, not on the field itself. Core's classifier now returns the referenced table for a 23503 (`params.referencedTable`, an additive `ErrorParams` field), and the column when the detail names it. PostgreSQL leaves the key out for a caller without SELECT on the referencing columns, which includes every API role (`Key is not present in table "files".`), so the column is usually absent. The Create page finds the field from the constraint name (`<table>_<column>_fkey` by default), else from the file fields that hold a value, and shows `error.attachment_expired` (six locales) with the field's label. Core's English default (MCP) names the attachment. Error text is otherwise not translated yet (`ErrorService`), so the page maps this one case.
+8. **Configuration.** `FILE_RECONCILE_INTERVAL` (`0` disables) and `FILE_ORPHAN_TTL` (at least `1h`); an unreadable value falls back to its default with a log line. The first tick runs when the worker starts. The worker needs `s3:DeleteObject`, which the documented IAM policy lacked.
+9. **Tests.**
+   - `tests/functional/v0-87-0-file-reconcile-sql-test.sh` checks the functions on throwaway tables in one rolled-back transaction: a mixed-case table name, a text primary key, a table without a key, a `CASCADE` reference from another schema, live jobs and every claim outcome. It runs in PR CI on the bare database.
+   - `tests/functional/v0-87-0-file-reconcile-test.sh` drives the real worker on pothole (nightly, `FILE_RECONCILE_INTERVAL=5s` from `tests/e2e/env/pothole.compose-env`).
+   - Go unit tests cover the key mapping, the configuration and the copy, claim and delete sequence over fakes.
+   - The legacy `{type}//{file}` repair is covered by the Go and SQL tests only, because RustFS refuses such keys.
+

@@ -4,3 +4,5 @@
 POSTGRES_DB=civic_os_db
 POSTGRES_PASSWORD=securepassword123
 MAINTENANCE_MODE=off
+# The file reconcile job ticks fast so tests/functional/v0-87-0-file-reconcile-test.sh needs no long waits.
+FILE_RECONCILE_INTERVAL=5s

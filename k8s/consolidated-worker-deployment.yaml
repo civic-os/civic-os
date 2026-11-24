@@ -78,6 +78,20 @@ spec:
               key: THUMBNAIL_MAX_WORKERS
               optional: true
 
+        # File reconcile configuration (v0.87.0)
+        - name: FILE_RECONCILE_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: FILE_RECONCILE_INTERVAL
+              optional: true
+        - name: FILE_ORPHAN_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: FILE_ORPHAN_TTL
+              optional: true
+
         # Notification Worker configuration
         - name: SITE_URL
           valueFrom:
