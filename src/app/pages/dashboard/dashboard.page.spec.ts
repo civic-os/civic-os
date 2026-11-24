@@ -23,6 +23,7 @@ import { of, throwError, Observable, BehaviorSubject, Subject } from 'rxjs';
 import { DashboardPage } from './dashboard.page';
 import { TranslationService } from '../../services/translation.service';
 import { DashboardService } from '../../services/dashboard.service';
+import { AuthService } from '../../services/auth.service';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
 import { Dashboard } from '../../interfaces/dashboard';
 import { createMockDashboard, MOCK_DASHBOARDS } from '../../testing';
@@ -39,9 +40,11 @@ describe('DashboardPage', () => {
     let mockDashboardService: any;
     let paramMapSubject: BehaviorSubject<any>;
     let roleChange: WritableSignal<number>;
+    let mockAuth: { authenticated: WritableSignal<boolean>; login: ReturnType<typeof vi.fn> };
 
     beforeEach(async () => {
         roleChange = signal(0);
+        mockAuth = { authenticated: signal(true), login: vi.fn() };
         // Create mock DashboardService
         mockDashboardService = {
             getDashboard: vi.fn().mockName("DashboardService.getDashboard"),
@@ -63,6 +66,7 @@ describe('DashboardPage', () => {
             providers: [
                 provideZonelessChangeDetection(),
                 { provide: DashboardService, useValue: mockDashboardService },
+                { provide: AuthService, useValue: mockAuth },
                 { provide: ActivatedRoute, useValue: { paramMap: paramMapSubject.asObservable() } }
             ]
         }).compileComponents();
@@ -200,7 +204,8 @@ describe('DashboardPage', () => {
             await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
             expect(component.loading()).toBe(false);
-            expect(component.error()).toBe('dashboard.error.not_found');
+            expect(component.unavailable()).toBe(true);
+            expect(component.error()).toBeUndefined();
             expect(component.dashboard()).toBeUndefined();
         });
 
@@ -339,19 +344,25 @@ describe('DashboardPage', () => {
             expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
         });
 
-        it('should retry loading specific dashboard when current dashboard exists', async () => {
-            mockDashboardService.getDashboard.mockReturnValue(of(MOCK_DASHBOARDS.multiWidget));
+        it('should retry the dashboard in the route after its load failed', async () => {
+            // Dashboard 1 loaded, then navigating to dashboard 3 failed: Retry must reload 3, not 1
+            mockDashboardService.getDashboard.mockReturnValue(of(MOCK_DASHBOARDS.welcome));
+            paramMapSubject.next(convertToParamMap({ id: '1' }));
+            fixture = TestBed.createComponent(DashboardPage);
+            component = fixture.componentInstance;
+            await advanceTime(10);
 
-            // Set a current dashboard first
-            component.dashboard.set(MOCK_DASHBOARDS.multiWidget);
+            mockDashboardService.getDashboard.mockReturnValue(throwError(() => new Error('network')));
+            paramMapSubject.next(convertToParamMap({ id: '3' }));
+            await advanceTime(10);
+            expect(component.error()).toBe('dashboard.error.load_failed');
 
-            // Reset spy call counts before testing retry
             mockDashboardService.getDashboard.mockClear();
-
+            mockDashboardService.getDashboard.mockReturnValue(of(MOCK_DASHBOARDS.multiWidget));
             component.retry();
-
             await advanceTime(10);
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
+            expect(component.error()).toBeUndefined();
         });
 
         it('should reset loading state when retrying', () => {
@@ -403,7 +414,7 @@ describe('DashboardPage', () => {
         });
 
         it('should show error state with retry button', async () => {
-            mockDashboardService.getDashboard.mockReturnValue(of(undefined));
+            mockDashboardService.getDashboard.mockReturnValue(throwError(() => new Error('network')));
 
             // Emit route params with dashboard ID
             paramMapSubject.next(convertToParamMap({ id: '999' }));
@@ -421,7 +432,7 @@ describe('DashboardPage', () => {
 
             expect(errorAlert).toBeTruthy();
             expect(compiled.textContent).toContain('Failed to Load Dashboard');
-            expect(compiled.textContent).toContain('Dashboard not found');
+            expect(compiled.textContent).toContain('Failed to load dashboard');
             expect(retryButton?.textContent).toContain('Retry');
         });
 
@@ -456,13 +467,14 @@ describe('DashboardPage', () => {
             await advanceTime(10);
 
             expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(7);
-            expect(component.error()).toBe('dashboard.error.not_found');
+            expect(component.unavailable()).toBe(true);
+            expect(component.error()).toBeUndefined();
         });
 
-        it('should render the error, title and retry label through the translation service', async () => {
+        it('should render a load failure, its title and retry label through the translation service', async () => {
             const translation = TestBed.inject(TranslationService);
             vi.spyOn(translation, 'get').mockImplementation((key: string) => `[${key}]`);
-            mockDashboardService.getDashboard.mockReturnValue(of(undefined));
+            mockDashboardService.getDashboard.mockReturnValue(throwError(() => new Error('network')));
             paramMapSubject.next(convertToParamMap({ id: '999' }));
 
             fixture = TestBed.createComponent(DashboardPage);
@@ -473,8 +485,57 @@ describe('DashboardPage', () => {
 
             const text = (fixture.nativeElement as HTMLElement).textContent;
             expect(text).toContain('[dashboard.error.title]');
-            expect(text).toContain('[dashboard.error.not_found]');
+            expect(text).toContain('[dashboard.error.load_failed]');
             expect(text).toContain('[a11y.retry]');
+        });
+
+        // Issue #129: get_dashboard() returns NULL for a missing dashboard and for one the caller may not
+        // see. That is not a load failure: no "Failed to Load" title and no Retry, which cannot succeed.
+        describe('dashboard not available (issue #129)', () => {
+            async function openUnavailable(authenticated: boolean) {
+                mockAuth.authenticated.set(authenticated);
+                const translation = TestBed.inject(TranslationService);
+                vi.spyOn(translation, 'get').mockImplementation((key: string) => `[${key}]`);
+                mockDashboardService.getDashboard.mockReturnValue(of(undefined));
+                paramMapSubject.next(convertToParamMap({ id: '42' }));
+                fixture = TestBed.createComponent(DashboardPage);
+                component = fixture.componentInstance;
+                await advanceTime(10);
+                fixture.detectChanges();
+                return fixture.nativeElement as HTMLElement;
+            }
+
+            it('shows a neutral message with a link home, not the load failure and Retry', async () => {
+                const el = await openUnavailable(true);
+                const text = el.textContent!;
+                expect(el.querySelector('[data-testid="dashboard-unavailable"]')).toBeTruthy();
+                expect(text).toContain('[dashboard.unavailable.title]');
+                expect(text).toContain('[dashboard.unavailable.message]');
+                expect(text).not.toContain('[dashboard.error.title]');
+                expect(text).not.toContain('[a11y.retry]');
+                const home = el.querySelector('[data-testid="dashboard-unavailable"] a') as HTMLAnchorElement;
+                expect(home.getAttribute('href')).toBe('/');
+                expect(home.textContent).toContain('[dashboard.unavailable.go_home]');
+                expect(el.querySelector('[data-testid="dashboard-unavailable-sign-in"]')).toBeNull();
+            });
+
+            it('offers anonymous visitors a sign-in, since signing in may make it visible', async () => {
+                const el = await openUnavailable(false);
+                expect(el.textContent).toContain('[dashboard.unavailable.sign_in_message]');
+                const signIn = el.querySelector('[data-testid="dashboard-unavailable-sign-in"]') as HTMLButtonElement;
+                expect(signIn.textContent).toContain('[action.login]');
+                signIn.click();
+                expect(mockAuth.login).toHaveBeenCalled();
+            });
+
+            it('clears when a later load finds the dashboard', async () => {
+                await openUnavailable(true);
+                mockDashboardService.getDashboard.mockReturnValue(of(MOCK_DASHBOARDS.welcome));
+                paramMapSubject.next(convertToParamMap({ id: '1' }));
+                await advanceTime(10);
+                expect(component.unavailable()).toBe(false);
+                expect(component.dashboard()).toEqual(MOCK_DASHBOARDS.welcome);
+            });
         });
 
         it('should render dashboard header with title and description', async () => {
@@ -596,7 +657,7 @@ describe('DashboardPage', () => {
         });
 
         it('should call retry when retry button clicked', async () => {
-            mockDashboardService.getDashboard.mockReturnValue(of(undefined));
+            mockDashboardService.getDashboard.mockReturnValue(throwError(() => new Error('network')));
 
             // Emit route params with dashboard ID
             paramMapSubject.next(convertToParamMap({ id: '999' }));
