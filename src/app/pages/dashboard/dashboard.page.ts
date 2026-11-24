@@ -16,12 +16,13 @@
  */
 
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef, effect, untracked } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard, DashboardWidget } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
+import { AuthService } from '../../services/auth.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
 
@@ -41,7 +42,7 @@ import { WidgetContainerComponent } from '../../components/widget-container/widg
  */
 @Component({
   selector: 'app-dashboard-page',
-  imports: [WidgetContainerComponent, TranslatePipe],
+  imports: [WidgetContainerComponent, TranslatePipe, RouterLink],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -49,6 +50,7 @@ import { WidgetContainerComponent } from '../../components/widget-container/widg
 export class DashboardPage {
   private dashboardService = inject(DashboardService);
   private route = inject(ActivatedRoute);
+  protected auth = inject(AuthService);
 
   // Component state (signals for reactivity)
   dashboard = signal<Dashboard | undefined>(undefined);
@@ -56,6 +58,14 @@ export class DashboardPage {
   loading = signal(true);
   /** Translation key of the current error (rendered through the translate pipe), or undefined. */
   error = signal<string | undefined>(undefined);
+  /**
+   * The dashboard does not exist or the caller may not see it: get_dashboard() returns NULL for both,
+   * and the page keeps them indistinguishable so ids do not leak. Not a load failure, so no Retry
+   * (issue #129).
+   */
+  unavailable = signal(false);
+  /** The dashboard id in the route, for the template (no "home" link when already on /). */
+  protected readonly onDashboardRoute = signal(false);
 
   // The load in flight. Starting another load (route change, retry) or leaving the page cancels
   // it, so a slow response for the previous dashboard cannot replace the current one.
@@ -69,7 +79,7 @@ export class DashboardPage {
 
     // A role change (impersonation, login, logout) changes what the caller may see: reload this view.
     // On / that re-resolves the default dashboard; on /dashboard/:id it re-runs get_dashboard, so a
-    // dashboard the new roles cannot see shows "not found".
+    // dashboard the new roles cannot see shows as not available.
     let initialRoles = true;
     effect(() => {
       this.dashboardService.roleChange();
@@ -88,6 +98,7 @@ export class DashboardPage {
       const dashboardId = params.get('id');
 
       this.routeDashboardId = dashboardId ? parseInt(dashboardId, 10) : undefined;
+      this.onDashboardRoute.set(this.routeDashboardId !== undefined);
 
       if (dashboardId) {
         // Load specific dashboard by ID
@@ -105,6 +116,7 @@ export class DashboardPage {
   private loadDashboard(id: number): void {
     this.loading.set(true);
     this.error.set(undefined);
+    this.unavailable.set(false);
 
     this.load?.unsubscribe();
     this.load = this.dashboardService.getDashboard(id).subscribe({
@@ -114,7 +126,9 @@ export class DashboardPage {
           this.widgets.set(dashboard.widgets || []);
           this.loading.set(false);
         } else {
-          this.error.set('dashboard.error.not_found');
+          this.dashboard.set(undefined);
+          this.widgets.set([]);
+          this.unavailable.set(true);
           this.loading.set(false);
         }
       },
@@ -132,6 +146,7 @@ export class DashboardPage {
   private loadDefaultDashboard(): void {
     this.loading.set(true);
     this.error.set(undefined);
+    this.unavailable.set(false);
 
     // Get default dashboard ID first
     // Hold the slot before subscribing: a synchronous emit calls loadDashboard(),
@@ -167,14 +182,10 @@ export class DashboardPage {
   }
 
   /**
-   * Retry loading dashboard
+   * Retry after a failed load: the dashboard in the route, or the default one on /. (Not the last
+   * dashboard shown: after navigating from one dashboard to another whose load failed, that is stale.)
    */
   retry(): void {
-    const currentDashboard = this.dashboard();
-    if (currentDashboard) {
-      this.loadDashboard(currentDashboard.id);
-    } else {
-      this.loadDefaultDashboard();
-    }
+    this.reloadForRoleChange();
   }
 }
