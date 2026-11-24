@@ -5,7 +5,7 @@
  * Unit tests for formatValue() and getTypeLabel().
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { formatValue, getTypeLabel } from '../../formatters/value.js';
 import { EntityPropertyType } from '@civic-os/core';
 import type { SchemaProperty } from '../../interfaces.js';
@@ -119,6 +119,25 @@ describe('formatValue() Date', () => {
     // formatDate catches and returns the raw string, but JS Date('not-a-date') gives Invalid Date
     // The code returns the raw string in the catch block
     expect(typeof result).toBe('string');
+  });
+
+  // Issue #131: a date-only string parses as UTC midnight, so rendering it in a
+  // zone west of UTC showed the previous day.
+  describe('west of UTC', () => {
+    let savedTz: string | undefined;
+    beforeAll(() => { savedTz = process.env['TZ']; process.env['TZ'] = 'America/Detroit'; });
+    afterAll(() => {
+      if (savedTz === undefined) delete process.env['TZ'];
+      else process.env['TZ'] = savedTz;
+    });
+
+    it('keeps the calendar day of a date-only value', () => {
+      expect(formatValue('2027-06-12', prop)).toBe('Jun 12, 2027');
+    });
+
+    it('keeps the calendar day on the first of a year', () => {
+      expect(formatValue('2027-01-01', prop)).toBe('Jan 1, 2027');
+    });
   });
 });
 
