@@ -15,9 +15,10 @@ describe('StaticAssetsService', () => {
     let httpMock: HttpTestingController;
 
     beforeEach(() => {
-        const mockAuth = {
+        const mockAuth: any = {
             hasPermission: vi.fn().mockName("AuthService.hasPermission")
         };
+        mockAuth.permission = (table: string, perm: string) => () => mockAuth.hasPermission(table, perm);
         mockAuth.hasPermission.mockReturnValue(false);
 
         TestBed.configureTestingModule({
@@ -132,7 +133,7 @@ describe('StaticAssetsService', () => {
     });
 
     describe('hasStaticAssetAccess', () => {
-        it('should delegate to AuthService.hasPermission', () => {
+        it('should read AuthService.permission', () => {
             const mockAuth = TestBed.inject(AuthService) as any;
             mockAuth.hasPermission.mockReturnValue(true);
 

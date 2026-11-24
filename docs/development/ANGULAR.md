@@ -84,6 +84,8 @@ export class MyComponent {
 
 **Template**: Access signal values with `()` syntax: `@if (loading()) { <span class="loading"></span> }`
 
+**Permission checks in signals** (issue #148): `AuthService.hasPermission()` reads its cache untracked, so an effect that calls it does not re-run when the permissions refresh (the v0.40.1 request loop). The flip side: a `computed()` that only calls it has no dependencies and keeps the `false` it computed before the permissions loaded. In a `computed()`, a template, or a service method a `computed()` calls, read the tracked signal instead: `auth.permission('files', 'read')()`, or assign `auth.permission('files', 'read')` to the field directly. Keep `hasPermission()` for effects and one-shot imperative checks, and wait for `auth.permissionsLoaded()` before a one-shot check that runs on page load. ESLint rejects `hasPermission()` inside `computed()`.
+
 **Multi-phase data loading**: For pages that load data in stages (e.g., load schema → query entities → query files), use multiple `effect()` instances where each reads signals written by the prior effect. Do NOT chain imperative method calls — async timing will break. See `docs/notes/ADMIN_PAGE_PITFALLS.md` for the pattern and common mistakes.
 
 ### Core stores, forms and routes in Angular

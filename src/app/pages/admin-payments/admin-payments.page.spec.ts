@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -69,8 +69,13 @@ describe('AdminPaymentsPage', () => {
 
     beforeEach(async () => {
         mockAuthService = {
-            hasPermission: vi.fn().mockName("AuthService.hasPermission")
+            hasPermission: vi.fn().mockName("AuthService.hasPermission"),
+            permissionsLoaded: signal(true)
         };
+        mockAuthService.permission = (table: string, perm: string) => computed(() => {
+            mockAuthService.permissionsLoaded();
+            return mockAuthService.hasPermission(table, perm);
+        });
         // Default to having permissions (synchronous boolean)
         mockAuthService.hasPermission.mockReturnValue(true);
 
@@ -100,6 +105,27 @@ describe('AdminPaymentsPage', () => {
         // Flush initial data request
         const req = httpMock.expectOne(r => r.url.includes('payment_transactions'));
         req.flush([]);
+    });
+
+    it('waits for the permissions before the first load (issue #148)', async () => {
+        httpMock.expectOne(r => r.url.includes('payment_transactions')).flush([]);
+
+        mockAuthService.hasPermission.mockReturnValue(false);
+        mockAuthService.permissionsLoaded.set(false);
+        fixture = TestBed.createComponent(AdminPaymentsPage);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        await fixture.whenStable();
+        httpMock.expectNone(r => r.url.includes('payment_transactions'));
+        expect(component.canViewPayments()).toBe(false);
+        expect(component.error()).toBeUndefined();
+
+        mockAuthService.hasPermission.mockReturnValue(true);
+        mockAuthService.permissionsLoaded.set(true);
+        await fixture.whenStable();
+        httpMock.expectOne(r => r.url.includes('payment_transactions')).flush([]);
+        expect(component.canViewPayments()).toBe(true);
+        expect(component.error()).toBeUndefined();
     });
 
     describe('Query Parameter Building', () => {

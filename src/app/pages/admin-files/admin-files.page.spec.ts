@@ -60,6 +60,7 @@ describe('AdminFilesPage', () => {
         mockAuthService = {
             hasPermission: vi.fn().mockName("AuthService.hasPermission")
         };
+        mockAuthService.permission = (table: string, perm: string) => () => mockAuthService.hasPermission(table, perm);
         mockAuthService.hasPermission.mockReturnValue(true);
 
         mockSchemaService = {

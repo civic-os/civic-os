@@ -88,9 +88,7 @@ export class AdminConfigPage {
   private stored = new Map<string, string | null>();
   private failed = new Map<string, string | null>();
 
-  canEdit = computed(() =>
-    this.auth.permissionsLoaded() && this.auth.hasPermission('metadata.instance_config', 'update')
-  );
+  canEdit = this.auth.permission('metadata.instance_config', 'update');
 
   // Done button
   private returnToParam = toSignal(

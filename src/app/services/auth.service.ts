@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, Signal, signal, untracked } from '@angular/core';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakService, ReadyArgs, AuthErrorArgs, typeEventArgs } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { DataService } from './data.service';
@@ -256,6 +256,32 @@ export class AuthService {
   hasPermission(tableName: string, permission: string): boolean {
     const perms = untracked(() => this.permissionsCache()).get(tableName);
     return perms?.has(permission) ?? false;
+  }
+
+  /** One tracked signal per table and permission, shared by every caller of permission(). */
+  private permissionSignals = new Map<string, Signal<boolean>>();
+
+  /**
+   * Tracked form of hasPermission(), for computed() signals, templates and service methods they call.
+   *
+   * hasPermission() reads the cache untracked (v0.40.1), so a computed() that only calls it has no
+   * dependencies and keeps the value it had before the permissions loaded (issue #148). Reading this
+   * signal makes the caller depend on the permission, and it changes only when the boolean does.
+   *
+   * Effects keep using hasPermission(): an effect that starts requests must not re-run on a cache refresh.
+   * ESLint rejects hasPermission() inside computed().
+   *
+   * @param tableName The name of the table to check
+   * @param permission The permission to check: 'create', 'read', 'update', or 'delete'
+   */
+  permission(tableName: string, permission: string): Signal<boolean> {
+    const key = `${tableName}\u0000${permission}`;
+    let tracked = this.permissionSignals.get(key);
+    if (!tracked) {
+      tracked = computed(() => this.permissionsCache().get(tableName)?.has(permission) ?? false);
+      this.permissionSignals.set(key, tracked);
+    }
+    return tracked;
   }
 
   /**
