@@ -4,7 +4,7 @@
   @if (loading()) {
     <div class="loading-container">
       <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
-      <p class="text-base-content/70 mt-4">Loading dashboard...</p>
+      <p class="text-base-content/70 mt-4">{{ 'dashboard.loading' | translate }}</p>
     </div>
   }
 
@@ -25,8 +25,33 @@
     </div>
   }
 
+  <!-- Not available: missing, or hidden from this caller (indistinguishable on purpose; no Retry) -->
+  @if (!loading() && unavailable()) {
+    <div class="error-container" data-testid="dashboard-unavailable">
+      <div class="alert max-w-md" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+        <div>
+          <h2 class="font-bold text-base m-0">{{ 'dashboard.unavailable.title' | translate }}</h2>
+          <p class="text-sm m-0">{{ (auth.authenticated() ? 'dashboard.unavailable.message' : 'dashboard.unavailable.sign_in_message') | translate }}</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-4">
+        @if (!auth.authenticated()) {
+          <button type="button" class="btn btn-primary" data-testid="dashboard-unavailable-sign-in" (click)="auth.login()">
+            {{ 'action.login' | translate }}
+          </button>
+        }
+        @if (onDashboardRoute()) {
+          <a routerLink="/" class="btn" [class.btn-primary]="auth.authenticated()">
+            {{ 'dashboard.unavailable.go_home' | translate }}
+          </a>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Dashboard Content -->
-  @if (!loading() && !error() && dashboard()) {
+  @if (!loading() && !error() && !unavailable() && dashboard()) {
     <div class="dashboard-container">
       <!-- Dashboard Header -->
       @if (dashboard()!.show_title) {

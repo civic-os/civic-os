@@ -654,6 +654,8 @@ Fields:
 - `is_public` is true;
 - the user holds a role with a `dashboard_roles` row for it, in either mode.
 
+A direct link to a dashboard the caller may not see (or one that does not exist; the page does not tell them apart, so ids do not leak) shows "This dashboard isn't available" with a link to the home dashboard, and a Log In button for anonymous visitors, not a load failure (v0.86.4).
+
 Rows only grant; **`is_public = false` is the only restriction switch**. Modes: `show` lets a role see the dashboard; `default` also makes it that role's landing dashboard. They are separate rows (primary key `dashboard_id, role_id, mode`), so a role can hold both on one dashboard; a default grants visibility too, so a role with a default needs no show row. `priority` orders defaults when a user holds several roles (higher wins). A role has at most one default dashboard. Roles are matched on `role_key` against `get_user_roles()`, which reads the JWT roles, honors role impersonation, and returns `anonymous` for signed-out visitors.
 
 Common patterns:

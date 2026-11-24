@@ -120,6 +120,17 @@ export class ImportModalComponent implements OnDestroy {
     }
   });
 
+  /** Detail text for an error message: the error's own message, else a translated "Unknown error". */
+  private errorDetail(error: unknown): string {
+    return error instanceof Error ? error.message : this.translation.get('import_modal.error_unknown');
+  }
+
+  /** Item label for a count: the integrator's `customImport.itemLabel`, else a translated "row"/"rows". */
+  public itemLabelFor(count: number): string {
+    return this.customImport?.itemLabel
+      || this.translation.get(count === 1 ? 'import_modal.rows_one' : 'import_modal.rows_other');
+  }
+
   // Computed properties
   public hasErrors = computed(() => {
     const summary = this.errorSummary();
@@ -186,7 +197,7 @@ export class ImportModalComponent implements OnDestroy {
     // Validate file size
     const sizeCheck = this.importExportService.validateFileSize(file);
     if (!sizeCheck.valid) {
-      this.errorMessage.set(sizeCheck.error || 'File too large');
+      this.errorMessage.set(sizeCheck.error || this.translation.get('import_modal.error_file_too_large'));
       return;
     }
 
@@ -196,7 +207,7 @@ export class ImportModalComponent implements OnDestroy {
     // Parse Excel file
     const parseResult = await this.importExportService.parseExcelFile(file);
     if (!parseResult.success || !parseResult.data) {
-      this.errorMessage.set(parseResult.error || 'Failed to parse file');
+      this.errorMessage.set(parseResult.error || this.translation.get('import_modal.error_parse_failed'));
       return;
     }
 
@@ -250,8 +261,8 @@ export class ImportModalComponent implements OnDestroy {
             row: rowNumber,
             column: col.name,
             value: '',
-            error: `${col.name} is required`,
-            errorType: 'Required'
+            error: this.translation.get('import_modal.err_required', { column: col.name }),
+            errorType: this.translation.get('import_modal.type_required')
           });
           rowHasError = true;
           continue;
@@ -276,8 +287,8 @@ export class ImportModalComponent implements OnDestroy {
                 row: rowNumber,
                 column: col.name,
                 value: strValue,
-                error: 'Invalid email format',
-                errorType: 'Invalid format'
+                error: this.translation.get('import_modal.err_invalid_email'),
+                errorType: this.translation.get('import_modal.type_invalid_format')
               });
               rowHasError = true;
             } else {
@@ -293,8 +304,8 @@ export class ImportModalComponent implements OnDestroy {
                 row: rowNumber,
                 column: col.name,
                 value: strValue,
-                error: 'Phone must be 10 digits',
-                errorType: 'Invalid format'
+                error: this.translation.get('import_modal.err_phone_digits'),
+                errorType: this.translation.get('import_modal.type_invalid_format')
               });
               rowHasError = true;
             } else {
@@ -314,8 +325,8 @@ export class ImportModalComponent implements OnDestroy {
                 row: rowNumber,
                 column: col.name,
                 value: strValue,
-                error: 'Must be true/false, yes/no, 1/0, or y/n',
-                errorType: 'Invalid format'
+                error: this.translation.get('import_modal.err_boolean'),
+                errorType: this.translation.get('import_modal.type_invalid_format')
               });
               rowHasError = true;
             }
@@ -409,7 +420,7 @@ export class ImportModalComponent implements OnDestroy {
       this.worker.onmessage = (event) => this.handleWorkerMessage(event);
       this.worker.onerror = (error) => {
         console.error('Worker error:', error);
-        this.errorMessage.set('Validation failed: Worker error');
+        this.errorMessage.set(this.translation.get('import_modal.error_validation_failed', { detail: this.translation.get('import_modal.error_worker') }));
         this.currentStep.set('choose');
         this.terminateWorker();
       };
@@ -426,7 +437,7 @@ export class ImportModalComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Validation error:', error);
-      this.errorMessage.set(`Validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.errorMessage.set(this.translation.get('import_modal.error_validation_failed', { detail: this.errorDetail(error) }));
       this.currentStep.set('choose');
     }
   }
@@ -559,7 +570,7 @@ export class ImportModalComponent implements OnDestroy {
       await this.importExportService.downloadTemplate(this.entity!, properties);
     } catch (error) {
       console.error('Template download error:', error);
-      this.errorMessage.set(`Template download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.errorMessage.set(this.translation.get('import_modal.error_template_failed', { detail: this.errorDetail(error) }));
     }
   }
 
@@ -615,14 +626,15 @@ export class ImportModalComponent implements OnDestroy {
             this.partialSuccessCount.set(result.importedCount);
             this.importedCount.set(result.importedCount);
             // Convert server errors to ValidationErrorSummary for display
+            const serverErrorType = this.translation.get('import_modal.type_server_error');
             const errors: ImportError[] = (result.errors || []).map(e => ({
               row: e.index,
               column: e.identifier || '',
               value: e.identifier || '',
               error: e.error,
-              errorType: 'Server error'
+              errorType: serverErrorType
             }));
-            const errorsByType = new Map<string, number>([['Server error', errors.length]]);
+            const errorsByType = new Map<string, number>([[serverErrorType, errors.length]]);
             const errorsByColumn = new Map<string, number>();
             this.errorSummary.set({
               totalErrors: errors.length,
@@ -634,15 +646,16 @@ export class ImportModalComponent implements OnDestroy {
             this.currentStep.set('results');
           } else {
             // All failed
-            this.errorMessage.set(`Import failed: all ${result.errorCount} rows had errors`);
+            this.errorMessage.set(this.translation.get('import_modal.error_all_rows_failed', { count: result.errorCount }));
+            const serverErrorType = this.translation.get('import_modal.type_server_error');
             const errors: ImportError[] = (result.errors || []).map(e => ({
               row: e.index,
               column: e.identifier || '',
               value: e.identifier || '',
               error: e.error,
-              errorType: 'Server error'
+              errorType: serverErrorType
             }));
-            const errorsByType = new Map<string, number>([['Server error', errors.length]]);
+            const errorsByType = new Map<string, number>([[serverErrorType, errors.length]]);
             const errorsByColumn = new Map<string, number>();
             this.errorSummary.set({
               totalErrors: errors.length,
@@ -656,7 +669,7 @@ export class ImportModalComponent implements OnDestroy {
         },
         error: (error) => {
           console.error('Custom import error:', error);
-          this.errorMessage.set(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          this.errorMessage.set(this.translation.get('import_modal.error_import_failed', { detail: this.errorDetail(error) }));
           this.currentStep.set('results');
         }
       });
@@ -681,19 +694,19 @@ export class ImportModalComponent implements OnDestroy {
             const insertedRows = response.body as any[] | null;
             this.insertM2mJunctions(insertedRows);
           } else if (response.error) {
-            this.errorMessage.set(response.error.humanMessage || 'Import failed');
+            this.errorMessage.set(response.error.humanMessage || this.translation.get('import_modal.error_import_failed_plain'));
             this.currentStep.set('results');
           }
         },
         error: (error) => {
           console.error('Import error:', error);
-          this.errorMessage.set(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          this.errorMessage.set(this.translation.get('import_modal.error_import_failed', { detail: this.errorDetail(error) }));
           this.currentStep.set('results');
         }
       });
     } catch (error) {
       console.error('Import error:', error);
-      this.errorMessage.set(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.errorMessage.set(this.translation.get('import_modal.error_import_failed', { detail: this.errorDetail(error) }));
       this.currentStep.set('results');
     }
   }
@@ -767,9 +780,9 @@ export class ImportModalComponent implements OnDestroy {
       next: (results) => {
         const failures = results.filter(r => !r.success);
         if (failures.length > 0) {
-          const errorMsg = failures.map(f => f.error?.humanMessage || 'Unknown error').join('; ');
+          const errorMsg = failures.map(f => f.error?.humanMessage || this.translation.get('import_modal.error_unknown')).join('; ');
           this.errorMessage.set(
-            `${this.validatedData.length} records imported. Some relationship associations failed: ${errorMsg}`
+            this.translation.get('import_modal.error_associations_partial', { count: this.validatedData.length, detail: errorMsg })
           );
           this.importedCount.set(this.validatedData.length);
           this.currentStep.set('success');
@@ -781,7 +794,7 @@ export class ImportModalComponent implements OnDestroy {
       error: (error) => {
         console.error('M:M junction insert error:', error);
         this.errorMessage.set(
-          `${this.validatedData.length} records imported. Relationship associations failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          this.translation.get('import_modal.error_associations_failed', { count: this.validatedData.length, detail: this.errorDetail(error) })
         );
         this.importedCount.set(this.validatedData.length);
         this.currentStep.set('success');

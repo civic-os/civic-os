@@ -1624,6 +1624,8 @@ Events:
 - `importComplete(count: number)` - Import succeeded
 - `close()` - User cancelled or closed modal
 
+i18n (issue #103): every string the modal shows, including error messages, row-level errors and error types, comes from `import_modal.*` keys. Messages that name an item use `_one`/`_other` keys selected by count (`confirm_import_*`, `success_items_*`, `partial_success_*`) with `count` and `itemLabel` parameters; `itemLabel` is the integrator's `CustomImportConfig.itemLabel` as given (not translated or inflected), else a translated "row"/"rows". Messages that embed a server or parser error take it as `{{detail}}`. The keys are seeded in the six core locales by `v0-86-4-import-modal-translations`. Messages produced by the validation worker (`src/app/workers/import-validation.worker.ts`) and by `ImportExportService` (such as the file-size message) are still English.
+
 State:
 ```typescript
 export class ImportModalComponent {

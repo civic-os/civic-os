@@ -26,6 +26,7 @@ import { DataService } from '../../services/data.service';
 import { SchemaEntityTable, SchemaEntityProperty, EntityPropertyType, ValidationErrorSummary } from '../../interfaces/entity';
 import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
 import { TranslationService } from '../../services/translation.service';
+import { EN_TRANSLATIONS } from '../../i18n/en.translations';
 
 describe('ImportModalComponent', () => {
     let component: ImportModalComponent;
@@ -110,7 +111,8 @@ describe('ImportModalComponent', () => {
             get: vi.fn().mockName("TranslationService.get"),
             version: () => 1
         };
-        mockTranslationService.get.mockImplementation((key: string) => key);
+        mockTranslationService.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+            (EN_TRANSLATIONS[key] ?? key).replace(/\{\{(\w+)\}\}/g, (m: string, k: string) => params?.[k] !== undefined ? String(params[k]) : m));
 
         await TestBed.configureTestingModule({
             imports: [ImportModalComponent],
@@ -1047,6 +1049,107 @@ describe('ImportModalComponent', () => {
             expect(component.currentStep()).toBe('success');
             expect(component.importedCount()).toBe(1);
             expect(component.errorMessage()).toContain('relationship associations failed');
+        });
+    });
+    describe('Translated strings (issue #103)', () => {
+        const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
+        const customImport = (itemLabel?: string): CustomImportConfig => ({
+            title: 'Import Users',
+            columns: [],
+            itemLabel,
+            submit: vi.fn().mockName('submit'),
+            generateTemplate: vi.fn().mockName('generateTemplate')
+        } as unknown as CustomImportConfig);
+
+        it('should only use import_modal keys that exist in the bundled English translations', () => {
+            const used = [
+                'col_identifier', 'rows_one', 'rows_other', 'partial_success_one', 'partial_success_other',
+                'partial_failed', 'confirm_import_one', 'confirm_import_other', 'importing_items',
+                'success_items_one', 'success_items_other', 'error_file_too_large', 'error_parse_failed',
+                'error_unknown', 'error_worker', 'error_validation_failed', 'error_template_failed',
+                'error_import_failed', 'error_import_failed_plain', 'error_all_rows_failed',
+                'error_associations_partial', 'error_associations_failed', 'err_required', 'err_invalid_email',
+                'err_phone_digits', 'err_boolean', 'type_required', 'type_invalid_format', 'type_server_error'
+            ];
+            for (const k of used) {
+                expect(EN_TRANSLATIONS['import_modal.' + k]).toBeTruthy();
+            }
+        });
+
+        it('should render the confirm message with _other for several rows and _one for a single row', () => {
+            component.customImport = customImport('users');
+            component.validRowCount.set(3);
+            component.currentStep.set('results');
+            fixture.detectChanges();
+            expect(text()).toContain('This will import 3 users.');
+            const keys = mockTranslationService.get.mock.calls.map((c: any[]) => c[0]);
+            expect(keys).toContain('import_modal.confirm_import_other');
+
+            component.validRowCount.set(1);
+            component.customImport = customImport('user');
+            fixture.detectChanges();
+            expect(mockTranslationService.get.mock.calls.map((c: any[]) => c[0])).toContain('import_modal.confirm_import_one');
+            expect(text()).toContain('This will import 1 user.');
+        });
+
+        it('should fall back to a translated row label when the integrator gives no itemLabel', () => {
+            component.customImport = customImport();
+            expect(component.itemLabelFor(1)).toBe('row');
+            expect(component.itemLabelFor(2)).toBe('rows');
+        });
+
+        it('should render the success and importing messages from keys', () => {
+            component.customImport = customImport('users');
+            component.validRowCount.set(2);
+            component.importedCount.set(2);
+            component.currentStep.set('importing');
+            fixture.detectChanges();
+            expect(text()).toContain('Importing 2 users...');
+
+            component.currentStep.set('success');
+            fixture.detectChanges();
+            expect(text()).toContain('Successfully imported 2 users!');
+        });
+
+        it('should render the error table headers and partial-success messages from keys', () => {
+            component.customImport = customImport('users');
+            component.partialSuccessCount.set(1);
+            component.errorSummary.set({
+                totalErrors: 2,
+                errorsByType: new Map(),
+                errorsByColumn: new Map(),
+                firstNErrors: [{ row: 3, column: 'a@b.c', value: 'a@b.c', error: 'dup', errorType: 'Server error' }],
+                allErrors: []
+            } as ValidationErrorSummary);
+            component.currentStep.set('results');
+            fixture.detectChanges();
+            const t = text();
+            expect(t).toContain('1 user created successfully.');
+            expect(t).toContain('2 failed with errors:');
+            expect(t).toContain('Row');
+            expect(t).toContain('Identifier');
+            expect(t).toContain('Error');
+        });
+
+        it('should key row-level validation errors and error types', () => {
+            component.customImport = {
+                ...customImport('users'),
+                columns: [
+                    { name: 'Email', key: 'email', type: 'email', required: true },
+                    { name: 'Name', key: 'name', type: 'text', required: true }
+                ]
+            } as unknown as CustomImportConfig;
+            (component as any).runCustomValidation([{ 'Email': 'nope', 'Name': 'A' }, { 'Email': 'a@b.co', 'Name': '' }]);
+            const errors = component.errorSummary()!.allErrors;
+            expect(errors[0].error).toBe('Invalid email format');
+            expect(errors[0].errorType).toBe('Invalid format');
+            expect(errors[1].error).toBe('Name is required');
+            expect(errors[1].errorType).toBe('Required');
+        });
+
+        it('should pass a thrown error message as the detail parameter', () => {
+            expect((component as any).errorDetail(new Error('boom'))).toBe('boom');
+            expect((component as any).errorDetail('x')).toBe('Unknown error');
         });
     });
 });
