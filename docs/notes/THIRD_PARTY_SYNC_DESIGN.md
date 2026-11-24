@@ -387,7 +387,7 @@
 | `services/consolidated-worker-go/main.go` | Worker registration (`river.AddWorker()`) |
 | `services/consolidated-worker-go/keycloak_client.go` | OAuth2 HTTP client with token caching |
 | `services/payment-worker/webhook_handler.go` | Inbound webhook: idempotency, sig verify, atomic txn |
-| `services/consolidated-worker-go/scheduled_jobs_worker.go` | Cron scheduling, unique_key dedup, audit logging |
+| `services/consolidated-worker-go/scheduled_jobs_worker.go` | Cron scheduling, River unique-job dedup, audit logging |
 | `docs/notes/FEDERATION_DESIGN.md` | Overlapping design to harmonize |
 
 ---

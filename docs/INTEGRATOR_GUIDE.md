@@ -4361,7 +4361,7 @@ The scheduled jobs system uses a **Scheduler + Executor pattern**:
    - Updates `last_run_at` on the job configuration
    - Logs success/failure with timing
 
-**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. Duplicate prevention via `unique_key` ensures the same scheduled time is never executed twice.
+**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. River's unique jobs (by job and scheduled time, in every job state) ensure the same scheduled time is never executed twice.
 
 > **Scaling Note**: The scheduled jobs scheduler runs in a single consolidated-worker instance. If you scale to multiple instances, the scheduler runs on each, but job deduplication prevents duplicate execution. For large-scale deployments, see `docs/notes/SCHEDULED_JOBS_DESIGN.md` for guidance on River leader election configuration.
 
@@ -7285,7 +7285,7 @@ GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
 ```
 
-`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.86.3 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.86.3 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+`SELECT` grants alone do not make a login role read-only: PostgreSQL grants `TEMPORARY` on every database to `PUBLIC`, and creating temporary objects is enough to exploit CVE-2026-6460. Since v0.86.4 the migrations revoke it on the Civic OS database. Revoke it on the cluster's other databases too, as a superuser (`REVOKE TEMPORARY ON DATABASE postgres, template_postgis FROM PUBLIC;`, naming the databases the v0.86.4 deploy notice lists), and never grant `TEMPORARY` to this role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 For full CRUD access, use the same `authenticated` role as the web frontend by authenticating through Keycloak.
 

@@ -144,7 +144,7 @@ jobs:
           ./tests/functional/v0-85-0-dimensions-registry-test.sh
           ./tests/functional/v0-86-0-dimension-cache-version-test.sh
           ./tests/functional/v0-86-1-module-interface-test.sh
-          ./tests/functional/v0-86-3-revoke-public-temp-test.sh
+          ./tests/functional/v0-86-4-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
           # no PostgREST or Keycloak in this job; the install path test's API section runs in E2E verification
@@ -296,7 +296,7 @@ jobs:
 
       - name: Verify the owner revoked TEMPORARY from PUBLIC (as restricted user)
         # The test switches roles with SET ROLE, so it connects as the superuser; doadmin owns the database and ran the revoke.
-        run: ./tests/functional/v0-86-3-revoke-public-temp-test.sh
+        run: ./tests/functional/v0-86-4-revoke-public-temp-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
 

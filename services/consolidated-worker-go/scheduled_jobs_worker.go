@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
+	"github.com/riverqueue/river/rivertype"
 	"github.com/robfig/cron/v3"
 )
 
@@ -17,12 +18,14 @@ import (
 // Job Definitions
 // ============================================================================
 
-// ScheduledJobExecuteArgs defines the arguments for executing a scheduled job
+// ScheduledJobExecuteArgs defines the arguments for executing a scheduled job.
+// JobID and ScheduledFor identify an execution (river:"unique"); a catch-up and a
+// regular tick for the same scheduled time are the same execution.
 type ScheduledJobExecuteArgs struct {
-	JobID        int       `json:"job_id"`
+	JobID        int       `json:"job_id" river:"unique"`
 	JobName      string    `json:"job_name"`
 	FunctionName string    `json:"function_name"`
-	ScheduledFor time.Time `json:"scheduled_for"`
+	ScheduledFor time.Time `json:"scheduled_for" river:"unique"`
 	TriggeredBy  string    `json:"triggered_by"` // "scheduler", "manual", "catchup"
 }
 
@@ -31,13 +34,37 @@ func (ScheduledJobExecuteArgs) Kind() string {
 	return "scheduled_job_execute"
 }
 
-// InsertOpts specifies River job insertion options
+// InsertOpts specifies River job insertion options.
+//
+// One execution per job and scheduled time, in every state: a run that completed,
+// failed for good or was cancelled is not queued again for the same time (until
+// River's job cleaner removes it). River enforces this with its river_job_unique_idx
+// (issue #147: the scheduler used to insert with hand-written SQL whose
+// ON CONFLICT (kind, unique_key) needed River's legacy unique index).
 func (ScheduledJobExecuteArgs) InsertOpts() river.InsertOpts {
 	return river.InsertOpts{
 		Queue:       "scheduled_jobs",
 		MaxAttempts: 3,
 		Priority:    2,
+		UniqueOpts: river.UniqueOpts{
+			ByArgs: true,
+			ByState: []rivertype.JobState{
+				rivertype.JobStateAvailable,
+				rivertype.JobStateCancelled,
+				rivertype.JobStateCompleted,
+				rivertype.JobStateDiscarded,
+				rivertype.JobStatePending,
+				rivertype.JobStateRetryable,
+				rivertype.JobStateRunning,
+				rivertype.JobStateScheduled,
+			},
+		},
 	}
+}
+
+// jobInserter is the part of the River client the scheduler uses (a fake in tests).
+type jobInserter interface {
+	Insert(ctx context.Context, args river.JobArgs, opts *river.InsertOpts) (*rivertype.JobInsertResult, error)
 }
 
 // ============================================================================
@@ -68,12 +95,13 @@ type ScheduledJobRow struct {
 // periodic jobs (since it didn't have them configured).
 //
 // CONSTRAINT: If you run multiple consolidated-worker instances, each will run
-// the scheduler independently. Duplicate job execution is prevented by unique_key
-// deduplication on River job insertion.
+// the scheduler independently. Duplicate job execution is prevented by River's
+// unique jobs (ScheduledJobExecuteArgs.InsertOpts).
 type ScheduledJobScheduler struct {
-	dbPool *pgxpool.Pool
-	ticker *time.Ticker
-	done   chan bool
+	dbPool   *pgxpool.Pool
+	inserter jobInserter // the River client, set before Start
+	ticker   *time.Ticker
+	done     chan bool
 }
 
 // Start begins the scheduler goroutine that checks for due jobs every minute
@@ -183,11 +211,14 @@ func (s *ScheduledJobScheduler) checkDueJobs(ctx context.Context) {
 				triggeredBy = "catchup" // More than 1 hour overdue
 			}
 
-			// Queue the job for execution via direct SQL insert
-			// Use unique_key to prevent duplicate jobs for the same scheduled_for time
-			err := s.queueExecuteJob(ctx, sj, nextDue, triggeredBy)
+			// Queue the execution through River; a duplicate for the same scheduled time is skipped
+			queued, err := s.queueExecuteJob(ctx, sj, nextDue, triggeredBy)
 			if err != nil {
 				log.Printf("[Scheduler] Failed to queue job '%s': %v", sj.Name, err)
+				continue
+			}
+			if !queued {
+				log.Printf("[Scheduler] Job '%s' already queued for %s", sj.Name, nextDue.Format(time.RFC3339))
 				continue
 			}
 
@@ -207,9 +238,14 @@ func (s *ScheduledJobScheduler) checkDueJobs(ctx context.Context) {
 	log.Printf("[Scheduler] Check complete: %d jobs queued, %d jobs not yet due", jobsQueued, jobsSkipped)
 }
 
-// queueExecuteJob inserts a scheduled job execution into the River queue
-// Uses unique_key to prevent duplicate jobs for the same scheduled_for time
-func (s *ScheduledJobScheduler) queueExecuteJob(ctx context.Context, sj ScheduledJobRow, scheduledFor time.Time, triggeredBy string) error {
+// queueExecuteJob queues a scheduled job execution through the River client. It
+// returns false, without error, when that execution is already queued or was run:
+// River skips the insert as a unique duplicate (ScheduledJobExecuteArgs.InsertOpts).
+func (s *ScheduledJobScheduler) queueExecuteJob(ctx context.Context, sj ScheduledJobRow, scheduledFor time.Time, triggeredBy string) (bool, error) {
+	if s.legacyExecutionPending(ctx, sj.ID, scheduledFor) {
+		return false, nil
+	}
+
 	args := ScheduledJobExecuteArgs{
 		JobID:        sj.ID,
 		JobName:      sj.Name,
@@ -218,39 +254,37 @@ func (s *ScheduledJobScheduler) queueExecuteJob(ctx context.Context, sj Schedule
 		TriggeredBy:  triggeredBy,
 	}
 
-	argsJSON, err := json.Marshal(args)
+	res, err := s.inserter.Insert(ctx, args, nil)
 	if err != nil {
-		return fmt.Errorf("failed to marshal job args: %w", err)
+		return false, fmt.Errorf("failed to insert job: %w", err)
 	}
+	return !res.UniqueSkippedAsDuplicate, nil
+}
 
-	// Insert directly into River job table
-	// unique_key prevents duplicate jobs for the same job_id + scheduled_for combination
-	uniqueKey := fmt.Sprintf("scheduled_job:%d:%s", sj.ID, scheduledFor.Format(time.RFC3339))
-
-	_, err = s.dbPool.Exec(ctx, `
-		INSERT INTO metadata.river_job (
-			state,
-			queue,
-			kind,
-			args,
-			priority,
-			max_attempts,
-			scheduled_at,
-			unique_key
-		) VALUES (
-			'available',
-			'scheduled_jobs',
-			'scheduled_job_execute',
-			$1,
-			2,
-			3,
-			NOW(),
-			$2
+// legacyExecutionPending reports whether a worker from before issue #147's fix
+// queued this execution with its own SQL insert (unique_key
+// "scheduled_job:<id>:<RFC3339>", no unique_states) and it has not run yet. River's
+// unique key differs from that one, so without this check an execution queued just
+// before an upgrade would be queued again. Remove it, with River's legacy index
+// river_job_kind_unique_key_idx, once no such rows remain.
+func (s *ScheduledJobScheduler) legacyExecutionPending(ctx context.Context, jobID int, scheduledFor time.Time) bool {
+	if s.dbPool == nil {
+		return false
+	}
+	legacyKey := []byte(fmt.Sprintf("scheduled_job:%d:%s", jobID, scheduledFor.Format(time.RFC3339)))
+	var pending bool
+	err := s.dbPool.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM metadata.river_job
+			WHERE kind = 'scheduled_job_execute' AND unique_key = $1 AND unique_states IS NULL
+			  AND state IN ('available', 'pending', 'retryable', 'running', 'scheduled')
 		)
-		ON CONFLICT (kind, unique_key) WHERE unique_key IS NOT NULL DO NOTHING
-	`, argsJSON, uniqueKey)
-
-	return err
+	`, legacyKey).Scan(&pending)
+	if err != nil {
+		log.Printf("[Scheduler] Could not check for a legacy queued execution of job %d: %v", jobID, err)
+		return false
+	}
+	return pending
 }
 
 // ============================================================================

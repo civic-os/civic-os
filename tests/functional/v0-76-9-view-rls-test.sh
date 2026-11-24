@@ -84,7 +84,7 @@ BEGIN
   ), 'civic_os_users: lost security_invoker (CREATE OR REPLACE VIEW resets view options)';
 END $$;
 
--- Helpers are created here, before the role switch: API roles cannot create temporary objects (v0.86.3
+-- Helpers are created here, before the role switch: API roles cannot create temporary objects (v0.86.4
 -- revokes TEMPORARY from PUBLIC). They are SECURITY INVOKER, so each call runs with the caller's privileges.
 
 -- helper to run a DML statement as the current principal and return the affected row count

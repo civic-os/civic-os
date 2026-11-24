@@ -1,6 +1,6 @@
 # CVE-2026-6460 Response: Revoke TEMPORARY from PUBLIC
 
-> **Status**: Hardening implemented in v0.86.3 (`v0-86-3-revoke-public-temp`). The fix is a PostgreSQL minor upgrade.
+> **Status**: Hardening implemented in v0.86.4 (`v0-86-4-revoke-public-temp`). The fix is a PostgreSQL minor upgrade.
 > **Author**: Daniel Kurin
 > **Date**: 2026-11-14
 > **Severity**: CVSS 3.1 8.8 (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H), CWE-843
@@ -35,9 +35,9 @@ The examples build their database from `docker/dev-postgres`, so rebuild it with
 
 The `postgis/postgis` 17-3.5 tags were last rebuilt before 17.12 shipped, so until they are rebuilt, the hardening below is the only defense on those images.
 
-## The Hardening: v0.86.3
+## The Hardening: v0.86.4
 
-The migration `v0-86-3-revoke-public-temp` revokes `TEMPORARY` on the Civic OS database from `PUBLIC`:
+The migration `v0-86-4-revoke-public-temp` revokes `TEMPORARY` on the Civic OS database from `PUBLIC`:
 
 - `CONNECT` is untouched.
 - The database owner keeps `TEMPORARY` (implicit in its ACL entry), and superusers bypass the check, so migrations that use temporary tables still deploy.
@@ -62,11 +62,11 @@ Name the databases the notice lists. `template_postgis` exists on the `postgis/p
 
 ## Read-Only Login Roles
 
-A role with only `SELECT` grants is not read-only at the database level while `PUBLIC` holds `TEMPORARY`. After v0.86.3 and the revoke above, a read-only role cannot create temporary objects in any database. Do not grant `TEMPORARY` to such roles. The recipes in `docs/INTEGRATOR_GUIDE.md` (Database Role for MCP) and `infrastructure/vps/README.md` (step 10) say so.
+A role with only `SELECT` grants is not read-only at the database level while `PUBLIC` holds `TEMPORARY`. After v0.86.4 and the revoke above, a read-only role cannot create temporary objects in any database. Do not grant `TEMPORARY` to such roles. The recipes in `docs/INTEGRATOR_GUIDE.md` (Database Role for MCP) and `infrastructure/vps/README.md` (step 10) say so.
 
 ## Verification
 
-`tests/functional/v0-86-3-revoke-public-temp-test.sh` checks, against a migrated database:
+`tests/functional/v0-86-4-revoke-public-temp-test.sh` checks, against a migrated database:
 
 - `PUBLIC` lacks `TEMPORARY` and keeps `CONNECT`;
 - `web_anon`, `authenticated`, `authenticator` and a role built from the read-only recipe cannot create a temporary table;

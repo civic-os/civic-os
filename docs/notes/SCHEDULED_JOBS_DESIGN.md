@@ -147,7 +147,9 @@ The scheduler uses a Go `time.Ticker` instead of River periodic jobs. This desig
 2. **No Leader Election Dependency**: River's leader election is schema-wide, meaning any client could become leader. If payment-worker became leader but had no periodic jobs configured, scheduled jobs wouldn't run.
 3. **Simplicity**: Ticker-based scheduling is straightforward and predictable
 
-**Constraint**: If you run multiple consolidated-worker instances, each will run the scheduler independently. Duplicate job execution is prevented by `unique_key` deduplication on River job insertion - only the first insert succeeds.
+**Constraint**: If you run multiple consolidated-worker instances, each will run the scheduler independently. Duplicate job execution is prevented by River's unique jobs: `ScheduledJobExecuteArgs` is unique by `job_id` and `scheduled_for` (`river:"unique"` tags) in every job state, so only the first insert succeeds and a run that completed, failed for good or was cancelled is not queued again for the same time.
+
+**Amendment (v0.86.4, issue #147)**: The scheduler used to insert executions with its own SQL (`unique_key = 'scheduled_job:<id>:<time>'`, `ON CONFLICT (kind, unique_key)`), which relied on River's legacy unique index `river_job_kind_unique_key_idx`. That index, which River's migration 006 replaces and our v0.10.0 copy failed to drop, also blocked new schema parse jobs while a completed one was kept. Executions now go through the River client (`UniqueOpts{ByArgs, ByState: every state}`, enforced by `river_job_unique_idx`), and migration `v0-86-4-drop-legacy-river-unique-index` drops the legacy index. For the upgrade window, the scheduler skips a time an older worker already queued under the legacy key (`legacyExecutionPending`); remove that check once no legacy rows can remain.
 
 **Future Scaling**: When horizontal scaling is needed, migrate back to River periodic jobs and ensure all workers have identical periodic job configuration.
 
@@ -165,7 +167,7 @@ if !nextDue.After(now) {
 
 **Key behaviors:**
 - **Catch-up**: If worker was down at 8 AM, job runs when it comes back up
-- **No duplicates**: `unique_key` on River job prevents re-queuing same scheduled_for time
+- **No duplicates**: River's unique jobs (by `job_id` and `scheduled_for`, every state) prevent re-queuing the same scheduled time
 - **Timezone-aware**: Cron parsing respects per-job timezone for DST handling
 
 ---
