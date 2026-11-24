@@ -46,6 +46,7 @@ import { MaintenanceService } from '../../services/maintenance.service';
 import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { HelpToggletipComponent } from '../../components/help-toggletip/help-toggletip.component';
 import { TranslationService } from '../../services/translation.service';
 import { ConfigService } from '../../services/config.service';
 import { ApiError } from '../../interfaces/api';
@@ -77,10 +78,14 @@ import { switchingStore } from '../../sdk/switching-store';
     ReactiveFormsModule,
     CosModalComponent,
     RouterModule,
-    TranslatePipe
+    TranslatePipe,
+    HelpToggletipComponent
 ]
 })
 export class CreatePage {
+  /** Whether the entity description is shown under the title (the title's help toggletip, issue #130). */
+  readonly descriptionOpen = signal(false);
+
   /** The route entity's core handle, from `entityResolver` through route input binding. The `recordEditor` facade is made from it (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
   readonly entityHandle = input<EntityHandle | undefined>();
 

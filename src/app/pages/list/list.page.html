@@ -3,12 +3,12 @@
     <h1>
       {{ entity.display_name }} {{ 'list.title_suffix' | translate }}
       @if (entity.description) {
-        <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description" aria-hidden="true">
-          <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle">help_outline</span>
-        </div>
-        <span class="sr-only">{{ entity.description }}</span>
+        <app-help-toggletip class="ms-2" size="title" [text]="entity.description" [subject]="entity.display_name" panelId="entity-description" [(open)]="descriptionOpen" />
       }
     </h1>
+    @if (entity.description) {
+      <div id="entity-description" class="not-prose text-sm text-base-content/80 bg-base-200 rounded-box px-4 py-3 mb-4 whitespace-pre-line" [hidden]="!descriptionOpen()">{{ entity.description }}</div>
+    }
 
     <!-- Sort/filter-change announcements: aria-sort changes and same-count filter
          updates are not otherwise spoken by screen readers. -->

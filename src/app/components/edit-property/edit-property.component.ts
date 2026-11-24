@@ -41,6 +41,7 @@ import { PhotoGalleryEditorComponent } from '../photo-gallery-editor/photo-galle
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { HelpToggletipComponent } from '../help-toggletip/help-toggletip.component';
 import { TreeSelectComponent, TreeSelectOption } from '../tree-select/tree-select.component';
 import { DimensionService } from '../../services/dimension.service';
 import { buildTree } from '@civic-os/core';
@@ -52,6 +53,7 @@ import { switchMap } from 'rxjs/operators';
     templateUrl: './edit-property.component.html',
     styleUrl: './edit-property.component.css',
     imports: [
+    HelpToggletipComponent,
     CommonModule,
     NgxMaskDirective,
     NgxCurrency,
@@ -73,6 +75,11 @@ import { switchMap } from 'rxjs/operators';
     ]
 })
 export class EditPropertyComponent {
+  /** Whether the field description is shown under the label (the label's help toggletip, issue #130). */
+  readonly descriptionOpen = signal(false);
+  /** id of the shown description, unique per field on a page. */
+  readonly helpPanelId = computed(() => `edit-help-${this.prop().table_name}-${this.prop().column_name}`);
+
   private data = inject(DataService);
   private fileUpload = inject(FileUploadService);
   private schema = inject(SchemaService);

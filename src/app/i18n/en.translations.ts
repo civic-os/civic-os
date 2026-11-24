@@ -137,6 +137,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.insert_link': 'Insert link',
   'a11y.move_up': 'Move {{name}} up',
   'a11y.move_down': 'Move {{name}} down',
+  'a11y.show_description': 'Show description of {{name}}',
+  'a11y.hide_description': 'Hide description of {{name}}',
   'a11y.move_earlier': 'Move {{name}} earlier',
   'a11y.move_later': 'Move {{name}} later',
   'a11y.moved_to_position': '{{name}} moved to position {{i}} of {{n}}',

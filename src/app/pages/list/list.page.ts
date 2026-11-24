@@ -43,6 +43,7 @@ import { ImportExportButtonsComponent } from '../../components/import-export-but
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { HelpToggletipComponent } from '../../components/help-toggletip/help-toggletip.component';
 import { FilterCriteria } from '../../interfaces/query';
 import { ConfigService } from '../../services/config.service';
 import { recordList, type EntityHandle, type ListFilterChip, type ListState, type RecordList, type RecordListSnapshot } from '@civic-os/core';
@@ -96,10 +97,14 @@ function toFilterChip(chip: ListFilterChip): FilterChip {
     ImportExportButtonsComponent,
     EmptyStateComponent,
     CosModalComponent,
-    TranslatePipe
+    TranslatePipe,
+    HelpToggletipComponent
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
+  /** Whether the entity description is shown under the title (the title's help toggletip, issue #130). */
+  readonly descriptionOpen = signal(false);
+
   /** The route entity's core handle, from `entityResolver` through route input binding. The `recordList` facade is made from it. */
   readonly entityHandle = input<EntityHandle | undefined>();
 

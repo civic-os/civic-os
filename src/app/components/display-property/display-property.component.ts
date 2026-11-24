@@ -32,6 +32,7 @@ import { getS3Config } from '../../config/runtime';
 import { getContrastTextColor } from '../../utils/color.utils';
 import { MarkdownModule } from 'ngx-markdown';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { HelpToggletipComponent } from '../help-toggletip/help-toggletip.component';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 import { compareBySortOrder } from '@civic-os/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -43,6 +44,7 @@ import { formatTreeLabel } from '../../utils/tree-path';
     selector: 'app-display-property',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
+    HelpToggletipComponent,
         CommonModule,
         RouterModule,
         GeoPointMapComponent,
@@ -62,6 +64,11 @@ import { formatTreeLabel } from '../../utils/tree-path';
     styleUrl: './display-property.component.css'
 })
 export class DisplayPropertyComponent {
+  /** Whether the field description is shown under the label (the label's help toggletip, issue #130). */
+  readonly descriptionOpen = signal(false);
+  /** id of the shown description, unique per field on a page. */
+  readonly helpPanelId = computed(() => `display-help-${this.prop().table_name}-${this.prop().column_name}`);
+
   @ViewChild(ImageViewerComponent) imageViewer?: ImageViewerComponent;
   @ViewChild(PdfViewerComponent) pdfViewer?: PdfViewerComponent;
 
