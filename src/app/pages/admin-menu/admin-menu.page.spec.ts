@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { computed, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { Observable, map, of, throwError } from 'rxjs';
 import type { MenuNodeRow } from '@civic-os/core';
@@ -81,7 +81,9 @@ describe('AdminMenuPage', () => {
           useValue: {
             isAdmin: () => options.admin ?? true,
             permissionsLoaded,
-            hasPermission: (table: string, permission: string) => (options.permissions ?? []).includes(`${table}:${permission}`)
+            hasPermission: (table: string, permission: string) => (options.permissions ?? []).includes(`${table}:${permission}`),
+            permission: (table: string, permission: string) =>
+              computed(() => permissionsLoaded() && (options.permissions ?? []).includes(`${table}:${permission}`))
           }
         },
       ]

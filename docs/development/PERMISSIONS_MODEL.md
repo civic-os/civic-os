@@ -248,6 +248,8 @@ The list and detail pages always render data tables for authenticated users. The
 - User without `read` and no ownership → empty table
 - Unauthenticated user → "Sign in to view data" prompt
 
+UI gating that does use permissions (sidebar admin links, admin pages) reads `AuthService.permission(table, permission)`, a tracked signal per pair that changes when the permissions load, refresh or clear. `hasPermission()` is the untracked snapshot for effects; inside a `computed()` it would never update (issue #148). See `docs/development/ANGULAR.md` (Signals for Reactive State).
+
 ## Related Documentation
 
 - `docs/AUTHENTICATION.md` — Keycloak setup, role configuration, JWT structure
