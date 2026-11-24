@@ -190,6 +190,7 @@ describe('ManyToManyEditorComponent', () => {
 
             expect(component.canEdit()).toBe(false);
             expect(editButton()).toBeNull();
+            expect(fixture.nativeElement.textContent).not.toContain("You don't have permission");
 
             mockAuthService.hasPermission.mockReturnValue(true);
             mockAuthService.permissionsLoaded.set(true);
@@ -199,6 +200,25 @@ describe('ManyToManyEditorComponent', () => {
 
             expect(component.canEdit()).toBe(true);
             expect(editButton()).not.toBeNull();
+        });
+
+        it('shows the no-permission hint only once permissions load without the grant', async () => {
+            mockAuthService.permissionsLoaded.set(false);
+            mockAuthService.hasPermission.mockReturnValue(false);
+            fixture.componentRef.setInput('entityId', 1);
+            fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+            fixture.componentRef.setInput('currentValues', []);
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+            expect(fixture.nativeElement.textContent).not.toContain("You don't have permission");
+
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await advanceTime(10);
+            fixture.detectChanges();
+
+            expect(fixture.nativeElement.textContent).toContain("You don't have permission");
         });
 
         it('does not reload options when permissions load', async () => {

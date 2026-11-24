@@ -52,6 +52,8 @@ export class ManyToManyEditorComponent {
   searchTerm = signal('');
   loading = signal(false);
   canEdit = signal(false);
+  /** Set once the edit permission has been read, so the "no permission" hint never shows while it loads. */
+  permissionsChecked = signal(false);
   error = signal<string | undefined>(undefined);
 
   // Services
@@ -165,6 +167,7 @@ export class ManyToManyEditorComponent {
     const hasCreate = this.authService.hasPermission(junctionTable, 'create');
     const hasDelete = this.authService.hasPermission(junctionTable, 'delete');
     this.canEdit.set(hasCreate && hasDelete);
+    this.permissionsChecked.set(true);
   }
 
   private loadAvailableOptions() {
