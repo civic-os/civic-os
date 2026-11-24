@@ -469,6 +469,19 @@ Leaflet's default marker (`keyboard: true`) is an `img` with `role="button"`, `t
 
 ---
 
+## Help Toggletips (Entity and Field Descriptions)
+
+Since v0.86.4 (issue #130), the (?) next to a page title (List, Create, Edit) or a field label (`DisplayPropertyComponent`, `EditPropertyComponent`) is `HelpToggletipComponent` (`src/app/components/help-toggletip/`), not a hover-only DaisyUI tooltip. The old tooltip had three problems: phones have no hover, the `aria-hidden` wrapper was not focusable so keyboard users could not open it, and its hidden tip was laid out centered on the icon, so an icon near the edge widened the page at phone width.
+
+| Input | Behavior |
+|---|---|
+| Touch, mouse click, keyboard (Enter/Space) | The button toggles the description, rendered by the parent in the page flow under the title or label (`[hidden]="!open()"`). The button carries `aria-expanded`, `aria-controls` and a translated name (`a11y.show_description` / `a11y.hide_description`, with the entity or field name). |
+| Hover, where the primary input hovers with a fine pointer (`(hover: hover) and (pointer: fine)`) | Also previews the description as a tooltip, which is rendered only while shown and aligned on hover (`helpTipAlign()`) to stay inside the viewport (logical start/end, so RTL works). It is hidden while the description is open. |
+
+Choose by input, not by screen width: tablets are md and up but touch. Keyboard users cannot be detected, so the button is always there. Edit forms keep the input's `aria-describedby` pointing at a screen-reader copy of the description. New descriptive help next to a heading or label should use the same component, not a `tooltip` class.
+
+---
+
 ## Testing Tools & Workflow
 
 **Automated Scanning**: Use IBM Equal Access engine via Playwright for comprehensive WCAG 2.2 AA scanning. See `docs/development/ACCESSIBILITY_AUDIT_RUNBOOK.md` for the complete procedure, known false positives, and scan cadence.

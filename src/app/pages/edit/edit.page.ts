@@ -50,6 +50,7 @@ import { SaveProgressComponent, SaveStep, SaveStepResult } from '../../component
 import { AnalyticsService } from '../../services/analytics.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { HelpToggletipComponent } from '../../components/help-toggletip/help-toggletip.component';
 import { TranslationService } from '../../services/translation.service';
 import { ConfigService } from '../../services/config.service';
 import { CommonModule } from '@angular/common';
@@ -92,12 +93,16 @@ function browserTimeZone(): string {
     CosModalComponent,
     RouterModule,
     TranslatePipe,
-    ContrastTextDirective
+    ContrastTextDirective,
+    HelpToggletipComponent
 ],
     templateUrl: './edit.page.html',
     styleUrl: './edit.page.css'
 })
 export class EditPage {
+  /** Whether the entity description is shown under the title (the title's help toggletip, issue #130). */
+  readonly descriptionOpen = signal(false);
+
   /** The route entity's core handle, from `entityResolver` through route input binding. The `recordEditor` facade is made from it (`docs/notes/FRONTEND_SDK_DESIGN.md` §11). */
   readonly entityHandle = input<EntityHandle | undefined>();
 

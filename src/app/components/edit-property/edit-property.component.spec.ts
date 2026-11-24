@@ -1557,7 +1557,8 @@ describe('EditPropertyComponent', () => {
             expect(label.textContent).toContain('Test Field');
         });
 
-        it('should display tooltip when description exists', () => {
+        // Issue #130: the (?) is a help toggletip, a button that shows the description in the page
+        it('should show a help button for the description when it exists', () => {
             const mockProperty = createMockProperty({
                 column_name: 'test',
                 description: 'This is a helpful description'
@@ -1568,12 +1569,20 @@ describe('EditPropertyComponent', () => {
             fixture.componentRef.setInput('formGroup', formGroup);
             fixture.detectChanges();
 
-            const tooltip = fixture.nativeElement.querySelector('.tooltip');
-            expect(tooltip).toBeTruthy();
-            expect(tooltip.getAttribute('data-tip')).toBe('This is a helpful description');
+            const button = fixture.nativeElement.querySelector('app-help-toggletip button') as HTMLButtonElement;
+            expect(button).toBeTruthy();
+            expect(button.getAttribute('aria-expanded')).toBe('false');
+            const panel = fixture.nativeElement.querySelector('#' + button.getAttribute('aria-controls')) as HTMLElement;
+            expect(panel.hidden).toBe(true);
+            expect(panel.textContent!.trim()).toBe('This is a helpful description');
+
+            button.click();
+            fixture.detectChanges();
+            expect(button.getAttribute('aria-expanded')).toBe('true');
+            expect(panel.hidden).toBe(false);
         });
 
-        it('should not display tooltip when description is null', () => {
+        it('should not show a help button when description is null', () => {
             const mockProperty = createMockProperty({
                 column_name: 'test',
                 description: undefined
@@ -1584,8 +1593,7 @@ describe('EditPropertyComponent', () => {
             fixture.componentRef.setInput('formGroup', formGroup);
             fixture.detectChanges();
 
-            const tooltip = fixture.nativeElement.querySelector('.tooltip');
-            expect(tooltip).toBeFalsy();
+            expect(fixture.nativeElement.querySelector('app-help-toggletip')).toBeFalsy();
         });
 
         it('should use font-semibold for label', () => {

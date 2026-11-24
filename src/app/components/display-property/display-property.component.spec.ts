@@ -587,7 +587,8 @@ describe('DisplayPropertyComponent', () => {
             expect(label.textContent).toContain('Field Name');
         });
 
-        it('should display tooltip when description exists', () => {
+        // Issue #130: the (?) is a help toggletip, a button that shows the description in the page
+        it('should show a help button for the description when it exists', () => {
             const mockProperty = createMockProperty({
                 description: 'Detailed information about this field'
             });
@@ -596,12 +597,20 @@ describe('DisplayPropertyComponent', () => {
             fixture.componentRef.setInput('datum', 'value');
             fixture.detectChanges();
 
-            const tooltip = fixture.nativeElement.querySelector('.tooltip');
-            expect(tooltip).toBeTruthy();
-            expect(tooltip.getAttribute('data-tip')).toBe('Detailed information about this field');
+            const button = fixture.nativeElement.querySelector('app-help-toggletip button') as HTMLButtonElement;
+            expect(button).toBeTruthy();
+            expect(button.getAttribute('aria-expanded')).toBe('false');
+            const panel = fixture.nativeElement.querySelector('#' + button.getAttribute('aria-controls')) as HTMLElement;
+            expect(panel.hidden).toBe(true);
+            expect(panel.textContent!.trim()).toBe('Detailed information about this field');
+
+            button.click();
+            fixture.detectChanges();
+            expect(button.getAttribute('aria-expanded')).toBe('true');
+            expect(panel.hidden).toBe(false);
         });
 
-        it('should not display tooltip when description is null', () => {
+        it('should not show a help button when description is null', () => {
             const mockProperty = createMockProperty({
                 description: undefined
             });
@@ -610,8 +619,7 @@ describe('DisplayPropertyComponent', () => {
             fixture.componentRef.setInput('datum', 'value');
             fixture.detectChanges();
 
-            const tooltip = fixture.nativeElement.querySelector('.tooltip');
-            expect(tooltip).toBeFalsy();
+            expect(fixture.nativeElement.querySelector('app-help-toggletip')).toBeFalsy();
         });
     });
 
