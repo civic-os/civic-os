@@ -26,9 +26,21 @@ export async function withResponse(page: Page, predicate: (r: Response) => boole
   return waiter;
 }
 
-/** Form control by its visible label; tolerates the required-field asterisk. */
+/**
+ * A form field's full accessible name, for `getByRole(role, { name: fieldName(label) })`: the
+ * label, the required-field asterisk and screen-reader marker, and, when the property has a
+ * description, its help toggletip button inside the label (issue #130), which makes the name
+ * "Description Show description of Description". A plain string `name` is a case-insensitive
+ * substring match, so 'Description' would also match every other field that has a toggletip.
+ */
+export function fieldName(label: string): RegExp {
+  const l = escapeRe(label);
+  return new RegExp(`^\\s*${l}\\s*\\*?\\s*(\\(required\\))?\\s*((Show|Hide) description of ${l}\\s*)?$`);
+}
+
+/** Form control by its visible label (see fieldName). */
 export function field(scope: Page | Locator, label: string): Locator {
-  return scope.getByLabel(new RegExp(`^\\s*${escapeRe(label)}\\s*\\*?\\s*(Required)?\\s*$`));
+  return scope.getByLabel(fieldName(label));
 }
 
 export function escapeRe(s: string): string {

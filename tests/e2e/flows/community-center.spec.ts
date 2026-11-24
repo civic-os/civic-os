@@ -28,7 +28,7 @@
 
 import type { Locator, Page } from '@playwright/test';
 import { test, expect } from '../lib/harness.ts';
-import { expectHeading, backToRecord, listRow } from '../lib/ui.ts';
+import { expectHeading, backToRecord, listRow, fieldName } from '../lib/ui.ts';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -147,8 +147,8 @@ test('04 create and delete a resource', async ({ harness }) => {
 
   await harness.step('fill and save', async () => {
     await page.getByRole('textbox', { name: 'Facility Name' }).fill(RESOURCE_NAME);
-    await page.getByRole('textbox', { name: 'Description' }).fill('Temporary space for harness events.');
-    await page.getByRole('textbox', { name: 'Display Color', exact: true }).fill('#2E7D32');
+    await page.getByRole('textbox', { name: fieldName('Description') }).fill('Temporary space for harness events.');
+    await page.getByRole('textbox', { name: fieldName('Display Color') }).fill('#2E7D32');
     await page.getByRole('spinbutton', { name: 'Capacity' }).fill('35');
     await page.getByRole('textbox', { name: 'Hourly Rate' }).fill('42.75');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -515,7 +515,7 @@ test('09 create page: invalid submit, time slot prefill, create another, Boolean
   });
 
   await harness.step('save, then Create another restores the false default', async () => {
-    await page.getByRole('textbox', { name: 'Display Color', exact: true }).fill('#1E88E5');
+    await page.getByRole('textbox', { name: fieldName('Display Color') }).fill('#1E88E5');
     await saveButton.click();
     const dialog = page.getByRole('dialog');
     await focusInDialog(dialog.getByRole('button', { name: /^Create another / }));
@@ -603,7 +603,7 @@ test('10 edit page: stored values, invalid submit, one PATCH, returnTo, series s
   await harness.step('resource edit form: the stored values are shown', async () => {
     await page.goto(`/edit/resources/${resourceId}`);
     await expect(facilityName).toHaveValue(roomName);
-    await expect(page.getByRole('textbox', { name: 'Display Color', exact: true })).toHaveValue('#2E7D32');
+    await expect(page.getByRole('textbox', { name: fieldName('Display Color') })).toHaveValue('#2E7D32');
     await expect(capacity).toHaveValue('35');
     await expect(page.getByRole('textbox', { name: 'Hourly Rate' })).toHaveValue(/42\.75/);
     await expect(active).toBeChecked();

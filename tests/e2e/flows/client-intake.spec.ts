@@ -287,7 +287,7 @@ test('07 list URL state, chips and page size', async ({ harness }) => {
     await page.getByRole('button', { name: 'Filters' }).click();
     await page.getByRole('checkbox', { name: 'Organization' }).check();
     await expect(page).toHaveURL(/f0_col=partner_type_id/);
-    await expect(page.getByText(/^Type \(\(\d+\)\)$/)).toBeVisible();
+    await expect(page.getByText('Type (Organization)', { exact: true })).toBeVisible();
   });
 
   await harness.step('deep-link type and active filters', async () => {
@@ -295,7 +295,7 @@ test('07 list URL state, chips and page size', async ({ harness }) => {
     const typeValue = url.searchParams.get('f0_val');
     await page.goto(`/view/partners?f0_col=partner_type_id&f0_op=in&f0_val=${encodeURIComponent(typeValue ?? '')}&f1_col=active&f1_op=eq&f1_val=false`);
     await expect(page.getByText('Active (No)', { exact: true })).toBeVisible();
-    await expect(page.getByText(/^Type \(\(\d+\)\)$/)).toBeVisible();
+    await expect(page.getByText('Type (Organization)', { exact: true })).toBeVisible();
   });
 
   await harness.step('remove the type chip', async () => {
