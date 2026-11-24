@@ -431,6 +431,55 @@ describe('PropertyManagementPage', () => {
             expect(properties[0].column_name).toBe('title');
             expect(mockPropertyManagementService.updatePropertiesOrder).not.toHaveBeenCalled();
         });
+
+        // Issue #90: the keyed @for re-inserts the moved row's element, which blurred the pressed button.
+        describe('keyboard focus', () => {
+            const threeProperties: SchemaEntityProperty[] = [
+                ...mockProperties,
+                { ...mockProperties[1], column_name: 'notes', display_name: 'Notes', sort_order: 2 }
+            ];
+            const button = (key: string, action: 'up' | 'down') =>
+                fixture.nativeElement.querySelector(`[data-row-key="${key}"] button[data-action="${action}"]`) as HTMLButtonElement;
+
+            async function render() {
+                mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+                mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+                mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(threeProperties));
+                mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+                mockPropertyManagementService.updatePropertiesOrder.mockReturnValue(of({ success: true }));
+                mockPropertyManagementService.updateStaticTextOrder.mockReturnValue(of({ success: true }));
+                fixture = TestBed.createComponent(PropertyManagementPage);
+                component = fixture.componentInstance;
+                fixture.detectChanges();
+                await advanceTime(100);
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+                await advanceTime(10);
+                fixture.detectChanges();
+            }
+
+            async function press(b: HTMLButtonElement) {
+                b.focus();
+                b.click();
+                fixture.detectChanges();
+                await fixture.whenStable();
+            }
+
+            it('keeps focus on Move up of the moved row', async () => {
+                await render();
+                await press(button('notes', 'up'));
+                expect(getPropertyItems(component)[1].column_name).toBe('notes');
+                expect(document.activeElement).toBe(button('notes', 'up'));
+            });
+
+            it('moves focus to Move down when the row reaches the top', async () => {
+                await render();
+                await press(button('description', 'up'));
+                expect(getPropertyItems(component)[0].column_name).toBe('description');
+                expect(button('description', 'up').disabled).toBe(true);
+                expect(document.activeElement).toBe(button('description', 'down'));
+            });
+        });
     });
 
     describe('Metadata Saving', () => {

@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ElementRef, Injector, afterNextRender } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FormsModule } from '@angular/forms';
@@ -90,6 +90,8 @@ export class PropertyManagementPage {
   private schemaService = inject(SchemaService);
   private propertyManagementService = inject(PropertyManagementService);
   private translation = inject(TranslationService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
 
   /** Shared aria-live announcement for keyboard reorder (D3) */
   reorderAnnouncement = signal('');
@@ -221,6 +223,7 @@ export class PropertyManagementPage {
     if (target < 0 || target >= items.length) return;
     moveItemInArray(items, index, target);
     this.persistOrder(items);
+    this.restoreMoveFocus(this.rowKey(items[target]), delta < 0 ? 'up' : 'down');
 
     const name = this.getItemName(items[target]);
     this.reorderAnnouncement.set(
@@ -230,6 +233,23 @@ export class PropertyManagementPage {
         n: items.length
       })
     );
+  }
+
+  /** A row's key, as the template's @for tracks it and writes it to data-row-key. */
+  private rowKey(item: ManageableItem): string {
+    return isStaticTextRow(item) ? 'st_' + item.id : item.column_name;
+  }
+
+  /**
+   * The keyed @for re-inserts a row moved up before its new neighbor, which blurs the button a keyboard
+   * user just pressed (issue #90). After the next render, focus the moved row's same move button, or its
+   * other one when the row reached a boundary and the pressed button is now disabled.
+   */
+  private restoreMoveFocus(key: string, action: 'up' | 'down'): void {
+    const button = (a: string) => this.host.nativeElement.querySelector<HTMLButtonElement>(
+      `[data-row-key="${CSS.escape(key)}"] button[data-action="${a}"]:not(:disabled)`);
+    afterNextRender({ read: () => (button(action) ?? button(action === 'up' ? 'down' : 'up'))?.focus() },
+      { injector: this.injector });
   }
 
   /** Display name used for reorder aria-labels/announcements. */
