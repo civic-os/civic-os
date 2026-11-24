@@ -14,7 +14,7 @@ This document provides a comprehensive guide to implementing file storage featur
 - **Consolidated Worker**: Single Go microservice (v0.11.0+) combining S3 Signer, Thumbnail Worker, and Notification Worker with shared database connection pool (4 connections vs 12)
   - **S3 Signer**: Generates presigned upload URLs using River job queue with automatic retries
   - **Thumbnail Worker**: Processes uploaded images (3 sizes: 150x150, 400x400, 800x800) and PDFs (first page) using bimg (libvips) and pdftoppm with white background letterboxing
-- **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails
+- **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails; a file uploaded before its record exists (Create page) is staged as `{entity_type}/_new/{file_id}/…` with `entity_id = ''` (v0.86.4 worker, issue #141; claiming and cleanup are designed in `docs/notes/FILE_RECONCILE_DESIGN.md`)
 - **UUIDv7**: Time-ordered UUIDs improve B-tree index performance
 
 ## Property Type Detection

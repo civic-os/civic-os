@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -72,9 +73,9 @@ func (w *S3PresignWorker) Work(ctx context.Context, job *river.Job[S3PresignArgs
 		fileExt = ".bin" // Fallback for files without extension
 	}
 
-	// Build S3 key: {entity_type}/{entity_id}/{file_id}/original.{ext}
+	// Build S3 key: {entity_type}/{entity_id}/{file_id}/original.{ext}, staged under _new before the record exists
 	bucket := getEnv("S3_BUCKET", "civic-os-files")
-	s3Key := fmt.Sprintf("%s/%s/%s/original%s", job.Args.EntityType, job.Args.EntityID, fileID, fileExt)
+	s3Key := originalObjectKey(job.Args.EntityType, job.Args.EntityID, fileID, fileExt)
 
 	// Generate presigned upload URL
 	presignedURL, err := w.generateUploadURL(ctx, bucket, s3Key)
@@ -131,4 +132,18 @@ func (w *S3PresignWorker) generateUploadURL(ctx context.Context, bucket, key str
 	}
 
 	return presignResult.URL, nil
+}
+
+// stagedEntityID is the key segment for a file uploaded before its record exists (a Create page).
+// The file's metadata.files row keeps entity_id ” until it is claimed for its record
+// (issue #141, docs/notes/FILE_RECONCILE_DESIGN.md).
+const stagedEntityID = "_new"
+
+// originalObjectKey is the S3 key of an uploaded file: {entity_type}/{entity_id}/{file_id}/original{ext},
+// with "_new" for an empty entity id, which used to produce an id-less "//" key.
+func originalObjectKey(entityType, entityID, fileID, ext string) string {
+	if strings.TrimSpace(entityID) == "" {
+		entityID = stagedEntityID
+	}
+	return fmt.Sprintf("%s/%s/%s/original%s", entityType, entityID, fileID, ext)
 }
