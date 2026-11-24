@@ -1,5 +1,5 @@
 -- Deploy civic_os:v0-86-4-revoke-public-temp
--- Requires: v0-86-4-drop-legacy-river-unique-index
+-- Requires: v0-86-4-help-toggletip-translations
 --
 -- Copyright (C) 2023-2026 Civic OS, L3C
 -- SPDX-License-Identifier: AGPL-3.0-or-later

@@ -109,6 +109,25 @@ describe('ActionBarComponent', () => {
         expect(actionBar).toBeTruthy();
     });
 
+    // Issue #140: the measuring row lays every button out on one line (about 700px with five
+    // actions). Unclipped, it widened the page at phone width. It sits in a box that clips it,
+    // so it adds nothing to the page's scroll width; offsetWidth and getBoundingClientRect
+    // ignore clipping, so measurement is unchanged. (happy-dom has no layout: the browser check
+    // is documentElement.scrollWidth at 375px.)
+    it('should keep the hidden measuring row inside a clipping box', async () => {
+        hostComponent.buttons.set(createButtons(5));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const row = fixture.nativeElement.querySelector('app-action-bar [data-testid="action-bar-measure"]') as HTMLElement;
+        expect(row).toBeTruthy();
+        expect(row.querySelectorAll('button').length).toBe(5);
+        expect(row.classList).toContain('w-max');
+        const clip = row.parentElement!;
+        expect(clip.getAttribute('aria-hidden')).toBe('true');
+        expect(Array.from(clip.classList)).toEqual(expect.arrayContaining(['absolute', 'inset-0', 'overflow-hidden', 'pointer-events-none']));
+    });
+
     it('should render all buttons when space permits', async () => {
         hostComponent.containerWidth.set(800);
         hostComponent.buttons.set(createButtons(3));
