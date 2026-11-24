@@ -115,16 +115,20 @@ export interface ActionButton {
       }
     </div>
 
-    <!-- Hidden measurement container for calculating button widths -->
-    <div class="absolute opacity-0 pointer-events-none flex gap-2" #measureContainer aria-hidden="true">
-      @for (btn of buttons(); track btn.id) {
-        <button type="button" tabindex="-1" [class]="'btn btn-sm ' + btn.style">
-          @if (btn.icon) {
-            <span class="material-symbols-outlined text-lg" aria-hidden="true">{{btn.icon}}</span>
-          }
-          <span>{{btn.label}}</span>
-        </button>
-      }
+    <!-- Hidden measurement row for calculating button widths. It lays every button out on one
+         line (w-max), so it is clipped by a box the size of the bar: otherwise it widened the
+         page at phone width (issue #140). Clipping does not change the measured widths. -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      <div class="flex gap-2 w-max opacity-0" #measureContainer data-testid="action-bar-measure">
+        @for (btn of buttons(); track btn.id) {
+          <button type="button" tabindex="-1" [class]="'btn btn-sm ' + btn.style">
+            @if (btn.icon) {
+              <span class="material-symbols-outlined text-lg" aria-hidden="true">{{btn.icon}}</span>
+            }
+            <span>{{btn.label}}</span>
+          </button>
+        }
+      </div>
     </div>
   `,
   styles: [`
