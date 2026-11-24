@@ -59,12 +59,9 @@ export class AdminMenuPage {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private injector = inject(Injector);
 
-  /**
-   * Admins, and roles granted metadata.menu_nodes:update (the database checks the same rule). hasPermission()
-   * reads its cache untracked, so permissionsLoaded() is what re-runs this when the page opens before they load.
-   */
+  /** Admins, and roles granted metadata.menu_nodes:update (the database checks the same rule). */
   protected readonly canManage = computed(() =>
-    this.auth.isAdmin() || (this.auth.permissionsLoaded() && this.auth.hasPermission('metadata.menu_nodes', 'update'))
+    this.auth.isAdmin() || this.auth.permission('metadata.menu_nodes', 'update')()
   );
 
   loading = signal(true);

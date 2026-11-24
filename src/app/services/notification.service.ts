@@ -429,12 +429,19 @@ export class NotificationService {
   // ==========================================================================
 
   /**
-   * Get current user's notification preferences
+   * Get current user's notification preferences.
+   *
+   * Filtered by user_id like updatePreference(): row-level security limits ordinary users to their own rows,
+   * but an admin may read every user's preferences and would otherwise get theirs mixed with everyone else's.
    */
   getUserPreferences(): Observable<NotificationPreference[]> {
-    return this.http.get<NotificationPreference[]>(
-      `${this.baseUrl}notification_preferences?select=*&order=channel.asc`
-    ).pipe(
+    return this.auth.getCurrentUserId().pipe(
+      switchMap(userId => userId
+        ? this.http.get<NotificationPreference[]>(
+            `${this.baseUrl}notification_preferences?select=*&user_id=eq.${userId}&order=channel.asc`
+          )
+        : of([])
+      ),
       catchError((error) => {
         console.error('Error fetching notification preferences:', error);
         return of([]);

@@ -12,16 +12,18 @@
  *   - root, packages/*, and tools/mcp-server have the same version;
  *   - internal @civic-os/* dependency specs are pinned to exactly that version
  *     (file:/link:/workspace: specs are exempt; they are local links);
- *   - lockfile metadata for these packages carries the same version.
+ *   - lockfile metadata for these packages carries the same version;
+ *   - src/app/config/version.ts (the About modal's app version) records it too.
  *
  * Usage:
- *   node scripts/sync-versions.mjs          # rewrite manifests + lockfiles to the root version
+ *   node scripts/sync-versions.mjs          # rewrite manifests, lockfiles and version.ts to the root version
  *   node scripts/sync-versions.mjs --check  # report drift, exit 1 if any (npm run check:versions)
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DEP_FIELDS, readJson, rel, repoRoot, workspacePackages } from './lib/workspaces.mjs';
+import { APP_VERSION_FILE, readAppVersion, renderAppVersionFile } from './lib/app-version.mjs';
 
 const check = process.argv.includes('--check');
 const rootManifestPath = join(repoRoot, 'package.json');
@@ -84,6 +86,17 @@ edit(join(mcpDir, 'package.json'), syncManifest);
 // The MCP lockfile records linked workspace packages under their relative path (e.g. "../../packages/core").
 syncLock(join(mcpDir, 'package-lock.json'), ['', ...workspaces.map((p) => `../../${p.relDir}`)]);
 
+// The About modal's app version. Only `npm version` (postversion) ran update-version.js, so a bump made
+// by editing the manifests left it stale (issue #106).
+const appVersionPath = join(repoRoot, APP_VERSION_FILE);
+const appVersionSource = existsSync(appVersionPath) ? readFileSync(appVersionPath, 'utf8') : '';
+if (appVersionSource !== renderAppVersionFile(version)) {
+  const recorded = readAppVersion(appVersionSource);
+  issues.push(`${APP_VERSION_FILE}: APP_VERSION is ${JSON.stringify(recorded ?? null)}, expected ${JSON.stringify(version)}`);
+  changedFiles.add(APP_VERSION_FILE);
+  if (!check) writeFileSync(appVersionPath, renderAppVersionFile(version));
+}
+
 if (check) {
   if (issues.length > 0) {
     console.error(`check:versions failed (release version ${version} from package.json):`);
@@ -91,7 +104,7 @@ if (check) {
     console.error('Fix: npm run sync-versions');
     process.exit(1);
   }
-  console.log(`check:versions ok: root, ${workspaces.map((p) => p.manifest.name).join(', ')}, and @civic-os/mcp-server are at ${version}.`);
+  console.log(`check:versions ok: root, ${workspaces.map((p) => p.manifest.name).join(', ')}, @civic-os/mcp-server and ${APP_VERSION_FILE} are at ${version}.`);
 } else {
   console.log(changedFiles.size === 0
     ? `sync-versions: everything already at ${version}.`

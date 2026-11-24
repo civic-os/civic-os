@@ -305,6 +305,38 @@ describe('ProfilePage', () => {
         });
     });
 
+    describe('permissions that load after the page (issue #148)', () => {
+        // The extension Add and Edit buttons call auth.hasPermission() in the template, which reads its
+        // cache untracked. They are safe because another user's profile renders only after
+        // permissionsLoaded$ emits; this pins that guarantee.
+        function addExtensionButton(): HTMLButtonElement | null {
+            return fixture.nativeElement.querySelector('#ext-borrowers button.btn-primary');
+        }
+
+        it("shows another user's extension Add button once permissions load", async () => {
+            mockProfileService.getProfileExtensions.mockReturnValue(of([mockExtension]));
+            mockAuthService.permissionsLoaded.set(false);
+            mockAuthService.hasPermission.mockReturnValue(false);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(component.loading()).toBe(true);
+            expect(mockProfileService.getUserProfileRecord).not.toHaveBeenCalled();
+            expect(addExtensionButton()).toBeNull();
+
+            mockAuthService.hasPermission.mockReturnValue(true);
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(component.isOwnProfile()).toBe(false);
+            expect(mockAuthService.hasPermission).toHaveBeenCalledWith('borrowers', 'create');
+            expect(addExtensionButton()).not.toBeNull();
+        });
+    });
+
     describe('Notification Preferences', () => {
         it('should load email preference', async () => {
             await fixture.whenStable();

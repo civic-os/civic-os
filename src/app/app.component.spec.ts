@@ -16,7 +16,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -30,7 +30,7 @@ import { AnalyticsService } from './services/analytics.service';
 import { ImpersonationService } from './services/impersonation.service';
 import { SwUpdate } from '@angular/service-worker';
 import { Location } from '@angular/common';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { settle } from './testing/await-http';
 
 const LATE_REQUEST_URLS = /\/(schema_properties|schema_m2m_properties|schema_dimensions|schema_menu_nodes|notification_preferences|rpc\/get_dashboards)(\?|$)/;
@@ -50,9 +50,17 @@ describe('AppComponent', () => {
             authenticated: vi.fn().mockName("AuthService.authenticated"),
             hasPermission: vi.fn().mockName("AuthService.hasPermission"),
             isRealAdmin: vi.fn().mockName("AuthService.isRealAdmin"),
+            // The settings modal reads notification preferences for the current user (#127).
+            getCurrentUserId: vi.fn().mockName("AuthService.getCurrentUserId").mockReturnValue(of(null)),
             permissionsLoaded: signal(true),
             userRoles: []
         };
+        // Like the real permission(): tracked, and re-read when the permissions load. Tests set
+        // hasPermission's implementation and flip permissionsLoaded.
+        mockAuthService.permission = (table: string, permission: string) => computed(() => {
+            mockAuthService.permissionsLoaded();
+            return mockAuthService.hasPermission(table, permission);
+        });
         mockAuthService.authenticated.mockReturnValue(false);
         // Default hasPermission to return false (synchronous boolean)
         mockAuthService.hasPermission.mockReturnValue(false);
@@ -795,6 +803,46 @@ describe('AppComponent', () => {
                 expect(component.hasMenuAdminPermission()).toBe(true);
                 expect(component.showAdminSection()).toBe(true);
             });
+        });
+
+        // Issue #148: each link rendered before the permissions arrived stayed hidden for the life of the app.
+        describe('permission-gated admin links appear when the permissions load after the first render', () => {
+            const entities = [
+                { table_name: 'booking', display_name: 'Booking', sort_order: 0, payment_initiation_rpc: 'pay', supports_recurring: true }
+            ];
+            const cases: [string, string][] = [
+                ['time_slot_series:read', '/admin/recurring-schedules'],
+                ['payment_transactions:read', '/admin/payments'],
+                ['files:read', '/admin/files'],
+                ['metadata.statuses:update', '/admin/statuses'],
+                ['metadata.instance_config:update', '/admin/config'],
+                ['metadata.categories:update', '/admin/categories'],
+                ['civic_os_users_private:update', '/admin/users'],
+                ['static_assets:create', '/admin/static-assets'],
+            ];
+
+            for (const [grant, href] of cases) {
+                it(`${href} (${grant})`, async () => {
+                    const granted: string[] = [];
+                    mockAuthService.isAdmin.mockReturnValue(false);
+                    mockAuthService.permissionsLoaded.set(false);
+                    mockAuthService.hasPermission.mockImplementation(
+                        (table: string, permission: string) => granted.includes(`${table}:${permission}`));
+                    const fixture = TestBed.createComponent(AppComponent);
+                    fixture.detectChanges();
+                    flushStartup(200, entities);
+                    await settle();
+                    fixture.detectChanges();
+                    const link = () => (fixture.nativeElement as HTMLElement).querySelector(`a[href="${href}"]`);
+                    expect(link()).toBeNull();
+
+                    granted.push(grant);
+                    mockAuthService.permissionsLoaded.set(true);
+                    await fixture.whenStable();
+                    fixture.detectChanges();
+                    expect(link()).toBeTruthy();
+                });
+            }
         });
     });
 });

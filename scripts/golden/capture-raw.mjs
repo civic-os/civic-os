@@ -19,7 +19,6 @@
  * Regeneration is explicit; nothing here runs as part of the test suite.
  */
 
-import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -134,6 +133,8 @@ const GLOBAL_MASK = ['created_at', 'updated_at'];
 const MASKS = {
   // Volatile timestamps; consumers only compare them for equality against a cached copy.
   schema_cache_versions: ['version'],
+  // The newest core migration, so it moves with every release; no fixture consumer reads it.
+  schema_domain_version: ['framework_version'],
 };
 const MASK_VALUE = '__MASKED__';
 
@@ -371,17 +372,11 @@ async function captureVariant(example, role, locale, token, outDir, meta) {
   record.files.sort();
 }
 
-function treeHash(path) {
-  try {
-    return execFileSync('git', ['rev-parse', `HEAD:${path}`], { cwd: REPO, encoding: 'utf8' }).trim();
-  } catch { return null; }
-}
-
 async function captureExample(example, outDir) {
+  // No capture time or tree hashes: they changed on every recapture and made release PRs noisy.
+  // The nightly `capture-all.sh --check` is the staleness gate; git log dates the fixtures.
   const meta = {
     example,
-    examplesTreeHash: treeHash(`examples/${example}`),
-    migrationsTreeHash: treeHash('postgres/migrations'),
     endpoints: STATIC_ENDPOINTS.map((e) => ({ file: e.file, path: e.path, method: e.body === undefined ? 'GET' : 'POST', consumer: e.consumer })),
     maskValue: MASK_VALUE,
     maskedFields: {},
@@ -389,7 +384,6 @@ async function captureExample(example, outDir) {
     clockDateMasks: {},
     redactions: {},
     variants: {},
-    capturedAt: new Date().toISOString(),
   };
   // Fresh dir so deleted endpoints don't linger.
   rmSync(join(outDir, example), { recursive: true, force: true });
@@ -436,16 +430,8 @@ function walk(dir, base = dir) {
   return out;
 }
 
-function comparableContent(path, rel) {
-  let txt = readFileSync(path, 'utf8');
-  if (rel.endsWith('meta.json')) {
-    const m = JSON.parse(txt);
-    delete m.capturedAt; // informational
-    delete m.examplesTreeHash; // reported as a warning, not a failure
-    delete m.migrationsTreeHash;
-    txt = canonical(m);
-  }
-  return txt;
+function comparableContent(path) {
+  return readFileSync(path, 'utf8');
 }
 
 function runCheck(examples, all, tmp) {
@@ -466,19 +452,9 @@ function runCheck(examples, all, tmp) {
     if (!ea || !eb) {
       console.error(`DIFF ${rel}: ${ea ? 'missing from fresh capture' : 'missing from committed fixtures'}`);
       diffs++;
-    } else if (comparableContent(a, rel) !== comparableContent(b, rel)) {
+    } else if (comparableContent(a) !== comparableContent(b)) {
       console.error(`DIFF ${rel}: content differs`);
       diffs++;
-    }
-  }
-  for (const ex of examples) {
-    const a = join(RAW_DIR, ex, 'meta.json');
-    const b = join(tmp, ex, 'meta.json');
-    if (existsSync(a) && existsSync(b)) {
-      const ma = JSON.parse(readFileSync(a, 'utf8'));
-      const mb = JSON.parse(readFileSync(b, 'utf8'));
-      if (ma.examplesTreeHash !== mb.examplesTreeHash) console.warn(`WARN ${ex}: examples tree hash changed since fixtures were captured`);
-      if (ma.migrationsTreeHash !== mb.migrationsTreeHash) console.warn(`WARN ${ex}: postgres/migrations tree hash changed since fixtures were captured`);
     }
   }
   return diffs;

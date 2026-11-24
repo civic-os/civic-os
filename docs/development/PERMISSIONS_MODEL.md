@@ -21,7 +21,7 @@ PostgreSQL `GRANT` statements control which database roles can access tables at 
 
 GRANTs are binary: either the role can access the table or it can't. They don't distinguish between individual users or their application-level roles.
 
-**Database-level privileges.** PostgreSQL grants `CONNECT` and `TEMPORARY` on every new database to `PUBLIC`. Since v0.86.2, core revokes `TEMPORARY` from `PUBLIC` on the Civic OS database (CVE-2026-6460 hardening): no API role creates temporary objects, the owner keeps the privilege for migrations, and a login role meant to be read-only must not be able to create objects of any kind. Don't grant `TEMPORARY` back to `PUBLIC` or to an API or read-only role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
+**Database-level privileges.** PostgreSQL grants `CONNECT` and `TEMPORARY` on every new database to `PUBLIC`. Since v0.86.3, core revokes `TEMPORARY` from `PUBLIC` on the Civic OS database (CVE-2026-6460 hardening): no API role creates temporary objects, the owner keeps the privilege for migrations, and a login role meant to be read-only must not be able to create objects of any kind. Don't grant `TEMPORARY` back to `PUBLIC` or to an API or read-only role. See `docs/notes/CVE_2026_6460_RESPONSE.md`.
 
 ### Layer 2: RBAC (Blanket Access for Roles)
 
@@ -249,6 +249,8 @@ The list and detail pages always render data tables for authenticated users. The
 - User without `read` but with ownership → sees own rows only
 - User without `read` and no ownership → empty table
 - Unauthenticated user → "Sign in to view data" prompt
+
+UI gating that does use permissions (sidebar admin links, admin pages) reads `AuthService.permission(table, permission)`, a tracked signal per pair that changes when the permissions load, refresh or clear. `hasPermission()` is the untracked snapshot for effects; inside a `computed()` it would never update (issue #148). See `docs/development/ANGULAR.md` (Signals for Reactive State).
 
 ## Related Documentation
 

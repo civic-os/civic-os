@@ -104,6 +104,8 @@ describe('AdminConfigPage', () => {
                     useValue: {
                         permissionsLoaded: signal(true),
                         hasPermission: (table: string, perm: string) =>
+                            canUpdate && table === 'metadata.instance_config' && perm === 'update',
+                        permission: (table: string, perm: string) => () =>
                             canUpdate && table === 'metadata.instance_config' && perm === 'update'
                     }
                 },

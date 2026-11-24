@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, ElementRef, Injector, afterNextRender } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FormsModule } from '@angular/forms';
@@ -54,6 +54,8 @@ export class EntityManagementPage {
   private schemaService = inject(SchemaService);
   private entityManagementService = inject(EntityManagementService);
   private translation = inject(TranslationService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
 
   // Mutable signals for user interactions
   entities = signal<EntityRow[]>([]);
@@ -181,6 +183,7 @@ export class EntityManagementPage {
     this.persistOrder(entities);
 
     const moved = entities[target];
+    this.restoreMoveFocus(moved.table_name, delta < 0 ? 'up' : 'down');
     const name = this.getEntityName(moved);
     this.reorderAnnouncement.set(
       this.translation.get('a11y.moved_to_position', {
@@ -189,6 +192,18 @@ export class EntityManagementPage {
         n: entities.length
       })
     );
+  }
+
+  /**
+   * The keyed @for re-inserts a row moved up before its new neighbor, which blurs the button a keyboard
+   * user just pressed (issue #90). After the next render, focus the moved row's same move button, or its
+   * other one when the row reached a boundary and the pressed button is now disabled.
+   */
+  private restoreMoveFocus(key: string, action: 'up' | 'down'): void {
+    const button = (a: string) => this.host.nativeElement.querySelector<HTMLButtonElement>(
+      `[data-row-key="${CSS.escape(key)}"] button[data-action="${a}"]:not(:disabled)`);
+    afterNextRender({ read: () => (button(action) ?? button(action === 'up' ? 'down' : 'up'))?.focus() },
+      { injector: this.injector });
   }
 
   /** Display name used for reorder aria-labels/announcements. */

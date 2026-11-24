@@ -38,6 +38,7 @@ describe('UserManagementService', () => {
             hasPermission: vi.fn().mockName("AuthService.hasPermission"),
             isAdmin: vi.fn().mockName("AuthService.isAdmin")
         };
+        mockAuthService.permission = (table: string, perm: string) => () => mockAuthService.hasPermission(table, perm);
         mockAuthService.hasPermission.mockReturnValue(true);
         mockAuthService.isAdmin.mockReturnValue(false);
 
@@ -436,7 +437,7 @@ describe('UserManagementService', () => {
     });
 
     describe('hasUserManagementAccess()', () => {
-        it('should delegate to AuthService.hasPermission', () => {
+        it('should read AuthService.permission', () => {
             mockAuthService.hasPermission.mockReturnValue(true);
 
             const result = service.hasUserManagementAccess();

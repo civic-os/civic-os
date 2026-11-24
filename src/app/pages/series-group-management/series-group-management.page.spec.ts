@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -82,7 +82,8 @@ describe('SeriesGroupManagementPage', () => {
             getProperties: vi.fn().mockName("SchemaService.getProperties")
         };
         mockAuthService = {
-            hasPermission: vi.fn().mockName("AuthService.hasPermission")
+            hasPermission: vi.fn().mockName("AuthService.hasPermission"),
+            permissionsLoaded: signal(true)
         };
         mockRouter = {
             navigate: vi.fn().mockName("Router.navigate")
@@ -151,6 +152,53 @@ describe('SeriesGroupManagementPage', () => {
             expect(types).toContain('reservations');
             expect(types).toContain('events');
             expect(types.length).toBe(2);
+        });
+    });
+
+    describe('permissions that load after the page (issue #148)', () => {
+        function createButton(): HTMLButtonElement | undefined {
+            return Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+                .find(b => b.textContent?.includes('Create Series'));
+        }
+
+        it('waits for permissions, then loads groups and shows Create Series', async () => {
+            mockAuthService.permissionsLoaded.set(false);
+            mockAuthService.hasPermission.mockReturnValue(false);
+
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(mockRecurringService.getSeriesGroups).not.toHaveBeenCalled();
+            expect(component.loading()).toBe(true);
+            expect(fixture.nativeElement.textContent).not.toContain("You don't have permission");
+            expect(createButton()).toBeUndefined();
+
+            mockAuthService.hasPermission.mockReturnValue(true);
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(component.hasPermission()).toBe(true);
+            expect(component.hasCreatePermission()).toBe(true);
+            expect(mockRecurringService.getSeriesGroups).toHaveBeenCalledTimes(1);
+            expect(component.groups().length).toBe(3);
+            expect(createButton()).toBeDefined();
+        });
+
+        it('does not reload groups when a permissions refresh keeps read access', async () => {
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(mockRecurringService.getSeriesGroups).toHaveBeenCalledTimes(1);
+
+            mockAuthService.permissionsLoaded.set(false);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            mockAuthService.permissionsLoaded.set(true);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(mockRecurringService.getSeriesGroups).toHaveBeenCalledTimes(1);
+            expect(createButton()).toBeDefined();
         });
     });
 

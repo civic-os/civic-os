@@ -11,6 +11,7 @@
 // kept light (recommended, not strict-type-checked) and the noisy non-a11y
 // rules that fire broadly across the pre-audit codebase are downgraded to
 // 'warn'/'off' below (each with a reason) so the a11y errors are the signal.
+// The few correctness guardrails are marked as such in the app block.
 
 //
 // WORKSPACE PACKAGES: `eslint packages` (part of `npm run lint`) applies the
@@ -88,6 +89,15 @@ export default tseslint.config(
       'no-fallthrough': 'off',
       'no-useless-escape': 'off',
       'prefer-const': 'warn',
+
+      // --- Correctness guardrails (not a11y) ---
+      // hasPermission() reads its cache untracked, so a computed() that calls it keeps the value it had
+      // before the permissions loaded (issue #148). Service methods a computed() calls are not caught
+      // here; they read auth.permission() for the same reason.
+      'no-restricted-syntax': ['error', {
+        selector: "CallExpression[callee.name='computed'] CallExpression[callee.property.name='hasPermission']",
+        message: 'hasPermission() is untracked inside computed(); read auth.permission(table, permission)() instead.',
+      }],
     },
   },
   {

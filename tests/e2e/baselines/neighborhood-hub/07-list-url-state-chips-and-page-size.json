@@ -118,6 +118,25 @@
         },
         {
           "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
           "path": "/schema_entities",
           "query": {},
           "headers": {
@@ -443,7 +462,7 @@
           "query": {
             "display_name": "ilike.*mower*",
             "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -459,7 +478,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*mower*"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc&display_name=ilike.*mower*"
             }
           ]
         },
@@ -520,6 +539,25 @@
             {
               "body": null,
               "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
             }
           ]
         },
@@ -718,7 +756,7 @@
           "path": "/tool_types",
           "query": {
             "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -734,7 +772,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         }
@@ -750,7 +788,7 @@
           "path": "/tool_types",
           "query": {
             "order": "display_name.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -766,7 +804,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc"
             }
           ]
         },
@@ -775,7 +813,7 @@
           "path": "/tool_types",
           "query": {
             "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -791,7 +829,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -852,6 +890,25 @@
             {
               "body": null,
               "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
             }
           ]
         },
@@ -1050,7 +1107,7 @@
           "path": "/tool_types",
           "query": {
             "order": "display_name.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1066,7 +1123,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc"
             }
           ]
         }
@@ -1082,7 +1139,7 @@
           "path": "/tool_types",
           "query": {
             "order": "display_name.asc,id.asc",
-            "select": "display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
+            "select": "display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1098,7 +1155,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/tool_types?select=display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
+              "url": "/tool_types?select=display_name,category_id:tool_categories!category_id(id,display_name),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity,id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -1159,6 +1216,25 @@
             {
               "body": null,
               "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_dimensions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_dimensions"
             }
           ]
         },

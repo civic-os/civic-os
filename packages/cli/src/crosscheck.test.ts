@@ -71,7 +71,10 @@ describe.each(examples)('cross-check against the core default select: %s', examp
   });
 
   it('the committed snapshot is what the generator emits', () => {
-    expect(readFileSync(snapshot(example), 'utf8')).toBe(emitTypes(model, generatorName()));
+    // Snapshots carry `<version>` in place of the CLI version (scripts/golden/codegen.mjs), so a
+    // release bump does not rewrite them; the name before the version must still match.
+    const [name] = generatorName().split(' ');
+    expect(readFileSync(snapshot(example), 'utf8')).toBe(emitTypes(model, `${name} <version>`));
   });
 });
 
