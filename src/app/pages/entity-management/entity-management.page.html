@@ -101,7 +101,7 @@
                 <!-- Map Settings (only show if entity has GeoPoint properties) -->
                 @if (hasGeoPointProperties(entity)) {
                   <div class="border-t border-base-300 pt-4">
-                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">Map Settings</h3>
+                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">{{ 'entity_management.map_settings' | translate }}</h3>
                     <div class="flex flex-wrap items-center gap-4">
                       <!-- Show Map Toggle -->
                       <label class="label cursor-pointer justify-start gap-2 py-0">
@@ -110,15 +110,16 @@
                           class="checkbox checkbox-sm"
                           [(ngModel)]="entity.show_map"
                           (ngModelChange)="onShowMapChange(entity)" />
-                        <span class="label-text text-xs">Show map on list view</span>
+                        <span class="label-text text-xs">{{ 'entity_management.show_map' | translate }}</span>
                       </label>
 
                       <!-- Map Property Selector (inline when enabled) -->
                       @if (entity.show_map) {
                         <div class="flex items-center gap-2">
-                          <span class="text-xs text-base-content/70">using</span>
+                          <span class="text-xs text-base-content/70" aria-hidden="true">{{ 'entity_management.using' | translate }}</span>
                           <select
                             class="select select-sm select-bordered"
+                            [attr.aria-label]="'a11y.map_property_for' | translate:{ entity: entity.table_name }"
                             [(ngModel)]="entity.map_property_name"
                             (ngModelChange)="onMapPropertyChange(entity)">
                             @for (prop of entity.geoPointProperties; track prop) {
@@ -134,7 +135,7 @@
                 <!-- Calendar Settings (only show if entity has TimeSlot properties) -->
                 @if (hasTimeSlotProperties(entity)) {
                   <div class="border-t border-base-300 pt-4">
-                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">Calendar Settings</h3>
+                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">{{ 'entity_management.calendar_settings' | translate }}</h3>
                     <div class="flex flex-wrap items-center gap-4">
                       <!-- Show Calendar Toggle -->
                       <label class="label cursor-pointer justify-start gap-2 py-0">
@@ -143,15 +144,16 @@
                           class="checkbox checkbox-sm"
                           [(ngModel)]="entity.show_calendar"
                           (ngModelChange)="onShowCalendarChange(entity)" />
-                        <span class="label-text text-xs">Show calendar on list view</span>
+                        <span class="label-text text-xs">{{ 'entity_management.show_calendar' | translate }}</span>
                       </label>
 
                       <!-- Calendar Property Selector (inline when enabled) -->
                       @if (entity.show_calendar) {
                         <div class="flex items-center gap-2">
-                          <span class="text-xs text-base-content/70">using</span>
+                          <span class="text-xs text-base-content/70" aria-hidden="true">{{ 'entity_management.using' | translate }}</span>
                           <select
                             class="select select-sm select-bordered"
+                            [attr.aria-label]="'a11y.calendar_property_for' | translate:{ entity: entity.table_name }"
                             [(ngModel)]="entity.calendar_property_name"
                             (ngModelChange)="onCalendarPropertyChange(entity)">
                             @for (prop of entity.timeSlotProperties; track prop) {
@@ -167,7 +169,7 @@
                 <!-- Recurring Schedules Settings (only show if entity has TimeSlot properties) -->
                 @if (hasTimeSlotProperties(entity)) {
                   <div class="border-t border-base-300 pt-4">
-                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">Recurring Schedules</h3>
+                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">{{ 'entity_management.recurring_settings' | translate }}</h3>
                     <div class="flex flex-wrap items-center gap-4">
                       <!-- Supports Recurring Toggle -->
                       <label class="label cursor-pointer justify-start gap-2 py-0">
@@ -176,15 +178,16 @@
                           class="checkbox checkbox-sm"
                           [(ngModel)]="entity.supports_recurring"
                           (ngModelChange)="onSupportsRecurringChange(entity)" />
-                        <span class="label-text text-xs">Allow recurring schedules</span>
+                        <span class="label-text text-xs">{{ 'entity_management.allow_recurring' | translate }}</span>
                       </label>
 
                       <!-- Recurring Property Selector (inline when enabled) -->
                       @if (entity.supports_recurring) {
                         <div class="flex items-center gap-2">
-                          <span class="text-xs text-base-content/70">using</span>
+                          <span class="text-xs text-base-content/70" aria-hidden="true">{{ 'entity_management.using' | translate }}</span>
                           <select
                             class="select select-sm select-bordered"
+                            [attr.aria-label]="'a11y.recurring_property_for' | translate:{ entity: entity.table_name }"
                             [(ngModel)]="entity.recurring_property_name"
                             (ngModelChange)="onRecurringPropertyChange(entity)">
                             @for (prop of entity.timeSlotProperties; track prop) {

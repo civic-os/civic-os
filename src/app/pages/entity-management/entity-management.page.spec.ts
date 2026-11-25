@@ -437,6 +437,35 @@ describe('EntityManagementPage', () => {
         });
     });
 
+    // Issue #111: the map, calendar and recurring settings are translated and their selects are labeled
+    describe('Map, calendar and recurring settings', () => {
+        it('names each property select for its entity', async () => {
+            const issue = { ...mockEntities[0], show_map: true, map_property_name: 'location', show_calendar: true, calendar_property_name: 'slot', supports_recurring: true, recurring_property_name: 'slot' };
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of([issue]));
+            mockSchemaService.getPropertiesForEntity.mockReturnValue(of([
+                { column_name: 'location', geography_type: 'Point', udt_name: 'geography' },
+                { column_name: 'slot', geography_type: null, udt_name: 'time_slot' }
+            ]));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+            await advanceTime(100);
+            fixture.detectChanges();
+
+            const el: HTMLElement = fixture.nativeElement;
+            const labels = Array.from(el.querySelectorAll('select')).map(s => s.getAttribute('aria-label'));
+            expect(labels).toEqual([
+                'Map property for Issue',
+                'Calendar property for Issue',
+                'Recurring schedule property for Issue'
+            ]);
+            const headings = Array.from(el.querySelectorAll('h3')).map(h => h.textContent?.trim());
+            expect(headings).toEqual(expect.arrayContaining(['Map Settings', 'Calendar Settings', 'Recurring Schedules']));
+        });
+    });
+
     describe('Helper Methods', () => {
         it('should get correct display name placeholder', async () => {
             mockEntityManagementService.isAdmin.mockReturnValue(of(true));
