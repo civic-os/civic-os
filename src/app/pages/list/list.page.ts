@@ -61,8 +61,10 @@ function sameItems<T>(a: readonly T[], b: readonly T[]): boolean {
   return a.length === b.length && a.every((item, i) => item === b[i]);
 }
 
-/** The chip's wording; the facade decides the kind, the page words it. */
-function toFilterChip(chip: ListFilterChip): FilterChip {
+type Translate = (key: string, params?: Record<string, string | number>) => string;
+
+/** The chip's wording; the facade decides the kind, the page words it in the interface language. */
+function toFilterChip(chip: ListFilterChip, t: Translate): FilterChip {
   switch (chip.kind) {
     case 'range':
       return { column: chip.column, columnLabel: chip.label, displayValue: `${chip.min} - ${chip.max}` };
@@ -71,9 +73,9 @@ function toFilterChip(chip: ListFilterChip): FilterChip {
     case 'lte':
       return { column: chip.column, columnLabel: chip.label, displayValue: `≤ ${chip.value}` };
     case 'selected':
-      return { column: chip.column, columnLabel: chip.label, displayValue: chip.count === 1 ? '1 selected' : `${chip.count} selected` };
+      return { column: chip.column, columnLabel: chip.label, displayValue: t(chip.count === 1 ? 'list.filter_selected_one' : 'list.filter_selected_other', { count: chip.count }) };
     case 'boolean':
-      return { column: chip.column, columnLabel: chip.label, displayValue: chip.yes ? 'Yes' : 'No' };
+      return { column: chip.column, columnLabel: chip.label, displayValue: t(chip.yes ? 'form.yes' : 'form.no') };
     case 'named':
       // Status and Category values by name (issue #72): the first two, then "+N"
       return {
@@ -231,7 +233,12 @@ export class ListPage implements OnInit, OnDestroy {
     () => [...(this.snapshot()?.searchTerms ?? [])],
     { equal: (a, b) => sameItems(a, b) });
   public isFiltered = computed(() => this.snapshot()?.filtered ?? false);
-  public filterChips = computed<FilterChip[]>(() => (this.snapshot()?.chips ?? []).map(toFilterChip));
+  public filterChips = computed<FilterChip[]>(() => {
+    // Re-word the chips when the locale's translations load (issue #169)
+    this.translation.version();
+    const t: Translate = (key, params) => this.translation.get(key, params);
+    return (this.snapshot()?.chips ?? []).map(chip => toFilterChip(chip, t));
+  });
   /** The calendar's view and focus date, which the calendar component starts from. */
   public calendarState = computed(() => this.snapshot()?.state.calendar ?? null);
 

@@ -27,6 +27,7 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { NotesService } from '../../services/notes.service';
+import { TranslationService } from '../../services/translation.service';
 import { BehaviorSubject, of } from 'rxjs';
 import type { EntityHandle, FacadeDeps } from '@civic-os/core';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
@@ -657,6 +658,24 @@ describe('ListPage', () => {
                 `${MOCK_PROPERTIES.user.display_name} (≥ 2)`
             ]);
             expect(component.isFiltered()).toBe(true);
+        });
+
+        // Issue #169: the selected-count and yes/no wording comes from translation keys
+        it('words selected and boolean chips through translation keys', async () => {
+            vi.spyOn(TestBed.inject(TranslationService), 'get').mockImplementation(
+                (key: string, params?: Record<string, string | number>) => params ? `${key}:${params['count']}` : key);
+            queryParams.next({
+                f0_col: 'is_active', f0_op: 'eq', f0_val: 'false',
+                f1_col: 'status_id', f1_op: 'in', f1_val: '(1)',
+                f2_col: 'assigned_to', f2_op: 'in', f2_val: '(1,2)'
+            });
+            await mount(MOCK_ENTITIES.issue, [
+                MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.boolean, MOCK_PROPERTIES.foreignKey, MOCK_PROPERTIES.user
+            ]);
+
+            expect(component.filterChips().map(c => c.displayValue)).toEqual([
+                'form.no', 'list.filter_selected_one:1', 'list.filter_selected_other:2'
+            ]);
         });
 
         // Issue #72: Status and Category chips name their values instead of showing ids

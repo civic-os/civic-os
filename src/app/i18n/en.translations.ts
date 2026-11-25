@@ -549,6 +549,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'list.add_new': 'Add New',
   'list.filters': 'Filters',
   'list.active_filters': 'Active filters',
+  'list.filter_selected_one': '{{count}} selected',
+  'list.filter_selected_other': '{{count}} selected',
   'list.clear_filters': 'Clear Filters',
   'list.columns': 'Columns',
   'list.sort_by': 'Sort by',
