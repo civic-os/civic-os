@@ -20,7 +20,7 @@
 
     <!-- Filter Controls Drawer (Collapsible) -->
     @if (isExpanded()) {
-      <div [id]="uid + '-drawer'" class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg" [class.start-0]="alignLeft()" [class.end-6]="!alignLeft()" [style.max-width]="dropdownMaxWidth()">
+      <div [id]="uid + '-drawer'" class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg max-sm:fixed max-sm:inset-x-4 max-sm:bottom-4 max-sm:max-h-[75vh] max-sm:overflow-y-auto" [class]="alignLeft() ? 'sm:start-0' : 'sm:end-6'" [style.width]="dropdownWidth()" [style.transform]="drawerShift() ? 'translateX(' + drawerShift() + 'px)' : null">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold">Filter Options</h3>
           @if (activeFilterCount() > 0) {

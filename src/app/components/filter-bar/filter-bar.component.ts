@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, Output, EventEmitter, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, Output, EventEmitter, signal, computed, inject, effect, ChangeDetectionStrategy, ElementRef, HostListener, Injector, afterNextRender } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
@@ -45,6 +45,29 @@ const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
   { id: 'partially_refunded', display_name: 'Partially Refunded' },
 ];
 
+/** Tailwind's sm breakpoint: below it the drawer is pinned to the viewport edges by CSS. */
+const SM_BREAKPOINT = 640;
+/** Gap the drawer keeps from each viewport edge from sm up (2rem in its width cap, split over both sides). */
+const VIEWPORT_MARGIN = 16;
+
+/**
+ * How far to move the drawer along x (px, positive toward the right) so it stays inside the viewport.
+ * From sm up the drawer hangs off its Filters button, so a wide drawer whose button sits mid-row can run
+ * past either edge (issue #166). Works on measured physical rects, so it holds in LTR and RTL alike.
+ */
+export function drawerShiftFor(rect: { left: number; right: number }, viewportWidth: number): number {
+  if (viewportWidth < SM_BREAKPOINT) {
+    return 0;
+  }
+  if (rect.left < VIEWPORT_MARGIN) {
+    return VIEWPORT_MARGIN - rect.left;
+  }
+  if (rect.right > viewportWidth - VIEWPORT_MARGIN) {
+    return Math.max(VIEWPORT_MARGIN - rect.left, viewportWidth - VIEWPORT_MARGIN - rect.right);
+  }
+  return 0;
+}
+
 @Component({
   selector: 'app-filter-bar',
   imports: [FormsModule, TranslatePipe, ContrastTextDirective],
@@ -55,6 +78,8 @@ const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
 export class FilterBarComponent {
   private dataService = inject(DataService);
   private schemaService = inject(SchemaService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
 
   // Incrementing counter → unique DOM id prefix per component instance.
   // Prevents duplicate `id` collisions when multiple filter bars render on
@@ -70,6 +95,8 @@ export class FilterBarComponent {
   @Output() filtersChange = new EventEmitter<FilterCriteria[]>();
 
   public isExpanded = signal(false);
+  /** Horizontal shift (px) that keeps the open drawer inside the viewport; see drawerShiftFor(). */
+  public drawerShift = signal(0);
   public filterState = signal<FilterState>({});
   public filterOptions = signal<Map<string, FilterOption[]>>(new Map());
 
@@ -122,9 +149,9 @@ export class FilterBarComponent {
     return count;
   });
 
-  // Calculate max width based on number of filterable properties
-  // Each column is 250px, gap is 16px, padding is 32px total
-  public dropdownMaxWidth = computed(() => {
+  // The drawer's width: one 250px column per filterable property (at most 4), 16px gaps and 32px
+  // padding, but never wider than the viewport less a margin, so it fits a phone screen (issue #166).
+  public dropdownWidth = computed(() => {
     const propCount = this.properties().length;
     const columns = Math.min(propCount, 4); // Cap at 4 columns
     const columnWidth = 250;
@@ -132,15 +159,12 @@ export class FilterBarComponent {
     const paddingWidth = 32;
 
     const width = (columnWidth * columns) + (gapWidth * (columns - 1)) + paddingWidth;
-    return `${width}px`;
+    return `min(${width}px, calc(100vw - 2rem))`;
   });
 
-  // Calculate grid columns string
-  public gridColumns = computed(() => {
-    const propCount = this.properties().length;
-    const columns = Math.min(propCount, 4); // Cap at 4 columns
-    return `repeat(${columns}, 250px)`;
-  });
+  // Columns that wrap when the drawer is narrower than the full row (issue #166). The minimum is 240px,
+  // not 250px, so the card's border cannot push the last of a full row of columns onto a new line.
+  public gridColumns = computed(() => 'repeat(auto-fill, minmax(min(240px, 100%), 1fr))');
 
   // Load FK, User, Status, and Payment filter options when properties change
   // IMPORTANT: This effect uses signal-based caching for Status to prevent infinite loops.
@@ -333,6 +357,29 @@ export class FilterBarComponent {
 
   public toggleExpanded() {
     this.isExpanded.set(!this.isExpanded());
+    if (this.isExpanded()) {
+      this.drawerShift.set(0);
+      afterNextRender({ read: () => this.fitDrawer() }, { injector: this.injector });
+    }
+  }
+
+  @HostListener('window:resize')
+  public onWindowResize() {
+    if (this.isExpanded()) {
+      this.fitDrawer();
+    }
+  }
+
+  /** Measures the open drawer and shifts it back inside the viewport (issue #166). */
+  private fitDrawer() {
+    const drawer = this.host.nativeElement.querySelector<HTMLElement>(`#${this.uid}-drawer`);
+    if (!drawer) {
+      return;
+    }
+    // Undo the current shift, so the drawer is fitted from where its anchor puts it
+    const shift = this.drawerShift();
+    const rect = drawer.getBoundingClientRect();
+    this.drawerShift.set(drawerShiftFor({ left: rect.left - shift, right: rect.right - shift }, window.innerWidth));
   }
 
   public onFilterChange() {
