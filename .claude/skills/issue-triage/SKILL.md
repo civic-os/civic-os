@@ -107,6 +107,7 @@ Group the Review-lane fixes into batches:
 - **Split a batch** when it would exceed 5 issues or about 500 non-test lines, or when one fix is much riskier than the rest (put the risky one alone, so the easy ones are not held behind its review).
 - **Group by theme** when a cluster shares a root cause or area (for example several phone-width overflow bugs); a themed batch is easier to review than a mixed one.
 - **Migrations in a batch:** all migrations in a batch use the same version prefix, and the golden recapture is one final commit after every fix, not one per fix.
+- **Merge order:** give the PRs a recommended merge order (a hotfix first), and build each one to merge without conflicts after the PRs before it. Two batches that would both touch the same file (always the case when both add migrations, since each appends to `sqitch.plan`) are stacked: the later batch branches from the earlier one's head, and its first migration requires the earlier batch's last migration, in both the plan entry and the deploy script's `-- requires:` header. Batches that share no files branch from `origin/main` as usual. Never open sibling PRs whose migrations require the same parent: whichever merges second conflicts.
 
 Report:
 
@@ -119,7 +120,7 @@ Report:
 ### Direct (self-merged PR)
 - #N <title>: <root cause, file:line>. <files, ~lines>. Test: <name>. <PR #M merged | PR #M waiting on CI | moved to Review: why>
 
-### Review batch: patch/vX.Y.Z (<theme or "mixed">)
+### Review batch: patch/vX.Y.Z (<theme or "mixed">), merge <1st | after #M>
 - #N <title>: <root cause>. Why Review: <rule from step 4>.
 
 ### Needs input
@@ -173,14 +174,14 @@ If any step shows the fix is larger or less certain than assessed, stop that fix
 
 ### Review lane
 
-For each batch:
+For each batch, in the merge order from step 5:
 
-1. Branch from fresh `origin/main` as `patch/vX.Y.Z[-theme]` (or `fix/<issue>-<slug>` for a hotfix).
+1. Branch from fresh `origin/main` as `patch/vX.Y.Z[-theme]` (or `fix/<issue>-<slug>` for a hotfix), or, for a stacked batch, from the head of the batch it merges after.
 2. One commit per issue, each with `Fixes #N` in its body and its regression test. A golden recapture, if any, is a final commit of its own.
-3. Verify the whole branch per CLAUDE.md's five layers (`docs/development/E2E_VERIFICATION.md`), scaled to what changed: Docker migrations and SQL checks only when the batch has a migration. Run them on the skill's own stack (Test stacks above) and tear it down before step 5.
+3. Verify the whole branch per CLAUDE.md's five layers (`docs/development/E2E_VERIFICATION.md`), scaled to what changed: Docker migrations and SQL checks only when the batch has a migration. For a stacked batch, deploy the whole chain with `--verify` on one fresh database, then revert this batch's migrations and deploy them again. Run them on the skill's own stack (Test stacks above) and tear it down before step 5.
 4. Bump `package.json` (`npm run check:versions` must pass) only in the batch that will be tagged, as its own final commit, so batches can be reordered without version conflicts.
-5. Push and open the PR. The body lists each issue with its root cause and its test, so the maintainer can review commit by commit, and asks for a **rebase merge** so each fix stays a separate, revertible commit on `main`.
-6. Never merge a Review-lane PR.
+5. Push and open the PR against `main`. The body lists each issue with its root cause and its test, so the maintainer can review commit by commit, and asks for a **rebase merge** so each fix stays a separate, revertible commit on `main`. A stacked PR's body opens with "Merge after #M", says it shows #M's commits until #M merges, and gives the follow-up: `gh pr update-branch <this PR> --rebase` once #M is on `main`.
+6. Never merge a Review-lane PR. A later run that finds a stacked PR's predecessor merged runs that `gh pr update-branch --rebase` itself and waits for the checks.
 
 ### Never
 
