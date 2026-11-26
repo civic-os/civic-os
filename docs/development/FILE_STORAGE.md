@@ -15,7 +15,7 @@ This document provides a comprehensive guide to implementing file storage featur
   - **S3 Signer**: Generates presigned upload URLs using River job queue with automatic retries
   - **Thumbnail Worker**: Processes uploaded images (3 sizes: 150x150, 400x400, 800x800) and PDFs (first page) using bimg (libvips) and pdftoppm with white background letterboxing
   - **File Reconcile Cron** (v0.87.0): Moves files staged on Create pages to their record's folder and deletes staged files nothing references (see Staged Uploads and File Reconcile below)
-- **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails; a file uploaded before its record exists (Create page) is staged as `{entity_type}/_new/{file_id}/…` with `entity_id = ''` (since v0.86.5, issue #141); the file reconcile job moves it to its record's folder once the record is saved (v0.87.0, see Staged Uploads and File Reconcile below)
+- **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails; a file uploaded before its record exists (Create page) is staged as `{entity_type}/_new/{file_id}/…` with `entity_id = ''` (since v0.87.0, issue #141); the file reconcile job moves it to its record's folder once the record is saved (v0.87.0, see Staged Uploads and File Reconcile below)
 - **UUIDv7**: Time-ordered UUIDs improve B-tree index performance
 
 ## Property Type Detection
@@ -44,7 +44,7 @@ if (column.udt_name === 'uuid' && column.join_table === 'files') {
 `EditPropertyComponent` provides file input with drag-drop, validates type/size, uploads immediately on selection, shows progress
 
 ### Create Forms
-File properties are on Create forms (since v0.86.5). A file chosen there is uploaded before the record exists, staged under `{entity_type}/_new/`, and its id is saved with the record; the file reconcile job then moves it to the record's folder (v0.87.0).
+File properties are on Create forms (since v0.87.0). A file chosen there is uploaded before the record exists, staged under `{entity_type}/_new/`, and its id is saved with the record; the file reconcile job then moves it to the record's folder (v0.87.0).
 
 ### Validation
 Frontend validates before upload; backend enforces via validation metadata
@@ -441,7 +441,7 @@ The PhotoGallery property type builds on the file storage system to manage order
 | Ordering | N/A | `sort_order` on `photo_gallery_files` |
 | Per-file metadata | None (just the file record) | `caption`, `alt_text` per image |
 | S3 key prefix | `{entity_type}/{entity_id}/{file_id}/` | `photo_gallery/{gallery_id}/{file_id}/` |
-| Create page behavior | Uploaded before the record exists, staged under `_new`, id saved with the record (v0.86.5), moved to the record's folder by the reconcile job (v0.87.0) | Draft gallery pattern (create gallery first, link after) |
+| Create page behavior | Uploaded before the record exists, staged under `_new`, id saved with the record (v0.87.0), moved to the record's folder by the reconcile job (v0.87.0) | Draft gallery pattern (create gallery first, link after) |
 
 See `docs/notes/PHOTO_GALLERY_DESIGN.md` for the full architecture, lifecycle, and RPC reference.
 
