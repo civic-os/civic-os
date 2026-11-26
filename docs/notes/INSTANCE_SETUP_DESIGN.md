@@ -1,6 +1,6 @@
 # Instance Setup & Configuration — Design Document
 
-> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0790) lists where the build differs from the revised design. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
+> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0790) lists where the build differs from the revised design. [Secret Keys](#secret-keys-designed-for-v0880), write-only rows for the S3 signing credentials, is **designed for v0.88.0** (November 2026) and not built. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 
 Two companion features that together solve instance onboarding:
 
@@ -78,7 +78,7 @@ Docker env vars handle infrastructure config. But application-level config (orga
 
 **No `is_required` column.** Setup tasks handle enforcement via `check_type: 'config_set'`. Instance config is a pure key-value store.
 
-**No secrets.** Every authenticated user can read every key, and public keys are readable without logging in. API secrets, SMTP passwords and the like stay in ENV or a secret store. A Stripe *publishable* key is fine here; a Stripe *secret* key never is.
+**No secrets (as built in v0.79.0).** Every authenticated user can read every key, and public keys are readable without logging in. API secrets, SMTP passwords and the like stay in ENV or a secret store. A Stripe *publishable* key is fine here; a Stripe *secret* key never is. [Secret Keys](#secret-keys-designed-for-v0880) (designed for v0.88.0, not built) adds rows that can be written but never read back, for the few secrets SQL itself must use, such as the S3 key that signs file URLs.
 
 ### Visibility and Writes (revised)
 
@@ -371,6 +371,231 @@ Where the build differs from the revised design above, and why.
 - The SQL test also covers `default_value`: normalized and checked on INSERT and UPDATE, refused on framework keys, not writable by an admin over the API, returned by `get_config()` while the value is unset (and not to `web_anon` for a private key). The browser test checks the `Default: <value>` placeholder after Reset and `get_config()` returning the default.
 - `services/consolidated-worker-go/instance_config_test.go` covers the worker's snapshot: cache and refresh, the `APP_TITLE` fallback for NULL, blank, missing row and missing table, typed values, concurrent reads, and `.Config` rendering in subject, HTML and text templates.
 
+### Secret Keys (designed for v0.88.0)
+
+> **Status**: designed November 2026, not built. First consumer: in-database SigV4 signing of file URLs (`docs/notes/SIGNED_FILE_URLS_DESIGN.md`, `docs/notes/SIGV4_SIGNING_REFERENCE.md`). The three decisions below were made by the maintainer on 2026-11-26. The signing functions, the `public.files` view, the upload RPC and the frontend belong to that design; this section owns only how the credentials get into the database, stay there, and are read.
+
+#### Problem
+
+The signing functions need five values when they run: the access key id, the secret access key, the region, the public endpoint (the browser-facing, path-style S3 base URL) and the default bucket. The signed URL design assumed they could be read with `get_config()`. As built in v0.79.0, that is unsafe in three ways:
+
+1. The `instance_config_select_authenticated` policy is `USING (true)`, so every signed-in user reads every row through `GET /instance_config` or `/rpc/get_config`.
+2. `get_config()` is `SECURITY INVOKER`, but inside a definer function or a notification trigger the invoker is the owner, who bypasses RLS. Any definer code that returns or embeds `get_config(x)` would hand out the value.
+3. The consolidated worker reads every row as `postgres` into the `.Config` snapshot (`services/consolidated-worker-go/instance_config.go`), so any notification template could print it.
+
+Today the S3 values exist only in the consolidated worker's environment (`S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_REGION`, `S3_ENDPOINT`, `S3_PUBLIC_ENDPOINT`, `S3_BUCKET`; `s3_client.go`). No S3 value reaches the postgres or migrations containers, and no API secret is stored in the database.
+
+#### Requirements
+
+- Definer signing functions can read all five values when they run.
+- The secret, and the access key id, never reach API roles, the frontend, `/rpc/get_config`, the `public.instance_config` view, the worker's `.Config` snapshot or the MCP server.
+- instance_config gains keys that can be written but never read back, rather than a parallel store, so a secret key has the same catalog row as any other key: label, help text, group, translations and a place on `/admin/config`.
+- Values arrive on deploy and on rotation in every deployment path: the example stacks, `docker-compose.prod.yml`, `infrastructure/vps/` and Kubernetes on DigitalOcean managed Postgres, where everything runs as `doadmin` (CREATEROLE, not superuser).
+- A missing value degrades visibly instead of failing silently.
+
+#### Decisions
+
+| # | Decision | Chosen | Rejected, and why |
+|---|---|---|---|
+| 1 | Where secret values live | An `is_secret` flag on `metadata.instance_config`. Values stay in `config_value`; RLS hides the rows from API roles, and every reader that bypasses RLS filters them out explicitly (below). | **A separate table with no API grants** isolates by privilege, which holds even if a later policy is too permissive. The maintainer preferred one table and one catalog; the explicit filters and tests below cover the readers that bypass RLS. **GUCs** (`ALTER DATABASE … SET app.s3_secret…`, the bridge in the signed URL design): any role reads them with `current_setting()` and from `pg_db_role_setting`. **Vault or pgsodium**: not available on DO managed Postgres, and the encryption key would have to live in the same database anyway. |
+| 2 | How the S3 values reach the database | The **consolidated worker publishes** the values it presigns with, at startup. It keeps the keys anyway (thumbnails, file reconcile), it already has all six S3 variables in every deployment path, and it connects as a deployment role. | **The migrations seed script** (`seed-instance-config.sh` with sync semantics): the prod and VPS migrations services would need five more variables, the examples have no migrations container, and rotation would mean keeping two copies of the environment equal. |
+| 3 | Whether admins edit the S3 values | **No: deployment-managed.** `/admin/config` shows their status read-only. The worker signs with the same key pair from its environment, so a change made only in the database would split the two, and revoking the old key would break thumbnails and reconcile. | Write-only admin fields for S3. The write-only admin path does exist, for secret keys marked `managed_by = 'admin'` (for example the ALTCHA HMAC key of `docs/notes/ANONYMOUS_PUBLIC_SUBMIT_DESIGN.md`). |
+
+#### Schema
+
+New columns on `metadata.instance_config`:
+
+| Column | Type | Meaning |
+|---|---|---|
+| `is_secret` | `BOOLEAN NOT NULL DEFAULT false` | The value is never readable through the API: not by RLS, `get_config()`, the view or the worker's template snapshot. Written only through the definer functions below. |
+| `managed_by` | `TEXT` | `'deployment'` (only `publish_deployment_config()` writes it) or `'admin'` (`set_instance_secret()` writes it). Required when `is_secret`, NULL otherwise. |
+| `secret_display` | `TEXT` | What `/admin/config` shows of a set value: `'none'` (only "Set"), `'last4'` (`…` plus the last four characters) or `'full'` (for non-secret companions such as the endpoint). Required when `is_secret`, NULL otherwise. |
+
+CHECK constraints: a secret row is not `is_public`, has `config_type = 'string'` and has no `default_value`. `managed_by` and `secret_display` are set if and only if `is_secret`.
+
+RLS and grants:
+
+| Policy | v0.79.0 | v0.88.0 |
+|---|---|---|
+| `instance_config_select_anon` (`web_anon`) | `is_public` | `is_public AND NOT is_secret` |
+| `instance_config_select_authenticated` | `true` | `NOT is_secret` |
+| `instance_config_update` (`authenticated`) | `has_permission('metadata.instance_config','update')` | the same `AND NOT is_secret`, in `USING` and `WITH CHECK` |
+
+The column grant stays `UPDATE (config_value)`, so no API caller can turn `is_secret` off. API callers cannot write a secret row directly either: PostgreSQL applies the SELECT policy to rows an `UPDATE … WHERE` reads, so a `PATCH /instance_config?config_key=eq.s3_secret_access_key` matches no row. Secret rows are written only by the definer functions below. An integrator with SQL access can still flip `is_secret`; that is the same trust as editing any other table.
+
+Readers that bypass RLS filter explicitly:
+
+- **`get_config()`** adds `AND NOT is_secret` to its body. It returns NULL for a secret key in every context, the owner's included, so a definer function or notification trigger cannot reach a secret through it.
+- **The worker's snapshot query** adds `WHERE NOT is_secret`, so `.Config.<secret key>` renders empty, like an unknown key.
+- **`public.instance_config`** is re-created with `CASE WHEN c.is_secret THEN NULL ELSE c.config_value END`. RLS already hides the rows; this guards against a caller that bypasses RLS. The re-creation keeps `security_invoker = true` and the v0.80.2 `metadata.t()` labels.
+- **`schema_cache_versions`** keeps `MAX(updated_at)` over all rows. A rotation therefore moves the `instance_config` version once, which reveals when a secret changed and never its value, the same exposure the view already accepts.
+
+Validation stays in `metadata.instance_config_normalize()`, with per-key rules alongside the Stripe and map ones: `s3_public_endpoint` matches `^https?://[^/\s]+(/\S*)?$` with any trailing slash stripped; `s3_region` matches `^[a-z0-9-]+$`; `s3_bucket` follows S3 bucket naming (`^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$`); `s3_access_key_id` and `s3_secret_access_key` are non-empty with no whitespace. Local MinIO and RustFS accept keys like `minioadmin`, so the key id has no AWS-shaped pattern. Messages name the key, never the value (the trigger already works this way).
+
+**No value in error output.** A constraint violation's DETAIL reads `Failing row contains (…)` and would print `config_value`, both to the caller (PostgREST returns `details`) and to the server log. Every function that writes a secret row catches `OTHERS` and re-raises with a message naming only the key and with no DETAIL or HINT. The test sentinel below checks this.
+
+#### Framework Secret Keys
+
+A new group `file_storage` ("File storage", icon `cloud`, sort 50) with five rows, all `is_secret = true` and `managed_by = 'deployment'`. The names match `SIGNED_FILE_URLS_DESIGN.md` (Credential storage).
+
+| Key | `secret_display` | Worker source |
+|---|---|---|
+| `s3_access_key_id` | `last4` | `S3_ACCESS_KEY_ID` |
+| `s3_secret_access_key` | `none` | `S3_SECRET_ACCESS_KEY` |
+| `s3_region` | `full` | `S3_REGION`, default `us-east-1` |
+| `s3_public_endpoint` | `full` | `S3_PUBLIC_ENDPOINT`, else `S3_ENDPOINT`, else `https://s3.<region>.amazonaws.com` (the endpoint the worker presigns with today) |
+| `s3_bucket` | `full` | `S3_BUCKET`, default `civic-os-files` |
+
+Region, endpoint and bucket are not secret: the frontend already receives the endpoint and bucket (Tier 1), and every presigned URL contains all three. They are secret rows so that the five values arrive in one publish, change together, and cannot be edited apart from the key pair on `/admin/config`. The migration seeds labels and descriptions in the six shipped locales through the existing source types (`instance_config`, `instance_config_group`).
+
+#### Interface for the Signing Functions
+
+```sql
+-- One row when all five values are set, no rows otherwise.
+metadata.s3_signing_config()
+  RETURNS TABLE (access_key_id TEXT, secret_access_key TEXT, region TEXT,
+                 public_endpoint TEXT, default_bucket TEXT)
+  STABLE SECURITY INVOKER
+
+-- Generic reader for other secret keys (e.g. the ALTCHA HMAC key). NULL when unset or not a secret key.
+metadata.get_instance_secret(p_key TEXT) RETURNS TEXT
+  STABLE SECURITY INVOKER
+```
+
+Both have `EXECUTE` revoked from `PUBLIC` and are granted to no role. Only the owner (the migration role: `postgres` locally, `doadmin` on DO) and superusers can execute them, so they are reachable only from `SECURITY DEFINER` functions owned by the migration role, which every core migration creates. Inside those functions the owner bypasses RLS on `metadata.instance_config`, so no policy is needed for the read. They are `INVOKER` on purpose: an accidental grant to an API role would read nothing, because RLS hides the rows from that role.
+
+A signing function reads the configuration like this:
+
+```sql
+SELECT * INTO v_cfg FROM metadata.s3_signing_config();
+IF NOT FOUND THEN
+  RETURN NULL;  -- GET URL columns; upload RPCs raise instead (below)
+END IF;
+```
+
+The rule for every definer function that reads a secret: it returns only what it computed (a signature, a URL, a boolean), never the value, and it is never written so that a caller's input selects which secret is read. Code review checks both.
+
+Cost: the `public.files` view signs up to four URLs per row, and each call does five primary-key lookups. A 50-row page is about a thousand index lookups, which is cheap. A signing function that returns all four URLs at once can read the configuration once per row; that choice belongs to the signing design.
+
+What happens when values are missing:
+
+| Where | Behavior |
+|---|---|
+| GET URL columns in `public.files` | NULL. The frontend shows its "file unavailable" state; nothing raises, so lists and detail pages still load. |
+| Upload URL RPC (`request_upload_url`) | Raises a named error, `file_storage_not_configured`, mapped to a translated message. An upload that cannot be signed must not appear to start. |
+| `/admin/config` | Each unset row shows "Missing". The group explains that the values come from the worker's S3 settings. |
+| Worker startup | One WARNING naming the missing variables; nothing is published, and existing database values are kept. |
+
+#### Writers
+
+**`metadata.publish_deployment_config(p_values JSONB) RETURNS JSONB`**, the deployment write path. `SECURITY DEFINER`, `SET search_path = metadata, public, pg_catalog`, `EXECUTE` revoked from `PUBLIC`, no grants.
+- Guard: `metadata._is_deployer()`, true only for a superuser or CREATEROLE session user with no `request.jwt.claims`. PostgREST connects as `authenticator`, so no API request qualifies, even with an admin JWT.
+- Takes `{"s3_access_key_id": "…", …}` and runs as one statement in one transaction, all or nothing. It refuses a key that is unknown, not secret or `managed_by = 'admin'`.
+- It updates only rows whose value `IS DISTINCT FROM` the stored one. A restart with unchanged credentials therefore changes nothing: `updated_at` and the cache version move only on a real rotation.
+- Returns `{"changed": ["s3_access_key_id", "s3_secret_access_key"]}`: key names only, never a value.
+
+**`public.set_instance_secret(p_key TEXT, p_value TEXT) RETURNS JSONB`**, the admin write-only path. `SECURITY DEFINER`, `EXECUTE` granted to `authenticated`.
+- Guard: `has_permission('metadata.instance_config','update') OR is_admin()` (management surfaces always admit `is_admin()`).
+- Accepts only `managed_by = 'admin'` keys. NULL or blank clears the value.
+- Returns `{success, config_key, is_set, updated_at}`, never the value, and errors without a DETAIL.
+- No S3 key accepts it. Nothing in v0.88.0 uses it yet; it ships so the next secret (the ALTCHA HMAC key) needs only a row.
+
+**`public.get_instance_secret_status() RETURNS TABLE (…)`**, for `/admin/config`. `SECURITY DEFINER`, same guard, raises `42501` for anyone else.
+- One row per secret key: `config_key`, `display_name` and `description` through `metadata.t()`, the group columns, `sort_order`, `managed_by`, `is_set`, `display_value` and `updated_at`.
+- `display_value` follows `secret_display`: NULL for `none`, `…` plus the last four characters for `last4`, the value for `full`.
+
+`set_instance_config()` is unchanged. For a secret key it reports `Unknown config key`, because RLS hides the row from the admin, and `/admin/config` never calls it for secret rows.
+
+#### How Values Arrive: the Worker Publishes
+
+At startup, after its S3 client is configured, the consolidated worker calls `metadata.publish_deployment_config($1)` with the five effective values from the table above, the ones it signs with itself. It passes them as one bind parameter, never as text in the SQL string.
+- **Retry.** While the function or table does not exist (`42883`, `42P01`), it retries every 30 seconds. In `docker-compose.prod.yml` the worker waits only for a healthy postgres, and in Kubernetes it may start before the PostgREST pod's migrations initContainer finishes. Any other error logs a WARNING and stops publishing until the next start; the worker keeps running.
+- **Startup only.** A periodic re-publish would let an old pod, still running during a rolling update, put the old key back after the new pod published the new one.
+- **Logging.** The worker logs `published s3 config: changed [s3_access_key_id s3_secret_access_key]`, `unchanged`, or the error's message. Values never appear in logs, and the function's errors carry none.
+- **Incomplete environment.** Without both the key id and the secret, it publishes nothing and logs one WARNING.
+
+No deployment path needs a compose or manifest change:
+
+| Path | Worker's database role | Where the S3 variables come from |
+|---|---|---|
+| Example stacks (`examples/*/docker-compose.yml`) | `postgres` (superuser) | Compose environment, local RustFS defaults (`minioadmin`) |
+| `docker-compose.prod.yml` | `postgres` (superuser) | `.env` |
+| `infrastructure/vps/` on DO managed Postgres | `${DB_USER}`, `doadmin` (CREATEROLE) | `.env` |
+| Kubernetes (`k8s/`) on DO managed Postgres | `DATABASE_URL` from `civic-os-secrets`, `doadmin` | `civic-os-secrets` (key pair) and `civic-os-config` (region, endpoints, bucket), already mapped in `consolidated-worker-deployment.yaml` |
+
+A deployment that runs the worker as a role that is neither superuser nor CREATEROLE must grant that role `EXECUTE` on `publish_deployment_config()` and loosen the guard for it. None does today. `scripts/migrate-production.sh` and `seed-instance-config.sh` are not involved.
+
+**Rotation**, for deployers. The deployment guide gets this runbook:
+1. Create a new access key at the provider.
+2. Put it in the deployment's secret store (`.env`, `civic-os-secrets`).
+3. Restart the consolidated worker. It publishes within seconds, and the browser and the worker now both use the new key.
+4. Wait at least the longest presigned URL lifetime (set by the signing design), so URLs signed with the old key expire.
+5. Revoke the old key.
+
+**After a database restore**, the database holds whatever credentials the backup had. Restart the worker afterwards so it publishes the current ones.
+
+#### `/admin/config`
+
+The page calls `get_instance_secret_status()` next to its existing `public.instance_config` read and merges the rows into their groups by `group_key` and `sort_order`:
+
+- **Deployment-managed rows** are read-only. Each shows `display_value` (or "Set" for `none`), a status badge ("Set" or "Missing", with `appContrastText`, and the text carries the state, not only the color), and when it last changed. The group's help text says the values come from the worker's S3 settings and are rotated by changing them and restarting the worker.
+- **Admin-managed rows** get a write-only input (`type="password"`, `autocomplete="new-password"`, never prefilled) with **Replace** and **Clear** buttons and the same badge. Save sends `set_instance_secret()`, and the field empties after each save.
+- The page's "leave sends unsaved drafts" rule does not apply to secret inputs: a half-typed secret is discarded, not sent.
+- New strings use `admin_config.secret.*` keys, translated into the six shipped locales; labels are associated with their inputs and the badge text is announced with the row.
+
+`ConfigService` does not change: it requests only the ten framework keys and never sees secret rows. The Deployment section's rule of never displaying `s3` values is unchanged; the File storage group shows them to admins from the database instead.
+
+#### What This Does Not Protect
+
+- **The access key id is in every presigned URL** (`X-Amz-Credential=<key id>/<date>/<region>/s3/aws4_request`). The requirement to keep it out of the API holds for config surfaces only; anyone who can open a file can read it. Only the secret is truly secret.
+- **Backups and dumps contain the secret** in `config_value`: DO's managed backups and any `pg_dump`. Dumps are already sensitive (PII) and are never committed; with this change they also hold a storage key. Excluding the table's data from a dump would drop all config, so the rule is to treat dumps as secrets.
+- **A shared bucket with a shared key.** Several instances share one DigitalOcean Spaces bucket. If they also share one key, each instance's database can sign a URL for any object in that bucket, other instances' files included. The worker already held that power; this design puts it in more places. Per-instance keys scoped to a bucket, or one bucket per instance, would close it. That is a follow-up for deployment practice, not for this design.
+- **Statement logging.** Values travel as bind parameters. With `log_statement = 'all'`, PostgreSQL logs parameter values, so production keeps statement logging off (the DO default). Failing statements log no parameters while `log_parameter_max_length_on_error` keeps its default of 0.
+- **Definer code written later.** Any definer function owned by the migration role can call `get_instance_secret()`. The rule stated in the interface (return only computed results, never let input pick the secret) is enforced by review and by the sentinel tests.
+
+#### Tests That Prove Secrets Do Not Leak
+
+Each test sets the secret keys to a unique sentinel (for example `LEAKCHECK-<random>`) and asserts that the sentinel appears in no response, message or log line.
+
+- **SQL** (`tests/functional/v0-88-0-instance-secrets-test.sh`, CI):
+  - RLS: as `web_anon`, `authenticated` and an admin JWT, `metadata.instance_config` and `public.instance_config` return no secret rows.
+  - `get_config()` returns NULL for every secret key as each API role, as the owner and inside a definer function.
+  - Writes refused: an admin `UPDATE … WHERE config_key = 's3_secret_access_key'` affects 0 rows; `UPDATE (is_secret)` is denied; `set_instance_config()` refuses secret keys; `set_instance_secret()` refuses deployment-managed keys.
+  - `has_function_privilege` is false for `web_anon` and `authenticated` on `s3_signing_config()`, `get_instance_secret()` and `publish_deployment_config()`.
+  - `publish_deployment_config()` is refused with JWT claims set, and as `authenticator` (`SET LOCAL SESSION AUTHORIZATION authenticator`, with `request.jwt.claims` set to `'{}'`, never `''`; `postgres` with `SET ROLE` would pass the guard).
+  - `publish_deployment_config()` is all or nothing on one bad value; a re-publish of unchanged values leaves `updated_at` unchanged; it refuses `admin`-managed and non-secret keys.
+  - For every rejected write, `SQLERRM`, `PG_EXCEPTION_DETAIL` and `PG_EXCEPTION_HINT` do not contain the sentinel.
+  - `get_instance_secret_status()` follows each `secret_display` policy, never returns the secret, and raises `42501` for a non-admin.
+  - The CHECK constraints hold, and `s3_signing_config()` returns no rows until all five values are set.
+- **PostgREST** (same script or `tests/functional/postgrest-api-regression-test.sh`, with real Keycloak tokens for anonymous, `testuser` and `testadmin`):
+  - Response bodies of `GET /instance_config`, `GET /instance_config?config_key=eq.s3_secret_access_key`, `POST /rpc/get_config`, `POST /rpc/get_instance_secret_status` and `PATCH /instance_config` never contain the sentinel.
+  - The `PATCH` changes nothing.
+  - `metadata` functions are not exposed: `/rpc/get_instance_secret` and `/rpc/publish_deployment_config` return 404, and neither appears in the OpenAPI document.
+- **Worker** (`services/consolidated-worker-go`):
+  - `instance_config_test.go`: the snapshot query excludes secret rows, and `{{.Config.s3_secret_access_key}}` renders empty in subject, HTML and text templates.
+  - Publisher tests: the effective values (defaults and endpoint fallback); retry on `42883` and `42P01`; no publish and one WARNING on an incomplete environment; log lines carry key names only.
+- **Browser** (alongside `v0-79-0-instance-config-integrator-keys-test.cjs`):
+  - On `/admin/config`, the network responses and `localStorage` (`civic-os-config`) never contain the sentinel.
+  - The File storage group renders read-only with `…` plus four characters and Set or Missing badges.
+  - An admin-managed test key saves write-only and comes back as "Set", never as its value.
+- **MCP**: the MCP server reaches the database only through PostgREST with the caller's JWT, and `instance_config` is not an entity, so the PostgREST tests cover it. No separate MCP test.
+- **Nightly**: the full-stack runs on the examples check that the worker published (every `is_set` is true as `testadmin`) and that a signed URL from `public.files` downloads, which is the signing design's test.
+
+#### Build Outline
+
+- **Migration** `v0-88-0-instance-secrets` (core), ahead of the signing migration:
+  - columns, CHECKs and policies (drop and re-create the three);
+  - `get_config()` replaced;
+  - `public.instance_config` re-created with `security_invoker = true` and the v0.80.2 labels;
+  - the normalize trigger function replaced;
+  - the `file_storage` group and five keys, with translations;
+  - the five functions, each with `REVOKE EXECUTE … FROM PUBLIC`.
+  No `create_schema_decision()` call, since framework migrations log no ADRs.
+- **Translations migration** for `admin_config.secret.*`.
+- **Worker**: the snapshot filter and the publisher.
+- **Frontend**: the `/admin/config` secret rows.
+- **Docs**: `INTEGRATOR_GUIDE.md` (Instance Configuration: secret keys and `get_instance_secret()` for integrator definer code), `docs/deployment/PRODUCTION.md` (rotation runbook) and `CLAUDE.md`. Also replace the GUC bridge and the `get_config()` credential reads in `SIGNED_FILE_URLS_DESIGN.md` and `ANONYMOUS_PUBLIC_SUBMIT_DESIGN.md` with this interface.
+
 ---
 
 ## Part 2: Setup Task Checklist
@@ -614,6 +839,9 @@ Changing `config_type` does not re-check `config_value` or `default_value`; assi
 ### Config Labels Are Translatable
 **(revised in v0.80.2, issue #48: the first build left them English-only as a deliberate deferral)** The `public.instance_config` view returns `display_name`, `description`, `group_display_name` and `group_description` through `metadata.t()`, with the column value as the fallback, so the page shell and its labels now follow the same locale. Source types and keys: `instance_config_group` with `<group_key>.display_name` / `<group_key>.description`, and `instance_config` with `<config_key>.display_name` / `<config_key>.description`. The stored columns stay English, so English needs no rows and an untranslated key shows its column text. The migration seeds es/ar/fr/de/ps for the ten framework keys and four groups with `ON CONFLICT DO NOTHING`; integrator keys use the same two source types. The view keeps `security_invoker = true`, which `CREATE OR REPLACE` would otherwise reset. The frontend never matched on label text, so it needed no change.
 
+### Secret Keys Live in instance_config, Published by the Worker
+**(designed for v0.88.0)** Secrets that SQL itself must use (first the S3 signing key) are instance_config rows with `is_secret`. They have one catalog with every other key, and RLS plus explicit filters in `get_config()`, the view and the worker's snapshot keep the value from every API surface. Reads go through owner-only functions. The S3 values are deployment-managed: the consolidated worker publishes the credentials it signs with at startup, so the database and the worker cannot disagree, and rotation means restarting the worker, as it already did. See [Secret Keys](#secret-keys-designed-for-v0880).
+
 ### Read-Only Deployment Section (Tier 1 Visibility)
 Tier 1 env vars that affect admin-visible behavior (PostgREST URL excluded, but `PWA_ENABLED`, `FAVICON_URL`, etc.) are surfaced as a read-only "Deployment" section on `/admin/config`. This gives admins the vocabulary to communicate with their deployer ("My PWA is disabled, can you enable it?") without exposing infrastructure topology or API keys.
 
@@ -684,6 +912,13 @@ INSERT INTO metadata.setup_tasks
 - Strings for the `/admin/config` page and its sidebar link in all six shipped locales
 
 Seeding is not a migration: `docker/migrations/seed-instance-config.sh` runs after each deploy and fills only NULL values.
+
+### `v0-88-0-instance-secrets` (designed, not built)
+- `is_secret`, `managed_by`, `secret_display` columns and their CHECKs on `metadata.instance_config`; the three policies re-created with `NOT is_secret`
+- `get_config()` excludes secret keys; `public.instance_config` re-created (`security_invoker = true`, translated labels, value masked for secret rows); normalize trigger gains the S3 key rules
+- `file_storage` group and the five `s3_*` keys, with translations
+- `metadata.s3_signing_config()`, `metadata.get_instance_secret()`, `metadata.publish_deployment_config()`, `public.set_instance_secret()`, `public.get_instance_secret_status()`
+- See [Secret Keys](#secret-keys-designed-for-v0880) (Build Outline)
 
 ### `v0-XX-1-setup-wizard`
 - `metadata.setup_task_groups` + `metadata.setup_tasks` + `metadata.setup_task_completions` tables
