@@ -112,7 +112,7 @@ describe('ImportExportService', () => {
             const result = service.validateFileSize(file);
 
             expect(result.valid).toBe(true);
-            expect(result.error).toBeUndefined();
+            expect(result.errorKey).toBeUndefined();
         });
 
         it('should accept files exactly at 10MB limit', () => {
@@ -131,9 +131,8 @@ describe('ImportExportService', () => {
             const result = service.validateFileSize(file);
 
             expect(result.valid).toBe(false);
-            expect(result.error).toBeDefined();
-            expect(result.error).toContain('15.0MB');
-            expect(result.error).toContain('10MB');
+            expect(result.errorKey).toBe('import_modal.error_file_too_large_size');
+            expect(result.errorParams).toEqual({ size: '15.0', max: 10 });
         });
 
         it('should reject very large files', () => {
@@ -143,7 +142,7 @@ describe('ImportExportService', () => {
             const result = service.validateFileSize(file);
 
             expect(result.valid).toBe(false);
-            expect(result.error).toContain('100.0MB');
+            expect(result.errorParams).toEqual({ size: '100.0', max: 10 });
         });
 
         it('should handle zero-byte files', () => {

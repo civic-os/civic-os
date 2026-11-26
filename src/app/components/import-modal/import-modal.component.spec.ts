@@ -27,6 +27,7 @@ import { SchemaEntityTable, SchemaEntityProperty, EntityPropertyType, Validation
 import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
 import { TranslationService } from '../../services/translation.service';
 import { EN_TRANSLATIONS } from '../../i18n/en.translations';
+import { readFileSync } from 'node:fs';
 
 describe('ImportModalComponent', () => {
     let component: ImportModalComponent;
@@ -289,12 +290,13 @@ describe('ImportModalComponent', () => {
 
             mockImportExportService.validateFileSize.mockReturnValue({
                 valid: false,
-                error: 'File too large (15.0MB). Maximum is 10MB.'
+                errorKey: 'import_modal.error_file_too_large_size',
+                errorParams: { size: '15.0', max: 10 }
             });
 
             await (component as any).handleFile(file);
 
-            expect(component.errorMessage()).toContain('File too large');
+            expect(component.errorMessage()).toBe('File too large (15.0MB). Maximum size is 10MB. Please split your data into smaller batches.');
             expect(component.currentStep()).toBe('choose');
         });
 
@@ -601,6 +603,87 @@ describe('ImportModalComponent', () => {
             expect(component.validRowCount()).toBe(2);
             expect(component.currentStep()).toBe('results');
             expect(mockWorker.terminate).toHaveBeenCalled();
+        });
+
+        describe('worker error messages (issue #170)', () => {
+            const complete = (allErrors: any[]) => ({
+                data: {
+                    type: 'complete',
+                    results: {
+                        validRows: [],
+                        errorSummary: { totalErrors: allErrors.length, errorsByColumn: new Map(), allErrors }
+                    }
+                }
+            });
+
+            it('should translate keyed worker errors with their parameters and group by translated type', () => {
+                (component as any).handleWorkerMessage(complete([
+                    { row: 3, column: 'Title', value: 'ab', errorKey: 'import_validation.err_min_length', errorParams: { n: 5 }, errorTypeKey: 'import_validation.type_text_length' },
+                    { row: 4, column: 'Title', value: 'a', errorKey: 'import_validation.err_min_length', errorParams: { n: 5 }, errorTypeKey: 'import_validation.type_text_length' },
+                    { row: 5, column: 'Client', value: 'zed', errorKey: 'import_validation.err_fk_not_found', errorParams: { value: 'zed', column: 'Client' }, errorTypeKey: 'import_validation.type_fk_not_found', errorTypeParams: { column: 'Client' } }
+                ]));
+
+                const summary = component.errorSummary()!;
+                expect(summary.allErrors[0].error).toBe('Must be at least 5 characters');
+                expect(summary.allErrors[0].errorType).toBe('Text length error');
+                expect(summary.allErrors[2].error).toBe('"zed" not found in Client');
+                expect(summary.allErrors[2].errorType).toBe('Client not found');
+                expect(summary.errorsByType.get('Text length error')).toBe(2);
+                expect(summary.errorsByType.get('Client not found')).toBe(1);
+                expect(summary.errorsByColumn.get('Title')).toBe(2);
+                expect(summary.firstNErrors).toHaveLength(3);
+                expect(summary.totalErrors).toBe(3);
+            });
+
+            it('should render a worker error in the active locale', () => {
+                const german: Record<string, string> = {
+                    'import_validation.err_min_length': 'Muss mindestens {{n}} Zeichen lang sein',
+                    'import_validation.type_text_length': 'Fehler bei der Textlänge'
+                };
+                mockTranslationService.get.mockImplementation((key: string, params?: Record<string, string | number>) =>
+                    (german[key] ?? key).replace(/\{\{(\w+)\}\}/g, (m: string, k: string) => params?.[k] !== undefined ? String(params[k]) : m));
+
+                (component as any).handleWorkerMessage(complete([
+                    { row: 3, column: 'Title', value: 'ab', errorKey: 'import_validation.err_min_length', errorParams: { n: 5 }, errorTypeKey: 'import_validation.type_text_length' }
+                ]));
+                fixture.detectChanges();
+
+                const html = (fixture.nativeElement as HTMLElement).textContent!;
+                expect(html).toContain('Muss mindestens 5 Zeichen lang sein');
+                expect(html).not.toContain('Must be at least');
+                expect(component.errorSummary()!.errorsByType.get('Fehler bei der Textlänge')).toBe(1);
+            });
+
+            it('should show a validation rule message verbatim without translating it', () => {
+                mockTranslationService.get.mockClear();
+
+                (component as any).handleWorkerMessage(complete([
+                    { row: 3, column: 'Title', value: 'ab', error: 'Titles need five letters', errorTypeKey: 'import_validation.type_text_length' }
+                ]));
+
+                expect(component.errorSummary()!.allErrors[0].error).toBe('Titles need five letters');
+                const keys = mockTranslationService.get.mock.calls.map((c: any[]) => c[0]);
+                expect(keys).toEqual(['import_validation.type_text_length']);
+            });
+
+            it('should carry the error type of an Error thrown in the worker as a translated key', () => {
+                (component as any).handleWorkerMessage(complete([
+                    { row: 3, column: 'Slot', value: 'x - y', error: 'boom', errorTypeKey: 'import_validation.type_timeslot_error' }
+                ]));
+
+                const [err] = component.errorSummary()!.allErrors;
+                expect(err.error).toBe('boom');
+                expect(err.errorType).toBe('TimeSlot error');
+            });
+
+            it('should keep every key the worker can emit in the bundled English strings', () => {
+                const src = readFileSync('src/app/workers/import-validation.worker.ts', 'utf8');
+                const used = [...src.matchAll(/(?:msg|typeMsg|ruleMsg|thrownMsg)\((?:[^,()]+, )?'((?:err|type)_\w+)'/g)].map(m => 'import_validation.' + m[1]);
+                expect(used.length).toBeGreaterThan(40);
+                for (const key of used) {
+                    expect(EN_TRANSLATIONS[key], key).toBeTruthy();
+                }
+            });
         });
 
         it('should handle worker cancelled message', () => {

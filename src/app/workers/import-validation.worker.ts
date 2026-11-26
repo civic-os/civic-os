@@ -20,8 +20,9 @@
 import * as chrono from 'chrono-node';
 import {
   EntityPropertyType, interpretNameMatches, normalizeNameKey,
-  type ImportError, type NameMatch, type ValidationCancelled, type ValidationErrorSummary, type ValidationProgress,
+  type NameMatch, type ValidationCancelled, type ValidationProgress,
 } from '@civic-os/core';
+import type { MessageParams, RawErrorSummary, RawImportError } from './import-validation.messages';
 
 // EntityPropertyType comes from @civic-os/core, the only copy. The core is
 // framework-free (no Angular, rxjs or DOM), so the worker bundle stays free of
@@ -89,8 +90,7 @@ function validateData(params: any): void {
   const { rows, properties, fkLookups, entityKey } = params;
 
   const validRows: any[] = [];
-  const allErrors: ImportError[] = [];
-  const errorsByType = new Map<string, number>();
+  const allErrors: RawImportError[] = [];
   const errorsByColumn = new Map<string, number>();
 
   // Identify M:M properties eligible for import (pure junctions only)
@@ -113,7 +113,7 @@ function validateData(params: any): void {
 
     const row = rows[i];
     const rowNumber = i + 3; // +3 for 1-indexed, hint row, and header row
-    const rowErrors: ImportError[] = [];
+    const rowErrors: RawImportError[] = [];
 
     const validatedRow: any = {};
     const rowM2mData: any = {};
@@ -151,8 +151,8 @@ function validateData(params: any): void {
             row: rowNumber,
             column: displayName,
             value: value,
-            error: 'FK lookup not available for ' + targetTable,
-            errorType: 'System error'
+            ...msg('err_fk_lookup_unavailable_for', { table: targetTable }),
+            ...typeMsg('type_system')
           });
           continue;
         }
@@ -176,8 +176,8 @@ function validateData(params: any): void {
               row: rowNumber,
               column: displayName,
               value: singleValue,
-              error: `"${singleValue}" not found in ${displayName}`,
-              errorType: `${displayName} not found`
+              ...msg('err_fk_not_found', { value: singleValue, column: displayName }),
+              ...typeMsg('type_fk_not_found', { column: displayName })
             });
             hasInvalidValue = true;
           } else if (match.kind === 'ambiguous') {
@@ -185,8 +185,8 @@ function validateData(params: any): void {
               row: rowNumber,
               column: displayName,
               value: singleValue,
-              error: ambiguousNameMessage(singleValue, displayName, match.candidates),
-              errorType: `Duplicate ${displayName}`
+              ...msg('err_fk_ambiguous', { value: singleValue, column: displayName, ids: candidateIds(match.candidates) }),
+              ...typeMsg('type_fk_duplicate', { column: displayName })
             });
             hasInvalidValue = true;
           } else {
@@ -233,8 +233,8 @@ function validateData(params: any): void {
               row: rowNumber,
               column: startCol,
               value: '',
-              error: 'This field is required',
-              errorType: 'Required field missing'
+              ...msg('err_required'),
+              ...typeMsg('type_required')
             });
           } else {
             validatedRow[prop.column_name] = null;
@@ -248,8 +248,8 @@ function validateData(params: any): void {
             row: rowNumber,
             column: startEmpty ? startCol : endCol,
             value: startEmpty ? startValue : endValue,
-            error: 'Both start and end times are required for a time slot',
-            errorType: 'TimeSlot incomplete'
+            ...msg('err_timeslot_incomplete'),
+            ...typeMsg('type_timeslot_incomplete')
           });
           continue;
         }
@@ -265,8 +265,8 @@ function validateData(params: any): void {
             row: rowNumber,
             column: displayName,
             value: `${startValue} - ${endValue}`,
-            error: error instanceof Error ? error.message : 'TimeSlot validation error',
-            errorType: 'TimeSlot error'
+            ...thrownMsg(error, 'err_timeslot_generic'),
+            ...typeMsg('type_timeslot_error')
           });
         }
         continue;
@@ -281,8 +281,8 @@ function validateData(params: any): void {
             row: rowNumber,
             column: displayName,
             value: value,
-            error: 'This field is required',
-            errorType: 'Required field missing'
+            ...msg('err_required'),
+            ...typeMsg('type_required')
           });
         } else {
           // Add null value to ensure consistent keys across all rows
@@ -303,8 +303,8 @@ function validateData(params: any): void {
           row: rowNumber,
           column: displayName,
           value: value,
-          error: error instanceof Error ? error.message : 'Validation error',
-          errorType: 'Validation error'
+          ...thrownMsg(error, 'err_validation_generic'),
+          ...typeMsg('type_validation_error')
         });
       }
     }
@@ -321,7 +321,6 @@ function validateData(params: any): void {
 
       // Track error stats
       rowErrors.forEach(err => {
-        errorsByType.set(err.errorType, (errorsByType.get(err.errorType) || 0) + 1);
         errorsByColumn.set(err.column, (errorsByColumn.get(err.column) || 0) + 1);
       });
     }
@@ -342,11 +341,9 @@ function validateData(params: any): void {
   }
 
   // Build summary
-  const errorSummary: ValidationErrorSummary = {
+  const errorSummary: RawErrorSummary = {
     totalErrors: allErrors.length,
-    errorsByType: errorsByType,
     errorsByColumn: errorsByColumn,
-    firstNErrors: allErrors.slice(0, 100),
     allErrors: allErrors
   };
 
@@ -382,7 +379,7 @@ function validateProperty(
   fkLookups: any,
   rowNumber: number,
   displayName: string,
-  rowErrors: ImportError[]
+  rowErrors: RawImportError[]
 ): any {
   switch (prop.type) {
     case EntityPropertyType.TextShort:
@@ -430,7 +427,7 @@ function validateProperty(
   }
 }
 
-function validateText(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+function validateText(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim();
 
   // Validation rules
@@ -441,8 +438,8 @@ function validateText(prop: any, value: any, rowNumber: number, displayName: str
           row: rowNumber,
           column: displayName,
           value: value,
-          error: rule.message || `Must be at least ${rule.value} characters`,
-          errorType: 'Text length error'
+          ...ruleMsg(rule.message, 'err_min_length', { n: rule.value }),
+          ...typeMsg('type_text_length')
         });
       }
       if (rule.type === 'maxLength' && str.length > parseInt(rule.value)) {
@@ -450,8 +447,8 @@ function validateText(prop: any, value: any, rowNumber: number, displayName: str
           row: rowNumber,
           column: displayName,
           value: value,
-          error: rule.message || `Must be at most ${rule.value} characters`,
-          errorType: 'Text length error'
+          ...ruleMsg(rule.message, 'err_max_length', { n: rule.value }),
+          ...typeMsg('type_text_length')
         });
       }
       if (rule.type === 'pattern' && !new RegExp(rule.value).test(str)) {
@@ -459,8 +456,8 @@ function validateText(prop: any, value: any, rowNumber: number, displayName: str
           row: rowNumber,
           column: displayName,
           value: value,
-          error: rule.message || 'Invalid format',
-          errorType: 'Pattern mismatch'
+          ...ruleMsg(rule.message, 'err_invalid_format'),
+          ...typeMsg('type_pattern')
         });
       }
     }
@@ -469,7 +466,7 @@ function validateText(prop: any, value: any, rowNumber: number, displayName: str
   return str;
 }
 
-function validateInteger(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): number {
+function validateInteger(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): number {
   const num = parseInt(String(value));
 
   if (isNaN(num)) {
@@ -477,8 +474,8 @@ function validateInteger(prop: any, value: any, rowNumber: number, displayName: 
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Must be a valid number',
-      errorType: 'Invalid number'
+      ...msg('err_number'),
+      ...typeMsg('type_number')
     });
     return 0;
   }
@@ -491,8 +488,8 @@ function validateInteger(prop: any, value: any, rowNumber: number, displayName: 
           row: rowNumber,
           column: displayName,
           value: value,
-          error: rule.message || `Must be at least ${rule.value}`,
-          errorType: 'Number range error'
+          ...ruleMsg(rule.message, 'err_min_value', { n: rule.value }),
+          ...typeMsg('type_number_range')
         });
       }
       if (rule.type === 'max' && num > parseFloat(rule.value)) {
@@ -500,8 +497,8 @@ function validateInteger(prop: any, value: any, rowNumber: number, displayName: 
           row: rowNumber,
           column: displayName,
           value: value,
-          error: rule.message || `Must be at most ${rule.value}`,
-          errorType: 'Number range error'
+          ...ruleMsg(rule.message, 'err_max_value', { n: rule.value }),
+          ...typeMsg('type_number_range')
         });
       }
     }
@@ -510,7 +507,7 @@ function validateInteger(prop: any, value: any, rowNumber: number, displayName: 
   return num;
 }
 
-function validateMoney(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): number {
+function validateMoney(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): number {
   const num = parseFloat(String(value).replace(/[^0-9.-]/g, ''));
 
   if (isNaN(num)) {
@@ -518,8 +515,8 @@ function validateMoney(prop: any, value: any, rowNumber: number, displayName: st
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Must be a valid monetary value',
-      errorType: 'Invalid money'
+      ...msg('err_money'),
+      ...typeMsg('type_money')
     });
     return 0;
   }
@@ -527,7 +524,7 @@ function validateMoney(prop: any, value: any, rowNumber: number, displayName: st
   return num;
 }
 
-function validateBoolean(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): boolean {
+function validateBoolean(value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): boolean {
   const str = String(value).toLowerCase().trim();
 
   if (['true', 'yes', '1', 'y'].includes(str)) return true;
@@ -537,8 +534,8 @@ function validateBoolean(value: any, rowNumber: number, displayName: string, row
     row: rowNumber,
     column: displayName,
     value: value,
-    error: 'Must be true/false or yes/no',
-    errorType: 'Invalid boolean'
+    ...msg('err_boolean'),
+    ...typeMsg('type_boolean')
   });
   return false;
 }
@@ -646,7 +643,7 @@ function parseFlexibleDate(input: string): Date | null {
   return null;
 }
 
-function validateDateTime(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+function validateDateTime(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim();
 
   // Try flexible parsing with chrono-node
@@ -656,8 +653,8 @@ function validateDateTime(prop: any, value: any, rowNumber: number, displayName:
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Could not parse date/time. Examples: "2025-11-30 20:00", "11/30/25 8pm", "Nov 30, 2025 8:00 PM"',
-      errorType: 'Invalid datetime'
+      ...msg('err_datetime'),
+      ...typeMsg('type_datetime')
     });
     return str;
   }
@@ -700,7 +697,7 @@ function validateTimeSlot(
   endValue: any,
   rowNumber: number,
   displayName: string,
-  rowErrors: ImportError[]
+  rowErrors: RawImportError[]
 ): string | undefined {
   const startStr = String(startValue).trim();
   const endStr = String(endValue).trim();
@@ -715,8 +712,8 @@ function validateTimeSlot(
       row: rowNumber,
       column: displayName + ' (Start)',
       value: startValue,
-      error: 'Could not parse start date/time. Examples: "2025-11-30 20:00", "11/30/25 8pm", "Nov 30, 2025 8:00 PM"',
-      errorType: 'Invalid datetime'
+      ...msg('err_datetime_start'),
+      ...typeMsg('type_datetime')
     });
     return undefined;
   }
@@ -727,8 +724,8 @@ function validateTimeSlot(
       row: rowNumber,
       column: displayName + ' (End)',
       value: endValue,
-      error: 'Could not parse end date/time. Examples: "2025-11-30 20:00", "11/30/25 8pm", "Nov 30, 2025 8:00 PM"',
-      errorType: 'Invalid datetime'
+      ...msg('err_datetime_end'),
+      ...typeMsg('type_datetime')
     });
     return undefined;
   }
@@ -739,8 +736,8 @@ function validateTimeSlot(
       row: rowNumber,
       column: displayName + ' (End)',
       value: endValue,
-      error: 'End time must be after start time',
-      errorType: 'TimeSlot range error'
+      ...msg('err_timeslot_range'),
+      ...typeMsg('type_timeslot_range')
     });
     return undefined;
   }
@@ -788,7 +785,7 @@ function validateForeignKey(
   fkLookups: any,
   rowNumber: number,
   displayName: string,
-  rowErrors: ImportError[]
+  rowErrors: RawImportError[]
 ): any {
   // Determine lookup table name based on property type:
   // - User: always 'civic_os_users'
@@ -812,8 +809,8 @@ function validateForeignKey(
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'FK lookup not available',
-      errorType: 'System error'
+      ...msg('err_fk_lookup_unavailable'),
+      ...typeMsg('type_system')
     });
     return null;
   }
@@ -831,8 +828,8 @@ function validateForeignKey(
       row: rowNumber,
       column: displayName,
       value: value,
-      error: `"${value}" not found in ${displayName}`,
-      errorType: `${displayName} not found`
+      ...msg('err_fk_not_found', { value, column: displayName }),
+      ...typeMsg('type_fk_not_found', { column: displayName })
     });
     return null;
   }
@@ -842,8 +839,8 @@ function validateForeignKey(
       row: rowNumber,
       column: displayName,
       value: value,
-      error: ambiguousNameMessage(value, displayName, match.candidates),
-      errorType: `Duplicate ${displayName}`
+      ...msg('err_fk_ambiguous', { value, column: displayName, ids: candidateIds(match.candidates) }),
+      ...typeMsg('type_fk_duplicate', { column: displayName })
     });
     return null;
   }
@@ -866,12 +863,37 @@ function matchLookupName(lookup: any, value: any): NameMatch<any> {
   );
 }
 
-/** The duplicate-name message: the candidate ids let the user pick one (N-06). */
-function ambiguousNameMessage(value: any, displayName: string, candidates: Array<{ id: any }>): string {
-  return `"${value}" matches multiple ${displayName} entries (IDs: ${candidates.map(c => c.id).join(', ')}). Use ID instead.`;
+/** The candidate ids of an ambiguous name, as the comma-separated list its message shows (N-06). */
+function candidateIds(candidates: Array<{ id: any }>): string {
+  return candidates.map(c => c.id).join(', ');
 }
 
-function validateGeoPoint(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+// Message helpers. Every message and error type is a key under `import_validation.` that the
+// import modal translates (issue #170); spread the result into the error object.
+
+const KEY_PREFIX = 'import_validation.';
+
+/** The translated message `key` with `params`. */
+function msg(key: string, params?: MessageParams): Pick<RawImportError, 'errorKey' | 'errorParams'> {
+  return params ? { errorKey: KEY_PREFIX + key, errorParams: params } : { errorKey: KEY_PREFIX + key };
+}
+
+/** The translated error category `key` with `params`. */
+function typeMsg(key: string, params?: MessageParams): Pick<RawImportError, 'errorTypeKey' | 'errorTypeParams'> {
+  return params ? { errorTypeKey: KEY_PREFIX + key, errorTypeParams: params } : { errorTypeKey: KEY_PREFIX + key };
+}
+
+/** A validation rule's own message, which is instance content and shown verbatim, else the default `key`. */
+function ruleMsg(ruleMessage: string | undefined, key: string, params?: MessageParams): Pick<RawImportError, 'error' | 'errorKey' | 'errorParams'> {
+  return ruleMessage ? { error: ruleMessage } : msg(key, params);
+}
+
+/** The message of a thrown Error as given, else the default `key`. */
+function thrownMsg(thrown: unknown, key: string): Pick<RawImportError, 'error' | 'errorKey' | 'errorParams'> {
+  return thrown instanceof Error ? { error: thrown.message } : msg(key);
+}
+
+function validateGeoPoint(value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim();
 
   // Check if already in WKT format
@@ -886,8 +908,8 @@ function validateGeoPoint(value: any, rowNumber: number, displayName: string, ro
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Must be in format: latitude,longitude (e.g., 42.36,-71.06)',
-      errorType: 'Invalid geopoint'
+      ...msg('err_geopoint_format'),
+      ...typeMsg('type_geopoint')
     });
     return str;
   }
@@ -900,8 +922,8 @@ function validateGeoPoint(value: any, rowNumber: number, displayName: string, ro
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Latitude and longitude must be valid numbers',
-      errorType: 'Invalid geopoint'
+      ...msg('err_geopoint_numbers'),
+      ...typeMsg('type_geopoint')
     });
     return str;
   }
@@ -911,8 +933,8 @@ function validateGeoPoint(value: any, rowNumber: number, displayName: string, ro
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Latitude must be between -90 and 90, longitude between -180 and 180',
-      errorType: 'Invalid geopoint'
+      ...msg('err_geopoint_range'),
+      ...typeMsg('type_geopoint')
     });
     return str;
   }
@@ -921,7 +943,7 @@ function validateGeoPoint(value: any, rowNumber: number, displayName: string, ro
   return `SRID=4326;POINT(${lng} ${lat})`;
 }
 
-function validateGeoPolygon(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+function validateGeoPolygon(value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim();
 
   // Check if already in WKT format (with or without SRID prefix)
@@ -934,14 +956,14 @@ function validateGeoPolygon(value: any, rowNumber: number, displayName: string, 
 
     // Validate minimum points (triangle + closing = 4)
     if (coords.length < 4) {
-      rowErrors.push({ row: rowNumber, column: displayName, value, error: 'Polygon must have at least 4 points (3 vertices + closing point)', errorType: 'Invalid geopolygon' });
+      rowErrors.push({ row: rowNumber, column: displayName, value, ...msg('err_geopolygon_points'), ...typeMsg('type_geopolygon') });
       return str;
     }
 
     // Validate all coordinates in WGS84 bounds
     for (const c of coords) {
       if (isNaN(c.lat) || isNaN(c.lng) || c.lat < -90 || c.lat > 90 || c.lng < -180 || c.lng > 180) {
-        rowErrors.push({ row: rowNumber, column: displayName, value, error: 'All coordinates must be valid (lat -90..90, lng -180..180)', errorType: 'Invalid geopolygon' });
+        rowErrors.push({ row: rowNumber, column: displayName, value, ...msg('err_geopolygon_coords'), ...typeMsg('type_geopolygon') });
         return str;
       }
     }
@@ -962,13 +984,13 @@ function validateGeoPolygon(value: any, rowNumber: number, displayName: string, 
     try {
       const geojson = JSON.parse(str);
       if (geojson.type !== 'Polygon' || !Array.isArray(geojson.coordinates) || !Array.isArray(geojson.coordinates[0])) {
-        rowErrors.push({ row: rowNumber, column: displayName, value, error: 'GeoJSON must be a Polygon type with coordinates array', errorType: 'Invalid geopolygon' });
+        rowErrors.push({ row: rowNumber, column: displayName, value, ...msg('err_geopolygon_geojson_type'), ...typeMsg('type_geopolygon') });
         return str;
       }
 
       const ring = geojson.coordinates[0];
       if (ring.length < 4) {
-        rowErrors.push({ row: rowNumber, column: displayName, value, error: 'Polygon must have at least 4 coordinate pairs', errorType: 'Invalid geopolygon' });
+        rowErrors.push({ row: rowNumber, column: displayName, value, ...msg('err_geopolygon_pairs'), ...typeMsg('type_geopolygon') });
         return str;
       }
 
@@ -978,7 +1000,7 @@ function validateGeoPolygon(value: any, rowNumber: number, displayName: string, 
         const lng = coord[0];
         const lat = coord[1];
         if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-          rowErrors.push({ row: rowNumber, column: displayName, value, error: 'All coordinates must be valid (lat -90..90, lng -180..180)', errorType: 'Invalid geopolygon' });
+          rowErrors.push({ row: rowNumber, column: displayName, value, ...msg('err_geopolygon_coords'), ...typeMsg('type_geopolygon') });
           return str;
         }
         wktPairs.push(`${lng} ${lat}`);
@@ -986,7 +1008,7 @@ function validateGeoPolygon(value: any, rowNumber: number, displayName: string, 
 
       return `SRID=4326;POLYGON((${wktPairs.join(', ')}))`;
     } catch {
-      rowErrors.push({ row: rowNumber, column: displayName, value, error: 'Invalid GeoJSON format', errorType: 'Invalid geopolygon' });
+      rowErrors.push({ row: rowNumber, column: displayName, value, ...msg('err_geopolygon_invalid_geojson'), ...typeMsg('type_geopolygon') });
       return str;
     }
   }
@@ -995,13 +1017,13 @@ function validateGeoPolygon(value: any, rowNumber: number, displayName: string, 
     row: rowNumber,
     column: displayName,
     value,
-    error: 'Must be WKT POLYGON((...)) or GeoJSON {"type":"Polygon","coordinates":[...]}',
-    errorType: 'Invalid geopolygon'
+    ...msg('err_geopolygon_format'),
+    ...typeMsg('type_geopolygon')
   });
   return str;
 }
 
-function validateColor(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+function validateColor(value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim().toUpperCase();
 
   // Check hex color format
@@ -1010,8 +1032,8 @@ function validateColor(value: any, rowNumber: number, displayName: string, rowEr
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Must be in format #RRGGBB (e.g., #3B82F6)',
-      errorType: 'Invalid color'
+      ...msg('err_color'),
+      ...typeMsg('type_color')
     });
     return str;
   }
@@ -1033,7 +1055,7 @@ function validateColor(value: any, rowNumber: number, displayName: string, rowEr
  * @param rowErrors Array to collect validation errors
  * @returns Validated email address (trimmed, lowercase)
  */
-function validateEmail(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+function validateEmail(value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim().toLowerCase();
 
   // RFC 5322 simplified email validation (matches PostgreSQL email_address domain)
@@ -1044,8 +1066,8 @@ function validateEmail(value: any, rowNumber: number, displayName: string, rowEr
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Must be a valid email address (e.g., user@example.com)',
-      errorType: 'Invalid email'
+      ...msg('err_email'),
+      ...typeMsg('type_email')
     });
     return str;
   }
@@ -1068,7 +1090,7 @@ function validateEmail(value: any, rowNumber: number, displayName: string, rowEr
  * @param rowErrors Array to collect validation errors
  * @returns 10-digit phone number string (digits only)
  */
-function validateTelephone(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+function validateTelephone(value: any, rowNumber: number, displayName: string, rowErrors: RawImportError[]): string {
   const str = String(value).trim();
 
   // Strip all non-digit characters
@@ -1080,8 +1102,8 @@ function validateTelephone(value: any, rowNumber: number, displayName: string, r
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Must be a 10-digit US phone number (e.g., 5551234567 or (555) 123-4567)',
-      errorType: 'Invalid phone number'
+      ...msg('err_phone'),
+      ...typeMsg('type_phone')
     });
     return digits;
   }
