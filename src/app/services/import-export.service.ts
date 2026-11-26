@@ -801,13 +801,15 @@ export class ImportExportService {
   }
 
   /**
-   * Check file size before parsing.
+   * Check file size before parsing. A failure returns a translation key with parameters
+   * (issue #170) for the caller to translate.
    */
-  validateFileSize(file: File): { valid: boolean; error?: string } {
+  validateFileSize(file: File): { valid: boolean; errorKey?: string; errorParams?: Record<string, string | number> } {
     if (file.size > this.MAX_FILE_SIZE) {
       return {
         valid: false,
-        error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB. Please split your data into smaller batches.`
+        errorKey: 'import_modal.error_file_too_large_size',
+        errorParams: { size: (file.size / 1024 / 1024).toFixed(1), max: this.MAX_FILE_SIZE / 1024 / 1024 }
       };
     }
     return { valid: true };

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -29,6 +29,7 @@ import {
 
 import { forkJoin } from 'rxjs';
 import { SchemaEntityTable, SchemaEntityProperty, ValidationErrorSummary, ImportError } from '../../interfaces/entity';
+import type { RawErrorSummary } from '../../workers/import-validation.messages';
 import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
 import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
@@ -197,7 +198,7 @@ export class ImportModalComponent implements OnDestroy {
     // Validate file size
     const sizeCheck = this.importExportService.validateFileSize(file);
     if (!sizeCheck.valid) {
-      this.errorMessage.set(sizeCheck.error || this.translation.get('import_modal.error_file_too_large'));
+      this.errorMessage.set(sizeCheck.errorKey ? this.translation.get(sizeCheck.errorKey, sizeCheck.errorParams) : this.translation.get('import_modal.error_file_too_large'));
       return;
     }
 
@@ -349,7 +350,17 @@ export class ImportModalComponent implements OnDestroy {
       this.validationProgress.set(Math.round(((i + 1) / nonBlankData.length) * 100));
     }
 
-    // Build error summary
+    const errorSummary = this.buildErrorSummary(allErrors);
+
+    const filtered = this.customImport?.preFilter ? this.customImport.preFilter(validRows) : validRows;
+    this.validatedData = filtered;
+    this.errorSummary.set(errorSummary);
+    this.validRowCount.set(filtered.length);
+    this.currentStep.set('results');
+  }
+
+  /** Group translated errors by type and column, with the first 100 for display. */
+  private buildErrorSummary(allErrors: ImportError[]): ValidationErrorSummary {
     const errorsByType = new Map<string, number>();
     const errorsByColumn = new Map<string, number>();
     for (const err of allErrors) {
@@ -357,19 +368,31 @@ export class ImportModalComponent implements OnDestroy {
       errorsByColumn.set(err.column, (errorsByColumn.get(err.column) || 0) + 1);
     }
 
-    const errorSummary: ValidationErrorSummary = {
+    return {
       totalErrors: allErrors.length,
       errorsByType,
       errorsByColumn,
       firstNErrors: allErrors.slice(0, 100),
       allErrors
     };
+  }
 
-    const filtered = this.customImport?.preFilter ? this.customImport.preFilter(validRows) : validRows;
-    this.validatedData = filtered;
-    this.errorSummary.set(errorSummary);
-    this.validRowCount.set(filtered.length);
-    this.currentStep.set('results');
+  /**
+   * Translate the worker's error summary (issue #170). The worker reports message keys with
+   * parameters because it cannot reach the TranslationService; an integrator's validation-rule
+   * message arrives as literal text and is shown as given. Translating once here keeps the
+   * template, the grouping by type and the Excel error report reading plain `error` and
+   * `errorType` strings.
+   */
+  private translateWorkerErrors(raw: RawErrorSummary): ValidationErrorSummary {
+    const allErrors: ImportError[] = raw.allErrors.map(e => ({
+      row: e.row,
+      column: e.column,
+      value: e.value,
+      error: e.error ?? (e.errorKey ? this.translation.get(e.errorKey, e.errorParams) : ''),
+      errorType: this.translation.get(e.errorTypeKey, e.errorTypeParams)
+    }));
+    return this.buildErrorSummary(allErrors);
   }
 
   /**
@@ -512,7 +535,7 @@ export class ImportModalComponent implements OnDestroy {
           this.m2mDataList = [];
           this.m2mProperties = [];
         }
-        this.errorSummary.set(message.results.errorSummary);
+        this.errorSummary.set(this.translateWorkerErrors(message.results.errorSummary));
         this.validRowCount.set(this.validatedData.length);
         this.currentStep.set('results');
         this.terminateWorker();
