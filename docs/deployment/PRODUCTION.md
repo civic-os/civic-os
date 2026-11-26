@@ -867,7 +867,7 @@ docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 
 #### Upgrading to v0.87.0 (file reconcile)
 
-The consolidated worker starts a file reconcile job (every `FILE_RECONCILE_INTERVAL`, default `5m`). Before upgrading on AWS S3, add `s3:DeleteObject` on `arn:aws:s3:::<bucket>/*` to the worker's IAM policy (see `docs/development/FILE_STORAGE.md`, IAM Permissions); without it the job still claims files but cannot delete the staged copies or orphans, and logs each failure. The first ticks also repair files attached on Create pages before v0.86.5 (rows with `entity_id = ''`), and delete staged files no record references that are older than `FILE_ORPHAN_TTL` (default 7 days). To hold that cleanup back, set `FILE_RECONCILE_INTERVAL=0` and enable it later.
+The consolidated worker starts a file reconcile job (every `FILE_RECONCILE_INTERVAL`, default `5m`). Before upgrading on AWS S3, add `s3:DeleteObject` on `arn:aws:s3:::<bucket>/*` to the worker's IAM policy (see `docs/development/FILE_STORAGE.md`, IAM Permissions); without it the job still claims files but cannot delete the staged copies or orphans, and logs each failure. The first ticks also repair files attached on Create pages before v0.87.0 (rows with `entity_id = ''`), and delete staged files no record references that are older than `FILE_ORPHAN_TTL` (default 7 days). To hold that cleanup back, set `FILE_RECONCILE_INTERVAL=0` and enable it later.
 
 #### Upgrading to v0.76.9 from v0.76.8 or earlier (recurring schedules)
 
