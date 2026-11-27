@@ -130,6 +130,56 @@
     "translated_text": "Analítica habilitada"
   },
   {
+    "source_key": "s3_access_key_id.description",
+    "source_type": "instance_config",
+    "translated_text": "Identifica la clave de almacenamiento que firma los enlaces de archivos."
+  },
+  {
+    "source_key": "s3_access_key_id.display_name",
+    "source_type": "instance_config",
+    "translated_text": "ID de clave de acceso"
+  },
+  {
+    "source_key": "s3_bucket.description",
+    "source_type": "instance_config",
+    "translated_text": "El bucket al que se suben los archivos nuevos."
+  },
+  {
+    "source_key": "s3_bucket.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Bucket"
+  },
+  {
+    "source_key": "s3_public_endpoint.description",
+    "source_type": "instance_config",
+    "translated_text": "La dirección que usan los navegadores para llegar al almacenamiento de archivos."
+  },
+  {
+    "source_key": "s3_public_endpoint.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Punto de acceso público"
+  },
+  {
+    "source_key": "s3_region.description",
+    "source_type": "instance_config",
+    "translated_text": "La región de almacenamiento en la que está el bucket."
+  },
+  {
+    "source_key": "s3_region.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Región"
+  },
+  {
+    "source_key": "s3_secret_access_key.description",
+    "source_type": "instance_config",
+    "translated_text": "Firma los enlaces de archivos. Nunca se muestra."
+  },
+  {
+    "source_key": "s3_secret_access_key.display_name",
+    "source_type": "instance_config",
+    "translated_text": "Clave de acceso secreta"
+  },
+  {
     "source_key": "sms_configured.description",
     "source_type": "instance_config",
     "translated_text": "Muestra las opciones de SMS. Actívelo solo cuando el worker tenga credenciales de SMS."
@@ -168,6 +218,16 @@
     "source_key": "appearance.display_name",
     "source_type": "instance_config_group",
     "translated_text": "Apariencia"
+  },
+  {
+    "source_key": "file_storage.description",
+    "source_type": "instance_config_group",
+    "translated_text": "Los define el despliegue a partir de la configuración S3 del worker. Para cambiarlos, actualice esa configuración y reinicie el worker."
+  },
+  {
+    "source_key": "file_storage.display_name",
+    "source_type": "instance_config_group",
+    "translated_text": "Almacenamiento de archivos"
   },
   {
     "source_key": "integrations.description",
@@ -430,6 +490,11 @@
     "translated_text": "Restablecer {{name}} a su valor heredado"
   },
   {
+    "source_key": "a11y.admin_config.secret_clear",
+    "source_type": "ui",
+    "translated_text": "Borrar {{name}}"
+  },
+  {
     "source_key": "a11y.admin_menu.added",
     "source_type": "ui",
     "translated_text": "{{name}} agregado al menú"
@@ -498,6 +563,11 @@
     "source_key": "a11y.bullet_list",
     "source_type": "ui",
     "translated_text": "Lista con viñetas"
+  },
+  {
+    "source_key": "a11y.calendar_property_for",
+    "source_type": "ui",
+    "translated_text": "Propiedad del calendario para {{entity}}"
   },
   {
     "source_key": "a11y.chart_view_as_table",
@@ -910,6 +980,11 @@
     "translated_text": "Ubicación"
   },
   {
+    "source_key": "a11y.map_property_for",
+    "source_type": "ui",
+    "translated_text": "Propiedad del mapa para {{entity}}"
+  },
+  {
     "source_key": "a11y.markdown_editor",
     "source_type": "ui",
     "translated_text": "Editor de Markdown"
@@ -1038,6 +1113,11 @@
     "source_key": "a11y.recurring_event",
     "source_type": "ui",
     "translated_text": "Evento recurrente"
+  },
+  {
+    "source_key": "a11y.recurring_property_for",
+    "source_type": "ui",
+    "translated_text": "Propiedad de horario recurrente para {{entity}}"
   },
   {
     "source_key": "a11y.reduced_contrast",
@@ -1528,6 +1608,41 @@
     "source_key": "admin_config.saving",
     "source_type": "ui",
     "translated_text": "Guardando..."
+  },
+  {
+    "source_key": "admin_config.secret.changed",
+    "source_type": "ui",
+    "translated_text": "Cambiado el {{date}}"
+  },
+  {
+    "source_key": "admin_config.secret.clear",
+    "source_type": "ui",
+    "translated_text": "Borrar"
+  },
+  {
+    "source_key": "admin_config.secret.deployment_managed",
+    "source_type": "ui",
+    "translated_text": "Lo define el despliegue. No se puede cambiar aquí."
+  },
+  {
+    "source_key": "admin_config.secret.missing",
+    "source_type": "ui",
+    "translated_text": "Falta"
+  },
+  {
+    "source_key": "admin_config.secret.new_value",
+    "source_type": "ui",
+    "translated_text": "Escriba un valor nuevo"
+  },
+  {
+    "source_key": "admin_config.secret.replace",
+    "source_type": "ui",
+    "translated_text": "Reemplazar"
+  },
+  {
+    "source_key": "admin_config.secret.set",
+    "source_type": "ui",
+    "translated_text": "Definido"
   },
   {
     "source_key": "admin_config.title",
@@ -2460,14 +2575,49 @@
     "translated_text": "Ver código fuente"
   },
   {
+    "source_key": "entity_management.allow_recurring",
+    "source_type": "ui",
+    "translated_text": "Permitir horarios recurrentes"
+  },
+  {
     "source_key": "entity_management.arrange_menu",
     "source_type": "ui",
     "translated_text": "Organizar el menú lateral"
   },
   {
+    "source_key": "entity_management.calendar_settings",
+    "source_type": "ui",
+    "translated_text": "Configuración del calendario"
+  },
+  {
+    "source_key": "entity_management.map_settings",
+    "source_type": "ui",
+    "translated_text": "Configuración del mapa"
+  },
+  {
     "source_key": "entity_management.order_help",
     "source_type": "ui",
     "translated_text": "Arrastre las entidades para definir su orden predeterminado, que se usa en las secciones relacionadas y para las entidades que no están en el menú lateral. Los cambios se guardan automáticamente."
+  },
+  {
+    "source_key": "entity_management.recurring_settings",
+    "source_type": "ui",
+    "translated_text": "Horarios recurrentes"
+  },
+  {
+    "source_key": "entity_management.show_calendar",
+    "source_type": "ui",
+    "translated_text": "Mostrar calendario en la vista de lista"
+  },
+  {
+    "source_key": "entity_management.show_map",
+    "source_type": "ui",
+    "translated_text": "Mostrar mapa en la vista de lista"
+  },
+  {
+    "source_key": "entity_management.using",
+    "source_type": "ui",
+    "translated_text": "usando"
   },
   {
     "source_key": "error.attachment_expired",
@@ -2583,6 +2733,11 @@
     "source_key": "file.uploading",
     "source_type": "ui",
     "translated_text": "Subiendo..."
+  },
+  {
+    "source_key": "file_upload.storage_not_configured",
+    "source_type": "ui",
+    "translated_text": "El almacenamiento de archivos aún no está configurado. Inténtelo de nuevo en un minuto o consulte a un administrador."
   },
   {
     "source_key": "form.back_to_record",
@@ -3135,6 +3290,11 @@
     "translated_text": "Archivo demasiado grande"
   },
   {
+    "source_key": "import_modal.error_file_too_large_size",
+    "source_type": "ui",
+    "translated_text": "Archivo demasiado grande ({{size}} MB). El tamaño máximo es de {{max}} MB. Divida sus datos en lotes más pequeños."
+  },
+  {
     "source_key": "import_modal.error_import_failed",
     "source_type": "ui",
     "translated_text": "Error al importar: {{detail}}"
@@ -3320,6 +3480,266 @@
     "translated_text": "¡Validación exitosa! {{count}} filas listas para importar."
   },
   {
+    "source_key": "import_validation.err_boolean",
+    "source_type": "ui",
+    "translated_text": "Debe ser true/false o yes/no"
+  },
+  {
+    "source_key": "import_validation.err_color",
+    "source_type": "ui",
+    "translated_text": "Debe tener el formato #RRGGBB (p. ej., #3B82F6)"
+  },
+  {
+    "source_key": "import_validation.err_datetime",
+    "source_type": "ui",
+    "translated_text": "No se pudo interpretar la fecha y la hora. Ejemplos: \"2025-11-30 20:00\", \"11/30/25 8pm\", \"Nov 30, 2025 8:00 PM\""
+  },
+  {
+    "source_key": "import_validation.err_datetime_end",
+    "source_type": "ui",
+    "translated_text": "No se pudo interpretar la fecha y la hora de fin. Ejemplos: \"2025-11-30 20:00\", \"11/30/25 8pm\", \"Nov 30, 2025 8:00 PM\""
+  },
+  {
+    "source_key": "import_validation.err_datetime_start",
+    "source_type": "ui",
+    "translated_text": "No se pudo interpretar la fecha y la hora de inicio. Ejemplos: \"2025-11-30 20:00\", \"11/30/25 8pm\", \"Nov 30, 2025 8:00 PM\""
+  },
+  {
+    "source_key": "import_validation.err_email",
+    "source_type": "ui",
+    "translated_text": "Debe ser una dirección de correo electrónico válida (p. ej., user@example.com)"
+  },
+  {
+    "source_key": "import_validation.err_fk_ambiguous",
+    "source_type": "ui",
+    "translated_text": "\"{{value}}\" coincide con varias entradas de {{column}} (ID: {{ids}}). Use el ID en su lugar."
+  },
+  {
+    "source_key": "import_validation.err_fk_lookup_unavailable",
+    "source_type": "ui",
+    "translated_text": "La búsqueda de claves foráneas no está disponible"
+  },
+  {
+    "source_key": "import_validation.err_fk_lookup_unavailable_for",
+    "source_type": "ui",
+    "translated_text": "La búsqueda de claves foráneas no está disponible para {{table}}"
+  },
+  {
+    "source_key": "import_validation.err_fk_not_found",
+    "source_type": "ui",
+    "translated_text": "\"{{value}}\" no se encontró en {{column}}"
+  },
+  {
+    "source_key": "import_validation.err_geopoint_format",
+    "source_type": "ui",
+    "translated_text": "Debe tener el formato: latitud,longitud (p. ej., 42.36,-71.06)"
+  },
+  {
+    "source_key": "import_validation.err_geopoint_numbers",
+    "source_type": "ui",
+    "translated_text": "La latitud y la longitud deben ser números válidos"
+  },
+  {
+    "source_key": "import_validation.err_geopoint_range",
+    "source_type": "ui",
+    "translated_text": "La latitud debe estar entre -90 y 90, y la longitud entre -180 y 180"
+  },
+  {
+    "source_key": "import_validation.err_geopolygon_coords",
+    "source_type": "ui",
+    "translated_text": "Todas las coordenadas deben ser válidas (lat -90..90, lng -180..180)"
+  },
+  {
+    "source_key": "import_validation.err_geopolygon_format",
+    "source_type": "ui",
+    "translated_text": "Debe ser WKT POLYGON((...)) o GeoJSON {\"type\":\"Polygon\",\"coordinates\":[...]}"
+  },
+  {
+    "source_key": "import_validation.err_geopolygon_geojson_type",
+    "source_type": "ui",
+    "translated_text": "GeoJSON debe ser de tipo Polygon con una matriz de coordenadas"
+  },
+  {
+    "source_key": "import_validation.err_geopolygon_invalid_geojson",
+    "source_type": "ui",
+    "translated_text": "Formato GeoJSON no válido"
+  },
+  {
+    "source_key": "import_validation.err_geopolygon_pairs",
+    "source_type": "ui",
+    "translated_text": "El polígono debe tener al menos 4 pares de coordenadas"
+  },
+  {
+    "source_key": "import_validation.err_geopolygon_points",
+    "source_type": "ui",
+    "translated_text": "El polígono debe tener al menos 4 puntos (3 vértices + punto de cierre)"
+  },
+  {
+    "source_key": "import_validation.err_invalid_format",
+    "source_type": "ui",
+    "translated_text": "Formato no válido"
+  },
+  {
+    "source_key": "import_validation.err_max_length",
+    "source_type": "ui",
+    "translated_text": "Debe tener como máximo {{n}} caracteres"
+  },
+  {
+    "source_key": "import_validation.err_max_value",
+    "source_type": "ui",
+    "translated_text": "Debe ser como máximo {{n}}"
+  },
+  {
+    "source_key": "import_validation.err_min_length",
+    "source_type": "ui",
+    "translated_text": "Debe tener al menos {{n}} caracteres"
+  },
+  {
+    "source_key": "import_validation.err_min_value",
+    "source_type": "ui",
+    "translated_text": "Debe ser como mínimo {{n}}"
+  },
+  {
+    "source_key": "import_validation.err_money",
+    "source_type": "ui",
+    "translated_text": "Debe ser un valor monetario válido"
+  },
+  {
+    "source_key": "import_validation.err_number",
+    "source_type": "ui",
+    "translated_text": "Debe ser un número válido"
+  },
+  {
+    "source_key": "import_validation.err_phone",
+    "source_type": "ui",
+    "translated_text": "Debe ser un número de teléfono de EE. UU. de 10 dígitos (p. ej., 5551234567 o (555) 123-4567)"
+  },
+  {
+    "source_key": "import_validation.err_required",
+    "source_type": "ui",
+    "translated_text": "Este campo es obligatorio"
+  },
+  {
+    "source_key": "import_validation.err_timeslot_generic",
+    "source_type": "ui",
+    "translated_text": "Error de validación del intervalo de tiempo"
+  },
+  {
+    "source_key": "import_validation.err_timeslot_incomplete",
+    "source_type": "ui",
+    "translated_text": "Se requieren la hora de inicio y la hora de fin para un intervalo de tiempo"
+  },
+  {
+    "source_key": "import_validation.err_timeslot_range",
+    "source_type": "ui",
+    "translated_text": "La hora de fin debe ser posterior a la hora de inicio"
+  },
+  {
+    "source_key": "import_validation.err_validation_generic",
+    "source_type": "ui",
+    "translated_text": "Error de validación"
+  },
+  {
+    "source_key": "import_validation.type_boolean",
+    "source_type": "ui",
+    "translated_text": "Valor booleano no válido"
+  },
+  {
+    "source_key": "import_validation.type_color",
+    "source_type": "ui",
+    "translated_text": "Color no válido"
+  },
+  {
+    "source_key": "import_validation.type_datetime",
+    "source_type": "ui",
+    "translated_text": "Fecha y hora no válidas"
+  },
+  {
+    "source_key": "import_validation.type_email",
+    "source_type": "ui",
+    "translated_text": "Correo electrónico no válido"
+  },
+  {
+    "source_key": "import_validation.type_fk_duplicate",
+    "source_type": "ui",
+    "translated_text": "{{column}} duplicado"
+  },
+  {
+    "source_key": "import_validation.type_fk_not_found",
+    "source_type": "ui",
+    "translated_text": "{{column}} no encontrado"
+  },
+  {
+    "source_key": "import_validation.type_geopoint",
+    "source_type": "ui",
+    "translated_text": "Punto geográfico no válido"
+  },
+  {
+    "source_key": "import_validation.type_geopolygon",
+    "source_type": "ui",
+    "translated_text": "Polígono geográfico no válido"
+  },
+  {
+    "source_key": "import_validation.type_money",
+    "source_type": "ui",
+    "translated_text": "Importe no válido"
+  },
+  {
+    "source_key": "import_validation.type_number",
+    "source_type": "ui",
+    "translated_text": "Número no válido"
+  },
+  {
+    "source_key": "import_validation.type_number_range",
+    "source_type": "ui",
+    "translated_text": "Error de rango numérico"
+  },
+  {
+    "source_key": "import_validation.type_pattern",
+    "source_type": "ui",
+    "translated_text": "El patrón no coincide"
+  },
+  {
+    "source_key": "import_validation.type_phone",
+    "source_type": "ui",
+    "translated_text": "Número de teléfono no válido"
+  },
+  {
+    "source_key": "import_validation.type_required",
+    "source_type": "ui",
+    "translated_text": "Falta un campo obligatorio"
+  },
+  {
+    "source_key": "import_validation.type_system",
+    "source_type": "ui",
+    "translated_text": "Error del sistema"
+  },
+  {
+    "source_key": "import_validation.type_text_length",
+    "source_type": "ui",
+    "translated_text": "Error de longitud del texto"
+  },
+  {
+    "source_key": "import_validation.type_timeslot_error",
+    "source_type": "ui",
+    "translated_text": "Error de intervalo de tiempo"
+  },
+  {
+    "source_key": "import_validation.type_timeslot_incomplete",
+    "source_type": "ui",
+    "translated_text": "Intervalo de tiempo incompleto"
+  },
+  {
+    "source_key": "import_validation.type_timeslot_range",
+    "source_type": "ui",
+    "translated_text": "Error de rango del intervalo de tiempo"
+  },
+  {
+    "source_key": "import_validation.type_validation_error",
+    "source_type": "ui",
+    "translated_text": "Error de validación"
+  },
+  {
     "source_key": "list.active_filters",
     "source_type": "ui",
     "translated_text": "Filtros activos"
@@ -3348,6 +3768,16 @@
     "source_key": "list.descending",
     "source_type": "ui",
     "translated_text": "Descendente"
+  },
+  {
+    "source_key": "list.filter_selected_one",
+    "source_type": "ui",
+    "translated_text": "{{count}} seleccionado"
+  },
+  {
+    "source_key": "list.filter_selected_other",
+    "source_type": "ui",
+    "translated_text": "{{count}} seleccionados"
   },
   {
     "source_key": "list.filters",
