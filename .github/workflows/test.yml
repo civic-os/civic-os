@@ -124,7 +124,7 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store and its secret keys, status and category cache versions, dashboard visibility and listing, request locale normalization, and the file reconcile functions
+      - name: Verify public views enforce RLS, infer FKs from output columns, the domain version record, the instance config store and its secret keys, status and category cache versions, dashboard visibility and listing, request locale normalization, the file reconcile functions, and signed file URLs
         run: |
           ./tests/functional/view-security-guard-test.sh
           ./tests/functional/v0-76-9-view-rls-test.sh
@@ -146,6 +146,7 @@ jobs:
           ./tests/functional/v0-86-1-module-interface-test.sh
           ./tests/functional/v0-87-0-file-reconcile-sql-test.sh
           ./tests/functional/v0-88-0-instance-secrets-test.sh
+          ./tests/functional/v0-88-0-signed-file-urls-test.sh
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/civic_os_test
           # no PostgREST or Keycloak in this job; the install path test's API section runs in E2E verification
