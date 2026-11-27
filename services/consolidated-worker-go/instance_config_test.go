@@ -276,3 +276,34 @@ func TestRenderer_TemplatesReadConfig(t *testing.T) {
 		t.Errorf("rendered output contains <no value>")
 	}
 }
+
+// Secret keys (v0.88.0) never reach templates: the query excludes them, and build()
+// drops any that slip through, so they render like an unknown key in every part.
+func TestRenderer_SecretKeysRenderEmpty(t *testing.T) {
+	const sentinel = "LEAKCHECK-secret-value"
+	secret := configRow{key: "s3_secret_access_key", typ: "string", value: strPtr(sentinel), secret: true}
+	renderer := testRenderer(&fakeConfigDB{rows: []configRow{
+		row("agency_name", "string", strPtr("City of Springfield")),
+		secret,
+	}})
+	tmpl := &NotificationTemplate{
+		Subject: "[{{.Config.s3_secret_access_key}}] {{.Config.agency_name}}",
+		HTML:    `<p>{{.Config.s3_secret_access_key}}</p>{{if .Config.s3_secret_access_key}}set{{end}}`,
+		Text:    `{{printf "%v" .Config.s3_secret_access_key}}|{{range $k, $v := .Config}}{{$v}};{{end}}`,
+	}
+	entity, _ := json.Marshal(map[string]interface{}{"id": 1})
+
+	out, err := renderer.RenderTemplate(tmpl, entity)
+	if err != nil {
+		t.Fatalf("RenderTemplate: %v", err)
+	}
+	if strings.Contains(out.Subject+out.HTML+out.Text, sentinel) {
+		t.Fatalf("a secret reached a rendered template: %q / %q / %q", out.Subject, out.HTML, out.Text)
+	}
+	if strings.Contains(out.HTML, "set") {
+		t.Errorf("{{if .Config.<secret>}} was true: %q", out.HTML)
+	}
+	if !strings.Contains(out.Subject, "City of Springfield") {
+		t.Errorf("Subject = %q, want the non-secret key rendered", out.Subject)
+	}
+}

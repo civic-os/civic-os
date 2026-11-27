@@ -121,6 +121,49 @@ describe('ConfigAdminService', () => {
         });
     });
 
+    describe('getSecretStatus', () => {
+        it('POSTs the status RPC and returns its rows', async () => {
+            const rows = [{ config_key: 's3_bucket', is_set: true, display_value: 'civic-os-files' }];
+            const result$ = firstValueFrom(service.getSecretStatus());
+            const req = httpMock.expectOne(r => r.url.includes('rpc/get_instance_secret_status'));
+            expect(req.request.method).toBe('POST');
+            req.flush(rows);
+            expect(await result$).toEqual(rows);
+        });
+
+        it('returns no rows when the RPC refuses the caller (42501)', async () => {
+            const result$ = firstValueFrom(service.getSecretStatus());
+            httpMock.expectOne(r => r.url.includes('rpc/get_instance_secret_status'))
+                .flush({ code: '42501', message: 'Permission denied' }, { status: 403, statusText: 'Forbidden' });
+            expect(await result$).toEqual([]);
+        });
+    });
+
+    describe('setSecret', () => {
+        it('POSTs p_key and p_value and returns only whether a value is set', async () => {
+            const result$ = firstValueFrom(service.setSecret('altcha_hmac_key', 'secret'));
+            const req = httpMock.expectOne(r => r.url.includes('rpc/set_instance_secret'));
+            expect(req.request.body).toEqual({ p_key: 'altcha_hmac_key', p_value: 'secret' });
+            req.flush({ success: true, config_key: 'altcha_hmac_key', is_set: true, updated_at: '2026-11-27T00:00:00Z' });
+            expect(await result$).toEqual({ success: true, is_set: true, updated_at: '2026-11-27T00:00:00Z' });
+            expect(mockConfig.invalidateCache).not.toHaveBeenCalled();
+        });
+
+        it('maps success:false and HTTP errors to error results', async () => {
+            const refused$ = firstValueFrom(service.setSecret('s3_bucket', 'x'));
+            httpMock.expectOne(r => r.url.includes('rpc/set_instance_secret'))
+                .flush({ success: false, error: 's3_bucket is set by the deployment' });
+            expect(await refused$).toEqual({ success: false, error: 's3_bucket is set by the deployment' });
+
+            const failed$ = firstValueFrom(service.setSecret('altcha_hmac_key', 'x'));
+            httpMock.expectOne(r => r.url.includes('rpc/set_instance_secret'))
+                .flush({ code: '42501', message: 'permission denied' }, { status: 403, statusText: 'Forbidden' });
+            const failed = await failed$;
+            expect(failed.success).toBe(false);
+            expect(failed.error).toBeTruthy();
+        });
+    });
+
     describe('ENV_VAR_NAMES', () => {
         it('maps the ten framework keys to their env vars', () => {
             expect(ENV_VAR_NAMES).toEqual({

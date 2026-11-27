@@ -53,6 +53,35 @@ export interface SetConfigResult {
   error?: string;
 }
 
+/**
+ * One row of `get_instance_secret_status()` (v0.88.0): what /admin/config shows of a secret key.
+ * The secret itself never leaves the database; `display_value` follows the key's display rule.
+ */
+export interface SecretStatusRow {
+  config_key: string;
+  display_name: string;
+  description: string | null;
+  group_key: string | null;
+  group_display_name: string | null;
+  group_description: string | null;
+  group_icon: string | null;
+  group_sort_order: number | null;
+  sort_order: number;
+  /** `deployment`: read-only here, set from the worker's environment. `admin`: write-only input. */
+  managed_by: 'deployment' | 'admin';
+  is_set: boolean;
+  display_value: string | null;
+  updated_at: string;
+}
+
+/** Result of `set_instance_secret`: never the value, only whether one is set. */
+export interface SetSecretResult {
+  success: boolean;
+  is_set?: boolean;
+  updated_at?: string;
+  error?: string;
+}
+
 /** The env var each framework key falls back to. Integrator-defined keys have none. */
 export const ENV_VAR_NAMES: Record<string, string> = {
   app_title: 'APP_TITLE',
@@ -94,6 +123,29 @@ export class ConfigAdminService {
         if (result.success) this.config.invalidateCache();
       }),
       catchError((error) => of<SetConfigResult>({ success: false, error: this.humanize(error) }))
+    );
+  }
+
+  /**
+   * Secret keys for admins (v0.88.0). The RPC refuses anyone else with 42501, so a viewer without
+   * the permission gets an empty list rather than an error.
+   */
+  getSecretStatus(): Observable<SecretStatusRow[]> {
+    return this.http.post<SecretStatusRow[]>(getPostgrestUrl() + 'rpc/get_instance_secret_status', {}).pipe(
+      catchError(() => of<SecretStatusRow[]>([]))
+    );
+  }
+
+  /** Writes an admin-managed secret ('' or null clears it). Never errors, like setValue(). */
+  setSecret(key: string, value: string | null): Observable<SetSecretResult> {
+    return this.http.post<SetSecretResult & { config_key?: string }>(
+      getPostgrestUrl() + 'rpc/set_instance_secret',
+      { p_key: key, p_value: value }
+    ).pipe(
+      map((response): SetSecretResult => response?.success === false
+        ? { success: false, error: response.error || 'Failed to save setting' }
+        : { success: true, is_set: !!response?.is_set, updated_at: response?.updated_at }),
+      catchError((error) => of<SetSecretResult>({ success: false, error: this.humanize(error) }))
     );
   }
 

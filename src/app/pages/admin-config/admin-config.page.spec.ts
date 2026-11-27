@@ -22,9 +22,10 @@ import { Observable, Subject, of, throwError } from 'rxjs';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 import { AdminConfigPage } from './admin-config.page';
-import { ConfigAdminService, InstanceConfigRow, SetConfigResult } from '../../services/config-admin.service';
+import { ConfigAdminService, InstanceConfigRow, SecretStatusRow, SetConfigResult, SetSecretResult } from '../../services/config-admin.service';
 import { ConfigService } from '../../services/config.service';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 
 function row(overrides: Partial<InstanceConfigRow> & { config_key: string }): InstanceConfigRow {
     return {
@@ -65,6 +66,31 @@ const ROWS: InstanceConfigRow[] = [
     row({ config_key: 'org_motto', display_name: 'Motto' })
 ];
 
+const STORAGE = {
+    group_key: 'file_storage', group_display_name: 'File storage', group_description: 'Set by the deployment',
+    group_icon: 'cloud', group_sort_order: 50
+};
+
+function secret(overrides: Partial<SecretStatusRow> & { config_key: string }): SecretStatusRow {
+    return {
+        display_name: overrides.config_key,
+        description: null,
+        sort_order: 0,
+        managed_by: 'deployment',
+        is_set: true,
+        display_value: null,
+        updated_at: '2026-11-26T12:00:00Z',
+        ...STORAGE,
+        ...overrides
+    };
+}
+
+const SECRETS: SecretStatusRow[] = [
+    secret({ config_key: 's3_access_key_id', display_name: 'Access key ID', display_value: '…AKID', sort_order: 10 }),
+    secret({ config_key: 's3_secret_access_key', display_name: 'Secret access key', description: 'Never shown', sort_order: 20 }),
+    secret({ config_key: 's3_bucket', display_name: 'Bucket', is_set: false, sort_order: 50 })
+];
+
 const ENV: Record<string, string> = {
     app_title: 'Pothole Tracker',
     default_theme: 'nord',
@@ -84,12 +110,15 @@ describe('AdminConfigPage', () => {
     let el: HTMLElement;
     let setValue: ReturnType<typeof vi.fn>;
     let getConfig: ReturnType<typeof vi.fn>;
+    let getSecretStatus: ReturnType<typeof vi.fn>;
+    let setSecret: ReturnType<typeof vi.fn>;
     let navigateByUrl: ReturnType<typeof vi.fn>;
     let canUpdate: boolean;
 
-    async function create(options: { rows?: InstanceConfigRow[]; load?: Observable<InstanceConfigRow[]>; returnTo?: string; canUpdate?: boolean } = {}) {
+    async function create(options: { rows?: InstanceConfigRow[]; load?: Observable<InstanceConfigRow[]>; returnTo?: string; canUpdate?: boolean; secrets?: SecretStatusRow[] } = {}) {
         canUpdate = options.canUpdate ?? true;
         getConfig.mockReturnValue(options.load ?? of(options.rows ?? ROWS));
+        getSecretStatus.mockReturnValue(of(options.secrets ?? []));
         const params: Record<string, string> = options.returnTo === undefined ? {} : { returnTo: options.returnTo };
 
         await TestBed.configureTestingModule({
@@ -97,7 +126,7 @@ describe('AdminConfigPage', () => {
             providers: [
                 provideTranslationTesting(),
                 provideZonelessChangeDetection(),
-                { provide: ConfigAdminService, useValue: { getConfig, setValue } },
+                { provide: ConfigAdminService, useValue: { getConfig, setValue, getSecretStatus, setSecret } },
                 { provide: ConfigService, useValue: { envValue: (key: string) => ENV[key] ?? null } },
                 {
                     provide: AuthService,
@@ -109,6 +138,7 @@ describe('AdminConfigPage', () => {
                             canUpdate && table === 'metadata.instance_config' && perm === 'update'
                     }
                 },
+                { provide: ThemeService, useValue: { theme: signal('corporate') } },
                 { provide: Router, useValue: { navigateByUrl } },
                 { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap(params)) } }
             ]
@@ -137,6 +167,10 @@ describe('AdminConfigPage', () => {
             (key: string, value: string | null): Observable<SetConfigResult> =>
                 of({ success: true, config_key: key, config_value: value }));
         getConfig = vi.fn().mockName('ConfigAdminService.getConfig');
+        getSecretStatus = vi.fn().mockName('ConfigAdminService.getSecretStatus');
+        setSecret = vi.fn().mockName('ConfigAdminService.setSecret').mockImplementation(
+            (_key: string, value: string | null): Observable<SetSecretResult> =>
+                of({ success: true, is_set: value !== null, updated_at: '2026-11-27T09:00:00Z' }));
         navigateByUrl = vi.fn().mockName('Router.navigateByUrl');
     });
 
@@ -643,6 +677,103 @@ describe('AdminConfigPage', () => {
         it('does not save anything', async () => {
             await advanceTime(2000);
             expect(setValue).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('secret keys (v0.88.0)', () => {
+        const titles = () => Array.from(el.querySelectorAll('details.collapse.collapse-arrow summary'))
+            .map(summary => summary.textContent!.replace(/\s+/g, ' ').trim());
+
+        it('adds a File storage group from the secret status, in group sort order before Other', async () => {
+            await create({ secrets: SECRETS });
+            const t = titles();
+            const storage = t.findIndex(title => title.includes('File storage'));
+            expect(storage).toBe(2);
+            expect(t[3]).toContain('Other');
+        });
+
+        it('shows deployment-managed keys read-only: display value, Set or Missing badge, no input', async () => {
+            await create({ secrets: SECRETS });
+            const keyId = field('s3_access_key_id');
+            expect(keyId.querySelector('input')).toBeNull();
+            expect(keyId.textContent).toContain('…AKID');
+            expect(keyId.querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.set');
+            expect(keyId.textContent).toContain('admin_config.secret.deployment_managed');
+
+            const secretRow = field('s3_secret_access_key');
+            expect(secretRow.querySelector('.font-mono')).toBeNull();
+            expect(secretRow.textContent).toContain('Never shown');
+
+            expect(field('s3_bucket').querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.missing');
+        });
+
+        it('shows nothing of secret keys when the status call returns none (a non-admin)', async () => {
+            await create({ secrets: [] });
+            expect(el.querySelector('[data-secret]')).toBeNull();
+            expect(titles().some(title => title.includes('File storage'))).toBe(false);
+        });
+
+        describe('admin-managed keys', () => {
+            const ADMIN_SECRET = secret({ config_key: 'altcha_hmac_key', display_name: 'ALTCHA key', managed_by: 'admin', is_set: false });
+
+            it('renders a write-only password input that is never prefilled', async () => {
+                await create({ secrets: [ADMIN_SECRET] });
+                const input = field('altcha_hmac_key').querySelector('input') as HTMLInputElement;
+                expect(input.type).toBe('password');
+                expect(input.autocomplete).toBe('new-password');
+                expect(input.value).toBe('');
+                expect((field('altcha_hmac_key').querySelector('label') as HTMLLabelElement).htmlFor).toBe(input.id);
+            });
+
+            it('Replace sends the typed value once, empties the field and marks the key set', async () => {
+                await create({ secrets: [ADMIN_SECRET] });
+                const input = field('altcha_hmac_key').querySelector('input') as HTMLInputElement;
+                input.value = 'new-secret';
+                input.dispatchEvent(new Event('input'));
+                fixture.detectChanges();
+                const replace = Array.from(field('altcha_hmac_key').querySelectorAll('button'))
+                    .find(b => b.textContent!.includes('admin_config.secret.replace')) as HTMLButtonElement;
+                replace.click();
+                fixture.detectChanges();
+
+                expect(setSecret).toHaveBeenCalledExactlyOnceWith('altcha_hmac_key', 'new-secret');
+                expect(component.secretDraft('altcha_hmac_key')).toBe('');
+                expect(field('altcha_hmac_key').querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.set');
+                expect(status('altcha_hmac_key')).toBe('Saved');
+            });
+
+            it('Clear sends null', async () => {
+                await create({ secrets: [{ ...ADMIN_SECRET, is_set: true }] });
+                const clear = Array.from(field('altcha_hmac_key').querySelectorAll('button'))
+                    .find(b => b.textContent!.includes('admin_config.secret.clear')) as HTMLButtonElement;
+                clear.click();
+                fixture.detectChanges();
+                expect(setSecret).toHaveBeenCalledExactlyOnceWith('altcha_hmac_key', null);
+                expect(field('altcha_hmac_key').querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.missing');
+            });
+
+            it('shows the error and discards the draft when a save fails', async () => {
+                setSecret.mockReturnValue(of({ success: false, error: 'Permission denied' }));
+                await create({ secrets: [ADMIN_SECRET] });
+                component.onSecretInput(ADMIN_SECRET, 'x');
+                component.saveSecret(ADMIN_SECRET);
+                fixture.detectChanges();
+                expect(status('altcha_hmac_key')).toBe('Permission denied');
+                expect(component.secretDraft('altcha_hmac_key')).toBe('');
+            });
+
+            it('never sends a half-typed secret when the page is left', async () => {
+                await create({ secrets: [ADMIN_SECRET] });
+                component.onSecretInput(ADMIN_SECRET, 'half-typed');
+                fixture.destroy();
+                expect(setSecret).not.toHaveBeenCalled();
+                expect(setValue).not.toHaveBeenCalled();
+            });
+
+            it('is read-only without the update permission', async () => {
+                await create({ secrets: [ADMIN_SECRET], canUpdate: false });
+                expect(field('altcha_hmac_key').querySelector('input')).toBeNull();
+            });
         });
     });
 });
