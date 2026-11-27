@@ -226,7 +226,7 @@
           <a
             [attr.href]="datum()?.url ?? null"
             (click)="onFileDownload($event, datum())"
-            class="font-medium link link-primary">
+            class="font-medium link link-primary matomo_ignore">
             {{ datum()?.file_name }}
           </a>
           <span class="text-sm text-base-content/60">{{ formatFileSize($safeNavigationMigration(datum()?.file_size)) }}</span>

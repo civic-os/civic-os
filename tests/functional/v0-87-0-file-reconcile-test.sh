@@ -26,6 +26,7 @@
 #   DATABASE_URL   postgres://postgres:securepassword123@localhost:15432/civic_os_db (superuser)
 #   POSTGREST_URL  http://localhost:3000     KEYCLOAK_URL  http://localhost:8082
 #   S3_URL         http://localhost:9000     S3_BUCKET     civic-os-files
+#   S3_ROOT_USER / S3_ROOT_PASSWORD   minioadmin (signed HEADs: objects are private since v0.88.0)
 #   TICK_WAIT      seconds to wait for a tick's effect (default 60)
 #
 # Copyright (C) 2023-2026 Civic OS, L3C
@@ -62,29 +63,23 @@ get_token() {
     -d "client_id=$KEYCLOAK_CLIENT" -d "username=$1" -d "password=$1" -d "grant_type=password" | jq -r '.access_token // empty'
 }
 
-# The Create page's upload: presign with an empty entity id, PUT, create the row. Prints the file id.
+# The Create page's upload: the database issues an upload with an empty entity id (v0.88.0:
+# request_file_upload, synchronous), PUT, create the row. Prints the file id.
 upload_staged() {
   local entity_type="$1" path="$2" name="$3" type="$4" property="$5"
-  local request_id url="" file_id="" status size thumb="not_applicable"
+  local issued url file_id key bucket size thumb="not_applicable"
   size=$(wc -c < "$path" | tr -d ' ')
-  request_id=$(curl -s -X POST "$POSTGREST_URL/rpc/request_upload_url" -H "Authorization: Bearer $TOKEN" \
+  issued=$(curl -s -X POST "$POSTGREST_URL/rpc/request_file_upload" -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"p_entity_type\":\"$entity_type\",\"p_entity_id\":\"\",\"p_file_name\":\"$name\",\"p_file_type\":\"$type\"}" | tr -d '"')
-  [ -z "$request_id" ] && return 1
-  for _ in $(seq 1 40); do
-    local poll; poll=$(curl -s -H "Authorization: Bearer $TOKEN" "$POSTGREST_URL/rpc/get_upload_url?p_request_id=$request_id")
-    status=$(echo "$poll" | jq -r '.[0].status // "pending"')
-    if [ "$status" = "completed" ]; then
-      url=$(echo "$poll" | jq -r '.[0].url'); file_id=$(echo "$poll" | jq -r '.[0].file_id'); break
-    fi
-    sleep 0.5
-  done
+    -d "{\"p_entity_type\":\"$entity_type\",\"p_entity_id\":\"\",\"p_file_name\":\"$name\",\"p_file_type\":\"$type\"}")
+  url=$(echo "$issued" | jq -r '.url // empty'); file_id=$(echo "$issued" | jq -r '.file_id // empty')
+  key=$(echo "$issued" | jq -r '.key // empty'); bucket=$(echo "$issued" | jq -r '.bucket // empty')
   [ -z "$url" ] && return 1
-  [ "$(curl -s -o /dev/null -w '%{http_code}' -X PUT "$url" -H "Content-Type: $type" -H 'x-amz-acl: public-read' --data-binary @"$path")" = "200" ] || return 1
-  local key; key=$(echo "$url" | sed 's|https\{0,1\}://[^/]*/[^/]*/||; s|?.*||')
+  # private file: no x-amz-acl (it is signed into the URL only for static assets)
+  [ "$(curl -s -o /dev/null -w '%{http_code}' -X PUT "$url" -H "Content-Type: $type" --data-binary @"$path")" = "200" ] || return 1
   case "$type" in image/*|application/pdf) thumb="pending" ;; esac
   curl -s -X POST "$POSTGREST_URL/rpc/create_file_record" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-    -d "{\"p_id\":\"$file_id\",\"p_entity_type\":\"$entity_type\",\"p_entity_id\":\"\",\"p_property_name\":\"$property\",\"p_file_name\":\"$name\",\"p_file_type\":\"$type\",\"p_file_size\":$size,\"p_s3_bucket\":\"$S3_BUCKET\",\"p_s3_original_key\":\"$key\",\"p_thumbnail_status\":\"$thumb\"}" \
+    -d "{\"p_id\":\"$file_id\",\"p_entity_type\":\"$entity_type\",\"p_entity_id\":\"\",\"p_property_name\":\"$property\",\"p_file_name\":\"$name\",\"p_file_type\":\"$type\",\"p_file_size\":$size,\"p_s3_bucket\":\"$bucket\",\"p_s3_original_key\":\"$key\",\"p_thumbnail_status\":\"$thumb\"}" \
     | jq -r '.id // empty'
 }
 
@@ -105,7 +100,11 @@ wait_for() {
   echo "$got"
 }
 
-object_status() { curl -s -o /dev/null -w '%{http_code}' "$S3_URL/$S3_BUCKET/$1"; }
+# Objects are private since v0.88.0, so existence is checked with a signed HEAD (200 or 404).
+object_status() {
+  curl -s -o /dev/null -w '%{http_code}' -I --aws-sigv4 "aws:amz:us-east-1:s3" \
+    --user "${S3_ROOT_USER:-minioadmin}:${S3_ROOT_PASSWORD:-minioadmin}" "$S3_URL/$S3_BUCKET/$1"
+}
 
 # Every object key of a file, space-separated, original first.
 file_keys() {
@@ -216,9 +215,17 @@ for _ in $(seq 1 "$TICK_WAIT"); do [ "$(object_status "$KEY_G")" = "200" ] || br
 # -----------------------------------------------------------------------------
 section "H. Stale upload requests"
 # -----------------------------------------------------------------------------
-q "UPDATE metadata.file_upload_requests SET created_at = now() - interval '25 hours' WHERE file_name = 'a.png' AND entity_type = 'Issue' AND entity_id = ''" > /dev/null
-check "H. upload requests older than 24 hours are deleted" "0" "$(wait_for "SELECT count(*) FROM metadata.file_upload_requests WHERE file_name = 'a.png' AND created_at < now() - interval '24 hours'" 0)"
-check "H. recent ones are kept" "t" "$(q "SELECT count(*) > 0 FROM metadata.file_upload_requests WHERE file_name = 'recent.txt'")"
+# Since v0.88.0 registering a file deletes its request, so only abandoned uploads (issued, never
+# registered) leave rows. Issue two, make one old.
+issue_only() {
+  curl -s -X POST "$POSTGREST_URL/rpc/request_file_upload" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"\",\"p_file_name\":\"$1\",\"p_file_type\":\"text/plain\"}" > /dev/null
+}
+issue_only abandoned-old.txt; issue_only abandoned-recent.txt
+q "UPDATE metadata.file_upload_requests SET created_at = now() - interval '25 hours' WHERE file_name = 'abandoned-old.txt'" > /dev/null
+check "H. upload requests older than 24 hours are deleted" "0" "$(wait_for "SELECT count(*) FROM metadata.file_upload_requests WHERE file_name = 'abandoned-old.txt'" 0)"
+check "H. recent ones are kept" "t" "$(q "SELECT count(*) > 0 FROM metadata.file_upload_requests WHERE file_name = 'abandoned-recent.txt'")"
+q "DELETE FROM metadata.file_upload_requests WHERE file_name = 'abandoned-recent.txt'" > /dev/null
 
 # -----------------------------------------------------------------------------
 section "I. Idempotency"

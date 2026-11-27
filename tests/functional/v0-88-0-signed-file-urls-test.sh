@@ -23,13 +23,19 @@
 # Usage:
 #   ./tests/functional/v0-88-0-signed-file-urls-test.sh
 #
+# With POSTGREST_URL and Keycloak reachable (not SKIP_API=1), a live section uploads a file through the
+# API and checks the store: signed GET 200, tampered or unsigned GET 403, the download's disposition.
+#
 # Environment overrides (the connecting user must be a superuser):
 #   DATABASE_URL   postgres://postgres:securepassword123@localhost:15432/civic_os_db
+#   POSTGREST_URL  http://localhost:3000     KEYCLOAK_URL  http://localhost:8082     SKIP_API=1
 # =============================================================================
 
 set -euo pipefail
 
 DATABASE_URL="${DATABASE_URL:-postgres://postgres:securepassword123@localhost:15432/civic_os_db}"
+POSTGREST_URL="${POSTGREST_URL:-http://localhost:3000}"
+KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8082}"
 
 if psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -o /dev/null <<'SQL'
 BEGIN;
@@ -310,3 +316,41 @@ else
   echo "FAIL: signed file URL checks failed (see error above)"
   exit 1
 fi
+
+# -----------------------------------------------------------------------------
+# Live: upload through the API and read the object back
+# -----------------------------------------------------------------------------
+if [ "${SKIP_API:-}" = "1" ] || ! curl -sf -o /dev/null "$POSTGREST_URL/" 2>/dev/null; then
+  echo "SKIP: live checks (SKIP_API or $POSTGREST_URL unreachable)"
+  exit 0
+fi
+
+fail=0
+TOKEN=$(curl -s -X POST "$KEYCLOAK_URL/realms/civic-os-dev/protocol/openid-connect/token" \
+  -d grant_type=password -d client_id=civic-os-dev-client -d username=testadmin -d password=testadmin |
+  python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
+H=(-H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json")
+curl -s -o /dev/null -X POST "${H[@]}" -d '{}' "$POSTGREST_URL/rpc/refresh_current_user"
+TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+printf 'signed url check %s\n' "$(date +%s)" > "$TMP/check.txt"
+
+ISSUED=$(curl -s -X POST "${H[@]}" -d '{"p_entity_type":"Issue","p_entity_id":"1","p_file_name":"check é.txt","p_file_type":"text/plain"}' "$POSTGREST_URL/rpc/request_file_upload")
+jv() { echo "$ISSUED" | python3 -c "import sys,json;print(json.load(sys.stdin)['$1'])"; }
+URL=$(jv url) || { echo "FAIL: request_file_upload: $ISSUED"; exit 1; }
+FILE_ID=$(jv file_id); KEY=$(jv key); BUCKET=$(jv bucket)
+[ "$(curl -s -o /dev/null -w '%{http_code}' -X PUT -H 'Content-Type: text/plain' --data-binary @"$TMP/check.txt" "$URL")" = 200 ] || { echo "FAIL: PUT to the presigned URL"; fail=1; }
+TAMPERED_KEY="Issue/1/$FILE_ID/original.png"
+CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "${H[@]}" -d "{\"p_id\":\"$FILE_ID\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"1\",\"p_file_name\":\"x\",\"p_file_type\":\"text/plain\",\"p_file_size\":1,\"p_s3_bucket\":\"$BUCKET\",\"p_s3_original_key\":\"$TAMPERED_KEY\"}" "$POSTGREST_URL/rpc/create_file_record")
+# 42501: PostgREST answers 401 or 403 depending on version and token
+case "$CODE" in 401|403) ;; *) echo "FAIL: a tampered key was not refused (HTTP $CODE)"; fail=1 ;; esac
+REC=$(curl -s -X POST "${H[@]}" -d "{\"p_id\":\"$FILE_ID\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"1\",\"p_file_name\":\"check é.txt\",\"p_file_type\":\"text/plain\",\"p_file_size\":20,\"p_s3_bucket\":\"$BUCKET\",\"p_s3_original_key\":\"$KEY\"}" "$POSTGREST_URL/rpc/create_file_record")
+VIEW_URL=$(echo "$REC" | python3 -c "import sys,json;print(json.load(sys.stdin)['url'])") || { echo "FAIL: create_file_record: $REC"; exit 1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' "$VIEW_URL")" = 200 ] || { echo "FAIL: signed GET"; fail=1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' "${VIEW_URL%?}$( [ "${VIEW_URL: -1}" = 0 ] && echo 1 || echo 0)")" = 403 ] || { echo "FAIL: a tampered signature was accepted"; fail=1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' "${VIEW_URL%%\?*}")" = 403 ] || { echo "FAIL: the unsigned object URL is readable"; fail=1; }
+DL=$(curl -s "${H[@]}" "$POSTGREST_URL/files?id=eq.$FILE_ID&select=download_url" | python3 -c "import sys,json;print(json.load(sys.stdin)[0]['download_url'])")
+curl -s -D - -o /dev/null "$DL" | grep -qi "content-disposition: attachment; filename=\"check _.txt\"; filename\*=UTF-8''check%20%C3%A9.txt" ||
+  { echo "FAIL: download_url does not set the expected Content-Disposition"; fail=1; }
+psql "$DATABASE_URL" -qc "DELETE FROM metadata.files WHERE id = '$FILE_ID'" > /dev/null
+
+[ $fail = 0 ] && echo "PASS: live upload, signed GET, tampered and unsigned GETs refused, download disposition, tampered key refused" || exit 1

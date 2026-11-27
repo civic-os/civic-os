@@ -222,7 +222,7 @@
                 <!-- Filename -->
                 <td>
                   <a [attr.href]="file.url ?? null" target="_blank" rel="noopener" (click)="openFile($event, file)"
-                    class="link link-primary text-sm" [title]="file.file_name">
+                    class="link link-primary text-sm matomo_ignore" [title]="file.file_name">
                     {{ file.file_name }}
                   </a>
                 </td>

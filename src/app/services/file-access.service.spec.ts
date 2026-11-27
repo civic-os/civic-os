@@ -47,11 +47,14 @@ describe('FileAccessService', () => {
 
     it('downloads with a download_url read at the moment of the click', async () => {
         const clicked: string[] = [];
-        vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { clicked.push(this.href); });
+        let clickedClass = '';
+        vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { clicked.push(this.href); clickedClass = this.className; });
         const result = service.download({ id: 'f1' });
         await flushUrls([{ url: 'https://s3.test/b/k?sig=view', download_url: 'https://s3.test/b/k?sig=download' }]);
         expect(await result).toBe(true);
         expect(clicked).toEqual(['https://s3.test/b/k?sig=download']);
+        // never reported by analytics link tracking (a signed URL opens the file until it expires)
+        expect(clickedClass).toBe('matomo_ignore');
         expect(document.querySelector('a[href*="sig=download"]')).toBeNull();
     });
 
