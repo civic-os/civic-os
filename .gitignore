@@ -49,6 +49,7 @@ Thumbs.db
 
 # Example environment files
 examples/*/.env
+examples/*/spaces.env
 
 # Instance configs (managed in private deployments repo)
 instances/

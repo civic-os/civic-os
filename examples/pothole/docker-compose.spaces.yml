@@ -1,0 +1,34 @@
+# Copyright (C) 2023-2026 Civic OS, L3C
+# AGPL-3.0-or-later
+#
+# Points the pothole stack's file storage at a DigitalOcean Spaces bucket instead of the local RustFS,
+# to check what RustFS cannot show: RustFS ignores object ACLs (by design), so only a real Spaces
+# bucket proves that private objects refuse unsigned reads, that public-read static assets load
+# directly, that `privatize-acls` closes existing objects, and that the bucket's CORS rule is right.
+#
+# Use a SCRATCH bucket made for this check, never a bucket that holds an instance's files: the check
+# uploads, re-ACLs and leaves test objects. Values come from spaces.env (copy spaces.env.example;
+# spaces.env is gitignored and holds the key).
+#
+#   cd examples/pothole
+#   docker compose -p spaces-check --env-file .env --env-file spaces.env \
+#     -f docker-compose.yml -f docker-compose.frontend-image.yml -f docker-compose.spaces.yml up -d --build
+#
+# The bucket needs a CORS rule for http://localhost:4200 first (control panel; spaces-cors.xml holds it).
+# See docs/development/FILE_STORAGE.md
+# (Checking the Production Image and DigitalOcean Spaces) for the steps and what to verify.
+services:
+  consolidated-worker:
+    environment:
+      # Server-side and browser-facing endpoints are the same for Spaces (path-style URLs)
+      - S3_ENDPOINT=${SPACES_ENDPOINT:?set SPACES_ENDPOINT in spaces.env}
+      - S3_PUBLIC_ENDPOINT=${SPACES_ENDPOINT:?set SPACES_ENDPOINT in spaces.env}
+      - S3_BUCKET=${SPACES_BUCKET:?set SPACES_BUCKET in spaces.env}
+      - S3_ACCESS_KEY_ID=${SPACES_ACCESS_KEY_ID:?set SPACES_ACCESS_KEY_ID in spaces.env}
+      - S3_SECRET_ACCESS_KEY=${SPACES_SECRET_ACCESS_KEY:?set SPACES_SECRET_ACCESS_KEY in spaces.env}
+      - S3_REGION=${SPACES_REGION:-us-east-1}
+
+  frontend:
+    environment:
+      S3_ENDPOINT: ${SPACES_ENDPOINT:?set SPACES_ENDPOINT in spaces.env}
+      S3_BUCKET: ${SPACES_BUCKET:?set SPACES_BUCKET in spaces.env}
