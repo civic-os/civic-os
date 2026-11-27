@@ -10,7 +10,7 @@
           "path": "/WorkPackage",
           "query": {
             "order": "display_name.asc,id.asc",
-            "select": "display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -26,7 +26,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
+              "url": "/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -84,7 +84,7 @@
           "query": {
             "id": "eq.<WorkPackage:1>",
             "order": "display_name.asc,id.asc",
-            "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -97,7 +97,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:1>"
+              "url": "/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:1>"
             }
           ]
         },
@@ -417,7 +417,7 @@
           "query": {
             "id": "eq.<WorkPackage:1>",
             "order": "display_name.asc,id.asc",
-            "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -430,28 +430,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:1>"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:7>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:7>"
+              "url": "/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:1>"
             }
           ]
         },
@@ -490,24 +469,24 @@
             "p_file_name": "final-report.pdf",
             "p_file_size": 598,
             "p_file_type": "application/pdf",
-            "p_id": "<uuid:8>",
+            "p_id": "<uuid:4>",
             "p_property_name": "report_pdf",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf",
+            "p_s3_original_key": "WorkPackage/<WorkPackage:1>/<uuid:4>/original.pdf",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:8>\",\"p_entity_type\":\"WorkPackage\",\"p_entity_id\":\"<WorkPackage:1>\",\"p_file_name\":\"final-report.pdf\",\"p_file_type\":\"application/pdf\",\"p_file_size\":598,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"report_pdf\"}",
+              "body": "{\"p_id\":\"<uuid:4>\",\"p_entity_type\":\"WorkPackage\",\"p_entity_id\":\"<WorkPackage:1>\",\"p_file_name\":\"final-report.pdf\",\"p_file_type\":\"application/pdf\",\"p_file_size\":598,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"WorkPackage/<WorkPackage:1>/<uuid:4>/original.pdf\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"report_pdf\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -526,7 +505,7 @@
           "raw": [
             {
               "body": "{\"p_entity_type\":\"WorkPackage\",\"p_entity_id\":\"<WorkPackage:1>\",\"p_file_name\":\"final-report.pdf\",\"p_file_type\":\"application/pdf\"}",
-              "url": "/rpc/request_upload_url"
+              "url": "/rpc/request_file_upload"
             }
           ]
         },
@@ -555,7 +534,7 @@
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/WorkPackage/<WorkPackage:1>/<uuid:8>/original.pdf -> 200"
+        "PUT /civic-os-files/WorkPackage/<WorkPackage:1>/<uuid:4>/original.pdf -> 200"
       ]
     },
     {
@@ -579,14 +558,14 @@
             "cost": 1250.5,
             "display_name": "Harness Resurfacing Package",
             "quote_due_date": "2031-03-14T18:30:00.000Z",
-            "report_pdf": "<uuid:8>",
+            "report_pdf": "<uuid:4>",
             "status": 14
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"display_name\":\"Harness Resurfacing Package\",\"quote_due_date\":\"2031-03-14T18:30:00.000Z\",\"status\":14,\"cost\":1250.5,\"report_pdf\":\"<uuid:8>\",\"attachment\":null}",
+              "body": "{\"display_name\":\"Harness Resurfacing Package\",\"quote_due_date\":\"2031-03-14T18:30:00.000Z\",\"status\":14,\"cost\":1250.5,\"report_pdf\":\"<uuid:4>\",\"attachment\":null}",
               "url": "/WorkPackage?id=eq.<WorkPackage:1>"
             }
           ]
@@ -652,7 +631,7 @@
           "query": {
             "id": "eq.<WorkPackage:1>",
             "order": "display_name.asc,id.asc",
-            "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -665,7 +644,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:1>"
+              "url": "/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:1>"
             }
           ]
         },

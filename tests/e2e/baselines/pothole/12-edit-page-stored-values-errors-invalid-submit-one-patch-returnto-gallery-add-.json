@@ -17,7 +17,7 @@
           "query": {
             "id": "eq.<WorkPackage:3>",
             "order": "display_name.asc,id.asc",
-            "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -30,7 +30,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:3>"
+              "url": "/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:3>"
             }
           ]
         },
@@ -438,7 +438,7 @@
           "query": {
             "id": "eq.<WorkPackage:3>",
             "order": "display_name.asc,id.asc",
-            "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -451,7 +451,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:3>"
+              "url": "/WorkPackage?select=created_at,updated_at,display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:3>"
             }
           ]
         },
@@ -529,7 +529,7 @@
           "path": "/WorkPackage",
           "query": {
             "order": "display_name.asc,id.asc",
-            "select": "display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -545,7 +545,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc"
+              "url": "/WorkPackage?select=display_name,quote_due_date,status:statuses!status(id,display_name,color,status_key),cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc"
             }
           ]
         },
@@ -555,7 +555,7 @@
           "query": {
             "id": "eq.<WorkPackage:4>",
             "order": "display_name.asc,id.asc",
-            "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -568,7 +568,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:4>"
+              "url": "/WorkPackage?select=display_name,quote_due_date,status,cost,report_pdf:files!report_pdf(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),attachment:files!attachment(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<WorkPackage:4>"
             }
           ]
         },
@@ -918,7 +918,7 @@
           "query": {
             "id": "eq.<Issue:17>",
             "order": "display_name.asc,id.asc",
-            "select": "description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+            "select": "description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -931,7 +931,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.<Issue:17>"
+              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),id&order=display_name.asc,id.asc&id=eq.<Issue:17>"
             }
           ]
         },
@@ -1003,7 +1003,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:12>"
+            "id": "eq.<uuid:7>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1016,7 +1016,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:12>"
+              "url": "/files?id=eq.<uuid:7>"
             }
           ]
         },
@@ -1024,7 +1024,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:13>"
+            "id": "eq.<uuid:8>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1037,7 +1037,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:13>"
+              "url": "/files?id=eq.<uuid:8>"
             }
           ]
         },
@@ -1082,48 +1082,6 @@
             {
               "body": null,
               "url": "/photo_gallery_config?table_name=eq.Issue&column_name=eq.photos"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:14>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:14>"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:15>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:15>"
             }
           ]
         },
@@ -1333,14 +1291,14 @@
             "p_column_name": "photos",
             "p_entity_id": "<Issue:17>",
             "p_entity_type": "Issue",
-            "p_file_id": "<uuid:12>",
+            "p_file_id": "<uuid:7>",
             "p_sort_order": 0
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:12>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:7>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image"
             }
           ]
@@ -1361,14 +1319,14 @@
             "p_column_name": "photos",
             "p_entity_id": "<Issue:17>",
             "p_entity_type": "Issue",
-            "p_file_id": "<uuid:13>",
+            "p_file_id": "<uuid:8>",
             "p_sort_order": 1
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:13>\",\"p_sort_order\":1,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:8>\",\"p_sort_order\":1,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image"
             }
           ]
@@ -1389,24 +1347,24 @@
             "p_file_name": "gallery-a.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:12>",
+            "p_id": "<uuid:7>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<Issue:17>/<uuid:12>/original.png",
+            "p_s3_original_key": "Issue/<Issue:17>/<uuid:7>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:12>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:17>/<uuid:12>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:7>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:17>/<uuid:7>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1425,7 +1383,7 @@
           "raw": [
             {
               "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-a.png\",\"p_file_type\":\"image/png\"}",
-              "url": "/rpc/request_upload_url"
+              "url": "/rpc/request_file_upload"
             }
           ]
         },
@@ -1445,24 +1403,24 @@
             "p_file_name": "gallery-b.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:13>",
+            "p_id": "<uuid:8>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<Issue:17>/<uuid:13>/original.png",
+            "p_s3_original_key": "Issue/<Issue:17>/<uuid:8>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:13>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:17>/<uuid:13>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:8>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:17>/<uuid:8>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1481,7 +1439,7 @@
           "raw": [
             {
               "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-b.png\",\"p_file_type\":\"image/png\"}",
-              "url": "/rpc/request_upload_url"
+              "url": "/rpc/request_file_upload"
             }
           ]
         },
@@ -1575,8 +1533,8 @@
         "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
       },
       "minio": [
-        "PUT /civic-os-files/Issue/<Issue:17>/<uuid:12>/original.png -> 200",
-        "PUT /civic-os-files/Issue/<Issue:17>/<uuid:13>/original.png -> 200"
+        "PUT /civic-os-files/Issue/<Issue:17>/<uuid:7>/original.png -> 200",
+        "PUT /civic-os-files/Issue/<Issue:17>/<uuid:8>/original.png -> 200"
       ]
     },
     {
@@ -1588,7 +1546,7 @@
           "query": {
             "id": "eq.<Issue:17>",
             "order": "display_name.asc,id.asc",
-            "select": "description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+            "select": "description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1601,7 +1559,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.<Issue:17>"
+              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),id&order=display_name.asc,id.asc&id=eq.<Issue:17>"
             }
           ]
         },
@@ -1673,7 +1631,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:16>"
+            "id": "eq.<uuid:9>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1686,7 +1644,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:16>"
+              "url": "/files?id=eq.<uuid:9>"
             }
           ]
         },
@@ -1731,27 +1689,6 @@
             {
               "body": null,
               "url": "/photo_gallery_config?table_name=eq.Issue&column_name=eq.photos"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:17>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:17>"
             }
           ]
         },
@@ -1931,7 +1868,7 @@
             "location": null,
             "observed_at": null,
             "photo": null,
-            "photos": "<uuid:18>",
+            "photos": "<uuid:10>",
             "severity_level": 3,
             "status": 5,
             "work_package": null
@@ -1940,7 +1877,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"description\":null,\"contact_email\":null,\"contact_phone\":null,\"display_name\":\"Harness Edit Gallery Issue\",\"status\":5,\"created_user\":\"<user:testadmin>\",\"work_package\":null,\"location\":null,\"severity_level\":3,\"observed_at\":null,\"photo\":null,\"photos\":\"<uuid:18>\"}",
+              "body": "{\"description\":null,\"contact_email\":null,\"contact_phone\":null,\"display_name\":\"Harness Edit Gallery Issue\",\"status\":5,\"created_user\":\"<user:testadmin>\",\"work_package\":null,\"location\":null,\"severity_level\":3,\"observed_at\":null,\"photo\":null,\"photos\":\"<uuid:10>\"}",
               "url": "/Issue?id=eq.<Issue:17>"
             }
           ]
@@ -1961,14 +1898,14 @@
             "p_column_name": "photos",
             "p_entity_id": "<Issue:17>",
             "p_entity_type": "Issue",
-            "p_file_id": "<uuid:16>",
+            "p_file_id": "<uuid:9>",
             "p_sort_order": 0
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:16>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_column_name\":\"photos\",\"p_file_id\":\"<uuid:9>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image"
             }
           ]
@@ -1989,24 +1926,24 @@
             "p_file_name": "gallery-c.png",
             "p_file_size": 2636,
             "p_file_type": "image/png",
-            "p_id": "<uuid:16>",
+            "p_id": "<uuid:9>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<Issue:17>/<uuid:16>/original.png",
+            "p_s3_original_key": "Issue/<Issue:17>/<uuid:9>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:16>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\",\"p_file_size\":2636,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:17>/<uuid:16>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:9>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\",\"p_file_size\":2636,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<Issue:17>/<uuid:9>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -2025,7 +1962,7 @@
           "raw": [
             {
               "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:17>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\"}",
-              "url": "/rpc/request_upload_url"
+              "url": "/rpc/request_file_upload"
             }
           ]
         },
@@ -2062,14 +1999,14 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_file_id": "<uuid:12>",
-            "p_gallery_id": "<uuid:18>"
+            "p_file_id": "<uuid:7>",
+            "p_gallery_id": "<uuid:10>"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_gallery_id\":\"<uuid:18>\",\"p_file_id\":\"<uuid:12>\"}",
+              "body": "{\"p_gallery_id\":\"<uuid:10>\",\"p_file_id\":\"<uuid:7>\"}",
               "url": "/rpc/remove_gallery_image"
             }
           ]
@@ -2086,16 +2023,16 @@
           },
           "body": {
             "p_file_ids": [
-              "<uuid:16>",
-              "<uuid:13>"
+              "<uuid:9>",
+              "<uuid:8>"
             ],
-            "p_gallery_id": "<uuid:18>"
+            "p_gallery_id": "<uuid:10>"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_gallery_id\":\"<uuid:18>\",\"p_file_ids\":[\"<uuid:16>\",\"<uuid:13>\"]}",
+              "body": "{\"p_gallery_id\":\"<uuid:10>\",\"p_file_ids\":[\"<uuid:9>\",\"<uuid:8>\"]}",
               "url": "/rpc/reorder_gallery_images"
             }
           ]
@@ -2168,7 +2105,7 @@
         "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
       },
       "minio": [
-        "PUT /civic-os-files/Issue/<Issue:17>/<uuid:16>/original.png -> 200"
+        "PUT /civic-os-files/Issue/<Issue:17>/<uuid:9>/original.png -> 200"
       ]
     },
     {
@@ -2180,7 +2117,7 @@
           "query": {
             "id": "eq.<Issue:17>",
             "order": "display_name.asc,id.asc",
-            "select": "description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id"
+            "select": "description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -2193,7 +2130,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),id&order=display_name.asc,id.asc&id=eq.<Issue:17>"
+              "url": "/Issue?select=description,contact_email,contact_phone,display_name,status,created_user,work_package,location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),id&order=display_name.asc,id.asc&id=eq.<Issue:17>"
             }
           ]
         },

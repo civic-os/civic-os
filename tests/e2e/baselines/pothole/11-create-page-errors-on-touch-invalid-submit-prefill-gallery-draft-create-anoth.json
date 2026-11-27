@@ -791,7 +791,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:9>"
+            "id": "eq.<uuid:5>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -804,7 +804,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:9>"
+              "url": "/files?id=eq.<uuid:5>"
             }
           ]
         },
@@ -849,27 +849,6 @@
             {
               "body": null,
               "url": "/photo_gallery_config?table_name=eq.Issue&column_name=eq.photos"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:10>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:10>"
             }
           ]
         },
@@ -1073,15 +1052,15 @@
           "body": {
             "p_alt_text": null,
             "p_caption": null,
-            "p_file_id": "<uuid:9>",
-            "p_gallery_id": "<uuid:11>",
+            "p_file_id": "<uuid:5>",
+            "p_gallery_id": "<uuid:6>",
             "p_sort_order": 0
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_gallery_id\":\"<uuid:11>\",\"p_file_id\":\"<uuid:9>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_gallery_id\":\"<uuid:6>\",\"p_file_id\":\"<uuid:5>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image_by_id"
             }
           ]
@@ -1100,13 +1079,13 @@
             "p_column_name": "photos",
             "p_entity_id": "<Issue:15>",
             "p_entity_type": "Issue",
-            "p_gallery_id": "<uuid:11>"
+            "p_gallery_id": "<uuid:6>"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_gallery_id\":\"<uuid:11>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:15>\",\"p_column_name\":\"photos\"}",
+              "body": "{\"p_gallery_id\":\"<uuid:6>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<Issue:15>\",\"p_column_name\":\"photos\"}",
               "url": "/rpc/link_gallery_to_entity"
             }
           ]
@@ -1122,29 +1101,29 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<uuid:11>",
+            "p_entity_id": "<uuid:6>",
             "p_entity_type": "Issue",
             "p_file_name": "gallery-c.png",
             "p_file_size": 2636,
             "p_file_type": "image/png",
-            "p_id": "<uuid:9>",
+            "p_id": "<uuid:5>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "Issue/<uuid:11>/<uuid:9>/original.png",
+            "p_s3_original_key": "Issue/<uuid:6>/<uuid:5>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:9>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<uuid:11>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\",\"p_file_size\":2636,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<uuid:11>/<uuid:9>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:5>\",\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<uuid:6>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\",\"p_file_size\":2636,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"Issue/<uuid:6>/<uuid:5>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1153,7 +1132,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<uuid:11>",
+            "p_entity_id": "<uuid:6>",
             "p_entity_type": "Issue",
             "p_file_name": "gallery-c.png",
             "p_file_type": "image/png"
@@ -1162,8 +1141,8 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<uuid:11>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\"}",
-              "url": "/rpc/request_upload_url"
+              "body": "{\"p_entity_type\":\"Issue\",\"p_entity_id\":\"<uuid:6>\",\"p_file_name\":\"gallery-c.png\",\"p_file_type\":\"image/png\"}",
+              "url": "/rpc/request_file_upload"
             }
           ]
         },
@@ -1280,7 +1259,7 @@
         "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
       },
       "minio": [
-        "PUT /civic-os-files/Issue/<uuid:11>/<uuid:9>/original.png -> 200"
+        "PUT /civic-os-files/Issue/<uuid:6>/<uuid:5>/original.png -> 200"
       ]
     },
     {
@@ -1347,7 +1326,7 @@
           "query": {
             "id": "eq.<Issue:16>",
             "order": "display_name.asc,id.asc",
-            "select": "created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
+            "select": "created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1360,7 +1339,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/Issue?select=created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.<Issue:16>"
+              "url": "/Issue?select=created_at,description,contact_email,updated_at,contact_phone,display_name,status:statuses!status(id,display_name,color,status_key),created_user:civic_os_users!created_user(id,display_name,full_name,phone,email),work_package:WorkPackage!work_package(id,display_name),location:location_text,severity_level,observed_at,photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color)),id&order=display_name.asc,id.asc&id=eq.<Issue:16>"
             }
           ]
         },

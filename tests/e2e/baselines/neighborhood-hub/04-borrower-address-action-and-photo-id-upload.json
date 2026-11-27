@@ -132,7 +132,7 @@
           "query": {
             "id": "eq.<borrowers:1>",
             "order": "display_name.asc,id.asc",
-            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -145,7 +145,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
+              "url": "/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
             }
           ]
         },
@@ -585,7 +585,7 @@
           "query": {
             "id": "eq.<borrowers:1>",
             "order": "display_name.asc,id.asc",
-            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -598,7 +598,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
+              "url": "/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
             }
           ]
         },
@@ -665,7 +665,7 @@
           "query": {
             "id": "eq.<borrowers:1>",
             "order": "display_name.asc,id.asc",
-            "select": "status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id"
+            "select": "status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),display_name,id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -678,7 +678,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/borrowers?select=status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
+              "url": "/borrowers?select=status_id,borrower_type,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),display_name,id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
             }
           ]
         },
@@ -756,7 +756,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:5>",
+            "id": "eq.<uuid:3>",
             "select": "thumbnail_status"
           },
           "headers": {
@@ -770,7 +770,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:5>&select=thumbnail_status"
+              "url": "/files?id=eq.<uuid:3>&select=thumbnail_status"
             }
           ]
         },
@@ -778,7 +778,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:5>"
+            "id": "eq.<uuid:3>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -791,28 +791,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:5>"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:6>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:6>"
+              "url": "/files?id=eq.<uuid:3>"
             }
           ]
         },
@@ -832,24 +811,24 @@
             "p_file_name": "photo-id.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:5>",
+            "p_id": "<uuid:3>",
             "p_property_name": "photo_id",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "borrowers/<borrowers:1>/<uuid:5>/original.png",
+            "p_s3_original_key": "borrowers/<borrowers:1>/<uuid:3>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:5>\",\"p_entity_type\":\"borrowers\",\"p_entity_id\":\"<borrowers:1>\",\"p_file_name\":\"photo-id.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"borrowers/<borrowers:1>/<uuid:5>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photo_id\"}",
+              "body": "{\"p_id\":\"<uuid:3>\",\"p_entity_type\":\"borrowers\",\"p_entity_id\":\"<borrowers:1>\",\"p_file_name\":\"photo-id.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"borrowers/<borrowers:1>/<uuid:3>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photo_id\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -868,14 +847,14 @@
           "raw": [
             {
               "body": "{\"p_entity_type\":\"borrowers\",\"p_entity_id\":\"<borrowers:1>\",\"p_file_name\":\"photo-id.png\",\"p_file_type\":\"image/png\"}",
-              "url": "/rpc/request_upload_url"
+              "url": "/rpc/request_file_upload"
             }
           ]
         }
       ],
       "keycloak": {},
       "minio": [
-        "PUT /civic-os-files/borrowers/<borrowers:1>/<uuid:5>/original.png -> 200"
+        "PUT /civic-os-files/borrowers/<borrowers:1>/<uuid:3>/original.png -> 200"
       ]
     },
     {
@@ -900,7 +879,7 @@
             "city": "Flint",
             "liability_waiver": null,
             "phone_verified": false,
-            "photo_id": "<uuid:5>",
+            "photo_id": "<uuid:3>",
             "state": "MI",
             "status_id": 5,
             "street": "412 Harness Ave",
@@ -910,7 +889,7 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"status_id\":5,\"borrower_type\":null,\"phone_verified\":false,\"street\":\"412 Harness Ave\",\"city\":\"Flint\",\"state\":\"MI\",\"zip\":\"48503\",\"photo_id\":\"<uuid:5>\",\"address_proof\":null,\"liability_waiver\":null}",
+              "body": "{\"status_id\":5,\"borrower_type\":null,\"phone_verified\":false,\"street\":\"412 Harness Ave\",\"city\":\"Flint\",\"state\":\"MI\",\"zip\":\"48503\",\"photo_id\":\"<uuid:3>\",\"address_proof\":null,\"liability_waiver\":null}",
               "url": "/borrowers?id=eq.<borrowers:1>"
             }
           ]
@@ -1024,7 +1003,7 @@
           "query": {
             "id": "eq.<borrowers:1>",
             "order": "display_name.asc,id.asc",
-            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id"
+            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1037,7 +1016,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
+              "url": "/borrowers?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,status_id:statuses!status_id(id,display_name,color,status_key),borrower_type:categories!borrower_type(id,display_name,color),phone,email,phone_verified,street,city,state,zip,photo_id:files!photo_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),liability_waiver:files!liability_waiver(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.<borrowers:1>"
             }
           ]
         },

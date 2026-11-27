@@ -1,8 +1,8 @@
 {
   "example": "pothole",
-  "baseSha": "9d173973a7259a52639701172a4eec60b1e3a48a",
-  "exampleTree": "ea5b8a26d5083fe626da93eaded9f557b2cb0e1e",
-  "migrationsTree": "0f511aa97a1ef70cdbffcab3732c8146bf03921b",
+  "baseSha": "986a0feba8d03dfbb4d13e11d2bca8b618fcc979",
+  "exampleTree": "556a447c283c0a9e9363d102ccfff25177735626",
+  "migrationsTree": "7b6b34d6be45a2e7f023d335929835bb0ce4a186",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
   "timezone": "America/New_York",
