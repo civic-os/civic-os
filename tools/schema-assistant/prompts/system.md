@@ -85,7 +85,8 @@ Every entity table MUST have:
 - **Match the existing pattern.** If the schema context shows PascalCase table names (e.g., `"Issue"`, `"WorkPackage"`), create new tables in PascalCase too. If it shows snake_case (e.g., `work_orders`), use snake_case. Consistency within a schema is more important than any single convention.
 - **Existing tables**: Use the **exact table name** from the schema context, preserving case and quoting. If the schema shows `"Issue"`, use `public."Issue"` — do NOT rename it to `public.issues`.
 - **Columns**: `snake_case` (e.g., `assigned_to`, `due_date`, `display_name`)
-- **If no schema context is provided** (greenfield): default to `snake_case` for table names.
+- **If no schema context is provided** (greenfield): `snake_case`, singular nouns (`work_order`, `inspection`). The examples in this prompt use plural `work_orders`; follow this rule, not the example spelling.
+- **Entity display names are singular** (`'Work Order'`): pages build "Add {entity}", "{entity}: {record}" and "Search {entity}..." from them. The plural (`'Work Orders'`) goes on the entity's menu node as its label (see Sidebar Menu).
 - **Indexes**: `idx_{table}_{column}` (e.g., `idx_work_orders_status`)
 - **Constraints**: `{table}_{column}_fkey` for FKs, `{table}_{description}_check` for CHECKs
 - **Policies**: `"{table}: {crud} permission"` (e.g., `"work_orders: read permission"`)
@@ -289,7 +290,7 @@ ALTER TABLE public.invoices
 ```sql
 -- Entity display configuration
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
-VALUES ('work_orders', 'Work Orders', 'Maintenance work order tracking', 10)
+VALUES ('work_orders', 'Work Order', 'Maintenance work order tracking', 10)
 ON CONFLICT (table_name) DO UPDATE
   SET display_name = EXCLUDED.display_name, description = EXCLUDED.description;
 
@@ -307,7 +308,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 ## Sidebar Menu (v0.81.0)
 
-The sidebar is a tree in `metadata.menu_nodes`. An entity with no node still appears at the root after every root node, ordered by its `sort_order` then its table name, so a new table needs no menu SQL. There is no `show_in_sidebar` column and `upsert_entity_metadata()` has no `p_show_in_sidebar` parameter; do not write either. To hide a table from the sidebar (helper, step or admin-only tables), upsert a hidden node. To group tables, add a heading node and place entity nodes under it. Rules: at most 3 levels; an entity node's `node_key` equals its table name; a heading's `node_key` matches `^[a-z][a-z0-9_]*$` and needs a `display_name`; headings sit at the root or under a heading; one node per entity. Insert parents before children. Since v0.83.0 a dashboard can be in the menu: a `dashboard` node (`node_key` = `'dashboard:' || id`, `dashboard_id` set, no `target_key`, nothing nested under it) links to it, or a heading's `dashboard_id` makes the heading's title open it; one place per dashboard, resolve the id by `display_name`, and it shows only to roles that can see the dashboard.
+The sidebar is a tree in `metadata.menu_nodes`. An entity with no node still appears at the root after every root node, ordered by its `sort_order` then its table name, so a new table needs no menu SQL. There is no `show_in_sidebar` column and `upsert_entity_metadata()` has no `p_show_in_sidebar` parameter; do not write either. To hide a table from the sidebar (helper, step or admin-only tables), upsert a hidden node. To group tables, add a heading node and place entity nodes under it. Rules: at most 3 levels; an entity node's `node_key` equals its table name; a heading's `node_key` matches `^[a-z][a-z0-9_]*$` and needs a `display_name`; headings sit at the root or under a heading; one node per entity. Insert parents before children. Since v0.83.0 a dashboard can be in the menu: a `dashboard` node (`node_key` = `'dashboard:' || id`, `dashboard_id` set, no `target_key`, nothing nested under it) links to it, or a heading's `dashboard_id` makes the heading's title open it; one place per dashboard, resolve the id by `display_name`, and it shows only to roles that can see the dashboard. Give each entity node the plural as its `display_name` (the entity's own name is singular); an entity with no node shows under its singular name.
 ```sql
 -- Hide a table from the sidebar
 INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, is_hidden)
@@ -317,9 +318,9 @@ ON CONFLICT (node_key) DO UPDATE SET is_hidden = TRUE;
 -- Group two tables under a heading
 INSERT INTO metadata.menu_nodes (node_key, node_kind, display_name, sort_order)
 VALUES ('operations', 'heading', 'Operations', 20);
-INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, parent_node_key, sort_order)
-VALUES ('work_orders', 'entity', 'work_orders', 'operations', 10),
-       ('inspections', 'entity', 'inspections', 'operations', 20);
+INSERT INTO metadata.menu_nodes (node_key, node_kind, target_key, display_name, parent_node_key, sort_order)
+VALUES ('work_orders', 'entity', 'work_orders', 'Work Orders', 'operations', 10),
+       ('inspections', 'entity', 'inspections', 'Inspections', 'operations', 20);
 ```
 
 ## Instance Configuration Keys (v0.79.0)

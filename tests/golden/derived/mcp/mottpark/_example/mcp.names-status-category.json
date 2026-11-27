@@ -1,6 +1,46 @@
 {
-  "categories": {},
+  "categories": {
+    "sponsorship_tier": {
+      "1 Individual — $100": {"byDisplayName": "1", "byPaddedDisplayName": "1", "byUpperDisplayName": "1"},
+      "2 Corporate — $250": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byUpperDisplayName": "2"},
+      "3 Corporate — $500": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byUpperDisplayName": "3"},
+      "4 Corporate — $1,000": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byUpperDisplayName": "4"},
+      "5 Presenting Sponsor — $2,500": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byUpperDisplayName": "5"},
+      "6 Custom Amount": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byUpperDisplayName": "6"},
+      "7 In-Kind Gift": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byUpperDisplayName": "7"}
+    },
+    "tshirt_size": {
+      "10 S": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byUpperDisplayName": "10"},
+      "11 M": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byUpperDisplayName": "11"},
+      "12 L": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byUpperDisplayName": "12"},
+      "13 XL": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byUpperDisplayName": "13"},
+      "14 2XL": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byUpperDisplayName": "14"},
+      "15 3XL": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byUpperDisplayName": "15"}
+    },
+    "vendor_type": {
+      "8 Retail Vendor": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byUpperDisplayName": "8"},
+      "9 Nonprofit / Resource Group": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byUpperDisplayName": "9"}
+    },
+    "worth_it": {
+      "16 Yes": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byUpperDisplayName": "16"},
+      "17 No": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byUpperDisplayName": "17"},
+      "18 Other": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byUpperDisplayName": "18"}
+    }
+  },
   "statuses": {
+    "festival": {
+      "22 Planning": {"byDisplayName": "22", "byPaddedDisplayName": "22", "byStatusKey": "22", "byUpperDisplayName": "22", "statusKey": "planning"},
+      "23 Open": {"byDisplayName": "23", "byPaddedDisplayName": "23", "byStatusKey": "23", "byUpperDisplayName": "23", "statusKey": "open"},
+      "24 Closed": {"byDisplayName": "24", "byPaddedDisplayName": "24", "byStatusKey": "24", "byUpperDisplayName": "24", "statusKey": "closed"},
+      "25 Completed": {"byDisplayName": "25", "byPaddedDisplayName": "25", "byStatusKey": "25", "byUpperDisplayName": "25", "statusKey": "completed"}
+    },
+    "food_truck_application": {
+      "32 Pending": {"byDisplayName": "32", "byPaddedDisplayName": "32", "byStatusKey": "32", "byUpperDisplayName": "32", "statusKey": "pending"},
+      "33 Approved": {"byDisplayName": "33", "byPaddedDisplayName": "33", "byStatusKey": "33", "byUpperDisplayName": "33", "statusKey": "approved"},
+      "34 Paid": {"byDisplayName": "34", "byPaddedDisplayName": "34", "byStatusKey": "34", "byUpperDisplayName": "34", "statusKey": "paid"},
+      "35 Denied": {"byDisplayName": "35", "byPaddedDisplayName": "35", "byStatusKey": "35", "byUpperDisplayName": "35", "statusKey": "denied"},
+      "36 Withdrawn": {"byDisplayName": "36", "byPaddedDisplayName": "36", "byStatusKey": "36", "byUpperDisplayName": "36", "statusKey": "withdrawn"}
+    },
     "guided_form": {
       "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
       "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
@@ -28,6 +68,22 @@
       "7 Denied": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "denied"},
       "8 Cancelled": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "cancelled"},
       "9 Completed": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "completed"}
+    },
+    "sponsorship_application": {
+      "37 Pending": {"byDisplayName": "37", "byPaddedDisplayName": "37", "byStatusKey": "37", "byUpperDisplayName": "37", "statusKey": "pending"},
+      "38 Approved": {"byDisplayName": "38", "byPaddedDisplayName": "38", "byStatusKey": "38", "byUpperDisplayName": "38", "statusKey": "approved"},
+      "39 Paid": {"byDisplayName": "39", "byPaddedDisplayName": "39", "byStatusKey": "39", "byUpperDisplayName": "39", "statusKey": "paid"},
+      "40 In-Kind": {"byDisplayName": "40", "byPaddedDisplayName": "40", "byStatusKey": "40", "byUpperDisplayName": "40", "statusKey": "in_kind"},
+      "41 Denied": {"byDisplayName": "41", "byPaddedDisplayName": "41", "byStatusKey": "41", "byUpperDisplayName": "41", "statusKey": "denied"},
+      "42 Withdrawn": {"byDisplayName": "42", "byPaddedDisplayName": "42", "byStatusKey": "42", "byUpperDisplayName": "42", "statusKey": "withdrawn"}
+    },
+    "vendor_application": {
+      "26 Pending": {"byDisplayName": "26", "byPaddedDisplayName": "26", "byStatusKey": "26", "byUpperDisplayName": "26", "statusKey": "pending"},
+      "27 Approved": {"byDisplayName": "27", "byPaddedDisplayName": "27", "byStatusKey": "27", "byUpperDisplayName": "27", "statusKey": "approved"},
+      "28 Paid": {"byDisplayName": "28", "byPaddedDisplayName": "28", "byStatusKey": "28", "byUpperDisplayName": "28", "statusKey": "paid"},
+      "29 Waived": {"byDisplayName": "29", "byPaddedDisplayName": "29", "byStatusKey": "29", "byUpperDisplayName": "29", "statusKey": "waived"},
+      "30 Denied": {"byDisplayName": "30", "byPaddedDisplayName": "30", "byStatusKey": "30", "byUpperDisplayName": "30", "statusKey": "denied"},
+      "31 Withdrawn": {"byDisplayName": "31", "byPaddedDisplayName": "31", "byStatusKey": "31", "byUpperDisplayName": "31", "statusKey": "withdrawn"}
     }
   }
 }

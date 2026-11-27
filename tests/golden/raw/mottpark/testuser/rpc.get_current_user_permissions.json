@@ -1,6 +1,22 @@
 [
   {
     "permission": "read",
+    "table_name": "current_festival"
+  },
+  {
+    "permission": "create",
+    "table_name": "feedback_submission"
+  },
+  {
+    "permission": "read",
+    "table_name": "festival"
+  },
+  {
+    "permission": "create",
+    "table_name": "food_truck_application"
+  },
+  {
+    "permission": "read",
     "table_name": "public_calendar_events"
   },
   {
@@ -14,5 +30,13 @@
   {
     "permission": "read",
     "table_name": "reservation_requests:notes"
+  },
+  {
+    "permission": "create",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "permission": "create",
+    "table_name": "vendor_application"
   }
 ]

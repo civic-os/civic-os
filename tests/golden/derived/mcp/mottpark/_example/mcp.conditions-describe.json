@@ -1,6 +1,108 @@
 {
   "conditions": [
     {
+      "condition": {
+        "and": [
+          {
+            "field": "status_id",
+            "operator": "in",
+            "value": [27]
+          },
+          {"field": "preferred_payment_method_id", "operator": "neq", "value": 18}
+        ]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"preferred_payment_method_id\":\"18\"}": "status_id is null, must be one of [27]",
+        "{\"preferred_payment_method_id\":18,\"status_id\":27}": "preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":18}": "status_id is null, must be one of [27]; preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":19,\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [27]",
+        "{\"preferred_payment_method_id\":19}": "status_id is null, must be one of [27]",
+        "{\"preferred_payment_method_id\":null}": "status_id is null, must be one of [27]",
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": "status_id is null, must be one of [27]; preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":19}}": "status_id is null, must be one of [27]",
+        "{\"preferred_payment_method_id\":{\"id\":null}}": "status_id is null, must be one of [27]",
+        "{\"preferred_payment_method_id\":{\"other\":1}}": "status_id is null, must be one of [27]",
+        "{\"status_id\":\"27\"}": "status_id is \"27\", must be one of [27]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [27]",
+        "{\"status_id\":null}": "status_id is null, must be one of [27]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [27]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [27]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [27]",
+        "{}": "status_id is null, must be one of [27]"
+      },
+      "usedBy": ["vendor_application.enable_online_payment:enabled_condition", "vendor_application.enable_online_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "and": [
+          {
+            "field": "status_id",
+            "operator": "in",
+            "value": [33]
+          },
+          {"field": "preferred_payment_method_id", "operator": "neq", "value": 18}
+        ]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"preferred_payment_method_id\":\"18\"}": "status_id is null, must be one of [33]",
+        "{\"preferred_payment_method_id\":18,\"status_id\":33}": "preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":18}": "status_id is null, must be one of [33]; preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":19,\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [33]",
+        "{\"preferred_payment_method_id\":19}": "status_id is null, must be one of [33]",
+        "{\"preferred_payment_method_id\":null}": "status_id is null, must be one of [33]",
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": "status_id is null, must be one of [33]; preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":19}}": "status_id is null, must be one of [33]",
+        "{\"preferred_payment_method_id\":{\"id\":null}}": "status_id is null, must be one of [33]",
+        "{\"preferred_payment_method_id\":{\"other\":1}}": "status_id is null, must be one of [33]",
+        "{\"status_id\":\"33\"}": "status_id is \"33\", must be one of [33]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [33]",
+        "{\"status_id\":null}": "status_id is null, must be one of [33]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [33]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [33]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [33]",
+        "{}": "status_id is null, must be one of [33]"
+      },
+      "usedBy": ["food_truck_application.enable_online_payment:enabled_condition", "food_truck_application.enable_online_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "and": [
+          {
+            "field": "status_id",
+            "operator": "in",
+            "value": [38]
+          },
+          {"field": "preferred_payment_method_id", "operator": "neq", "value": 18}
+        ]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"preferred_payment_method_id\":\"18\"}": "status_id is null, must be one of [38]",
+        "{\"preferred_payment_method_id\":18,\"status_id\":38}": "preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":18}": "status_id is null, must be one of [38]; preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":19,\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [38]",
+        "{\"preferred_payment_method_id\":19}": "status_id is null, must be one of [38]",
+        "{\"preferred_payment_method_id\":null}": "status_id is null, must be one of [38]",
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":18,\"status_key\":\"k\"}}": "status_id is null, must be one of [38]; preferred_payment_method_id is 18, must not be 18",
+        "{\"preferred_payment_method_id\":{\"display_name\":\"N\",\"id\":19}}": "status_id is null, must be one of [38]",
+        "{\"preferred_payment_method_id\":{\"id\":null}}": "status_id is null, must be one of [38]",
+        "{\"preferred_payment_method_id\":{\"other\":1}}": "status_id is null, must be one of [38]",
+        "{\"status_id\":\"38\"}": "status_id is \"38\", must be one of [38]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [38]",
+        "{\"status_id\":null}": "status_id is null, must be one of [38]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [38]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [38]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [38]",
+        "{}": "status_id is null, must be one of [38]"
+      },
+      "usedBy": ["sponsorship_application.enable_online_payment:enabled_condition", "sponsorship_application.enable_online_payment:visibility_condition"]
+    },
+    {
       "condition": {"field": "can_record_payment", "operator": "eq", "value": true},
       "failures": {
         "<null data>": "__throws:TypeError__",
@@ -77,6 +179,291 @@
         "{}": "status_id is null, expected 9"
       },
       "usedBy": ["reservation_requests.close:enabled_condition", "reservation_requests.close:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [22, 24]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"22\"}": "status_id is \"22\", must be one of [22,24]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [22,24]",
+        "{\"status_id\":null}": "status_id is null, must be one of [22,24]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [22,24]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [22,24]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [22,24]",
+        "{}": "status_id is null, must be one of [22,24]"
+      },
+      "usedBy": ["festival.open_applications:enabled_condition", "festival.open_applications:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [23]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"23\"}": "status_id is \"23\", must be one of [23]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [23]",
+        "{\"status_id\":null}": "status_id is null, must be one of [23]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [23]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [23]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [23]",
+        "{}": "status_id is null, must be one of [23]"
+      },
+      "usedBy": ["festival.close_applications:enabled_condition", "festival.close_applications:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [24]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"24\"}": "status_id is \"24\", must be one of [24]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [24]",
+        "{\"status_id\":null}": "status_id is null, must be one of [24]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [24]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [24]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [24]",
+        "{}": "status_id is null, must be one of [24]"
+      },
+      "usedBy": ["festival.mark_completed:enabled_condition", "festival.mark_completed:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [26, 27, 28, 29]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"26\"}": "status_id is \"26\", must be one of [26,27,28,29]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [26,27,28,29]",
+        "{\"status_id\":null}": "status_id is null, must be one of [26,27,28,29]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [26,27,28,29]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [26,27,28,29]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [26,27,28,29]",
+        "{}": "status_id is null, must be one of [26,27,28,29]"
+      },
+      "usedBy": ["vendor_application.withdraw:enabled_condition", "vendor_application.withdraw:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [26, 27]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"26\"}": "status_id is \"26\", must be one of [26,27]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [26,27]",
+        "{\"status_id\":null}": "status_id is null, must be one of [26,27]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [26,27]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [26,27]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [26,27]",
+        "{}": "status_id is null, must be one of [26,27]"
+      },
+      "usedBy": ["vendor_application.deny:enabled_condition", "vendor_application.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [26]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"26\"}": "status_id is \"26\", must be one of [26]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [26]",
+        "{\"status_id\":null}": "status_id is null, must be one of [26]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [26]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [26]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [26]",
+        "{}": "status_id is null, must be one of [26]"
+      },
+      "usedBy": ["vendor_application.approve:enabled_condition", "vendor_application.approve:visibility_condition", "vendor_application.waive_and_approve:enabled_condition", "vendor_application.waive_and_approve:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [27]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"27\"}": "status_id is \"27\", must be one of [27]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [27]",
+        "{\"status_id\":null}": "status_id is null, must be one of [27]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [27]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [27]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [27]",
+        "{}": "status_id is null, must be one of [27]"
+      },
+      "usedBy": ["vendor_application.record_payment:enabled_condition", "vendor_application.record_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [32, 33, 34]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"32\"}": "status_id is \"32\", must be one of [32,33,34]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [32,33,34]",
+        "{\"status_id\":null}": "status_id is null, must be one of [32,33,34]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [32,33,34]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [32,33,34]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [32,33,34]",
+        "{}": "status_id is null, must be one of [32,33,34]"
+      },
+      "usedBy": ["food_truck_application.withdraw:enabled_condition", "food_truck_application.withdraw:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [32, 33]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"32\"}": "status_id is \"32\", must be one of [32,33]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [32,33]",
+        "{\"status_id\":null}": "status_id is null, must be one of [32,33]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [32,33]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [32,33]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [32,33]",
+        "{}": "status_id is null, must be one of [32,33]"
+      },
+      "usedBy": ["food_truck_application.deny:enabled_condition", "food_truck_application.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [32]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"32\"}": "status_id is \"32\", must be one of [32]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [32]",
+        "{\"status_id\":null}": "status_id is null, must be one of [32]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [32]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [32]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [32]",
+        "{}": "status_id is null, must be one of [32]"
+      },
+      "usedBy": ["food_truck_application.approve:enabled_condition", "food_truck_application.approve:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [33]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"33\"}": "status_id is \"33\", must be one of [33]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [33]",
+        "{\"status_id\":null}": "status_id is null, must be one of [33]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [33]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [33]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [33]",
+        "{}": "status_id is null, must be one of [33]"
+      },
+      "usedBy": ["food_truck_application.record_payment:enabled_condition", "food_truck_application.record_payment:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [37, 38, 39, 40]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"37\"}": "status_id is \"37\", must be one of [37,38,39,40]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [37,38,39,40]",
+        "{\"status_id\":null}": "status_id is null, must be one of [37,38,39,40]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [37,38,39,40]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [37,38,39,40]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [37,38,39,40]",
+        "{}": "status_id is null, must be one of [37,38,39,40]"
+      },
+      "usedBy": ["sponsorship_application.withdraw:enabled_condition", "sponsorship_application.withdraw:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [37, 38]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"37\"}": "status_id is \"37\", must be one of [37,38]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [37,38]",
+        "{\"status_id\":null}": "status_id is null, must be one of [37,38]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [37,38]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [37,38]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [37,38]",
+        "{}": "status_id is null, must be one of [37,38]"
+      },
+      "usedBy": ["sponsorship_application.deny:enabled_condition", "sponsorship_application.deny:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [37]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"37\"}": "status_id is \"37\", must be one of [37]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [37]",
+        "{\"status_id\":null}": "status_id is null, must be one of [37]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [37]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [37]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [37]",
+        "{}": "status_id is null, must be one of [37]"
+      },
+      "usedBy": ["sponsorship_application.approve:enabled_condition", "sponsorship_application.approve:visibility_condition"]
+    },
+    {
+      "condition": {
+        "field": "status_id",
+        "operator": "in",
+        "value": [38]
+      },
+      "failures": {
+        "<null data>": "__throws:TypeError__",
+        "<undefined data>": "__throws:TypeError__",
+        "{\"status_id\":\"38\"}": "status_id is \"38\", must be one of [38]",
+        "{\"status_id\":\"__not_in__\"}": "status_id is \"__not_in__\", must be one of [38]",
+        "{\"status_id\":null}": "status_id is null, must be one of [38]",
+        "{\"status_id\":{\"display_name\":\"N\",\"id\":\"__not_in__\"}}": "status_id is \"__not_in__\", must be one of [38]",
+        "{\"status_id\":{\"id\":null}}": "status_id is null, must be one of [38]",
+        "{\"status_id\":{\"other\":1}}": "status_id is {\"other\":1}, must be one of [38]",
+        "{}": "status_id is null, must be one of [38]"
+      },
+      "usedBy": ["sponsorship_application.record_payment:enabled_condition", "sponsorship_application.record_payment:visibility_condition"]
     },
     {
       "condition": {

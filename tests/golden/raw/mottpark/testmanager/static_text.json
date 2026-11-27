@@ -1,6 +1,78 @@
 [
   {
     "column_width": 8,
+    "content": "We invite feedback from food trucks and retail vendors on what worked and what can be improved for Mott Fest. Thank you for being a part of it!",
+    "created_at": "__MASKED__",
+    "id": 9,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 0,
+    "table_name": "feedback_submission",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "**What worked well for you this year?** Please list as many items as you wish.",
+    "created_at": "__MASKED__",
+    "id": 10,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 5,
+    "table_name": "feedback_submission",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "**What did not go well? What suggestions do you have for our planning committee?**",
+    "created_at": "__MASKED__",
+    "id": 11,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 15,
+    "table_name": "feedback_submission",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "**Was it worth it financially for you to join us at Mott Fest?**",
+    "created_at": "__MASKED__",
+    "id": 12,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 25,
+    "table_name": "feedback_submission",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "**Was it worth it in non-financial ways (fun, connections, networking, marketing, etc.) for you to join us?**",
+    "created_at": "__MASKED__",
+    "id": 13,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 45,
+    "table_name": "feedback_submission",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "Thanks for your interest in Mott Fest! Submit this form and our committee will review it and email you. Once approved, your fee is due one month before the festival — pay online or by check. You won't be able to edit your application after submitting, so email us with any changes.",
+    "created_at": "__MASKED__",
+    "id": 6,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 0,
+    "table_name": "food_truck_application",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
     "content": "### Cleaning Fee Payment Instructions\n\n**Cleaning Fee payments cannot be made by credit card.** Please pay [REDACTED NAME] directly using one of these methods:\n\n- **CashApp**: [REDACTED HANDLE]\n- **Money Order or Check**: Payable to [REDACTED NAME]\n  - Mail to: Mott Park Club House, 123 Example Street, Flint, Michigan 48504\n  - Or drop off at the clubhouse mailbox on the front door\n\n**Questions?** Contact [REDACTED NAME] at 555-0100 or [REDACTED EMAIL]\n\n*Security Deposit and Facility Fee can be paid online using the Pay Now button.*",
     "created_at": "__MASKED__",
     "id": 4,
@@ -45,6 +117,42 @@
     "show_on_edit": false,
     "sort_order": 999,
     "table_name": "reservation_requests",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "### Sponsorship Levels\n\n| Level | Recognition |\n|---|---|\n| Individual — $100 | Celebrated on a donor board in the Clubhouse; Mott Fest t-shirt |\n| Corporate — $250 | Thanked on social media; Mott Fest t-shirt |\n| Corporate — $500 | Named on t-shirts; thanked on social media; Mott Fest t-shirt |\n| Corporate — $1,000 | Named on a large banner at Mott Fest; named on t-shirts; thanked on social media; Mott Fest t-shirt |\n| Presenting Sponsor — $2,500 | Named on the official poster as presenting sponsor; 3 minutes on the microphone during Mott Fest; use of the clubhouse for 3 events this year; and all of the above |\n| Custom Amount | Any amount you choose |\n| In-Kind Gift | Goods or services for the festival |",
+    "created_at": "__MASKED__",
+    "id": 7,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 0,
+    "table_name": "sponsorship_application",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "I understand I support Mott Fest and the Mott Park Recreation Association. All sponsorship funds will be available to pay for Mott Fest and be available as undesignated funds for future MPRA projects and events. No refunds will be issued.",
+    "created_at": "__MASKED__",
+    "id": 8,
+    "show_on_create": true,
+    "show_on_detail": true,
+    "show_on_edit": false,
+    "sort_order": 140,
+    "table_name": "sponsorship_application",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 8,
+    "content": "Thanks for your interest in Mott Fest! Submit this form and our committee will review it and email you. Once approved, your fee is due one month before the festival — pay online or by check. You won't be able to edit your application after submitting, so email us with any changes.",
+    "created_at": "__MASKED__",
+    "id": 5,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 0,
+    "table_name": "vendor_application",
     "updated_at": "__MASKED__"
   }
 ]

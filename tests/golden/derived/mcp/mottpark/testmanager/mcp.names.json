@@ -1,42 +1,107 @@
 {
   "actionAnomalies": {},
-  "actionCounts": {"probes": 20, "resolvedToSelf": 20},
-  "columnAnomalies": {},
-  "columnCounts": {"probes": 285, "resolvedToSelf": 285},
+  "actionCounts": {"probes": 58, "resolvedToSelf": 58},
+  "columnAnomalies": {
+    "feedback_response": {
+      "worth_it_non_financially_other": {"byDisplayName": "\"If other, please explain\" -> worth_it_financially_other", "byUpperDisplayName": "\"IF OTHER, PLEASE EXPLAIN\" -> worth_it_financially_other"}
+    },
+    "feedback_submission": {
+      "worth_it_non_financially_other": {"byDisplayName": "\"If other, please explain\" -> worth_it_financially_other", "byUpperDisplayName": "\"IF OTHER, PLEASE EXPLAIN\" -> worth_it_financially_other"}
+    }
+  },
+  "columnCounts": {"probes": 804, "resolvedToSelf": 800},
   "entities": {
-    "holiday_rules": {"byDisplayName": "holiday_rules", "byFirstWord": "holiday_rules", "byPaddedDisplayName": "holiday_rules", "byTableName": "holiday_rules", "byUpperDisplayName": "holiday_rules", "displayName": "Holiday Rules"},
-    "manager_events": {"byDisplayName": "manager_events", "byFirstWord": "manager_events", "byPaddedDisplayName": "manager_events", "byTableName": "manager_events", "byUpperDisplayName": "manager_events", "displayName": "Manager Events"},
+    "current_festival": {"byDisplayName": "current_festival", "byFirstWord": "current_festival", "byPaddedDisplayName": "current_festival", "byTableName": "current_festival", "byUpperDisplayName": "current_festival", "displayName": "Current Festival"},
+    "feedback_response": {
+      "byDisplayName": "feedback_response",
+      "byFirstWord": "ERR Ambiguous entity name \"Feedback\". Did you mean one of: \"Feedback Response\" (feedback_response), \"Mott Fest Feedback\" (feedback_submission)?",
+      "byPaddedDisplayName": "feedback_response",
+      "byTableName": "feedback_response",
+      "byUpperDisplayName": "feedback_response",
+      "displayName": "Feedback Response"
+    },
+    "feedback_submission": {
+      "byDisplayName": "feedback_submission",
+      "byFirstWord": "ERR Ambiguous entity name \"Mott\". Did you mean one of: \"Mott Fest Feedback\" (feedback_submission), \"Revenue Summary\" (mottfest_revenue_summary), \"Current Festival Summary\" (mottfest_current_summary)?",
+      "byPaddedDisplayName": "feedback_submission",
+      "byTableName": "feedback_submission",
+      "byUpperDisplayName": "feedback_submission",
+      "displayName": "Mott Fest Feedback"
+    },
+    "festival": {"byDisplayName": "festival", "byFirstWord": "festival", "byPaddedDisplayName": "festival", "byTableName": "festival", "byUpperDisplayName": "festival", "displayName": "Festival"},
+    "food_truck_application": {
+      "byDisplayName": "food_truck_application",
+      "byFirstWord": "food_truck_application",
+      "byPaddedDisplayName": "food_truck_application",
+      "byTableName": "food_truck_application",
+      "byUpperDisplayName": "food_truck_application",
+      "displayName": "Food Truck Application"
+    },
+    "holiday_rules": {"byDisplayName": "holiday_rules", "byFirstWord": "holiday_rules", "byPaddedDisplayName": "holiday_rules", "byTableName": "holiday_rules", "byUpperDisplayName": "holiday_rules", "displayName": "Holiday Rule"},
+    "manager_events": {"byDisplayName": "manager_events", "byFirstWord": "manager_events", "byPaddedDisplayName": "manager_events", "byTableName": "manager_events", "byUpperDisplayName": "manager_events", "displayName": "Manager Event"},
+    "mottfest_current_summary": {
+      "byDisplayName": "mottfest_current_summary",
+      "byFirstWord": "current_festival",
+      "byPaddedDisplayName": "mottfest_current_summary",
+      "byTableName": "mottfest_current_summary",
+      "byUpperDisplayName": "mottfest_current_summary",
+      "displayName": "Current Festival Summary"
+    },
+    "mottfest_revenue_summary": {
+      "byDisplayName": "mottfest_revenue_summary",
+      "byFirstWord": "mottfest_revenue_summary",
+      "byPaddedDisplayName": "mottfest_revenue_summary",
+      "byTableName": "mottfest_revenue_summary",
+      "byUpperDisplayName": "mottfest_revenue_summary",
+      "displayName": "Revenue Summary"
+    },
     "public_calendar_events": {
       "byDisplayName": "public_calendar_events",
       "byFirstWord": "public_calendar_events",
       "byPaddedDisplayName": "public_calendar_events",
       "byTableName": "public_calendar_events",
       "byUpperDisplayName": "public_calendar_events",
-      "displayName": "Public Events"
+      "displayName": "Public Event"
     },
     "reservation_payment_types": {
       "byDisplayName": "reservation_payment_types",
-      "byFirstWord": "ERR Ambiguous entity name \"Payment\". Did you mean one of: \"Reservation Payments\" (reservation_payments), \"Payment Types\" (reservation_payment_types)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Payment\". Did you mean one of: \"Reservation Payment\" (reservation_payments), \"Payment Type\" (reservation_payment_types)?",
       "byPaddedDisplayName": "reservation_payment_types",
       "byTableName": "reservation_payment_types",
       "byUpperDisplayName": "reservation_payment_types",
-      "displayName": "Payment Types"
+      "displayName": "Payment Type"
     },
     "reservation_payments": {
       "byDisplayName": "reservation_payments",
-      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Requests\" (reservation_requests), \"Reservation Payments\" (reservation_payments), \"Payment Types\" (reservation_payment_types)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Request\" (reservation_requests), \"Reservation Payment\" (reservation_payments), \"Payment Type\" (reservation_payment_types)?",
       "byPaddedDisplayName": "reservation_payments",
       "byTableName": "reservation_payments",
       "byUpperDisplayName": "reservation_payments",
-      "displayName": "Reservation Payments"
+      "displayName": "Reservation Payment"
     },
     "reservation_requests": {
       "byDisplayName": "reservation_requests",
-      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Requests\" (reservation_requests), \"Reservation Payments\" (reservation_payments), \"Payment Types\" (reservation_payment_types)?",
+      "byFirstWord": "ERR Ambiguous entity name \"Reservation\". Did you mean one of: \"Reservation Request\" (reservation_requests), \"Reservation Payment\" (reservation_payments), \"Payment Type\" (reservation_payment_types)?",
       "byPaddedDisplayName": "reservation_requests",
       "byTableName": "reservation_requests",
       "byUpperDisplayName": "reservation_requests",
-      "displayName": "Reservation Requests"
+      "displayName": "Reservation Request"
+    },
+    "sponsorship_application": {
+      "byDisplayName": "sponsorship_application",
+      "byFirstWord": "sponsorship_application",
+      "byPaddedDisplayName": "sponsorship_application",
+      "byTableName": "sponsorship_application",
+      "byUpperDisplayName": "sponsorship_application",
+      "displayName": "Sponsorship"
+    },
+    "vendor_application": {
+      "byDisplayName": "vendor_application",
+      "byFirstWord": "vendor_application",
+      "byPaddedDisplayName": "vendor_application",
+      "byTableName": "vendor_application",
+      "byUpperDisplayName": "vendor_application",
+      "displayName": "Booth Vendor Application"
     }
   }
 }

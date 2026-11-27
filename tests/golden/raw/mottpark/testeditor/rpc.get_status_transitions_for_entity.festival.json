@@ -1,0 +1,62 @@
+[
+  {
+    "description": null,
+    "display_name": "Open Applications",
+    "entity_type": "festival",
+    "from_color": "#9CA3AF",
+    "from_display_name": "Planning",
+    "from_status_id": 22,
+    "id": 11,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 1,
+    "to_color": "#22C55E",
+    "to_display_name": "Open",
+    "to_status_id": 23
+  },
+  {
+    "description": null,
+    "display_name": "Reopen Applications",
+    "entity_type": "festival",
+    "from_color": "#F59E0B",
+    "from_display_name": "Closed",
+    "from_status_id": 24,
+    "id": 12,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 2,
+    "to_color": "#22C55E",
+    "to_display_name": "Open",
+    "to_status_id": 23
+  },
+  {
+    "description": null,
+    "display_name": "Close Applications",
+    "entity_type": "festival",
+    "from_color": "#22C55E",
+    "from_display_name": "Open",
+    "from_status_id": 23,
+    "id": 13,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 3,
+    "to_color": "#F59E0B",
+    "to_display_name": "Closed",
+    "to_status_id": 24
+  },
+  {
+    "description": null,
+    "display_name": "Mark Completed",
+    "entity_type": "festival",
+    "from_color": "#F59E0B",
+    "from_display_name": "Closed",
+    "from_status_id": 24,
+    "id": 14,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 4,
+    "to_color": "#3B82F6",
+    "to_display_name": "Completed",
+    "to_status_id": 25
+  }
+]

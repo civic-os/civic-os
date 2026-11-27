@@ -1,5 +1,21 @@
 [
   {
+    "permission": "read",
+    "table_name": "current_festival"
+  },
+  {
+    "permission": "create",
+    "table_name": "feedback_submission"
+  },
+  {
+    "permission": "read",
+    "table_name": "festival"
+  },
+  {
+    "permission": "create",
+    "table_name": "food_truck_application"
+  },
+  {
     "permission": "create",
     "table_name": "manager_events"
   },
@@ -65,6 +81,10 @@
   },
   {
     "permission": "create",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "permission": "create",
     "table_name": "time_slot_instances"
   },
   {
@@ -110,5 +130,9 @@
   {
     "permission": "update",
     "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "vendor_application"
   }
 ]

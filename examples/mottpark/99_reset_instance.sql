@@ -13,9 +13,155 @@
 --   6. Clears dashboards and widgets
 --
 -- After running this, execute scripts 01-05 in order to rebuild.
+--
+-- Section 0 removes the Mott Fest module (scripts 34-38) on its own: run
+-- only Section 0 (it is one DO block plus its drops) to remove the module and
+-- keep the clubhouse, then re-apply 34-38. It runs first because the module's
+-- tables reference clubhouse-era statuses (payment_method).
 -- ============================================================================
 
 BEGIN;
+
+-- ============================================================================
+-- SECTION 0: MOTT FEST MODULE (scripts 34-38, 40)
+-- ============================================================================
+
+DO $$
+DECLARE
+  v_tables TEXT[] := ARRAY['festival', 'vendor_application', 'food_truck_application',
+                           'sponsorship_application', 'feedback_response', 'feedback_submission',
+                           'current_festival', 'mottfest_revenue_summary', 'mottfest_current_summary'];
+  v_status_types TEXT[] := ARRAY['festival', 'vendor_application', 'food_truck_application',
+                                 'sponsorship_application'];
+  v_category_types TEXT[] := ARRAY['vendor_type', 'sponsorship_tier', 'tshirt_size', 'worth_it'];
+  v_dashboards TEXT[] := ARRAY['Mott Fest', 'Mott Fest Management', 'Thanks for your feedback'];
+  v_role_id INT := (SELECT id FROM metadata.roles WHERE role_key = 'mottfest_admin');
+  v_mottfest_dashboard BIGINT := (SELECT id FROM metadata.dashboards WHERE display_name = 'Mott Fest');
+  v_fn REGPROCEDURE;
+BEGIN
+  -- Banner on the clubhouse dashboard (found by its link, as script 40 does);
+  -- the clubhouse welcome header beside it goes back to full width.
+  IF v_mottfest_dashboard IS NOT NULL THEN
+    DELETE FROM metadata.dashboard_widgets
+     WHERE dashboard_id <> ALL (SELECT id FROM metadata.dashboards WHERE display_name = ANY (v_dashboards))
+       AND config->>'content' LIKE '%/dashboard/' || v_mottfest_dashboard || '"%';
+    IF FOUND THEN
+      UPDATE metadata.dashboard_widgets
+         SET width = 2
+       WHERE id = (SELECT w.id FROM metadata.dashboard_widgets w
+                     JOIN metadata.dashboards d ON d.id = w.dashboard_id
+                    WHERE d.display_name = 'Mott Park Clubhouse Reservations'
+                      AND w.widget_type = 'markdown' AND COALESCE(w.title, '') = ''
+                    ORDER BY w.sort_order, w.id LIMIT 1)
+         AND width = 1;
+    END IF;
+  END IF;
+
+  -- Dashboards (widgets and dashboard_roles go first)
+  DELETE FROM metadata.dashboard_roles
+   WHERE dashboard_id IN (SELECT id FROM metadata.dashboards WHERE display_name = ANY (v_dashboards));
+  DELETE FROM metadata.dashboard_widgets
+   WHERE dashboard_id IN (SELECT id FROM metadata.dashboards WHERE display_name = ANY (v_dashboards));
+  DELETE FROM metadata.dashboards WHERE display_name = ANY (v_dashboards);
+
+  -- Menu: children of the heading, hidden helper nodes, then the heading
+  DELETE FROM metadata.menu_nodes WHERE parent_node_key = 'mottfest' OR target_key = ANY (v_tables);
+  DELETE FROM metadata.menu_nodes WHERE node_key = 'mottfest';
+
+  -- Notifications before their templates (FK by name)
+  DELETE FROM metadata.notifications
+   WHERE template_name LIKE 'mottfest\_%' OR entity_type = ANY (v_tables);
+  DELETE FROM metadata.notification_templates WHERE name LIKE 'mottfest\_%';
+
+  -- Payments opened by the module (refunds first; the sample users are RESTRICTed by these)
+  DELETE FROM payments.refunds
+   WHERE transaction_id IN (SELECT id FROM payments.transactions WHERE entity_type = ANY (v_tables));
+  -- Guarded: PL/pgSQL resolves table names only when a statement runs, so a
+  -- reset of an instance without the module would fail here.
+  IF to_regclass('public.vendor_application') IS NOT NULL THEN
+    UPDATE vendor_application      SET payment_transaction_id = NULL WHERE payment_transaction_id IS NOT NULL;
+    UPDATE food_truck_application  SET payment_transaction_id = NULL WHERE payment_transaction_id IS NOT NULL;
+    UPDATE sponsorship_application SET payment_transaction_id = NULL WHERE payment_transaction_id IS NOT NULL;
+  END IF;
+  DELETE FROM payments.transactions WHERE entity_type = ANY (v_tables);
+
+  -- Per-entity metadata
+  DELETE FROM metadata.entity_action_roles
+   WHERE entity_action_id IN (SELECT id FROM metadata.entity_actions WHERE table_name = ANY (v_tables));
+  DELETE FROM metadata.entity_action_params
+   WHERE entity_action_id IN (SELECT id FROM metadata.entity_actions WHERE table_name = ANY (v_tables));
+  DELETE FROM metadata.entity_actions WHERE table_name = ANY (v_tables);
+  DELETE FROM metadata.permission_roles
+   WHERE permission_id IN (SELECT id FROM metadata.permissions WHERE table_name = ANY (v_tables)
+                              OR table_name = ANY (SELECT t || ':notes' FROM unnest(v_tables) t));
+  DELETE FROM metadata.permissions
+   WHERE table_name = ANY (v_tables) OR table_name = ANY (SELECT t || ':notes' FROM unnest(v_tables) t);
+  DELETE FROM metadata.entity_notes WHERE entity_type = ANY (v_tables);
+  DELETE FROM metadata.files WHERE entity_type = ANY (v_tables);
+  DELETE FROM metadata.static_text WHERE table_name = ANY (v_tables);
+  DELETE FROM metadata.validations WHERE table_name = ANY (v_tables);
+  DELETE FROM metadata.constraint_messages WHERE table_name = ANY (v_tables);
+  DELETE FROM metadata.properties WHERE table_name = ANY (v_tables);
+  DELETE FROM metadata.entities WHERE table_name = ANY (v_tables);
+
+  -- Role (the user_roles and roles deletes queue the Keycloak sync)
+  IF v_role_id IS NOT NULL THEN
+    DELETE FROM metadata.user_roles WHERE role_id = v_role_id;
+    DELETE FROM metadata.entity_action_roles WHERE role_id = v_role_id;
+    DELETE FROM metadata.permission_roles WHERE role_id = v_role_id;
+    DELETE FROM metadata.dashboard_roles WHERE role_id = v_role_id;
+    DELETE FROM metadata.dashboard_role_defaults WHERE role_id = v_role_id;
+    DELETE FROM metadata.role_can_manage WHERE v_role_id IN (manager_role_id, managed_role_id);
+    DELETE FROM metadata.roles WHERE id = v_role_id;
+  END IF;
+
+  -- Contact email setting
+  DELETE FROM metadata.instance_config WHERE config_key LIKE 'mottfest\_%';
+  DELETE FROM metadata.instance_config_groups WHERE group_key = 'mottfest';
+
+  -- Decision records written by 34-37 and 40
+  DELETE FROM metadata.schema_decisions WHERE migration_id LIKE '__\_mottfest\_%';
+
+  -- Views, tables (CASCADE takes triggers, policies, indexes), then functions
+  DROP VIEW IF EXISTS feedback_submission, current_festival,
+                      mottfest_current_summary, mottfest_revenue_summary CASCADE;
+  DROP TABLE IF EXISTS feedback_response, sponsorship_application, food_truck_application,
+                       vendor_application, festival CASCADE;
+  FOR v_fn IN
+    SELECT p.oid::regprocedure FROM pg_proc p
+     WHERE p.pronamespace = 'public'::regnamespace
+       AND (p.proname LIKE 'mottfest\_%'
+         OR p.proname LIKE '%mottfest%'
+         OR p.proname IN ('approve_vendor_application', 'waive_and_approve_vendor_application',
+                          'deny_vendor_application', 'withdraw_vendor_application', 'record_vendor_payment',
+                          'approve_food_truck_application', 'deny_food_truck_application',
+                          'withdraw_food_truck_application', 'record_food_truck_payment',
+                          'approve_sponsorship', 'deny_sponsorship', 'withdraw_sponsorship',
+                          'record_sponsorship_payment',
+                          'enable_online_payment_vendor_application',
+                          'enable_online_payment_food_truck_application',
+                          'enable_online_payment_sponsorship',
+                          'initiate_vendor_application_payment', 'initiate_food_truck_application_payment',
+                          'initiate_sponsorship_payment',
+                          'open_festival', 'close_festival', 'complete_festival',
+                          'get_current_festival', 'get_manual_payment_methods'))
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS %s CASCADE', v_fn);
+  END LOOP;
+
+  -- Status and category sets (the tables that referenced them are gone)
+  DELETE FROM metadata.status_transitions WHERE entity_type = ANY (v_status_types);
+  DELETE FROM metadata.statuses WHERE entity_type = ANY (v_status_types);
+  DELETE FROM metadata.status_types WHERE entity_type = ANY (v_status_types);
+  DELETE FROM metadata.categories WHERE entity_type = ANY (v_category_types);
+  DELETE FROM metadata.category_groups WHERE entity_type = ANY (v_category_types);
+
+  -- Sample placeholder users from script 38 (private rows cascade)
+  DELETE FROM metadata.civic_os_users WHERE id::text LIKE '5a3b1e00-0000-4000-8000-%';
+
+  RAISE NOTICE 'Mott Fest module removed';
+END;
+$$;
 
 -- ============================================================================
 -- SECTION 1: DROP APPLICATION TABLES

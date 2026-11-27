@@ -23,7 +23,7 @@ Derived from post-design corrections to the Neighborhood Engagement Hub (NEH) in
 - [ ] For guided forms: which fields are borrower-visible vs. staff-only? — *Why: NEH exposed `notes` and `site_review_completed` (staff-internal fields) to borrowers filling out the form.*
 - [ ] For each guided form step: is it skippable or required? — *Why: Work site selection was accidentally marked skippable when the business rule requires parcel selection.*
 - [ ] For system-managed fields (submitted_at, display_name, form status): are they marked hidden from all views? — *Why: These clutter the UI and confuse users who can't edit them.*
-- [ ] For each entity in the design: what's the human-readable display name? — *Why: Raw table names like `checkout_instances` render as navigation labels. Define labels up front ("Checked Out Tools").*
+- [ ] For each entity in the design: what's the singular display name, and what's the plural menu label? — *Why: Raw table names like `checkout_instances` render as navigation labels, and pages build their text from the entity name ("Add {entity}", "{entity}: {record}"), so a plural name reads "Add Checked Out Tools". Define both up front: entity "Checked Out Tool", menu node label "Checked Out Tools".*
 - [ ] For each FK column: what should the display label be? — *Why: `user_id` renders as "User Id" by default. Define human labels ("Account", "Applicant", "Assigned To").*
 
 ## Dropdowns & Selection UX

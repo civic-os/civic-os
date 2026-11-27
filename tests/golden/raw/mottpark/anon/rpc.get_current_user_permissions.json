@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "permission": "read",
+    "table_name": "current_festival"
+  },
+  {
+    "permission": "read",
+    "table_name": "festival"
+  }
+]

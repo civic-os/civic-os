@@ -40,7 +40,7 @@ Civic OS uses a metadata-driven architecture where database tables in the `metad
 
 Key fields:
 - `table_name` (PK) - PostgreSQL table name (from `public` schema)
-- `display_name` - Friendly name shown in menu and page titles
+- `display_name` - Friendly name for one record, used in page titles and buttons ("Add {name}", "{name}: {record}", "Search {name}...") and as the sidebar label when the entity's menu node has no label of its own. Use the singular ("Work Order"); see [Naming Conventions](#naming-conventions) below
 - `description` - Optional description shown on List pages
 - `sort_order` - Default entity order (lower numbers first): Detail related sections, the MCP entity list, and entities with no sidebar menu node. Sidebar placement, nesting and visibility live in `metadata.menu_nodes` (see [Menu Configuration](#menu-configuration-v0810)); `show_in_sidebar` was removed in v0.81.0
 - `search_fields` - TEXT[] array of columns for full-text search
@@ -69,7 +69,7 @@ INSERT INTO metadata.entities (
   calendar_color_property
 ) VALUES (
   'reservations',
-  'Reservations',
+  'Reservation',
   'Resource booking system',
   10,
   ARRAY['purpose', 'notes'],  -- Full-text search columns
@@ -79,6 +79,18 @@ INSERT INTO metadata.entities (
 ```
 
 **Accessibility note**: Calendar events are keyboard-focusable and activatable (Tab to an event, then Enter/Space to open it) via FullCalendar's `eventInteractive` option. FullCalendar has no keyboard path for drag-selecting a time range to create a new event, so keyboard and screen-reader users create and edit time slots through the standard datetime inputs on the Create/Edit pages — the calendar is an equivalent visualization of records that remain fully reachable via the List and Detail pages.
+
+#### Naming Conventions
+
+| Name | Form | Example | Where it shows |
+|---|---|---|---|
+| Entity `display_name` | Singular | Work Order | Page titles, buttons and search ("Work Order List", "Add Work Order", "Work Order: Fix the gate", "Search Work Order..."), Detail related-record cards |
+| Menu node `display_name` | Plural | Work Orders | The sidebar entry (`metadata.menu_nodes`, see [Menu Configuration](#menu-configuration-v0810)) |
+| Table name (new work) | Singular snake_case | `work_order` | URLs (`/view/work_order`), API paths, exports |
+
+- Pages build their text from the entity name, so a plural entity name reads "Add Work Orders". The sidebar lists collections, so the plural belongs on the menu node. There is no automatic pluralization: give each entity node its plural label, and add a node for any entity that would otherwise show at the root under its singular name.
+- Renaming an entity does not rename its sidebar entry once the node has a label; change both.
+- Existing instances keep their table style. Never rename a table to follow this convention: the name is in URLs, API paths, saved filters, iCal feed URLs, exports and integrations. Change `display_name` and the node label instead, which touches none of those.
 
 ---
 
@@ -5682,7 +5694,7 @@ The sidebar lists your entities as a tree of headings and entity links, stored i
 - An entity with no node still appears at the root, after every root node, ordered among the other unplaced entities by its `sort_order` and then its table name. A new table shows up at the end of the menu without any menu SQL; place it when you want it elsewhere.
 - Siblings order by `sort_order` (NULL counts as 0) and then `node_key`.
 - A node whose target is no longer listable (the table was dropped, or it is a junction table) is dropped and its children take its place. A heading with no visible entry under it disappears.
-- Label: the node's `display_name`, else the entity's display name. `collapsed_by_default` starts a heading or parent entity closed. The branch that holds the current page is always open, and each user's open and closed choices persist in the browser (`localStorage` key `civic-os.menu.open`).
+- Label: the node's `display_name`, else the entity's display name. Since entity names are singular, give each entity node the plural as its label ("Work Orders"); an entity without a node shows under its singular name, so add a node for any entity you want listed in the plural. `collapsed_by_default` starts a heading or parent entity closed. The branch that holds the current page is always open, and each user's open and closed choices persist in the browser (`localStorage` key `civic-os.menu.open`).
 - A root heading renders as a section title like the sidebar's About and Admin, with its entries at the root indent. Root entities that follow a heading (usually the unplaced ones), or every root entity when there is no heading, sit under a **Data** title, so they never read as part of the heading above. Root entities placed before the first heading show untitled, under Home. Data, About and Admin collapse like headings, start open, and stay open while they hold the current page.
 - The database enforces the structural rules with a trigger on `metadata.menu_nodes`, so SQL that breaks them fails with a check violation.
 

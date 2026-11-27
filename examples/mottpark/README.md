@@ -11,6 +11,7 @@ A reservation management system for the Mott Park Recreation Area clubhouse, dem
 - **Notification Triggers** - Email notifications on status changes
 - **Scheduled Jobs** - Daily automation for payment reminders and event completion
 - **Holiday Rules** - Evergreen holiday pricing (weekends/holidays = $300, weekdays = $150)
+- **Mott Fest module** - Festival vendor, food truck and sponsorship applications on top of the clubhouse (see [Mott Fest Module](#mott-fest-module))
 
 ## Quick Start
 
@@ -56,6 +57,7 @@ docker-compose up -d --build
 | Username | Password | Roles | Access Level |
 |----------|----------|-------|--------------|
 | testuser | testuser | user | View records, submit requests |
+| testeditor | testeditor | user, editor | Create and edit records |
 | testmanager | testmanager | user, manager | Create, edit, manage records |
 | testadmin | testadmin | user, admin | Full access + Permissions page |
 
@@ -109,6 +111,37 @@ To enable payments:
 5. After event: Manager marks as Completed
 6. After deposit refund: Manager marks as Closed
 
+## Mott Fest Module
+
+Scripts 34-38 and 40 add Mott Fest, the park's annual festival: organizers open a festival, the public applies as vendors, food trucks or sponsors, and organizers review, collect fees and close the festival. The module needs Civic OS v0.82.0+ (role-gated dashboards, the configurable menu and selector-hidden dashboards).
+
+| Script | Adds |
+|--------|------|
+| `34_mottfest_schema.sql` | The `festival` table, the three application tables, the `mottfest_admin` role, statuses, categories, RLS, the revenue summary views and the anonymous feedback form (`feedback_submission`) |
+| `35_mottfest_actions_payments.sql` | Review actions (approve, deny, waive, record payment, withdraw), festival open/close/complete, and the Pay Now guards that refuse unpayable rows with a message |
+| `36_mottfest_notifications.sql` | Eight email templates and their triggers; the reply-to address comes from the `mottfest_contact_email` instance config key |
+| `37_mottfest_dashboards_menu.sql` | Mott Fest and Mott Fest Management dashboards (review queues, payments, revenue and a "Thank-Yous Due" sponsor list), the "Thanks for your feedback" dashboard (hidden from the selector, reached after the survey) and the Mott Fest menu heading. The dashboards are shown only to `mottfest_admin` until script 40 runs |
+| `38_mottfest_sample_data.sql` | **Example only.** An Open "Mott Fest (Sample)" festival with applications in every status, owned by placeholder users nobody can sign in as |
+| `40_mottfest_launch.sql` | **Launch.** Makes the Mott Fest dashboard public, lets every signed-in user open the Thanks page, and adds the Mott Fest banner beside the welcome header on the default dashboard. Dashboards can't be menu entries yet ([civic-os/civic-os#124](https://github.com/civic-os/civic-os/issues/124)), so the banner and the dashboard selector lead to them |
+
+**Naming.** Mott Fest tables are singular (`festival`, `vendor_application`), and so are entity display names ("Booth Vendor Application"), because pages build "Add {entity}" and "{entity}: {record}" from them. Menu nodes carry the plural labels ("Booth Vendor Applications"). `39_mpra_entity_names.sql` gives the clubhouse entities the same singular names and plural menu labels without renaming their tables, so URLs, API paths and iCal feed URLs are unchanged.
+
+Every script records its schema decisions in `metadata.schema_decisions` and is safe to re-run. Re-runs keep an admin's menu and dashboard edits.
+
+**Staged launch.** Scripts 34-38 can go onto a live instance well before the festival: organizers (`mottfest_admin`) and admins see the Mott Fest dashboards and can test every flow, while clubhouse users see no dashboard or landing-page change. The Mott Fest menu heading is not staged and shows from script 37 on, because menu hiding applies to everyone, admins included. Script 40 is the launch switch; production runs it last, as `37_mottfest_launch.sql`. A fresh example database runs it too, so it starts launched.
+
+**Organizer access.** No test account is an organizer by default. Sign in as `testadmin`, open User Management and give a user the `mottfest_admin` role; the worker syncs it to Keycloak, so it is in the token at that user's next sign-in. The clubhouse `manager` role grants nothing in Mott Fest.
+
+**Functional test.** With the stack running (and the worker, for the mail checks):
+
+```bash
+tests/functional/mottfest-module-test.sh
+```
+
+It signs in as testuser and testmanager (applicants), testeditor (made organizer for the run) and testadmin, and removes everything it creates. Stripe completion (paying with a test card through `stripe listen`) is not covered and is checked by hand. To run it against another database built from the production numbering, point `SCRIPTS_DIR` at that directory: script names are read from it.
+
+**Removing the module.** Section 0 of `99_reset_instance.sql` drops everything 34-38 and 40 add and leaves the clubhouse alone; it does nothing on an instance without the module.
+
 ## Reset Database
 
 ```bash
@@ -128,21 +161,17 @@ mottpark/
 ├── .env.example           # Template for .env
 ├── README.md              # This file
 ├── KEYCLOAK_SETUP.md      # Keycloak Admin API documentation
-├── keycloak/              # Keycloak realm configuration
-│   └── mottpark-dev.json  # Local dev realm with test users
-└── init-scripts/          # Database initialization
+├── view-security-allowlist.txt  # Deliberate definer views (none; read by the nightly guard)
+├── 99_reset_instance.sql  # Clears instance data, Mott Fest first (Section 0)
+└── init-scripts/          # Database initialization, run in order on first start
     ├── 00_create_authenticator.sh
-    ├── 01_mpra_reservations_schema.sql
-    ├── 02_mpra_holidays_dashboard.sql
-    ├── 03_mpra_manager_automation.sql
-    ├── 04_mpra_new_features.sql
-    ├── 05_mpra_public_calendar.sql
-    ├── 06_mpra_fix_overlap_constraint.sql
-    ├── 07_mpra_fix_payment_display_name.sql
-    ├── 08_mpra_fix_public_calendar_widget.sql
-    ├── 09_mpra_payment_status_sync.sql
-    ├── 10_mpra_fix_public_events_types.sql
-    ├── 11_mpra_calendar_colors.sql
-    ├── 12_mpra_scheduled_jobs.sql
-    └── 99_reset_instance.sql
+    ├── 01-05_mpra_*.sql   # Clubhouse schema, dashboard, automation, public calendar
+    ├── 06-33_mpra_*.sql   # Clubhouse fixes and features (.disabled files are superseded)
+    ├── 34_mottfest_schema.sql
+    ├── 35_mottfest_actions_payments.sql
+    ├── 36_mottfest_notifications.sql
+    ├── 37_mottfest_dashboards_menu.sql
+    ├── 38_mottfest_sample_data.sql   # Example only
+    ├── 39_mpra_entity_names.sql      # Singular clubhouse entity names, plural menu labels
+    └── 40_mottfest_launch.sql        # Shows Mott Fest to everyone (run last in production)
 ```

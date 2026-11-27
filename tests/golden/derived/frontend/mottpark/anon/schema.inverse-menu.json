@@ -1,5 +1,15 @@
 {
   "inverse": {
+    "current_festival": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "festival": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
     "holiday_rules": {
       "afterExclude": [],
       "all": [
@@ -11,7 +21,7 @@
           "sourceColumn": "relative_to_rule_id",
           "sourceColumnDisplayName": "Relative To Rule Id",
           "sourceTable": "holiday_rules",
-          "sourceTableDisplayName": "Holiday Rules"
+          "sourceTableDisplayName": "Holiday Rule"
         }
       ],
       "excluding": ["holiday_rules"]
@@ -32,6 +42,6 @@
       "excluding": []
     }
   },
-  "management": ["public_calendar_events", "reservation_requests", "holiday_rules", "reservation_payment_types"],
-  "menu": ["reservation_requests", "public_calendar_events", "holiday_rules", "reservation_payment_types"]
+  "management": ["public_calendar_events", "reservation_requests", "holiday_rules", "reservation_payment_types", "festival", "current_festival"],
+  "menu": ["reservation_requests", "public_calendar_events", "holiday_rules", "festival", "reservation_payment_types"]
 }

@@ -24,6 +24,48 @@
     "table_name": "*"
   },
   {
+    "column_name": "festival_id",
+    "constraint_name": "feedback_response_festival_id_fkey",
+    "error_message": "This festival has applications or feedback, so it cannot be deleted.",
+    "table_name": "feedback_response"
+  },
+  {
+    "column_name": "display_name",
+    "constraint_name": "festival_display_name_key",
+    "error_message": "A festival with this name already exists.",
+    "table_name": "festival"
+  },
+  {
+    "column_name": "food_truck_capacity",
+    "constraint_name": "festival_food_truck_capacity_check",
+    "error_message": "Food truck spots cannot be negative.",
+    "table_name": "festival"
+  },
+  {
+    "column_name": "status_id",
+    "constraint_name": "festival_one_open",
+    "error_message": "Another festival is already Open. Close it first.",
+    "table_name": "festival"
+  },
+  {
+    "column_name": "vendor_capacity",
+    "constraint_name": "festival_vendor_capacity_check",
+    "error_message": "Booth vendor spots cannot be negative.",
+    "table_name": "festival"
+  },
+  {
+    "column_name": "applications_close_at",
+    "constraint_name": "festival_window_check",
+    "error_message": "Applications must close after they open.",
+    "table_name": "festival"
+  },
+  {
+    "column_name": "festival_id",
+    "constraint_name": "food_truck_application_festival_id_fkey",
+    "error_message": "This festival has applications or feedback, so it cannot be deleted.",
+    "table_name": "food_truck_application"
+  },
+  {
     "column_name": "time_slot",
     "constraint_name": "max_advance_booking",
     "error_message": "Reservations cannot be made more than 1 year in advance.",
@@ -48,6 +90,18 @@
     "table_name": "reservation_requests"
   },
   {
+    "column_name": "agreed_to_terms",
+    "constraint_name": "sponsorship_application_agreed_check",
+    "error_message": "Please agree to the sponsorship terms",
+    "table_name": "sponsorship_application"
+  },
+  {
+    "column_name": "festival_id",
+    "constraint_name": "sponsorship_application_festival_id_fkey",
+    "error_message": "This festival has applications or feedback, so it cannot be deleted.",
+    "table_name": "sponsorship_application"
+  },
+  {
     "column_name": null,
     "constraint_name": "tree_parent_cycle",
     "error_message": "A record cannot be placed under itself or one of its own descendants. Choose a different parent.",
@@ -58,5 +112,11 @@
     "constraint_name": "valid_time_slot_bounds",
     "error_message": "Invalid time slot: end time must be after start time.",
     "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "festival_id",
+    "constraint_name": "vendor_application_festival_id_fkey",
+    "error_message": "This festival has applications or feedback, so it cannot be deleted.",
+    "table_name": "vendor_application"
   }
 ]
