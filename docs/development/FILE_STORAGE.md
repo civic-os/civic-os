@@ -127,6 +127,33 @@ The `examples/pothole/docker-compose.yml` includes:
 
 **Migration**: `postgres/migrations/deploy/v0-5-0-add-file-storage.sql` adds core file storage infrastructure
 
+### Checking the Production Image and DigitalOcean Spaces
+
+`ng serve` sends no Content-Security-Policy, and RustFS ignores object ACLs by design, so two things are only visible with the production frontend image and a real Spaces bucket: whether the CSP lets the browser load, upload and frame files from the store, and whether objects are private or public as intended. Two compose overrides in `examples/pothole/` cover them. Nothing has to be published: every image is built from the checkout.
+
+- `docker-compose.frontend-image.yml` serves the production frontend image, built locally, on `http://localhost:4200` (the only origin the dev Keycloak client accepts), so stop `ng serve` first. On its own it checks the CSP against the local RustFS.
+- `docker-compose.spaces.yml` points the consolidated worker (and so the URLs the database signs) and the frontend's CSP at a Spaces bucket. Its values come from `spaces.env` (copy `spaces.env.example`; gitignored, it holds the key).
+
+Use a scratch bucket made for the check, never one that holds an instance's files, and a key with read, write and delete on it. A per-bucket (limited) key cannot change bucket settings, so add the CORS rule in the DigitalOcean control panel: origin `http://localhost:4200`, methods GET, PUT and HEAD, headers `*` (`spaces-cors.xml` holds the same rule for an all-buckets key). Run the stack under its own project name, so the example's usual volumes are left alone:
+
+```bash
+cd examples/pothole
+docker compose -p spaces-check --env-file .env --env-file spaces.env \
+  -f docker-compose.yml -f docker-compose.frontend-image.yml -f docker-compose.spaces.yml up -d --build
+npm run generate pothole    # from the repo root, once the stack is healthy
+```
+
+Then check, against the bucket:
+
+1. The worker logs `published s3 config`, and `/admin/config` (File storage) names the Spaces endpoint and bucket.
+2. A file uploaded on an Issue or WorkPackage is stored, its thumbnails are generated, and its signed URL and thumbnail URLs load. The same URL with a changed signature, an unsigned URL to the object and a URL signed more than 20 minutes ago return 403.
+3. The PDF viewer shows a PDF (the CSP's `frame-src` must name the store), and `download_url` answers with `Content-Disposition: attachment`.
+4. A static asset is public: its direct, unsigned original and thumbnail URLs load anonymously.
+5. `privatize-acls --acl public-read` makes private files' objects readable without a signature, `privatize-acls` makes them refuse it again, static assets stay public, and a second run changes nothing. Run it with `run -T --rm --no-deps consolidated-worker /app/consolidated-worker privatize-acls` and the same `-p`, `--env-file` and `-f` options.
+6. The browser console shows no CSP violations.
+
+Afterwards run `docker compose -p spaces-check ... down -v`, then delete the bucket and the key.
+
 ---
 
 ## Production Configuration

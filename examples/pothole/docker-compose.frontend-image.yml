@@ -1,0 +1,36 @@
+# Copyright (C) 2023-2026 Civic OS, L3C
+# AGPL-3.0-or-later
+#
+# Serves the production frontend image, built locally from this checkout, on http://localhost:4200
+# in place of `ng serve`. Use it to check what only the image does: the nginx Content-Security-Policy
+# (S3 origin for images, uploads and the PDF viewer) and the runtime config the entrypoint writes.
+# Stop `ng serve` first; the dev Keycloak client only accepts http://localhost:4200.
+# A project name of its own (-p) keeps the example's usual volumes, which may hold an older schema, untouched.
+#
+#   cd examples/pothole
+#   docker compose -p frontend-image -f docker-compose.yml -f docker-compose.frontend-image.yml up -d --build
+#
+# With docker-compose.spaces.yml added as a third -f, the CSP names the Spaces endpoint instead of the
+# local RustFS one. See docs/development/FILE_STORAGE.md (Checking the Production Image and DigitalOcean Spaces).
+services:
+  frontend:
+    build:
+      context: ../..
+      dockerfile: docker/frontend/Dockerfile
+    image: civic-os-frontend:local
+    container_name: frontend_local
+    ports:
+      - "4200:80"
+    environment:
+      POSTGREST_URL: http://localhost:3000/
+      SWAGGER_URL: http://localhost:8080
+      KEYCLOAK_URL: http://localhost:8082
+      KEYCLOAK_REALM: civic-os-dev
+      KEYCLOAK_CLIENT_ID: civic-os-dev-client
+      # Browser-facing S3 origin, used only for the CSP (file URLs come from public.files)
+      S3_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      S3_BUCKET: ${S3_BUCKET:-civic-os-files}
+      DEFAULT_LOCALE: en
+      SUPPORTED_LOCALES: en,es
+    depends_on:
+      - postgrest
