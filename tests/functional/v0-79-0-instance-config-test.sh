@@ -82,9 +82,9 @@ GRANT EXECUTE ON FUNCTION pg_temp.val(text) TO PUBLIC;
 -- ---------------------------------------------------------------------------
 DO $$
 BEGIN
-  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE config_key NOT LIKE 't\_%') = 10, 'ten framework keys are seeded';
-  ASSERT (SELECT count(*) FROM metadata.instance_config_groups) = 4, 'four framework groups are seeded';
-  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE config_key NOT LIKE 't\_%' AND config_value IS NOT NULL) = 0,
+  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE config_key NOT LIKE 't\_%' AND NOT is_secret) = 10, 'ten framework keys are seeded (besides the v0.88.0 secret keys)';
+  ASSERT (SELECT count(*) FROM metadata.instance_config_groups WHERE group_key <> 'file_storage') = 4, 'four framework groups are seeded (besides the v0.88.0 file_storage group)';
+  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE config_key NOT LIKE 't\_%' AND NOT is_secret AND config_value IS NOT NULL) = 0,
     'framework keys start NULL (not set)';
   ASSERT (SELECT reloptions @> ARRAY['security_invoker=true'] FROM pg_class WHERE oid = 'public.instance_config'::regclass),
     'public.instance_config sets security_invoker = true';
@@ -132,7 +132,7 @@ BEGIN
   ASSERT (SELECT bool_and(is_public) FROM public.instance_config), 'web_anon sees only is_public rows';
   ASSERT NOT EXISTS (SELECT 1 FROM public.instance_config WHERE config_key IN ('sms_configured', 't_string')),
     'web_anon does not see sms_configured or temporary non-public keys';
-  ASSERT (SELECT count(*) FROM metadata.instance_config_groups) = 4, 'web_anon reads the groups';
+  ASSERT (SELECT count(*) FROM metadata.instance_config_groups WHERE group_key <> 'file_storage') = 4, 'web_anon reads the groups';
   ASSERT public.get_config('sms_configured') IS NULL, 'get_config is NULL for web_anon on a non-public key';
   ASSERT public.get_config('no_such_key') IS NULL, 'get_config is NULL for an unknown key';
   ASSERT pg_temp.expect_sqlstate($q$SELECT public.set_instance_config('app_title', 'x')$q$, '42501'),
@@ -496,8 +496,8 @@ then
   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -o /dev/null <<'SQL'
 DO $$
 BEGIN
-  ASSERT (SELECT count(*) FROM metadata.instance_config) = 10, 'no temporary key remains';
-  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE config_value IS NOT NULL) = 0, 'every framework key is back to NULL';
+  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE NOT is_secret) = 10, 'no temporary key remains';
+  ASSERT (SELECT count(*) FROM metadata.instance_config WHERE NOT is_secret AND config_value IS NOT NULL) = 0, 'every framework key is back to NULL';
 END $$;
 SQL
   echo "PASS: instance config store (visibility, typed set_instance_config, get_config, write lockdown, cache version, contract hash)"

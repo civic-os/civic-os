@@ -18,9 +18,10 @@ const (
 
 // configRow is one metadata.instance_config row as the worker reads it.
 type configRow struct {
-	key   string
-	typ   string
-	value *string
+	key    string
+	typ    string
+	value  *string
+	secret bool // is_secret (v0.88.0): never reaches templates
 }
 
 // instanceConfigSnapshot is what templates see: {{.Config.<key>}} and
@@ -59,7 +60,9 @@ type instanceConfigResolver struct {
 // newInstanceConfigResolver builds a resolver backed by the given pool. A nil
 // pool yields a resolver that always returns the fallback site name and no keys.
 // The worker connects as postgres, so RLS does not apply: templates see every
-// key, private ones included, as every signed-in user can.
+// key, private ones included, as every signed-in user can. Secret keys
+// (is_secret, v0.88.0) are excluded here and again in build(), so
+// {{.Config.<secret key>}} renders empty like an unknown key.
 func newInstanceConfigResolver(fallbackSiteName string, pool *pgxpool.Pool) *instanceConfigResolver {
 	r := &instanceConfigResolver{
 		fallbackSiteName: fallbackSiteName,
@@ -69,7 +72,8 @@ func newInstanceConfigResolver(fallbackSiteName string, pool *pgxpool.Pool) *ins
 	if pool != nil {
 		r.query = func(ctx context.Context) ([]configRow, error) {
 			rows, err := pool.Query(ctx,
-				`SELECT config_key, config_type, COALESCE(config_value, default_value) FROM metadata.instance_config`,
+				`SELECT config_key, config_type, COALESCE(config_value, default_value), is_secret
+				   FROM metadata.instance_config WHERE NOT is_secret`,
 			)
 			if err != nil {
 				return nil, err
@@ -79,7 +83,7 @@ func newInstanceConfigResolver(fallbackSiteName string, pool *pgxpool.Pool) *ins
 			var out []configRow
 			for rows.Next() {
 				var row configRow
-				if err := rows.Scan(&row.key, &row.typ, &row.value); err != nil {
+				if err := rows.Scan(&row.key, &row.typ, &row.value, &row.secret); err != nil {
 					return nil, err
 				}
 				out = append(out, row)
@@ -128,6 +132,9 @@ func (r *instanceConfigResolver) SiteName() string {
 func (r *instanceConfigResolver) build(rows []configRow) instanceConfigSnapshot {
 	config := make(map[string]interface{}, len(rows)+1)
 	for _, row := range rows {
+		if row.secret {
+			continue
+		}
 		config[row.key] = typedConfigValue(row)
 	}
 

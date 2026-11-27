@@ -16,9 +16,10 @@
  */
 
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, debounce, filter, map, of, switchMap, tap, timer } from 'rxjs';
+import { Subject, debounce, filter, forkJoin, map, of, switchMap, tap, timer } from 'rxjs';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../services/auth.service';
 import { ConfigService } from '../../services/config.service';
@@ -27,8 +28,10 @@ import {
   ConfigAdminService,
   ENV_VAR_NAMES,
   InstanceConfigRow,
+  SecretStatusRow,
   SetConfigResult
 } from '../../services/config-admin.service';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 import { RECOMMENDED_THEMES, themeNameToLabel } from '../../constants/themes';
 import { getFaviconUrl, getMapConfig, getPwaAppNameOverride, getPwaConfig } from '../../config/runtime';
 
@@ -39,7 +42,10 @@ export interface ConfigGroup {
   displayName: string | null;
   description: string | null;
   icon: string | null;
+  sortOrder: number | null;
   rows: InstanceConfigRow[];
+  /** Secret keys (v0.88.0), from get_instance_secret_status(); never their values. */
+  secrets: SecretStatusRow[];
 }
 
 interface FieldEmission {
@@ -56,7 +62,7 @@ const SAFE_RETURN_TO = /^\/(?![/\\])[^\s\\]*$/;
 @Component({
   selector: 'app-admin-config',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, DatePipe, ContrastTextDirective],
   templateUrl: './admin-config.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -81,6 +87,9 @@ export class AdminConfigPage {
   values = signal<Record<string, string | null>>({});
   statuses = signal<Record<string, FieldStatus>>({});
   fieldErrors = signal<Record<string, string>>({});
+
+  /** Write-only drafts of admin-managed secret keys. Never sent on leave, never prefilled. */
+  secretDrafts = signal<Record<string, string>>({});
 
   private subjects = new Map<string, Subject<FieldEmission>>();
   /** Per key: the value last sent, the value the server last stored, the value last rejected. */
@@ -118,15 +127,15 @@ export class AdminConfigPage {
   load() {
     this.loading.set(true);
     this.error.set(undefined);
-    this.configAdmin.getConfig().subscribe({
-      next: (rows) => {
+    forkJoin({ rows: this.configAdmin.getConfig(), secrets: this.configAdmin.getSecretStatus() }).subscribe({
+      next: ({ rows, secrets }) => {
         const values: Record<string, string | null> = {};
         for (const row of rows) {
           values[row.config_key] = row.config_value;
           this.setupField(row);
         }
         this.values.set(values);
-        this.groups.set(this.buildGroups(rows));
+        this.groups.set(this.buildGroups(rows, secrets));
         this.loading.set(false);
       },
       error: (err) => {
@@ -137,15 +146,15 @@ export class AdminConfigPage {
     });
   }
 
-  /** Groups in API order; rows without a group go last. */
-  private buildGroups(rows: InstanceConfigRow[]): ConfigGroup[] {
+  /**
+   * Groups by group sort order (API order for ties); rows without a group go last. Secret keys
+   * join their group, which may hold only secrets (File storage).
+   */
+  private buildGroups(rows: InstanceConfigRow[], secrets: SecretStatusRow[] = []): ConfigGroup[] {
     const grouped = new Map<string, ConfigGroup>();
-    const ungrouped: InstanceConfigRow[] = [];
-    for (const row of rows) {
-      if (row.group_key === null || row.group_key === undefined) {
-        ungrouped.push(row);
-        continue;
-      }
+    const ungrouped: ConfigGroup = { key: null, displayName: null, description: null, icon: null, sortOrder: null, rows: [], secrets: [] };
+    const groupFor = (row: InstanceConfigRow | SecretStatusRow): ConfigGroup => {
+      if (row.group_key === null || row.group_key === undefined) return ungrouped;
       let group = grouped.get(row.group_key);
       if (!group) {
         group = {
@@ -153,17 +162,66 @@ export class AdminConfigPage {
           displayName: row.group_display_name,
           description: row.group_description,
           icon: row.group_icon,
-          rows: []
+          sortOrder: row.group_sort_order ?? null,
+          rows: [],
+          secrets: []
         };
         grouped.set(row.group_key, group);
       }
-      group.rows.push(row);
-    }
-    const result = [...grouped.values()];
-    if (ungrouped.length > 0) {
-      result.push({ key: null, displayName: null, description: null, icon: null, rows: ungrouped });
-    }
+      return group;
+    };
+    for (const row of rows) groupFor(row).rows.push(row);
+    for (const secret of secrets) groupFor(secret).secrets.push(secret);
+
+    const result = [...grouped.values()]
+      .map((group, index) => ({ group, index }))
+      .sort((a, b) => (a.group.sortOrder ?? Infinity) - (b.group.sortOrder ?? Infinity) || a.index - b.index)
+      .map(({ group }) => group);
+    if (ungrouped.rows.length > 0 || ungrouped.secrets.length > 0) result.push(ungrouped);
     return result;
+  }
+
+  // ── Secret keys (write-only) ───────────────────
+
+  onSecretInput(row: SecretStatusRow, value: string) {
+    this.secretDrafts.update(drafts => ({ ...drafts, [row.config_key]: value }));
+    if (this.statusOf(row.config_key) !== 'saving') this.setStatus(row.config_key, 'idle');
+  }
+
+  secretDraft(key: string): string {
+    return this.secretDrafts()[key] ?? '';
+  }
+
+  /** Replace (a typed value) or Clear (null). The field empties after every save. */
+  saveSecret(row: SecretStatusRow, clear = false) {
+    const key = row.config_key;
+    const value = clear ? null : (this.secretDraft(key) || null);
+    if (!clear && value === null) return;
+    this.setStatus(key, 'saving');
+    this.configAdmin.setSecret(key, value).subscribe(result => {
+      this.secretDrafts.update(drafts => {
+        const rest = { ...drafts };
+        delete rest[key];
+        return rest;
+      });
+      if (!result.success) {
+        this.fieldErrors.update(errors => ({ ...errors, [key]: result.error || '' }));
+        this.setStatus(key, 'error');
+        return;
+      }
+      this.fieldErrors.update(errors => {
+        const rest = { ...errors };
+        delete rest[key];
+        return rest;
+      });
+      this.groups.update(groups => groups.map(group => ({
+        ...group,
+        secrets: group.secrets.map(secret => secret.config_key === key
+          ? { ...secret, is_set: !!result.is_set, updated_at: result.updated_at ?? secret.updated_at }
+          : secret)
+      })));
+      this.setStatus(key, 'saved');
+    });
   }
 
   // ── Saving ────────────────────────────────────

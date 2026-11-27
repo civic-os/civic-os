@@ -202,6 +202,10 @@ func main() {
 	s3Clients := initializeS3Client(ctx)
 	log.Println("[Init] ✓ S3 clients initialized")
 
+	// Publish the S3 values this worker signs with, so the database's URL signer uses the same key
+	// pair (v0.88.0). Startup only; retries while the migrations have not run yet.
+	go publishS3SigningConfig(ctx, poolConfigPublisher(dbPool), s3PublishRetryInterval)
+
 	// ===========================================================================
 	// 4. Verify Dependencies (Thumbnail Worker)
 	// ===========================================================================
