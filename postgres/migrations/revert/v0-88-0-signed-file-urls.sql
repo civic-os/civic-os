@@ -46,7 +46,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 REVOKE EXECUTE ON FUNCTION request_upload_url(text, text, text, text) FROM PUBLIC;
-COMMENT ON FUNCTION request_upload_url(text, text, text, text) IS NULL;
+COMMENT ON FUNCTION request_upload_url(text, text, text, text) IS
+  'Request presigned S3 upload URL. Returns request ID for polling.';
 
 CREATE OR REPLACE FUNCTION get_upload_url(p_request_id uuid)
 RETURNS TABLE(status text, url text, file_id uuid, error text) AS $$
@@ -65,7 +66,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 REVOKE EXECUTE ON FUNCTION get_upload_url(uuid) FROM PUBLIC;
-COMMENT ON FUNCTION get_upload_url(uuid) IS NULL;
+COMMENT ON FUNCTION get_upload_url(uuid) IS
+  'Poll for presigned URL status. Returns completed URL or error.';
 
 CREATE OR REPLACE FUNCTION public.create_file_record(
   p_id UUID,
