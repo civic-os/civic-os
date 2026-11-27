@@ -181,14 +181,14 @@
     }
     @if (propType() == EntityPropertyType.FilePDF) {
       <div class="flex items-center gap-2">
-        @if (datum()?.s3_thumbnail_medium_key) {
+        @if (datum()?.thumb_medium_url) {
           <div class="cursor-pointer relative" role="button" tabindex="0"
                [attr.aria-label]="'a11y.view_pdf' | translate"
                (click)="onPdfClick(datum())"
                (keydown.enter)="onPdfClick(datum())"
                (keydown.space)="$event.preventDefault(); onPdfClick(datum())">
             <img
-              [src]="getS3Url(datum().s3_thumbnail_medium_key)"
+              [src]="datum().thumb_medium_url"
               [alt]="'PDF Preview: ' + datum().file_name"
               class="not-prose w-24 h-32 object-cover rounded border hover:opacity-80 transition-opacity"
             />
@@ -224,8 +224,8 @@
         }
         <div class="flex flex-col">
           <a
-            [href]="getS3Url($safeNavigationMigration(datum()?.s3_original_key))"
-            [download]="$safeNavigationMigration(datum()?.file_name)"
+            [attr.href]="datum()?.url ?? null"
+            (click)="onFileDownload($event, datum())"
             class="font-medium link link-primary">
             {{ datum()?.file_name }}
           </a>

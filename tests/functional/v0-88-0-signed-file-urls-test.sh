@@ -191,6 +191,7 @@ BEGIN
   v_rec := public.create_file_record((r ->> 'file_id')::uuid, 'Issue', '', 'photo.png', 'image/png', 1, 'test-bucket', r ->> 'key', 'pending', 'photo');
   ASSERT v_rec ->> 'entity_id' = '' AND v_rec ->> 's3_original_key' = r ->> 'key' AND NOT (v_rec ->> 'is_public')::boolean,
     'the issued upload is registered with its key, private';
+  ASSERT v_rec ->> 'url' LIKE '%X-Amz-Signature=%', 'create_file_record returns the file with its signed URL';
   ASSERT pg_temp.expect_sqlstate(format($q$SELECT public.create_file_record(%L, 'Issue', '', 'photo.png', 'image/png', 1, 'test-bucket', %L)$q$, r ->> 'file_id', r ->> 'key'), '42501'),
     'an upload is registered once';
 

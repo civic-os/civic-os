@@ -636,12 +636,13 @@ BEGIN
 
   DELETE FROM metadata.file_upload_requests WHERE id = v_req.id;
 
-  RETURN pg_catalog.row_to_json(v_result);
+  -- The new file with its URLs (the caller created it, so it may read it): the files view's columns.
+  RETURN (SELECT pg_catalog.row_to_json(v) FROM public.files v WHERE v.id = v_result.id);
 END;
 $$;
 
 COMMENT ON FUNCTION public.create_file_record IS
-  'Register an uploaded file. Only an upload the database issued to the same user (request_file_upload), with that upload''s entity, bucket and key; is_public follows metadata.file_is_public(). SECURITY DEFINER; created_by set by trigger from JWT. Since v0.39.0; issued uploads only since v0.88.0.';
+  'Register an uploaded file. Only an upload the database issued to the same user (request_file_upload), with that upload''s entity, bucket and key; is_public follows metadata.file_is_public(). Returns the file as public.files shows it, URLs included. SECURITY DEFINER; created_by set by trigger from JWT. Since v0.39.0; issued uploads only and URLs in the result since v0.88.0.';
 
 NOTIFY pgrst, 'reload schema';
 

@@ -144,7 +144,7 @@
         ]
       },
       "name": "files uuid image/png",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "FileImage",
       "typeId": 19
     },
@@ -160,7 +160,7 @@
         ]
       },
       "name": "files uuid image/*",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "FileImage",
       "typeId": 19
     },
@@ -176,7 +176,7 @@
         ]
       },
       "name": "files uuid \"image\" (no slash)",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "File",
       "typeId": 18
     },
@@ -192,7 +192,7 @@
         ]
       },
       "name": "files uuid pdf",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "FilePDF",
       "typeId": 20
     },
@@ -208,21 +208,21 @@
         ]
       },
       "name": "files uuid other",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "File",
       "typeId": 18
     },
     {
       "input": {"data_type": "uuid", "join_column": "id", "join_schema": "metadata", "join_table": "files", "udt_name": "uuid"},
       "name": "files uuid no rule",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "File",
       "typeId": 18
     },
     {
       "input": {"data_type": "bigint", "join_column": "id", "join_schema": "metadata", "join_table": "files", "udt_name": "int8"},
       "name": "files int8 fk",
-      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+      "select": "col:files!col(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
       "type": "File",
       "typeId": 18
     },
@@ -271,14 +271,14 @@
     {
       "input": {"data_type": "uuid", "join_column": "id", "join_schema": "metadata", "join_table": "photo_galleries", "udt_name": "uuid"},
       "name": "photo_galleries uuid",
-      "select": "col:photo_galleries!col(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+      "select": "col:photo_galleries!col(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)))",
       "type": "PhotoGallery",
       "typeId": 25
     },
     {
       "input": {"data_type": "integer", "join_column": "id", "join_schema": "metadata", "join_table": "photo_galleries", "udt_name": "int4"},
       "name": "photo_galleries int4",
-      "select": "col:photo_galleries!col(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))",
+      "select": "col:photo_galleries!col(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)))",
       "type": "PhotoGallery",
       "typeId": 25
     },

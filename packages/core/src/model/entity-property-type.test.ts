@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { EntityPropertyType } from './index.js';
+import { EntityPropertyType, fileDisplayUrl } from './index.js';
 
 /**
  * Pins the members of EntityPropertyType, the only copy of the enum (the MCP
@@ -74,5 +74,29 @@ describe('EntityPropertyType', () => {
     for (const [name, value] of EXPECTED) {
       expect(EntityPropertyType[value]).toBe(name);
     }
+  });
+});
+
+describe('fileDisplayUrl (v0.88.0)', () => {
+  const all = { url: 'o', thumb_small_url: 's', thumb_medium_url: 'm', thumb_large_url: 'l' };
+
+  it('returns the requested size when it exists', () => {
+    expect(fileDisplayUrl(all, 'small')).toBe('s');
+    expect(fileDisplayUrl(all, 'medium')).toBe('m');
+    expect(fileDisplayUrl(all, 'large')).toBe('l');
+    expect(fileDisplayUrl(all, 'original')).toBe('o');
+  });
+
+  it('falls back to the next larger thumbnail, then the original', () => {
+    expect(fileDisplayUrl({ ...all, thumb_small_url: null }, 'small')).toBe('m');
+    expect(fileDisplayUrl({ url: 'o', thumb_large_url: 'l' }, 'small')).toBe('l');
+    expect(fileDisplayUrl({ url: 'o' }, 'medium')).toBe('o');
+    expect(fileDisplayUrl({ url: 'o', thumb_small_url: 's' }, 'large')).toBe('o');
+  });
+
+  it('is null without a file or any URL', () => {
+    expect(fileDisplayUrl(null, 'small')).toBeNull();
+    expect(fileDisplayUrl(undefined, 'original')).toBeNull();
+    expect(fileDisplayUrl({ url: null, thumb_small_url: null }, 'small')).toBeNull();
   });
 });

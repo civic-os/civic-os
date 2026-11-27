@@ -28,7 +28,7 @@ import { DisplayTimeSlotComponent } from '../display-time-slot/display-time-slot
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
 import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.component';
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
-import { getS3Config } from '../../config/runtime';
+import { FileAccessService } from '../../services/file-access.service';
 import { getContrastTextColor } from '../../utils/color.utils';
 import { MarkdownModule } from 'ngx-markdown';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -89,6 +89,7 @@ export class DisplayPropertyComponent {
 
   // Resolved only when a Dimension path is shown, so contexts that never show one need no HTTP providers
   private readonly injector = inject(Injector);
+  private readonly fileAccess = inject(FileAccessService);
   private readonly ancestorLabels = toSignal(
     toObservable(
       computed(() => ({ prop: this.prop(), id: this.datum()?.id, on: this.showPath() }), {
@@ -154,11 +155,12 @@ export class DisplayPropertyComponent {
   }
 
   /**
-   * Construct S3 URL from key
+   * Download a generic file under its name with a URL read at click time (signed URLs expire, v0.88.0).
+   * The link's href stays usable for a middle-click or "open in new tab" while it is fresh.
    */
-  getS3Url(s3Key: string): string {
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${s3Key}`;
+  onFileDownload(event: Event, file: FileReference) {
+    event.preventDefault();
+    void this.fileAccess.download(file);
   }
 
   /**
@@ -197,15 +199,6 @@ export class DisplayPropertyComponent {
     const gallery = this.datum();
     if (!gallery?.photo_gallery_files) return [];
     return [...gallery.photo_gallery_files].sort((a: GalleryImage, b: GalleryImage) => a.sort_order - b.sort_order);
-  }
-
-  /**
-   * Get thumbnail URL for a gallery image.
-   */
-  getGalleryThumbUrl(image: GalleryImage): string {
-    if (!image.file) return '';
-    const key = image.file.s3_thumbnail_medium_key || image.file.s3_original_key;
-    return this.getS3Url(key);
   }
 
   /**

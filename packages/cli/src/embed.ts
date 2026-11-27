@@ -105,6 +105,10 @@ export const SYSTEM_SHAPES: Readonly<Record<string, Readonly<Record<string, Syst
     s3_thumbnail_small_key: { ts: 'string', nullable: true }, s3_thumbnail_medium_key: { ts: 'string', nullable: true },
     s3_thumbnail_large_key: { ts: 'string', nullable: true },
     thumbnail_status: { ts: 'string' }, thumbnail_error: { ts: 'string', nullable: true }, created_at: { ts: 'string' },
+    // v0.88.0: direct (public files) or signed URLs; NULL without the S3 signing config or a thumbnail
+    is_public: { ts: 'boolean' }, url: { ts: 'string', nullable: true },
+    thumb_small_url: { ts: 'string', nullable: true }, thumb_medium_url: { ts: 'string', nullable: true },
+    thumb_large_url: { ts: 'string', nullable: true },
   },
   payment_transactions: {
     id: { ts: 'string' }, amount: { ts: 'number' }, currency: { ts: 'string' }, status: { ts: 'string' },

@@ -8,6 +8,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { FileThumbnailComponent } from './file-thumbnail.component';
 import { FileReference } from '../../interfaces/entity';
+import { FileUploadService } from '../../services/file-upload.service';
 
 describe('FileThumbnailComponent', () => {
     let component: FileThumbnailComponent;
@@ -28,7 +29,11 @@ describe('FileThumbnailComponent', () => {
         s3_thumbnail_large_key: 'p/thumb_800.jpg',
         thumbnail_status: 'completed',
         created_at: '2026-01-01',
-        updated_at: '2026-01-01'
+        updated_at: '2026-01-01',
+        url: 'https://s3.test/test/p/original.jpg?X-Amz-Signature=a',
+        thumb_small_url: 'https://s3.test/test/p/thumb_150.jpg?X-Amz-Signature=b',
+        thumb_medium_url: 'https://s3.test/test/p/thumb_400.jpg?X-Amz-Signature=c',
+        thumb_large_url: 'https://s3.test/test/p/thumb_800.jpg?X-Amz-Signature=d'
     };
 
     beforeEach(async () => {
@@ -76,9 +81,9 @@ describe('FileThumbnailComponent', () => {
     it('should fall back to original when medium thumbnail not available', () => {
         const fileNoThumb: FileReference = {
             ...mockFile,
-            s3_thumbnail_small_key: undefined,
-            s3_thumbnail_medium_key: undefined,
-            s3_thumbnail_large_key: undefined,
+            thumb_small_url: null,
+            thumb_medium_url: null,
+            thumb_large_url: null,
             thumbnail_status: 'pending'
         };
         fixture.componentRef.setInput('file', fileNoThumb);
@@ -88,13 +93,13 @@ describe('FileThumbnailComponent', () => {
         expect(component.isLoading()).toBe(false); // Has original to show
     });
 
-    it('should show loading state when no image keys available', () => {
+    it('should show loading state when no image URLs are available', () => {
         const pendingFile: FileReference = {
             ...mockFile,
-            s3_original_key: '',
-            s3_thumbnail_small_key: undefined,
-            s3_thumbnail_medium_key: undefined,
-            s3_thumbnail_large_key: undefined,
+            url: null,
+            thumb_small_url: null,
+            thumb_medium_url: null,
+            thumb_large_url: null,
             thumbnail_status: 'pending'
         };
         fixture.componentRef.setInput('file', pendingFile);
@@ -104,13 +109,13 @@ describe('FileThumbnailComponent', () => {
         expect(component.isLoading()).toBe(true);
     });
 
-    it('should show failed state when thumbnail failed and no keys', () => {
+    it('should show failed state when thumbnail failed and no URLs', () => {
         const failedFile: FileReference = {
             ...mockFile,
-            s3_original_key: '',
-            s3_thumbnail_small_key: undefined,
-            s3_thumbnail_medium_key: undefined,
-            s3_thumbnail_large_key: undefined,
+            url: null,
+            thumb_small_url: null,
+            thumb_medium_url: null,
+            thumb_large_url: null,
             thumbnail_status: 'failed'
         };
         fixture.componentRef.setInput('file', failedFile);
@@ -120,10 +125,11 @@ describe('FileThumbnailComponent', () => {
         expect(component.isLoading()).toBe(false);
     });
 
-    it('should not show loading when file has original key even if pending', () => {
+    it('should not show loading when file has an original URL even if pending', () => {
         const pendingWithOriginal: FileReference = {
             ...mockFile,
-            s3_thumbnail_medium_key: undefined,
+            thumb_medium_url: null,
+            thumb_large_url: null,
             thumbnail_status: 'pending'
         };
         fixture.componentRef.setInput('file', pendingWithOriginal);
@@ -138,5 +144,28 @@ describe('FileThumbnailComponent', () => {
         fixture.detectChanges();
 
         expect(component.thumbnailUrl()).toBeNull();
+    });
+
+    it('never builds a URL from the S3 keys (a record without URLs shows the placeholder)', () => {
+        const keysOnly: FileReference = { ...mockFile, url: null, thumb_small_url: null, thumb_medium_url: null, thumb_large_url: null };
+        fixture.componentRef.setInput('file', keysOnly);
+        fixture.detectChanges();
+
+        expect(component.thumbnailUrl()).toBeNull();
+    });
+
+    it('refetches the file once when its image fails to load (an expired signed URL)', async () => {
+        const getFile = vi.spyOn(TestBed.inject(FileUploadService), 'getFile')
+            .mockResolvedValue({ ...mockFile, thumb_medium_url: 'https://s3.test/test/p/thumb_400.jpg?X-Amz-Signature=fresh' });
+        fixture.componentRef.setInput('file', mockFile);
+        fixture.detectChanges();
+
+        component.onImageError();
+        component.onImageError();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(getFile).toHaveBeenCalledExactlyOnceWith('file-1');
+        expect(component.thumbnailUrl()).toContain('Signature=fresh');
     });
 });

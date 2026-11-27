@@ -52,7 +52,9 @@ describe('AdminFilesPage', () => {
             thumbnail_error: overrides.thumbnail_error,
             property_name: overrides.property_name,
             created_at: overrides.created_at ?? '2026-03-18T10:00:00Z',
-            updated_at: overrides.updated_at ?? '2026-03-18T10:00:00Z'
+            updated_at: overrides.updated_at ?? '2026-03-18T10:00:00Z',
+            url: overrides.url,
+            thumb_small_url: overrides.thumb_small_url
         };
     }
 
@@ -182,13 +184,6 @@ describe('AdminFilesPage', () => {
         });
     });
 
-    describe('getS3Url', () => {
-        it('should construct S3 URL from key', () => {
-            const url = component.getS3Url('issues/1/original.jpg');
-            expect(url).toContain('issues/1/original.jpg');
-        });
-    });
-
     describe('getFileIcon', () => {
         it('should return image icon for images', () => {
             expect(component.getFileIcon('image/jpeg')).toBe('image');
@@ -212,14 +207,20 @@ describe('AdminFilesPage', () => {
         it('should return thumbnail URL when available', () => {
             const file = createMockFile({
                 thumbnail_status: 'completed',
-                s3_thumbnail_small_key: 'issues/1/thumb-small.jpg'
+                s3_thumbnail_small_key: 'issues/1/thumb-small.jpg',
+                thumb_small_url: 'https://s3.test/b/issues/1/thumb-small.jpg?X-Amz-Signature=x'
             });
             const url = component.getThumbnailUrl(file);
-            expect(url).toContain('thumb-small.jpg');
+            expect(url).toBe('https://s3.test/b/issues/1/thumb-small.jpg?X-Amz-Signature=x');
         });
 
         it('should return null when no thumbnail', () => {
             const file = createMockFile({ thumbnail_status: 'pending' });
+            expect(component.getThumbnailUrl(file)).toBeNull();
+        });
+
+        it('never builds a URL from the keys when the view returned none', () => {
+            const file = createMockFile({ thumbnail_status: 'completed', s3_thumbnail_small_key: 'issues/1/thumb-small.jpg' });
             expect(component.getThumbnailUrl(file)).toBeNull();
         });
     });

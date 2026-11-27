@@ -68,6 +68,11 @@ export interface Database {
           thumbnail_status: string;
           thumbnail_error: string | null;
           created_at: string;
+          is_public: boolean;
+          url: string | null;
+          thumb_small_url: string | null;
+          thumb_medium_url: string | null;
+          thumb_large_url: string | null;
         } | null;
         borrower_type: {
           id: number;
@@ -87,6 +92,11 @@ export interface Database {
           thumbnail_status: string;
           thumbnail_error: string | null;
           created_at: string;
+          is_public: boolean;
+          url: string | null;
+          thumb_small_url: string | null;
+          thumb_medium_url: string | null;
+          thumb_large_url: string | null;
         } | null;
         photo_id: {
           id: string;
@@ -101,6 +111,11 @@ export interface Database {
           thumbnail_status: string;
           thumbnail_error: string | null;
           created_at: string;
+          is_public: boolean;
+          url: string | null;
+          thumb_small_url: string | null;
+          thumb_medium_url: string | null;
+          thumb_large_url: string | null;
         } | null;
         status_id: {
           id: number;
@@ -807,6 +822,11 @@ export interface Database {
               s3_thumbnail_medium_key: string | null;
               s3_thumbnail_large_key: string | null;
               thumbnail_status: string;
+              is_public: boolean;
+              url: string | null;
+              thumb_small_url: string | null;
+              thumb_medium_url: string | null;
+              thumb_large_url: string | null;
             };
           }>;
         } | null;
@@ -946,6 +966,11 @@ export interface Database {
               s3_thumbnail_medium_key: string | null;
               s3_thumbnail_large_key: string | null;
               thumbnail_status: string;
+              is_public: boolean;
+              url: string | null;
+              thumb_small_url: string | null;
+              thumb_medium_url: string | null;
+              thumb_large_url: string | null;
             };
           }>;
         } | null;
@@ -968,6 +993,11 @@ export interface Database {
               s3_thumbnail_medium_key: string | null;
               s3_thumbnail_large_key: string | null;
               thumbnail_status: string;
+              is_public: boolean;
+              url: string | null;
+              thumb_small_url: string | null;
+              thumb_medium_url: string | null;
+              thumb_large_url: string | null;
             };
           }>;
         } | null;

@@ -9,7 +9,7 @@
 
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject, ElementRef, viewChild } from '@angular/core';
 import { GalleryImage } from '../../interfaces/entity';
-import { getS3Config } from '../../config/runtime';
+import { fileDisplayUrl } from '@civic-os/core';
 import { LocaleService } from '../../services/locale.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -166,20 +166,12 @@ export class GalleryLightboxComponent {
     }
   }
 
-  /** Get image URL — use original for full-quality lightbox display */
+  /**
+   * Image URL — the original, for full-quality lightbox display. From the files view (signed for
+   * private files, v0.88.0); a URL is stable for 5 minutes, so the src does not churn across renders.
+   */
   getImageUrl(image: GalleryImage): string {
-    if (!image.file) return '';
-    const s3Config = getS3Config();
-    const key = image.file.s3_original_key;
-    return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
-  }
-
-  /** Get thumbnail URL for navigation strip */
-  getThumbUrl(image: GalleryImage): string {
-    if (!image.file) return '';
-    const s3Config = getS3Config();
-    const key = image.file.s3_thumbnail_small_key || image.file.s3_thumbnail_medium_key || image.file.s3_original_key;
-    return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
+    return fileDisplayUrl(image.file, 'original') ?? '';
   }
 
   /** Stop click propagation (prevent backdrop close when clicking image) */

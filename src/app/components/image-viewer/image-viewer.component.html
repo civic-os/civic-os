@@ -8,7 +8,7 @@
   <div class="overflow-auto max-h-[60vh] bg-base-200 rounded-lg flex items-start justify-center">
     @if (currentImage()) {
       <img
-        [src]="getImageUrl()"
+        [src]="imageUrl()"
         [alt]="currentImage()!.file_name"
         [class.w-full]="!zoomed()"
         class="not-prose block max-w-full"

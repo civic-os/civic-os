@@ -75,15 +75,16 @@ describe('ImageWidgetComponent', () => {
         expect(component.config().static_asset).toBeUndefined();
     });
 
-    it('should construct S3 URLs correctly', () => {
-        const url = component.getS3Url('static_assets/abc/file.jpg');
-        expect(url).toContain('static_assets/abc/file.jpg');
-    });
-
-    it('should return empty string for null S3 keys', () => {
-        expect(component.getS3Url(null)).toBe('');
-        expect(component.getS3Url(undefined)).toBe('');
-        expect(component.getS3Url('')).toBe('');
+    it('uses each crop\'s direct URL from the files view and is empty without one (v0.88.0)', () => {
+        component.asset.set({
+            id: 'a1', slug: 'banner', display_name: 'Banner',
+            desktop_file: { id: 'd', thumbnail_status: 'completed', url: 'https://s3.test/b/static_assets/a1/d/original.jpg' },
+            mobile_file: { id: 'm', thumbnail_status: 'completed', url: null }
+        } as any);
+        expect(component.getSrcsetForBreakpoint('desktop')).toBe('https://s3.test/b/static_assets/a1/d/original.jpg');
+        expect(component.getSrcForBreakpoint('mobile')).toBe('');
+        expect(component.getSrcForBreakpoint('tablet')).toBe('');
+        expect(component.fallbackSrc()).toBe('https://s3.test/b/static_assets/a1/d/original.jpg');
     });
 
     it('should check breakpoint crops correctly', () => {

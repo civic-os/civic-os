@@ -14,7 +14,7 @@
           "expires_date",
           "revoked_date",
           "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)",
-          "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)"
+          "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)"
         ],
         "edit": [
           "client_id",
@@ -24,7 +24,7 @@
           "expires_date",
           "revoked_date",
           "captured_by",
-          "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+          "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
           "display_name"
         ],
         "list": ["display_name", "client_id:clients!client_id(id,display_name)", "status_id:statuses!status_id(id,display_name,color,status_key)", "method_id:categories!method_id(id,display_name,color)", "granted_date", "expires_date"]
@@ -399,7 +399,7 @@
             "expires_date",
             "revoked_date",
             "captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email)",
-            "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
             "id"
           ],
           "input": {"entityId": "1", "fields": "<detail>", "key": "client_consents"},
@@ -409,7 +409,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),id&order=display_name.asc,id.asc&id=eq.1"
+            "url": "<PGRST>/client_consents?select=display_name,client_id:clients!client_id(id,display_name),created_at,updated_at,status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,revoked_date,captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email),evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),id&order=display_name.asc,id.asc&id=eq.1"
           }
         },
         {
@@ -422,7 +422,7 @@
             "expires_date",
             "revoked_date",
             "captured_by",
-            "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+            "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
             "display_name",
             "id"
           ],
@@ -433,7 +433,7 @@
             "method": "GET",
             "reportProgress": false,
             "responseType": "json",
-            "url": "<PGRST>/client_consents?select=client_id,status_id,method_id,granted_date,expires_date,revoked_date,captured_by,evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
+            "url": "<PGRST>/client_consents?select=client_id,status_id,method_id,granted_date,expires_date,revoked_date,captured_by,evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),display_name,id&order=display_name.asc,id.asc&id=eq.44444444-4444-4444-8444-444444444444"
           }
         },
         {

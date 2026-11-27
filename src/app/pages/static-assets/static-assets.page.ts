@@ -21,10 +21,9 @@ import { FormsModule } from '@angular/forms';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage, CropperPosition } from 'ngx-image-cropper';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { StaticAssetsService, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from '../../services/static-assets.service';
+import { StaticAssetsService, StaticAssetWithFiles, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from '../../services/static-assets.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { StaticAsset, CropState, CropCoordinates, CropBreakpoint, CropPresetProfile } from '../../interfaces/dashboard';
-import { getS3Config } from '../../config/runtime';
 import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 type CropStep = 'upload' | 'profile' | 'crop-desktop' | 'crop-tablet' | 'crop-mobile' | 'saving';
@@ -42,7 +41,7 @@ export class StaticAssetsPage implements OnInit {
   private fileUploadService = inject(FileUploadService);
 
   // List state
-  assets = signal<StaticAsset[]>([]);
+  assets = signal<StaticAssetWithFiles[]>([]);
   loading = signal(true);
   error = signal<string | undefined>(undefined);
   hasAssets = computed(() => this.assets().length > 0);
@@ -172,7 +171,7 @@ export class StaticAssetsPage implements OnInit {
     this.cropStep.set('upload');
   }
 
-  openEditModal(asset: StaticAsset): void {
+  openEditModal(asset: StaticAssetWithFiles): void {
     this.resetCropState();
     this.editingAsset.set(asset);
     this.assetName.set(asset.display_name);
@@ -180,10 +179,11 @@ export class StaticAssetsPage implements OnInit {
     this.originalFileId.set(asset.original_file_id);
     this.showCreateModal.set(true);
 
-    // Load original image URL for re-cropping
-    const originalFile = (asset as any).original_file;
-    if (originalFile?.s3_original_key) {
-      this.originalImageUrl.set(this.getS3Url(originalFile.s3_original_key));
+    // Load original image URL for re-cropping (a public file: a direct, stable URL; the cropper
+    // loads it into a canvas, so the bucket's CORS rule must allow GET)
+    const originalUrl = asset.original_file?.url;
+    if (originalUrl) {
+      this.originalImageUrl.set(originalUrl);
     }
 
     // Restore previous crop state if available
@@ -521,21 +521,10 @@ export class StaticAssetsPage implements OnInit {
 
   // ─── Helpers ───────────────────────────────────────────────────
 
-  getS3Url(s3Key: string | null | undefined): string {
-    if (!s3Key) return '';
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${s3Key}`;
-  }
-
-  getThumbnailUrl(asset: StaticAsset): string {
-    const original = (asset as any).original_file;
-    if (original?.s3_thumbnail_small_key) {
-      return this.getS3Url(original.s3_thumbnail_small_key);
-    }
-    if (original?.s3_thumbnail_medium_key) {
-      return this.getS3Url(original.s3_thumbnail_medium_key);
-    }
-    return '';
+  /** The original's small thumbnail, else its medium one (from the files view, v0.88.0). */
+  getThumbnailUrl(asset: StaticAssetWithFiles): string {
+    const original = asset.original_file;
+    return original?.thumb_small_url || original?.thumb_medium_url || '';
   }
 
   formatDate(dateStr: string): string {

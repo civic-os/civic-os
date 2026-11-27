@@ -73,6 +73,47 @@ export interface FileReference {
     property_name?: string;  // Column name of entity property referencing this file (v0.39.0)
     created_at: string;
     updated_at: string;
+    /** Static assets only: direct URLs and public-read objects (v0.88.0). */
+    is_public?: boolean;
+    /**
+     * URLs from `public.files` (v0.88.0): direct for a public file, signed and valid at least 15 minutes
+     * otherwise, NULL while a thumbnail does not exist or the instance has no S3 signing config.
+     * Read them with {@link fileDisplayUrl}; never build a URL from the keys.
+     */
+    url?: string | null;
+    thumb_small_url?: string | null;
+    thumb_medium_url?: string | null;
+    thumb_large_url?: string | null;
+    /** A signed URL that downloads under file_name. Not embedded: fetch the row when the user downloads. */
+    download_url?: string | null;
+}
+
+/** A display size: a thumbnail, or the original. */
+type FileDisplaySize = 'small' | 'medium' | 'large' | 'original';
+
+const FILE_URL_ORDER: Record<FileDisplaySize, readonly ('thumb_small_url' | 'thumb_medium_url' | 'thumb_large_url' | 'url')[]> = {
+    small: ['thumb_small_url', 'thumb_medium_url', 'thumb_large_url', 'url'],
+    medium: ['thumb_medium_url', 'thumb_large_url', 'url'],
+    large: ['thumb_large_url', 'url'],
+    original: ['url'],
+};
+
+/**
+ * The URL to show a file at a size: that thumbnail, else the next larger one, else the original.
+ * Null when the file has none (no signing config, or not yet a record).
+ *
+ * @consumer app
+ */
+export function fileDisplayUrl(
+    file: Pick<FileReference, 'url' | 'thumb_small_url' | 'thumb_medium_url' | 'thumb_large_url'> | null | undefined,
+    size: FileDisplaySize,
+): string | null {
+    if (!file) return null;
+    for (const field of FILE_URL_ORDER[size]) {
+        const value = file[field];
+        if (value) return value;
+    }
+    return null;
 }
 
 /** @consumer app */

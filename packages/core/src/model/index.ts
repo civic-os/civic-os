@@ -83,6 +83,7 @@ export {
   EntityPropertyType,
   isStaticText,
   isProperty,
+  fileDisplayUrl,
 } from './entity.js';
 export type {
   Environment,

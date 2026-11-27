@@ -25,7 +25,7 @@
         "column": "evidence_file",
         "columnSpan": 2,
         "defaultValue": null,
-        "select": "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "select": "evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
         "selectForEdit": "=",
         "selectForList": "=",
         "type": "File",

@@ -1580,6 +1580,14 @@ interface FieldState {
 }
 ```
 
+### `fileDisplayUrl`
+
+Kind: function. Consumer: app.
+
+```ts
+function fileDisplayUrl(file: Pick<FileReference, 'url' | 'thumb_small_url' | 'thumb_medium_url' | 'thumb_large_url'> | null | undefined, size: 'small' | 'medium' | 'large' | 'original'): string | null;
+```
+
 ### `FileReference`
 
 Kind: interface. Consumer: app.
@@ -1603,6 +1611,12 @@ interface FileReference {
   property_name?: string | undefined;
   created_at: string;
   updated_at: string;
+  is_public?: boolean | undefined;
+  url?: string | null | undefined;
+  thumb_small_url?: string | null | undefined;
+  thumb_medium_url?: string | null | undefined;
+  thumb_large_url?: string | null | undefined;
+  download_url?: string | null | undefined;
 }
 ```
 

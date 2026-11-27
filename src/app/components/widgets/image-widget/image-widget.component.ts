@@ -18,10 +18,9 @@
 import { Component, input, computed, signal, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslationService } from '../../../services/translation.service';
-import { DashboardWidget, ImageWidgetConfig, StaticAsset } from '../../../interfaces/dashboard';
-import { StaticAssetsService } from '../../../services/static-assets.service';
+import { DashboardWidget, ImageWidgetConfig } from '../../../interfaces/dashboard';
+import { StaticAssetFile, StaticAssetWithFiles, StaticAssetsService } from '../../../services/static-assets.service';
 import { DEFAULT_BREAKPOINTS } from '../../../services/static-assets.service';
-import { getS3Config } from '../../../config/runtime';
 
 /**
  * Image Widget Component (v0.38.0)
@@ -65,7 +64,7 @@ export class ImageWidgetComponent {
   private translation = inject(TranslationService);
 
   // Component state
-  asset = signal<StaticAsset | null>(null);
+  asset = signal<StaticAssetWithFiles | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
@@ -111,32 +110,21 @@ export class ImageWidgetComponent {
     });
   }
 
-  /**
-   * Get S3 URL for a file key.
-   * Same pattern as ImageViewerComponent.
-   */
-  getS3Url(s3Key: string | null | undefined): string {
-    if (!s3Key) return '';
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${s3Key}`;
+  /** The crop file of a breakpoint, if the asset has one. */
+  private cropFile(breakpointKey: string): StaticAssetFile | null {
+    const a = this.asset();
+    if (!a) return null;
+    return a[`${breakpointKey}_file` as 'desktop_file' | 'tablet_file' | 'mobile_file'] ?? null;
   }
 
   /**
    * Get the <source> srcset for a breakpoint.
    * Uses the original crop file directly — static asset crops are already
    * pre-sized (1200px wide) so square thumbnails would distort the aspect ratio.
+   * Static assets are public, so the URL is direct and stable (v0.88.0).
    */
   getSrcsetForBreakpoint(breakpointKey: string): string {
-    const a = this.asset() as any;
-    if (!a) return '';
-
-    const fileData = a[`${breakpointKey}_file`];
-    if (!fileData) return '';
-
-    if (fileData.s3_original_key) {
-      return this.getS3Url(fileData.s3_original_key);
-    }
-    return '';
+    return this.cropFile(breakpointKey)?.url ?? '';
   }
 
   /**
@@ -144,20 +132,13 @@ export class ImageWidgetComponent {
    * Uses the original crop — thumbnails are square-padded and unsuitable for display.
    */
   getSrcForBreakpoint(breakpointKey: string): string {
-    const a = this.asset() as any;
-    if (!a) return '';
-
-    const fileData = a[`${breakpointKey}_file`];
-    if (!fileData) return '';
-
-    return this.getS3Url(fileData.s3_original_key);
+    return this.cropFile(breakpointKey)?.url ?? '';
   }
 
   /**
    * Check if a breakpoint crop exists.
    */
   hasBreakpointCrop(breakpointKey: string): boolean {
-    const a = this.asset() as any;
-    return !!a && a[`${breakpointKey}_file`] != null;
+    return this.cropFile(breakpointKey) !== null;
   }
 }

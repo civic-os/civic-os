@@ -697,14 +697,14 @@ describe('AdminConfigPage', () => {
             const keyId = field('s3_access_key_id');
             expect(keyId.querySelector('input')).toBeNull();
             expect(keyId.textContent).toContain('…AKID');
-            expect(keyId.querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.set');
-            expect(keyId.textContent).toContain('admin_config.secret.deployment_managed');
+            expect(keyId.querySelector('.badge')!.textContent!.trim()).toBe('Set');
+            expect(keyId.textContent).toContain('Set by the deployment');
 
             const secretRow = field('s3_secret_access_key');
             expect(secretRow.querySelector('.font-mono')).toBeNull();
             expect(secretRow.textContent).toContain('Never shown');
 
-            expect(field('s3_bucket').querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.missing');
+            expect(field('s3_bucket').querySelector('.badge')!.textContent!.trim()).toBe('Missing');
         });
 
         it('shows nothing of secret keys when the status call returns none (a non-admin)', async () => {
@@ -732,24 +732,24 @@ describe('AdminConfigPage', () => {
                 input.dispatchEvent(new Event('input'));
                 fixture.detectChanges();
                 const replace = Array.from(field('altcha_hmac_key').querySelectorAll('button'))
-                    .find(b => b.textContent!.includes('admin_config.secret.replace')) as HTMLButtonElement;
+                    .find(b => b.textContent!.includes('Replace')) as HTMLButtonElement;
                 replace.click();
                 fixture.detectChanges();
 
                 expect(setSecret).toHaveBeenCalledExactlyOnceWith('altcha_hmac_key', 'new-secret');
                 expect(component.secretDraft('altcha_hmac_key')).toBe('');
-                expect(field('altcha_hmac_key').querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.set');
+                expect(field('altcha_hmac_key').querySelector('.badge')!.textContent!.trim()).toBe('Set');
                 expect(status('altcha_hmac_key')).toBe('Saved');
             });
 
             it('Clear sends null', async () => {
                 await create({ secrets: [{ ...ADMIN_SECRET, is_set: true }] });
                 const clear = Array.from(field('altcha_hmac_key').querySelectorAll('button'))
-                    .find(b => b.textContent!.includes('admin_config.secret.clear')) as HTMLButtonElement;
+                    .find(b => b.textContent!.includes('Clear')) as HTMLButtonElement;
                 clear.click();
                 fixture.detectChanges();
                 expect(setSecret).toHaveBeenCalledExactlyOnceWith('altcha_hmac_key', null);
-                expect(field('altcha_hmac_key').querySelector('.badge')!.textContent!.trim()).toBe('admin_config.secret.missing');
+                expect(field('altcha_hmac_key').querySelector('.badge')!.textContent!.trim()).toBe('Missing');
             });
 
             it('shows the error and discards the draft when a save fails', async () => {

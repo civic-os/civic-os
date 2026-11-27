@@ -51,7 +51,7 @@
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {
         "column": "receipt",
-        "select": "receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "select": "receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
         "type": "File",
         "typeId": 18
       },
@@ -90,7 +90,7 @@
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {
         "column": "file",
-        "select": "file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)",
+        "select": "file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
         "type": "File",
         "typeId": 18
       },

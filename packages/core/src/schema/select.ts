@@ -39,6 +39,13 @@ export function manyToManySelect(prop: SchemaEntityProperty, meta: ManyToManyMet
 }
 
 /**
+ * The URL columns of `public.files` (v0.88.0) every file embed selects. `url` and `thumb_*_url` are direct
+ * for public files and signed (valid at least 15 minutes) otherwise; `download_url` is left out because it
+ * is fetched when the user downloads, so a page left open never offers an expired link.
+ */
+const FILE_URL_FIELDS = 'is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url';
+
+/**
  * PostgREST select fragment for a property on detail pages (FK, file, user,
  * status, category, payment, gallery and M:M properties embed related rows).
  *
@@ -52,7 +59,7 @@ export function propertyToSelectString(prop: SchemaEntityProperty): string {
 
   // File types: Embed file metadata from files table (system type - see METADATA_SYSTEM_TABLES)
   if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-    return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
+    return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,${FILE_URL_FIELDS})`;
   }
 
   // Payment type: Embed payment data from payment_transactions view (system type)
@@ -76,7 +83,7 @@ export function propertyToSelectString(prop: SchemaEntityProperty): string {
 
   // PhotoGallery: Embed gallery with nested files and file metadata (v0.47.0)
   if (prop.type === EntityPropertyType.PhotoGallery) {
-    return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
+    return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,${FILE_URL_FIELDS})))`;
   }
 
   // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
@@ -121,7 +128,7 @@ export function propertyToSelectStringForEdit(prop: SchemaEntityProperty): strin
 
   // File types: Need full file data to show current file and allow replacement
   if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
-    return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
+    return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,${FILE_URL_FIELDS})`;
   }
 
   // For FK fields in edit forms, we only need the raw ID value
@@ -159,7 +166,7 @@ export function propertyToSelectStringForEdit(prop: SchemaEntityProperty): strin
   // PhotoGallery: Need full gallery data with files for edit form (same as detail view)
   // Editor component shows current images and allows add/remove/reorder
   if (prop.type === EntityPropertyType.PhotoGallery) {
-    return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
+    return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,${FILE_URL_FIELDS})))`;
   }
 
   // Everything else uses the column name directly
