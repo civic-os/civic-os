@@ -28,9 +28,10 @@ Landing and releasing are separate decisions. Direct merges and reviewed PRs bot
    - Interactive: `git status` in the current checkout is clean. If not, stop and say so; never stash or discard the maintainer's work.
    - `--unattended`: never touch the maintainer's checkout, which may hold work in progress. Work in a dedicated worktree beside it, `<checkout>/../civic-os-triage`: create it with `git worktree add --detach ../civic-os-triage origin/main` if missing, otherwise `git -C ../civic-os-triage checkout --detach origin/main && git -C ../civic-os-triage reset --hard && git -C ../civic-os-triage clean -fd` (that worktree belongs to this skill alone). Run `npm ci` there when `package-lock.json` changed since the last run. Every later step runs in that worktree.
 2. `git fetch origin main`; note `main`'s HEAD. All work starts from `origin/main`, never from the current branch.
-3. Note the latest tag (`git describe --tags --abbrev=0 origin/main`) and `package.json` `version`. The next patch is the latest tag plus one patch level.
+3. Note the latest tag (`git describe --tags --abbrev=0 origin/main`) and `package.json` `version`.
 4. List open PRs (`gh pr list --state open --json number,title,headRefName,files,body`) to know which files and issues are already in flight.
-5. Make sure the labels exist (skip in `--report-only`):
+5. Find the next patch. A release already claimed by work in flight comes before it: take the highest version among the latest tag, the migration prefixes in `origin/main`'s `sqitch.plan`, and the `postgres/migrations/deploy/vX-Y-Z-*` files of each open PR. The next patch is that version plus one patch level. For example, with tag v0.87.0 and an open PR adding `v0-88-0-*` migrations, the next patch is v0.88.1, not v0.87.1. When the highest version comes from an open PR, that PR is the **release PR**: batches with a migration stack on it (section 5, Merge order), and the report names it. When several open PRs claim that version, stack on the one whose migrations come last in its plan, and say in the report that the others still have to be chained. A hotfix never waits behind a release PR: it branches from `origin/main` as the latest tag plus one patch level, and the report says the release PR must be re-chained onto it.
+6. Make sure the labels exist (skip in `--report-only`):
    `gh label create triage:direct --color 0e8a16 --force`, and likewise `triage:review` (fbca04), `triage:needs-input` (d93f0b), `triage:hotfix` (b60205).
 
 ## 2. Collect
@@ -107,12 +108,12 @@ Group the Review-lane fixes into batches:
 - **Split a batch** when it would exceed 5 issues or about 500 non-test lines, or when one fix is much riskier than the rest (put the risky one alone, so the easy ones are not held behind its review).
 - **Group by theme** when a cluster shares a root cause or area (for example several phone-width overflow bugs); a themed batch is easier to review than a mixed one.
 - **Migrations in a batch:** all migrations in a batch use the same version prefix, and the golden recapture is one final commit after every fix, not one per fix.
-- **Merge order:** give the PRs a recommended merge order (a hotfix first), and build each one to merge without conflicts after the PRs before it. Two batches that would both touch the same file (always the case when both add migrations, since each appends to `sqitch.plan`) are stacked: the later batch branches from the earlier one's head, and its first migration requires the earlier batch's last migration, in both the plan entry and the deploy script's `-- requires:` header. Batches that share no files branch from `origin/main` as usual. Never open sibling PRs whose migrations require the same parent: whichever merges second conflicts.
+- **Merge order:** give the PRs a recommended merge order (a hotfix first), and build each one to merge without conflicts after the PRs before it. Two batches that would both touch the same file (always the case when both add migrations, since each appends to `sqitch.plan`) are stacked: the later batch branches from the earlier one's head, and its first migration requires the earlier batch's last migration, in both the plan entry and the deploy script's `-- requires:` header. A batch with a migration whose next patch follows a release PR (step 1.5) is stacked on that PR the same way, and its PR body opens with "Merge after #M". Batches that share no files branch from `origin/main` as usual. Never open sibling PRs whose migrations require the same parent: whichever merges second conflicts.
 
 Report:
 
 ```
-## Triage, <date>, main at <sha>, next patch vX.Y.Z
+## Triage, <date>, main at <sha>, next patch vX.Y.Z[ after release PR #M]
 
 ### Hotfix
 - #N <title>: <root cause, file:line>. PR alone.
