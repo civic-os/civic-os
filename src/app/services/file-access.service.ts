@@ -53,6 +53,8 @@ export class FileAccessService {
     const link = this.document.createElement('a');
     link.href = href;
     link.rel = 'noopener';
+    // Analytics link tracking would report the signed URL, which opens the file until it expires
+    link.className = 'matomo_ignore';
     this.document.body.appendChild(link);
     link.click();
     this.document.body.removeChild(link);
