@@ -3292,6 +3292,21 @@ Please have the following ready:
 );
 ```
 
+#### Video Embeds
+
+**Version**: v0.50.0+
+
+`@[video](url)` on a line of its own embeds a YouTube video, in static text and anywhere else markdown renders (notes, Markdown properties). `youtube.com/watch?v=`, `youtu.be/`, `youtube.com/embed/` and `youtube.com/playlist?list=` links are accepted, and a `t=` or `start=` timestamp is kept. The player always loads from the privacy-enhanced `https://www.youtube-nocookie.com`; a link to any other host renders as a plain link.
+
+The frontend image's Content-Security-Policy must allow that host in `frame-src`, or browsers block the player. The image does so since v0.88.0 (`docker/frontend/nginx.conf`); before then embedded videos only played under `ng serve`, which sends no CSP. A proxy that sets its own CSP in front of the frontend needs `frame-src https://www.youtube-nocookie.com` too.
+
+```sql
+INSERT INTO metadata.static_text (table_name, content, sort_order, column_width)
+VALUES ('reservation_requests', '### How to book
+
+@[video](https://www.youtube.com/watch?v=dQw4w9WgXcQ)', 1, 2);
+```
+
 #### Schema Reference
 
 | Column | Type | Default | Description |

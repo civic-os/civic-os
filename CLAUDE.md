@@ -59,7 +59,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Static Text Blocks** (v0.17.0+): Display-only markdown content blocks interspersed with properties on Detail, Create, and Edit pages. See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide.
 
-**Video Embeds** (v0.50.0+): `@[video](url)` markdown syntax for embedding YouTube videos within Static Text Blocks and notes. Uses DOMPurify sanitization with privacy-enhanced nocookie domain for GDPR compliance. Supported in all markdown rendering contexts. See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section).
+**Video Embeds** (v0.50.0+): `@[video](url)` markdown syntax for embedding YouTube videos within Static Text Blocks and notes. Uses DOMPurify sanitization with privacy-enhanced nocookie domain for GDPR compliance. Supported in all markdown rendering contexts. The frontend image's CSP must name `https://www.youtube-nocookie.com` in `frame-src` (added in v0.88.0; before that the player was blocked in production). See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section).
 
 **Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports action parameters, filtered FK param dropdowns, photo gallery params, and dot-notation visibility/enabled conditions. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
