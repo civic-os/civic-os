@@ -157,7 +157,7 @@
           "path": "/static_assets",
           "query": {
             "limit": "1",
-            "select": "*,desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status),tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status),mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)",
+            "select": "*,desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url),tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url),mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)",
             "slug": "eq.ecs-logo"
           },
           "headers": {
@@ -170,7 +170,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/static_assets?select=*,desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status),tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status),mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)&slug=eq.ecs-logo&limit=1"
+              "url": "/static_assets?select=*,desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url),tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url),mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)&slug=eq.ecs-logo&limit=1"
             }
           ]
         },

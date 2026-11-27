@@ -649,7 +649,7 @@
           "method": "GET",
           "path": "/files",
           "query": {
-            "id": "eq.<uuid:7>"
+            "id": "eq.<uuid:4>"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -662,7 +662,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/files?id=eq.<uuid:7>"
+              "url": "/files?id=eq.<uuid:4>"
             }
           ]
         },
@@ -707,27 +707,6 @@
             {
               "body": null,
               "url": "/photo_gallery_config?table_name=eq.projects&column_name=eq.photos"
-            }
-          ]
-        },
-        {
-          "method": "GET",
-          "path": "/rpc/get_upload_url",
-          "query": {
-            "p_request_id": "<uuid:8>"
-          },
-          "headers": {
-            "accept": "application/json, text/plain, */*",
-            "accept-language": "en",
-            "authorization": "Bearer <present>"
-          },
-          "body": null,
-          "status": "2xx|cancelled",
-          "n": ">=1",
-          "raw": [
-            {
-              "body": null,
-              "url": "/rpc/get_upload_url?p_request_id=<uuid:8>"
             }
           ]
         },
@@ -896,29 +875,29 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<uuid:9>",
+            "p_entity_id": "<uuid:5>",
             "p_entity_type": "projects",
             "p_file_name": "site-c.png",
             "p_file_size": 3346,
             "p_file_type": "image/png",
-            "p_id": "<uuid:7>",
+            "p_id": "<uuid:4>",
             "p_property_name": "photos",
             "p_s3_bucket": "civic-os-files",
-            "p_s3_original_key": "projects/<uuid:9>/<uuid:7>/original.png",
+            "p_s3_original_key": "projects/<uuid:5>/<uuid:4>/original.png",
             "p_thumbnail_status": "pending"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_id\":\"<uuid:7>\",\"p_entity_type\":\"projects\",\"p_entity_id\":\"<uuid:9>\",\"p_file_name\":\"site-c.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"projects/<uuid:9>/<uuid:7>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
+              "body": "{\"p_id\":\"<uuid:4>\",\"p_entity_type\":\"projects\",\"p_entity_id\":\"<uuid:5>\",\"p_file_name\":\"site-c.png\",\"p_file_type\":\"image/png\",\"p_file_size\":3346,\"p_s3_bucket\":\"civic-os-files\",\"p_s3_original_key\":\"projects/<uuid:5>/<uuid:4>/original.png\",\"p_thumbnail_status\":\"pending\",\"p_property_name\":\"photos\"}",
               "url": "/rpc/create_file_record"
             }
           ]
         },
         {
           "method": "POST",
-          "path": "/rpc/request_upload_url",
+          "path": "/rpc/request_file_upload",
           "query": {},
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -927,7 +906,7 @@
             "authorization": "Bearer <present>"
           },
           "body": {
-            "p_entity_id": "<uuid:9>",
+            "p_entity_id": "<uuid:5>",
             "p_entity_type": "projects",
             "p_file_name": "site-c.png",
             "p_file_type": "image/png"
@@ -936,8 +915,8 @@
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_entity_type\":\"projects\",\"p_entity_id\":\"<uuid:9>\",\"p_file_name\":\"site-c.png\",\"p_file_type\":\"image/png\"}",
-              "url": "/rpc/request_upload_url"
+              "body": "{\"p_entity_type\":\"projects\",\"p_entity_id\":\"<uuid:5>\",\"p_file_name\":\"site-c.png\",\"p_file_type\":\"image/png\"}",
+              "url": "/rpc/request_file_upload"
             }
           ]
         },
@@ -1098,7 +1077,7 @@
         "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
       },
       "minio": [
-        "PUT /civic-os-files/projects/<uuid:9>/<uuid:7>/original.png -> 200"
+        "PUT /civic-os-files/projects/<uuid:5>/<uuid:4>/original.png -> 200"
       ]
     },
     {
@@ -1141,15 +1120,15 @@
           "body": {
             "p_alt_text": null,
             "p_caption": null,
-            "p_file_id": "<uuid:7>",
-            "p_gallery_id": "<uuid:9>",
+            "p_file_id": "<uuid:4>",
+            "p_gallery_id": "<uuid:5>",
             "p_sort_order": 0
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_gallery_id\":\"<uuid:9>\",\"p_file_id\":\"<uuid:7>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
+              "body": "{\"p_gallery_id\":\"<uuid:5>\",\"p_file_id\":\"<uuid:4>\",\"p_sort_order\":0,\"p_caption\":null,\"p_alt_text\":null}",
               "url": "/rpc/add_gallery_image_by_id"
             }
           ]
@@ -1168,13 +1147,13 @@
             "p_column_name": "photos",
             "p_entity_id": "<projects:2>",
             "p_entity_type": "projects",
-            "p_gallery_id": "<uuid:9>"
+            "p_gallery_id": "<uuid:5>"
           },
           "status": "2xx",
           "n": 1,
           "raw": [
             {
-              "body": "{\"p_gallery_id\":\"<uuid:9>\",\"p_entity_type\":\"projects\",\"p_entity_id\":\"<projects:2>\",\"p_column_name\":\"photos\"}",
+              "body": "{\"p_gallery_id\":\"<uuid:5>\",\"p_entity_type\":\"projects\",\"p_entity_id\":\"<projects:2>\",\"p_column_name\":\"photos\"}",
               "url": "/rpc/link_gallery_to_entity"
             }
           ]
@@ -1240,7 +1219,7 @@
           "query": {
             "id": "eq.<projects:2>",
             "order": "display_name.asc,id.asc",
-            "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
+            "select": "display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id"
           },
           "headers": {
             "accept": "application/json, text/plain, */*",
@@ -1253,7 +1232,7 @@
           "raw": [
             {
               "body": null,
-              "url": "/projects?select=display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.<projects:2>"
+              "url": "/projects?select=display_name,description,photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url))),project_parcels_m2m:project_parcels!project_id(parcels!parcel_id(id,display_name)),id&order=display_name.asc,id.asc&id=eq.<projects:2>"
             }
           ]
         },
