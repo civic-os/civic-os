@@ -5,7 +5,10 @@ package main
 // private, and this command fixes the old ones. It walks metadata.files (never the bucket), so on a bucket
 // several instances share it touches only this instance's objects. Static assets (is_public) are skipped.
 //
-//   consolidated-worker privatize-acls [--dry-run] [--acl private|public-read] [--after <file id>] [--batch 500]
+//   /app/consolidated-worker privatize-acls [--dry-run] [--acl private|public-read] [--after <file id>] [--batch 500]
+//
+// In Docker Compose: docker compose run --rm --no-deps consolidated-worker /app/consolidated-worker privatize-acls
+// (the image has no ENTRYPOINT, so the binary must be named; --no-deps leaves running services alone).
 //
 // --acl public-read puts the old ACL back (rollback). Setting an ACL twice is harmless, so the command can
 // simply be run again; --after resumes after the last file id it printed.
