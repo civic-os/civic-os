@@ -13,7 +13,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -113,6 +112,11 @@ func copySource(bucket, key string) string {
 	}
 	return url.PathEscape(bucket) + "/" + strings.Join(segments, "/")
 }
+
+// stagedEntityID is the key segment for a file uploaded before its record exists (a Create page).
+// The file's metadata.files row keeps entity_id ” until it is claimed for its record (issue #141,
+// docs/notes/FILE_RECONCILE_DESIGN.md). The key is built by metadata._file_object_key() since v0.88.0.
+const stagedEntityID = "_new"
 
 // unclaimedReference is one row of metadata.unclaimed_file_references().
 type unclaimedReference struct {
@@ -483,16 +487,20 @@ type s3FileObjectStore struct {
 	client *s3.Client
 }
 
-// Copy copies an object, keeping its content type, with the public-read ACL every upload has
-// (a copy does not keep the source's ACL).
+// Copy copies an object, keeping its content type. The copy is private (the default ACL): only
+// staged Create-page uploads are copied, and those are never public files (static assets are uploaded
+// with their record's id, so they are never staged). Since v0.88.0; before, every copy was public-read.
 func (s *s3FileObjectStore) Copy(ctx context.Context, bucket, from, to string) error {
-	_, err := s.client.CopyObject(ctx, &s3.CopyObjectInput{
+	_, err := s.client.CopyObject(ctx, reconcileCopyInput(bucket, from, to))
+	return err
+}
+
+func reconcileCopyInput(bucket, from, to string) *s3.CopyObjectInput {
+	return &s3.CopyObjectInput{
 		Bucket:     aws.String(bucket),
 		CopySource: aws.String(copySource(bucket, from)),
 		Key:        aws.String(to),
-		ACL:        types.ObjectCannedACLPublicRead,
-	})
-	return err
+	}
 }
 
 func (s *s3FileObjectStore) Delete(ctx context.Context, bucket, key string) error {

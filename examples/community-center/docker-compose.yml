@@ -97,8 +97,10 @@ services:
       timeout: 10s
       retries: 3
 
-  # S3 bucket initialization: creates the default bucket, public read policy and
-  # the CORS rule browsers need for presigned PUT (RustFS allows no origins by default).
+  # S3 bucket initialization: creates the default bucket, a public read policy for static_assets/ only
+  # and the CORS rule browsers need for presigned PUT and GET (RustFS allows no origins by default).
+  # Every other file is private and read through URLs the database signs (v0.88.0). RustFS ignores
+  # object ACLs, so in development the policy, not x-amz-acl, is what makes static assets public.
   # Uses curl from the RustFS image, so no separate client image is required.
   s3-init:
     image: rustfs/rustfs:1.0.4
@@ -115,9 +117,9 @@ services:
         B=${S3_BUCKET:-civic-os-files}
         code=$$(curl -sS -o /dev/null -w '%{http_code}' $$S -X PUT $$U/$$B)
         case "$$code" in 2*|409) ;; *) echo "bucket create failed: HTTP $$code"; exit 1;; esac
-        curl -fsS $$S -X PUT -H "Content-Type: application/json" --data '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'$$B'/*"]}]}' "$$U/$$B?policy" || exit 1
+        curl -fsS $$S -X PUT -H "Content-Type: application/json" --data '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'$$B'/static_assets/*"]}]}' "$$U/$$B?policy" || exit 1
         curl -fsS $$S -X PUT -H "Content-Type: application/xml" --data '<CORSConfiguration><CORSRule><AllowedOrigin>*</AllowedOrigin><AllowedMethod>GET</AllowedMethod><AllowedMethod>PUT</AllowedMethod><AllowedMethod>HEAD</AllowedMethod><AllowedHeader>*</AllowedHeader><ExposeHeader>ETag</ExposeHeader></CORSRule></CORSConfiguration>' "$$U/$$B?cors" || exit 1
-        echo "S3 bucket initialized (public read, CORS): $$B"
+        echo "S3 bucket initialized (public read for static_assets/ only, CORS): $$B"
     networks:
       - postgrest-network
 

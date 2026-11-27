@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.31.17
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.21
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.90.0
+	github.com/aws/smithy-go v1.23.2
 	github.com/h2non/bimg v1.1.9
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/pganalyze/pg_query_go/v6 v6.2.2
@@ -32,7 +33,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.39.1 // indirect
-	github.com/aws/smithy-go v1.23.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect

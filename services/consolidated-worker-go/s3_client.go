@@ -10,39 +10,33 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// S3Clients holds both the S3 client and presign client
+// S3Clients holds the S3 client the worker reads and writes objects with.
 type S3Clients struct {
-	S3Client        *s3.Client
-	S3PresignClient *s3.PresignClient
+	S3Client *s3.Client
 }
 
-// initializeS3Client creates AWS S3 clients with optional custom endpoint for presigning.
-// Used by both S3PresignWorker (to generate presigned URLs) and ThumbnailWorker (to upload/download files).
+// initializeS3Client creates the AWS S3 client used by the ThumbnailWorker, the FileReconcileCron and
+// the privatize-acls command. Upload and download URLs are signed in the database since v0.88.0 with the
+// values publishS3SigningConfig() publishes, so the worker no longer presigns.
 //
 // Parameters from environment:
 //   - S3_ACCESS_KEY_ID / AWS_ACCESS_KEY_ID (deprecated)
 //   - S3_SECRET_ACCESS_KEY / AWS_SECRET_ACCESS_KEY (deprecated)
 //   - S3_REGION / AWS_REGION (deprecated)
 //   - S3_ENDPOINT / AWS_ENDPOINT_URL (deprecated) - Internal endpoint for operations
-//   - S3_PUBLIC_ENDPOINT - Public endpoint for presigned URLs (optional, for local RustFS/Docker)
 func initializeS3Client(ctx context.Context) *S3Clients {
 	// S3 configuration with dual support (generic S3_* names take priority)
 	s3AccessKey := getS3Env("S3_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID", "")
 	s3SecretKey := getS3Env("S3_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY", "")
 	s3Region := getS3Env("S3_REGION", "AWS_REGION", "us-east-1")
 	s3Endpoint := getS3Env("S3_ENDPOINT", "AWS_ENDPOINT_URL", "")
-	publicEndpoint := getEnv("S3_PUBLIC_ENDPOINT", "")
 
 	log.Printf("[S3] Initializing S3 client...")
 	log.Printf("[S3] Region: %s", s3Region)
 	if s3Endpoint != "" {
 		log.Printf("[S3] Internal Endpoint: %s", s3Endpoint)
 	}
-	if publicEndpoint != "" {
-		log.Printf("[S3] Public Endpoint (presigning): %s", publicEndpoint)
-	}
 
-	// Initialize AWS S3 client with explicit credentials
 	awsCfg, err := config.LoadDefaultConfig(ctx,
 		config.WithRegion(s3Region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
@@ -62,38 +56,9 @@ func initializeS3Client(ctx context.Context) *S3Clients {
 		}
 		o.UsePathStyle = true // Required for S3-compatible stores (RustFS, MinIO, DigitalOcean Spaces)
 	})
+	log.Println("[S3] ✓ S3 client initialized")
 
-	// For presigning, use public endpoint if configured (for local RustFS/Docker)
-	var s3PresignClient *s3.PresignClient
-	if publicEndpoint != "" {
-		// Create separate config with public endpoint for presigned URLs
-		publicCfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion(s3Region),
-			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-				s3AccessKey,
-				s3SecretKey,
-				"",
-			)),
-		)
-		if err != nil {
-			log.Fatalf("[S3] Failed to load AWS SDK configuration for presigning: %v", err)
-		}
-
-		publicS3Client := s3.NewFromConfig(publicCfg, func(o *s3.Options) {
-			o.BaseEndpoint = aws.String(publicEndpoint)
-			o.UsePathStyle = true // Required for path-style URLs (RustFS, MinIO)
-		})
-		s3PresignClient = s3.NewPresignClient(publicS3Client)
-		log.Println("[S3] ✓ S3 client initialized with public endpoint for presigning")
-	} else {
-		s3PresignClient = s3.NewPresignClient(s3Client)
-		log.Println("[S3] ✓ S3 client initialized")
-	}
-
-	return &S3Clients{
-		S3Client:        s3Client,
-		S3PresignClient: s3PresignClient,
-	}
+	return &S3Clients{S3Client: s3Client}
 }
 
 // getS3Env retrieves S3-related environment variable with dual support for generic and AWS-specific names.

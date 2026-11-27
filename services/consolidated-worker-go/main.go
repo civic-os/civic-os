@@ -25,12 +25,16 @@ var (
 )
 
 func main() {
+	// Operator commands (v0.88.0): consolidated-worker privatize-acls [flags]
+	if len(os.Args) > 1 && os.Args[1] == "privatize-acls" {
+		os.Exit(runPrivatizeACLs(os.Args[2:]))
+	}
+
 	log.Println("========================================")
 	log.Println("  Civic OS - Consolidated Worker")
 	log.Printf("  Version: %s", version)
 	log.Println("========================================")
 	log.Println("  Combines:")
-	log.Println("    - S3 Signer")
 	log.Println("    - Thumbnail Worker")
 	log.Println("    - Notification Worker")
 	log.Println("    - Recurring Series Worker")
@@ -196,7 +200,7 @@ func main() {
 	log.Printf("[Init] ✓ Database connection pool established (max: %d, min: %d)", dbMaxConns, dbMinConns)
 
 	// ===========================================================================
-	// 3. Initialize S3 Clients (for S3 Signer and Thumbnail Worker)
+	// 3. Initialize S3 Client (thumbnails, file reconcile; upload URLs are signed in the database since v0.88.0)
 	// ===========================================================================
 	log.Println("[Init] Initializing S3 clients...")
 	s3Clients := initializeS3Client(ctx)
@@ -290,14 +294,6 @@ func main() {
 	// ===========================================================================
 	log.Println("[Init] Registering River workers...")
 	workers := river.NewWorkers()
-
-	// S3 Presign Worker (s3_signer queue)
-	river.AddWorker(workers, &S3PresignWorker{
-		s3Client:        s3Clients.S3Client,
-		s3PresignClient: s3Clients.S3PresignClient,
-		dbPool:          dbPool,
-	})
-	log.Println("[Init] ✓ S3PresignWorker registered (queue: s3_signer)")
 
 	// Thumbnail Worker (thumbnails queue)
 	river.AddWorker(workers, &ThumbnailWorker{
@@ -420,7 +416,6 @@ func main() {
 
 	riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 		Queues: map[string]river.QueueConfig{
-			"s3_signer":         {MaxWorkers: 20},                  // I/O-bound, many workers
 			"thumbnails":        {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
 			"notifications":     {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
 			"recurring":         {MaxWorkers: 5},                   // Series expansion jobs
@@ -480,7 +475,6 @@ func main() {
 	log.Println("========================================")
 	log.Println("")
 	log.Println("Registered job kinds:")
-	log.Println("  - s3_presign (queue: s3_signer, 20 workers)")
 	log.Println("  - thumbnail_generate (queue: thumbnails,", thumbnailMaxWorkers, "workers)")
 	log.Println("  - send_notification (queue: notifications, 30 workers)")
 	log.Println("  - send_email (queue: notifications)")

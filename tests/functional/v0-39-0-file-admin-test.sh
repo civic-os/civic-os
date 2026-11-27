@@ -139,45 +139,25 @@ upload_file() {
   local file_size
   file_size=$(wc -c < "$file_path" | tr -d ' ')
 
-  # Request presigned URL
-  local request_id
-  request_id=$(curl -s -X POST "$POSTGREST_URL/rpc/request_upload_url" \
+  # Issue the upload (v0.88.0: synchronous, signed in the database)
+  local issued url file_id s3_bucket s3_key is_public
+  issued=$(curl -s -X POST "$POSTGREST_URL/rpc/request_file_upload" \
     -H "Authorization: Bearer $token" \
     -H "Content-Type: application/json" \
-    -d "{\"p_entity_type\":\"$entity_type\",\"p_entity_id\":\"$entity_id\",\"p_file_name\":\"$file_name\",\"p_file_type\":\"$file_type\"}" \
-    | jq -r '. // empty' | tr -d '"')
-  [ -z "$request_id" ] && return 1
-
-  # Poll for URL (max 10s)
-  local url="" file_id=""
-  for i in $(seq 1 20); do
-    local poll
-    poll=$(curl -s -H "Authorization: Bearer $token" \
-      "$POSTGREST_URL/rpc/get_upload_url?p_request_id=$request_id")
-    local status
-    status=$(echo "$poll" | jq -r '.[0].status // "pending"')
-    if [ "$status" = "completed" ]; then
-      url=$(echo "$poll" | jq -r '.[0].url // empty')
-      file_id=$(echo "$poll" | jq -r '.[0].file_id // empty')
-      break
-    elif [ "$status" = "failed" ]; then
-      return 1
-    fi
-    sleep 0.5
-  done
+    -d "{\"p_entity_type\":\"$entity_type\",\"p_entity_id\":\"$entity_id\",\"p_file_name\":\"$file_name\",\"p_file_type\":\"$file_type\"}")
+  url=$(echo "$issued" | jq -r '.url // empty')
+  file_id=$(echo "$issued" | jq -r '.file_id // empty')
+  s3_bucket=$(echo "$issued" | jq -r '.bucket // empty')
+  s3_key=$(echo "$issued" | jq -r '.key // empty')
+  is_public=$(echo "$issued" | jq -r '.is_public // false')
   [ -z "$url" ] && return 1
 
-  # Upload to S3 (x-amz-acl is signed into the URL; see 7c)
-  local upload_status
+  # Upload to S3; x-amz-acl is signed into the URL only for public files (static assets)
+  local upload_status acl_header=()
+  [ "$is_public" = "true" ] && acl_header=(-H "x-amz-acl: public-read")
   upload_status=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X PUT "$url" -H "Content-Type: $file_type" -H "x-amz-acl: public-read" --data-binary @"$file_path")
+    -X PUT "$url" -H "Content-Type: $file_type" ${acl_header[@]+"${acl_header[@]}"} --data-binary @"$file_path")
   [ "$upload_status" != "200" ] && return 1
-
-  # Extract S3 bucket/key from presigned URL
-  local s3_path s3_bucket s3_key
-  s3_path=$(echo "$url" | sed 's|http[s]*://[^/]*/||' | sed 's|?.*||')
-  s3_bucket=$(echo "$s3_path" | cut -d'/' -f1)
-  s3_key=$(echo "$s3_path" | sed 's|^[^/]*/||')
 
   # Determine thumbnail_status
   local thumb_status="not_applicable"
@@ -547,24 +527,33 @@ section "PART 4: File Record Creation via RPC"
 
 echo "Testing file creation via create_file_record RPC..."
 
+# create_file_record registers only an upload the database issued (v0.88.0), so issue one first.
+# Usage: issue_upload <token> <entity_type> <entity_id> <file_name> <file_type>  -> JSON {file_id, bucket, key}
+issue_upload() {
+  curl -s -X POST "$POSTGREST_URL/rpc/request_file_upload" \
+    -H "Authorization: Bearer $1" -H "Content-Type: application/json" \
+    -d "{\"p_entity_type\":\"$2\",\"p_entity_id\":\"$3\",\"p_file_name\":\"$4\",\"p_file_type\":\"$5\"}"
+}
+
 # 4a. Create file record WITH property_name via RPC
 FILE_ID=""
 if [ -n "$ADMIN_TOKEN" ]; then
+  ISSUED=$(issue_upload "$ADMIN_TOKEN" Issue 1 functional_test_photo.jpg image/jpeg)
   RESULT=$(curl -s -X POST "$POSTGREST_URL/rpc/create_file_record" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
-    -d '{
-      "p_id": "b0000000-0000-0000-0000-000000000001",
-      "p_entity_type": "Issue",
-      "p_entity_id": "1",
-      "p_property_name": "photo",
-      "p_file_name": "functional_test_photo.jpg",
-      "p_file_type": "image/jpeg",
-      "p_file_size": 12345,
-      "p_s3_bucket": "civic-os-files",
-      "p_s3_original_key": "Issue/1/test-func/original.jpg",
-      "p_thumbnail_status": "not_applicable"
-    }')
+    -d "{
+      \"p_id\": \"$(echo "$ISSUED" | jq -r .file_id)\",
+      \"p_entity_type\": \"Issue\",
+      \"p_entity_id\": \"1\",
+      \"p_property_name\": \"photo\",
+      \"p_file_name\": \"functional_test_photo.jpg\",
+      \"p_file_type\": \"image/jpeg\",
+      \"p_file_size\": 12345,
+      \"p_s3_bucket\": \"$(echo "$ISSUED" | jq -r .bucket)\",
+      \"p_s3_original_key\": \"$(echo "$ISSUED" | jq -r .key)\",
+      \"p_thumbnail_status\": \"not_applicable\"
+    }")
   FILE_ID=$(echo "$RESULT" | jq -r '.id // empty')
   PROP_NAME=$(echo "$RESULT" | jq -r '.property_name // empty')
   assert_not_empty "4a. File created via RPC with property_name" "$FILE_ID"
@@ -574,20 +563,21 @@ fi
 # 4b. Create file record WITHOUT property_name (legacy compat)
 LEGACY_ID=""
 if [ -n "$ADMIN_TOKEN" ]; then
+  ISSUED=$(issue_upload "$ADMIN_TOKEN" Issue 2 legacy_upload.png image/png)
   RESULT=$(curl -s -X POST "$POSTGREST_URL/rpc/create_file_record" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
-    -d '{
-      "p_id": "b0000000-0000-0000-0000-000000000002",
-      "p_entity_type": "Issue",
-      "p_entity_id": "2",
-      "p_file_name": "legacy_upload.png",
-      "p_file_type": "image/png",
-      "p_file_size": 54321,
-      "p_s3_bucket": "civic-os-files",
-      "p_s3_original_key": "Issue/2/test-legacy/original.png",
-      "p_thumbnail_status": "not_applicable"
-    }')
+    -d "{
+      \"p_id\": \"$(echo "$ISSUED" | jq -r .file_id)\",
+      \"p_entity_type\": \"Issue\",
+      \"p_entity_id\": \"2\",
+      \"p_file_name\": \"legacy_upload.png\",
+      \"p_file_type\": \"image/png\",
+      \"p_file_size\": 54321,
+      \"p_s3_bucket\": \"$(echo "$ISSUED" | jq -r .bucket)\",
+      \"p_s3_original_key\": \"$(echo "$ISSUED" | jq -r .key)\",
+      \"p_thumbnail_status\": \"not_applicable\"
+    }")
   LEGACY_ID=$(echo "$RESULT" | jq -r '.id // empty')
   LEGACY_PROP=$(echo "$RESULT" | jq -r '.property_name // "null"')
   assert_not_empty "4b. Legacy file created without property_name" "$LEGACY_ID"
@@ -824,7 +814,7 @@ fi
 # PART 7: Full Upload Workflow via RPC (curl → worker → S3)
 # =============================================================================
 
-section "PART 7: Full Upload Workflow (RPC + Worker + S3)"
+section "PART 7: Legacy Upload Workflow (deprecated request_upload_url/get_upload_url shims, signed in the database since v0.88.0)"
 
 echo "Testing presigned URL workflow..."
 

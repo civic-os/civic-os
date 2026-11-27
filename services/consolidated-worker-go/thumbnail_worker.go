@@ -80,8 +80,9 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 
 	// Query database for file metadata (single source of truth)
 	var bucket, s3Key, fileType string
-	query := `SELECT s3_bucket, s3_original_key, file_type FROM metadata.files WHERE id = $1`
-	err := w.dbPool.QueryRow(ctx, query, job.Args.FileID).Scan(&bucket, &s3Key, &fileType)
+	var isPublic bool
+	query := `SELECT s3_bucket, s3_original_key, file_type, is_public FROM metadata.files WHERE id = $1`
+	err := w.dbPool.QueryRow(ctx, query, job.Args.FileID).Scan(&bucket, &s3Key, &fileType, &isPublic)
 	if err != nil {
 		log.Printf("[Job %d] Error querying file metadata: %v", job.ID, err)
 		return fmt.Errorf("failed to query file metadata from database: %w", err)
@@ -100,9 +101,9 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 	// Generate thumbnails based on file type
 	var thumbnailKeys map[string]string
 	if isPDFType(fileType) {
-		thumbnailKeys, err = w.generatePDFThumbnails(ctx, job.ID, fileData, s3Key, bucket)
+		thumbnailKeys, err = w.generatePDFThumbnails(ctx, job.ID, fileData, s3Key, bucket, isPublic)
 	} else {
-		thumbnailKeys, err = w.generateImageThumbnails(ctx, job.ID, fileData, s3Key, bucket)
+		thumbnailKeys, err = w.generateImageThumbnails(ctx, job.ID, fileData, s3Key, bucket, isPublic)
 	}
 
 	if err != nil {
@@ -139,7 +140,7 @@ func isPDFType(fileType string) bool {
 }
 
 // generateImageThumbnails creates thumbnails for image files using bimg (libvips)
-func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int64, imageData []byte, originalKey, bucket string) (map[string]string, error) {
+func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int64, imageData []byte, originalKey, bucket string, isPublic bool) (map[string]string, error) {
 	thumbnailKeys := make(map[string]string)
 	basePath := filepath.Dir(originalKey)
 
@@ -165,7 +166,7 @@ func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int
 		// Upload to S3
 		// Expected format: {entity_type}/{entity_id}/{file_id}/thumb-{size}.jpg
 		thumbnailKey := fmt.Sprintf("%s/thumb-%s.jpg", basePath, size.Name)
-		err = w.uploadToS3(ctx, bucket, thumbnailKey, thumbnail)
+		err = w.uploadToS3(ctx, bucket, thumbnailKey, thumbnail, isPublic)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload %s thumbnail: %w", size.Name, err)
 		}
@@ -178,7 +179,7 @@ func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int
 }
 
 // generatePDFThumbnails creates thumbnails for PDF files (first page only)
-func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64, pdfData []byte, originalKey, bucket string) (map[string]string, error) {
+func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64, pdfData []byte, originalKey, bucket string, isPublic bool) (map[string]string, error) {
 	log.Printf("[Job %d] Converting PDF first page to image...", jobID)
 
 	// Write PDF to temp file
@@ -236,7 +237,7 @@ func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64
 		}
 
 		thumbnailKey := fmt.Sprintf("%s/thumb-%s.png", basePath, size.Name)
-		err = w.uploadToS3(ctx, bucket, thumbnailKey, thumbnail)
+		err = w.uploadToS3(ctx, bucket, thumbnailKey, thumbnail, isPublic)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload %s thumbnail: %w", size.Name, err)
 		}
@@ -267,20 +268,30 @@ func (w *ThumbnailWorker) downloadFromS3(ctx context.Context, bucket, key string
 	return data, nil
 }
 
-// uploadToS3 uploads data to S3 with content type derived from the key extension
-func (w *ThumbnailWorker) uploadToS3(ctx context.Context, bucket, key string, data []byte) error {
+// uploadToS3 uploads a thumbnail with the same visibility as its file
+func (w *ThumbnailWorker) uploadToS3(ctx context.Context, bucket, key string, data []byte, isPublic bool) error {
+	_, err := w.s3Client.PutObject(ctx, thumbnailPutInput(bucket, key, data, isPublic))
+	return err
+}
+
+// thumbnailPutInput builds the upload of one thumbnail: content type from the key extension, and the
+// public-read ACL only for a public file (static assets, metadata.files.is_public). Private files'
+// thumbnails are read through signed URLs (v0.88.0).
+func thumbnailPutInput(bucket, key string, data []byte, isPublic bool) *s3.PutObjectInput {
 	contentType := "image/jpeg"
 	if strings.HasSuffix(key, ".png") {
 		contentType = "image/png"
 	}
-	_, err := w.s3Client.PutObject(ctx, &s3.PutObjectInput{
+	input := &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(data),
 		ContentType: aws.String(contentType),
-		ACL:         types.ObjectCannedACLPublicRead,
-	})
-	return err
+	}
+	if isPublic {
+		input.ACL = types.ObjectCannedACLPublicRead
+	}
+	return input
 }
 
 // updateThumbnailStatus updates the database with thumbnail keys and status
