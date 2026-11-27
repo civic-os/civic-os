@@ -53,7 +53,7 @@ func main() {
 	// ===========================================================================
 	databaseURL := getEnv("DATABASE_URL", "postgres://authenticator:password@localhost:5432/civic_os")
 
-	// S3 Configuration (for s3-signer and thumbnail-worker)
+	// S3 Configuration (thumbnails, file reconcile, the S3 config publisher)
 	s3Bucket := getEnv("S3_BUCKET", "civic-os-files")
 
 	// Thumbnail Worker Configuration

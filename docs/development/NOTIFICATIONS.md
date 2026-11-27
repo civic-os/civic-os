@@ -4,7 +4,7 @@
 
 **Version**: 0.11.0
 
-This document describes the architecture and implementation plan for the Civic OS notification system, which runs as part of the `consolidated-worker` service alongside S3 presigning and thumbnail generation. The notification worker uses River queue for reliable multi-channel notifications (email, SMS) with template support.
+This document describes the architecture and implementation plan for the Civic OS notification system, which runs as part of the `consolidated-worker` service alongside thumbnail generation and file reconcile. The notification worker uses River queue for reliable multi-channel notifications (email, SMS) with template support.
 
 > **ℹ️ Deployment Note**: The notification worker runs within the `consolidated-worker` container (v0.11.0+), sharing database connections with the Thumbnail Worker and the other jobs for improved resource efficiency.
 

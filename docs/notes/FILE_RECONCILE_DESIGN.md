@@ -30,7 +30,7 @@ Every later step finds a staged file through the foreign key of the record that 
 
 ### Step 1: staging key (built, v0.87.0)
 
-When `entity_id` is empty, the presign worker writes `{entity_type}/_new/{file_id}/original.{ext}`. `entity_id` stays `''` in `metadata.files`: the empty id remains the "unclaimed" marker, so no migration is needed and existing rows keep their meaning. Uploads on Create pages work against RustFS, and production stops creating id-less prefixes.
+When `entity_id` is empty, the presign worker writes `{entity_type}/_new/{file_id}/original.{ext}` (since v0.88.0 the database issues uploads and `request_file_upload()` computes the same key in SQL; there is no presign worker). `entity_id` stays `''` in `metadata.files`: the empty id remains the "unclaimed" marker, so no migration is needed and existing rows keep their meaning. Uploads on Create pages work against RustFS, and production stops creating id-less prefixes.
 
 ### Step 2: discover references (SQL, migration; built, v0.87.0)
 

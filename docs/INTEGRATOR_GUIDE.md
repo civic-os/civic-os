@@ -6882,7 +6882,7 @@ Civic OS provides production-ready Docker containers for all components:
 - **Frontend** (Angular app): `ghcr.io/civic-os/frontend:latest`
 - **PostgREST** API: `ghcr.io/civic-os/postgrest:latest`
 - **Migrations** (Sqitch): `ghcr.io/civic-os/migrations:latest`
-- **Consolidated Worker** (Go + River): `ghcr.io/civic-os/consolidated-worker:latest` - Handles S3 presigning, thumbnail generation, and notifications in a single service
+- **Consolidated Worker** (Go + River): `ghcr.io/civic-os/consolidated-worker:latest` - Handles thumbnail generation, file reconcile and notifications in a single service, and publishes the S3 settings the database signs file URLs with (v0.88.0)
 
 > **Note:** For production deployments, pin to specific versions (e.g., `v0.14.0`) to ensure reproducible builds. Check [GitHub Releases](https://github.com/civic-os/civic-os-frontend/releases) for available versions.
 
