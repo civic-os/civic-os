@@ -66,6 +66,16 @@ SELECT metadata.publish_deployment_config(jsonb_build_object(
   's3_access_key_id', 'TESTKEYID', 's3_secret_access_key', 'testsecret', 's3_region', 'us-east-1',
   's3_public_endpoint', 'http://files.example.test:9000', 's3_bucket', 'test-bucket'));
 
+-- Issue permissions the fixtures rely on, so the test runs on a bare core database (CI) as well as on
+-- the pothole example, which already has them: read for user and anonymous, create for user
+INSERT INTO metadata.permissions (table_name, permission) VALUES ('Issue', 'read'), ('Issue', 'create')
+ON CONFLICT (table_name, permission) DO NOTHING;
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id FROM metadata.permissions p JOIN metadata.roles r
+  ON (p.permission = 'read' AND r.role_key IN ('user', 'anonymous')) OR (p.permission = 'create' AND r.role_key = 'user')
+WHERE p.table_name = 'Issue'
+ON CONFLICT DO NOTHING;
+
 -- Two users and fixtures: a readable Issue file, a hidden file, a public static asset
 INSERT INTO metadata.civic_os_users (id, display_name) VALUES
   ('00000000-0000-0000-0000-0000000088a1', 'Signer A'),
