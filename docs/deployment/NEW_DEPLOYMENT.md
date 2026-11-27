@@ -589,7 +589,7 @@ s3:
     - s3_data:/data
 ```
 
-RustFS also needs the `s3-init` service beside it: it creates the bucket and sets the public-read policy and the CORS rule that browser uploads need. Copy it from any example's `docker-compose.yml`; see `docs/development/FILE_STORAGE.md` (Bucket CORS).
+RustFS also needs the `s3-init` service beside it: it creates the bucket and sets a public-read policy for `static_assets/` only (every other file is private and read through signed URLs, v0.88.0) and the CORS rule that browser uploads need. Copy it from any example's `docker-compose.yml`; see `docs/development/FILE_STORAGE.md` (Bucket CORS).
 
 **Consolidated Worker (File Storage + Thumbnails + Notifications):**
 ```yaml
@@ -624,8 +624,8 @@ consolidated-worker:
 ```
 
 **Key Points:**
-- RustFS provides S3-compatible storage for local development; the `s3-init` service creates the bucket and sets its public-read policy and CORS rule
-- Consolidated Worker combines S3 presigning, thumbnail generation, and notifications in a single service
+- RustFS provides S3-compatible storage for local development; the `s3-init` service creates the bucket and sets its public-read policy (`static_assets/` only) and CORS rule
+- Consolidated Worker combines thumbnail generation, file reconcile and notifications in a single service, and publishes the S3 settings the database signs file URLs with (v0.88.0)
 - Uses shared PostgreSQL connection pool (4 connections vs 12 with separate services)
 - Processes jobs using River queue for reliable background processing
 - For production, replace RustFS with AWS S3, DigitalOcean Spaces, or similar

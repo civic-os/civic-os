@@ -1,5 +1,7 @@
 # Database Connection Optimization Guide
 
+> **Historical (written for v0.11.0).** The three services below (s3-signer, thumbnail-worker, notification-worker) were consolidated into one `consolidated-worker` in v0.11.0, and the S3 Signer's work moved into PostgreSQL in v0.88.0 (in-database URL signing). The pool settings (`DB_MAX_CONNS`, `DB_MIN_CONNS`) still apply to the consolidated worker; see `docs/development/GO_MICROSERVICES_GUIDE.md`.
+
 **Problem**: Each Go microservice creates a connection pool without explicit limits, consuming 10-20 connections per service by default. With 3 services (s3-signer, thumbnail-worker, notification-worker) across multiple instances, this quickly exhausts PostgreSQL's connection limit (typically 100 connections).
 
 **Impact**: In demo/multi-tenant environments with many seldom-used instances, connection exhaustion prevents new services from starting.

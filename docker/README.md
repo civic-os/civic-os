@@ -19,7 +19,7 @@ Civic OS provides five production-ready container images:
    - Must match frontend/postgrest versions for compatibility
 
 4. **Consolidated Worker Container** (`ghcr.io/civic-os/consolidated-worker`)
-   - Go microservice for S3 presigned URLs, thumbnail generation, and notifications
+   - Go microservice for thumbnail generation, file reconcile and notifications; publishes the S3 settings the database signs file URLs with (v0.88.0)
    - Uses River job queue for reliable background processing
 
 5. **Payment Worker Container** (`ghcr.io/civic-os/payment-worker`) - Optional

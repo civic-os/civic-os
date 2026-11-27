@@ -17,6 +17,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Add Login/Logout Screens (uses Keycloak Auth)
 - [x] Add File/Image data types (S3-based with thumbnails)
 - [x] Add File Administration page with tiered RLS and storage stats (`/admin/files`)
+- [x] Signed file URLs (v0.88.0: files private by default, URLs signed in PostgreSQL after RLS and expiring, uploads issued by the database, only static assets public; write-only secret keys in instance config for the S3 credentials)
 - [x] Live update page as Schema is updated
 - [x] Add Color PropertyType
 - [x] Configurable Entity Menu (v0.81.0: nested headings, hiding, labels and translations via `metadata.menu_nodes` and the `/admin/menu` editor; plural names are labels you set per node)
