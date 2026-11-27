@@ -177,8 +177,8 @@ curl -s -o /dev/null -w "%{http_code}" "https://nyc3.digitaloceanspaces.com/{BUC
 **After upgrading an existing instance**, make the objects it uploaded before v0.88.0 private. The command walks this instance's own file records, so other instances sharing the bucket are not touched:
 
 ```bash
-docker compose run --rm consolidated-worker privatize-acls --dry-run
-docker compose run --rm consolidated-worker privatize-acls
+docker compose run --rm --no-deps consolidated-worker /app/consolidated-worker privatize-acls --dry-run
+docker compose run --rm --no-deps consolidated-worker /app/consolidated-worker privatize-acls
 ```
 
 Do **not** set ACLs across the whole bucket (`list-objects` loops): on a bucket several instances share, that would change every instance's objects. See `docs/deployment/PRODUCTION.md` (Upgrading to v0.88.0) for rollback and key rotation.
