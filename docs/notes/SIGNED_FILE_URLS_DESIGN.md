@@ -1,7 +1,7 @@
 # Signed File Access URLs — Design Document
 
-> **Status**: Designed, ready to build
-> **Dependencies**: Instance Config Store (`docs/notes/INSTANCE_SETUP_DESIGN.md`), `pgcrypto` extension
+> **Status**: **Built in v0.88.0**, both phases (signed reads and in-database upload signing) in one release. Where the build differs from the design below, the [v0.88.0 amendment](#amendment-as-built-in-v0880) wins.
+> **Dependencies**: Instance Config Store with secret keys (`docs/notes/INSTANCE_SETUP_DESIGN.md`, Secret Keys), `pgcrypto` extension
 > **See also**: `docs/notes/SIGV4_SIGNING_REFERENCE.md` (algorithm reference)
 
 ## Problem
@@ -481,3 +481,31 @@ The VIEW always generates a signed `download_url` (with `Content-Disposition`) e
 | `src/app/services/file-upload.service.ts` | Upload service (Phase 1: conditional ACL; Phase 2: remove polling) |
 | `docs/notes/INSTANCE_SETUP_DESIGN.md` | Instance config design (dependency for credential storage) |
 | `docs/notes/SIGV4_SIGNING_REFERENCE.md` | SigV4 algorithm reference (extracted from research) |
+
+---
+
+## Amendment: as built in v0.88.0
+
+Built November 2026 as `v0-88-0-instance-secrets` (credential store) and `v0-88-0-signed-file-urls`, plus their translation changes. Decisions made by the maintainer on 2026-11-26 and findings from the build:
+
+| Topic | Design above | As built |
+|---|---|---|
+| Scope | Phase 1 (reads), Phase 2 (uploads) a later release | Both in v0.88.0. The s3_presign worker job, the `s3_signer` queue and the polling are gone. |
+| Credentials | `get_config()` over `instance_config`, GUC bridge | `instance_config` rows with `is_secret`, deployment-managed: the consolidated worker publishes its S3 settings at startup (`metadata.publish_deployment_config()`), signers read them through the owner-only `metadata.s3_signing_config()`. Every signed-in user could read every ordinary key, so `get_config()` was never safe for a secret. See `INSTANCE_SETUP_DESIGN.md` (Secret Keys). |
+| `is_public` | Client parameter on the upload RPC | Server rule `metadata.file_is_public(entity_type)`: static assets only. Uploading one needs `static_assets:create` (or admin), because `p_entity_type` is chosen by the caller. Anonymous visitors reach other files through signed URLs on rows RLS lets them read. |
+| pgcrypto | `hmac()` and `digest()` by name | Digests use built-in `sha256()`. `metadata._hmac_sha256()` is generated at deploy with pgcrypto's schema qualified (`plugins` self-hosted, `public` on managed databases), so every signer pins `search_path = ''`. The same deploy pins `uuid_generate_v7()`'s `search_path` to `pg_catalog` and pgcrypto's schema: it called `gen_random_bytes()` unqualified and failed inside any definer with a narrow path. |
+| URL style | Path-style and virtual-hosted | Path-style only, matching the worker's S3 client; the base is the published `s3_public_endpoint` (an endpoint path prefix is kept). |
+| Browser cache (Known Gap 1) | Open | Signing time rounded down to 5 minutes, `X-Amz-Expires = 1200`: the same URL for 5 minutes (stable `src`, cache hits), valid at least 15 minutes after a read. A failed `<img>` refetches its row once (`FileThumbnailComponent`). |
+| `download_url` | Embedded | A view column, but not in core's embeds; downloads and new tabs read the row at click time (`FileAccessService`). The signed `Content-Disposition` (RFC 6266, ASCII fallback plus `filename*`) replaces the blob fetch, so downloads need no CORS. The image cropper still loads a static asset into a canvas and needs CORS GET. |
+| View signing cost | One function call per URL column | `LEFT JOIN LATERAL metadata.file_urls(...)` signs the four display URLs with one config read per row; `download_url` is computed only when selected (the view is inlined). Measured 0.15 ms per signature. |
+| `create_file_record()` | Trusts the client's bucket and key | **Security fix.** Registers only an upload issued to the same user (`file_upload_requests.requested_by`), with the issued entity, bucket and key, once; returns the `public.files` row, URLs included. Before, a client could point a record at another file's private key and, as its `created_by`, get a signed URL for it. |
+| Upload RPC | `request_upload_url()` changed to return JSONB | New `request_file_upload()` returns `{url, file_id, bucket, key, is_public}`. The old `request_upload_url()` / `get_upload_url()` stay as SQL-signed shims for an SPA loaded before the upgrade; they sign `x-amz-acl: public-read` because that SPA always sends it (S3 refuses unsigned `x-amz-*` headers), and `get_upload_url()` now returns only the caller's request. Remove both, with `metadata.file_upload_requests` as an issuance ledger kept, in a later release. |
+| Missing credentials | Not covered | URL columns NULL (placeholder in the UI); uploads raise `file_storage_not_configured` (55000), shown as `file_upload.storage_not_configured`. |
+| Existing objects (Step 4) | Script lists the bucket | `consolidated-worker privatize-acls` walks this instance's `metadata.files` rows (instances share a Spaces bucket), with `--dry-run`, `--after`, and `--acl public-read` for rollback. |
+| Thumbnails, moves | ACL from `is_public` | Thumbnails follow `is_public`; the reconcile copy is private (staged files are never static assets), so `unclaimed_file_references()` did not change. |
+| Email renderer | Reads `public.files` | Unchanged: `staticAsset()` reads `metadata.files` and builds the direct URL of a public file. |
+| Development | MinIO, ACLs | RustFS ignores canned ACLs (checked: an object PUT with `x-amz-acl: public-read` stays 403 without a bucket policy). The example `s3-init` policies allow anonymous GET on `static_assets/*` only. Real ACL behavior is proven on DigitalOcean Spaces. |
+
+**Bug found and fixed:** `metadata.can_view_entity_record()` raised `undefined_function` for a UUID-keyed table (`static_assets`: no `uuid = bigint` operator) instead of answering false, so any non-admin read whose RLS check reached that branch for a static asset file failed. It now falls through to the UUID lookup.
+
+**Known limits:** the access key id is in every presigned URL (only the secret is secret); instances sharing a bucket and a key can sign URLs for each other's objects (per-instance keys close it); objects of deleted files are still not deleted (issue #165), but they are private, so no URL reaches them.

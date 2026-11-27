@@ -37,7 +37,7 @@ spec:
         - name: DB_MIN_CONNS
           value: "1"
 
-        # S3/AWS configuration (for S3 Signer and Thumbnail Worker)
+        # S3 configuration (thumbnails, file reconcile; published to the database for URL signing, v0.88.0)
         - name: S3_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
@@ -154,7 +154,7 @@ spec:
           #   Example: replicas: 3, THUMBNAIL_MAX_WORKERS: 4 per replica
           #
           # Memory Formula: (THUMBNAIL_MAX_WORKERS × 150MB) + 200MB baseline
-          # S3 Signer and Notification workers are I/O-bound (minimal resources)
+          # Notification workers are I/O-bound (minimal resources)
           # Thumbnail Worker is CPU/memory intensive (scales linearly with worker count)
           #
           # See docs/deployment/PRODUCTION.md for complete tuning guide

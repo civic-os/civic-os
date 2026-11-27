@@ -119,7 +119,8 @@ services:
       retries: 3
       start_period: 10s
 
-  # Consolidated Worker - S3 Signer, Thumbnails, Notifications, Recurring, Scheduled Jobs
+  # Consolidated Worker - Thumbnails, file reconcile, notifications, recurring, scheduled jobs;
+  # publishes the S3 settings the database signs file URLs with (v0.88.0)
   consolidated-worker:
     image: ghcr.io/${GITHUB_ORG:-civic-os}/consolidated-worker:${VERSION:-latest}
     # NO container_name - required for docker-rollout

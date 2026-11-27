@@ -226,12 +226,8 @@ REVOKE ALL ON FUNCTION metadata.generate_presigned_get_url(...) FROM public;
 - The function is not exposed via PostgREST — it's called internally by the VIEW's computed columns
 - RLS authorization happens *before* the function is called (via `security_invoker` VIEW)
 
-### Credential storage options
+### Credential storage (as built, v0.88.0)
 
-| Method | Pros | Cons |
-|--------|------|------|
-| `instance_config` table + `get_config()` | Integrates with Instance Config Store design; standard Civic OS pattern | Plaintext in table (rely on disk encryption) |
-| GUC via `ALTER DATABASE SET` | Simplest; well-documented PostgREST pattern | Visible in `pg_settings`/dumps |
-| Supabase Vault | Encrypted at rest | Supabase-only |
+The signing functions read the credentials through the owner-only `metadata.s3_signing_config()`, which reads deployment-managed secret rows of `metadata.instance_config` (`is_secret`). The consolidated worker publishes them at startup. GUCs were rejected (any role reads them with `current_setting()`), and so was an ordinary `instance_config` row (every signed-in user reads those). See `docs/notes/INSTANCE_SETUP_DESIGN.md` (Secret Keys).
 
-**Recommendation**: Use `instance_config` + `get_config()` for consistency with the Instance Config Store design. GUC bridge for development until `instance_config` is implemented.
+The implementation is `metadata._sigv4_presign()` in `postgres/migrations/deploy/v0-88-0-signed-file-urls.sql`, verified against the AWS example vector above (expected signature `aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404`) by the migration's verify script and `tests/functional/v0-88-0-signed-file-urls-test.sh`.
