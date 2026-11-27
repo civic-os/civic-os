@@ -39,7 +39,7 @@ Civic OS uses a containerized architecture with five main components:
 3. **Migrations** - Sqitch-based database schema migrations (runs before PostgREST)
 4. **PostgreSQL** - Database with PostGIS extensions
 5. **Consolidated Worker** - Go microservice combining:
-   - S3 presigned URL generation for file uploads
+   - S3 settings published for in-database URL signing (v0.88.0), thumbnails
    - Thumbnail generation for images and PDFs
    - File reconcile: moves files staged on Create pages to their record's folder and deletes unreferenced ones (v0.87.0)
    - Email/SMS notification delivery
@@ -239,7 +239,8 @@ MAP_DEFAULT_ZOOM=13
 # S3 / File Storage Configuration
 # (Required for v0.10.0+ file upload features)
 # ======================================
-# Public-facing S3 endpoint (used by frontend for downloads)
+# Browser-facing S3 endpoint, path-style: the base of every upload and file URL the database signs
+# (v0.88.0: the consolidated worker publishes it with the key pair at startup)
 S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 S3_BUCKET=civic-os-files-prod
 
@@ -573,7 +574,7 @@ spec:
 
 ### Step 7: Deploy Consolidated Worker
 
-The consolidated worker handles file storage (S3 presigning + thumbnails), notifications, user provisioning, and optionally payment processing. If using payments, add the Stripe environment variables below.
+The consolidated worker handles file storage (thumbnails, file reconcile, publishing the S3 settings the database signs URLs with), notifications, user provisioning, and optionally payment processing. If using payments, add the Stripe environment variables below.
 
 **consolidated-worker-deployment.yaml:**
 ```yaml
@@ -864,6 +865,24 @@ docker-compose -f docker-compose.prod.yml up migrations
 # 4. Restart application services
 docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 ```
+
+#### Upgrading to v0.88.0 (signed file URLs, private files)
+
+Files become private: the database signs every upload and read URL with the S3 key pair the consolidated worker publishes at startup, and RLS decides who gets a URL. Static assets stay public. See `docs/development/FILE_STORAGE.md` (Signed URLs and Private Files).
+
+1. **Before upgrading: CORS.** Add `GET` and `HEAD` to the bucket's CORS rule for the app's origin (keep `PUT`). The static-assets cropper loads images into a canvas. On DigitalOcean Spaces this is in the Space's settings (`infrastructure/vps/README.md`, step 6).
+2. **Upgrade** (migrations, then the worker and frontend). Old objects keep `public-read` and keep working at their old URLs; new uploads of non-public files are private. A browser tab opened before the upgrade can still upload through the deprecated RPC shims.
+3. **Check:**
+   - The worker log shows `[S3Config] published s3 config: changed [...]` (or `unchanged` on a later restart).
+   - `/admin/config` → File storage shows all five values as Set.
+   - As a normal user and signed out, images and PDFs load, downloads save under the file's name, and an upload works. Network requests to the bucket carry `X-Amz-Signature`.
+   - If the log shows `not publishing S3 signing config` or a WARNING, fix the worker's `S3_*` variables and restart it. Until then file URLs are empty and uploads say file storage is not set up.
+4. **Make old objects private.** Run `docker compose run --rm consolidated-worker privatize-acls --dry-run` (Kubernetes: `kubectl exec deploy/consolidated-worker -- /app/consolidated-worker privatize-acls --dry-run`), then without `--dry-run`. It walks this instance's own `metadata.files` rows, so on a bucket shared by several instances it touches only this instance's objects. It skips static assets and can be re-run; `--after <file id>` resumes where it stopped. The worker's key needs `s3:PutObjectAcl` (already required). Afterwards, an old unsigned URL to a private file returns 403.
+5. **Rollback:** `privatize-acls --acl public-read` puts the old ACL back; reverting the migrations needs the v0.87 worker (which signs uploads again).
+
+**Rotating the S3 key:** create the new key, put it in the deployment's secret store (`.env`, `civic-os-secrets`), restart the consolidated worker (it publishes within seconds), wait at least 20 minutes (the longest URL lifetime), then revoke the old key. After restoring a database backup, restart the worker so it publishes the current key. Dumps and backups now contain the storage secret: treat them as secrets.
+
+**Shared buckets:** instances that share a bucket and a key can sign URLs for each other's objects. Give each instance its own key limited to its bucket, or its own bucket, where the provider allows it.
 
 #### Upgrading to v0.87.0 (file reconcile)
 
@@ -1331,7 +1350,7 @@ docker stats
 
 **Consolidated Worker Resource Tuning:**
 
-The consolidated worker combines S3 presigning, thumbnail generation, and notifications in a single service. Resources scale primarily with `THUMBNAIL_MAX_WORKERS` (image processing is CPU/memory intensive).
+The consolidated worker combines thumbnail generation, file reconcile and notifications in a single service. Resources scale primarily with `THUMBNAIL_MAX_WORKERS` (image processing is CPU/memory intensive).
 
 **Resource Formula:**
 ```

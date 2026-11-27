@@ -6,7 +6,7 @@
 
 This document describes the architecture and implementation plan for the Civic OS notification system, which runs as part of the `consolidated-worker` service alongside S3 presigning and thumbnail generation. The notification worker uses River queue for reliable multi-channel notifications (email, SMS) with template support.
 
-> **ℹ️ Deployment Note**: The notification worker runs within the `consolidated-worker` container (v0.11.0+), sharing database connections with S3 Signer and Thumbnail Worker for improved resource efficiency.
+> **ℹ️ Deployment Note**: The notification worker runs within the `consolidated-worker` container (v0.11.0+), sharing database connections with the Thumbnail Worker and the other jobs for improved resource efficiency.
 
 ## Overview
 
@@ -1769,7 +1769,7 @@ services:
       DATABASE_URL: postgres://authenticator:${AUTHENTICATOR_PASSWORD}@postgres:5432/civic_os
       DB_MAX_CONNS: 4
 
-      # S3 Configuration (for S3 Signer and Thumbnail Worker)
+      # S3 Configuration (thumbnails; published to the database for URL signing)
       S3_ENDPOINT: http://s3:9000
       S3_BUCKET: civic-os-files
       S3_ACCESS_KEY_ID: ${S3_ROOT_USER}

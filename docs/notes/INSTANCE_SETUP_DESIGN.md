@@ -1,6 +1,6 @@
 # Instance Setup & Configuration — Design Document
 
-> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0790) lists where the build differs from the revised design. [Secret Keys](#secret-keys-designed-for-v0880), write-only rows for the S3 signing credentials, is **designed for v0.88.0** (November 2026) and not built. Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
+> **Status**: Part 1 (Instance Config Store and `/admin/config`) is **implemented in v0.79.0**, after a revision against the code in October 2026; [Implementation Notes (v0.79.0)](#implementation-notes-v0790) lists where the build differs from the revised design. [Secret Keys](#secret-keys-v0880), write-only rows for the S3 signing credentials, is **implemented in v0.88.0** (November 2026). Part 2 (Setup Task Checklist) is designed and follows Part 1. Design first written August 2026. Integrator usage: `docs/INTEGRATOR_GUIDE.md` (Instance Configuration).
 
 Two companion features that together solve instance onboarding:
 
@@ -78,7 +78,7 @@ Docker env vars handle infrastructure config. But application-level config (orga
 
 **No `is_required` column.** Setup tasks handle enforcement via `check_type: 'config_set'`. Instance config is a pure key-value store.
 
-**No secrets (as built in v0.79.0).** Every authenticated user can read every key, and public keys are readable without logging in. API secrets, SMTP passwords and the like stay in ENV or a secret store. A Stripe *publishable* key is fine here; a Stripe *secret* key never is. [Secret Keys](#secret-keys-designed-for-v0880) (designed for v0.88.0, not built) adds rows that can be written but never read back, for the few secrets SQL itself must use, such as the S3 key that signs file URLs.
+**No secrets (as built in v0.79.0).** Every authenticated user can read every key, and public keys are readable without logging in. API secrets, SMTP passwords and the like stay in ENV or a secret store. A Stripe *publishable* key is fine here; a Stripe *secret* key never is. [Secret Keys](#secret-keys-v0880) (v0.88.0) adds rows that can be written but never read back, for the few secrets SQL itself must use, such as the S3 key that signs file URLs.
 
 ### Visibility and Writes (revised)
 
@@ -371,9 +371,9 @@ Where the build differs from the revised design above, and why.
 - The SQL test also covers `default_value`: normalized and checked on INSERT and UPDATE, refused on framework keys, not writable by an admin over the API, returned by `get_config()` while the value is unset (and not to `web_anon` for a private key). The browser test checks the `Default: <value>` placeholder after Reset and `get_config()` returning the default.
 - `services/consolidated-worker-go/instance_config_test.go` covers the worker's snapshot: cache and refresh, the `APP_TITLE` fallback for NULL, blank, missing row and missing table, typed values, concurrent reads, and `.Config` rendering in subject, HTML and text templates.
 
-### Secret Keys (designed for v0.88.0)
+### Secret Keys (v0.88.0)
 
-> **Status**: designed November 2026, not built. First consumer: in-database SigV4 signing of file URLs (`docs/notes/SIGNED_FILE_URLS_DESIGN.md`, `docs/notes/SIGV4_SIGNING_REFERENCE.md`). The three decisions below were made by the maintainer on 2026-11-26. The signing functions, the `public.files` view, the upload RPC and the frontend belong to that design; this section owns only how the credentials get into the database, stay there, and are read.
+> **Status**: designed November 2026 and **built in v0.88.0**; [Amendments after build](#amendments-after-build-v0880) lists where the build differs. First consumer: in-database SigV4 signing of file URLs (`docs/notes/SIGNED_FILE_URLS_DESIGN.md`, `docs/notes/SIGV4_SIGNING_REFERENCE.md`). The three decisions below were made by the maintainer on 2026-11-26. The signing functions, the `public.files` view, the upload RPC and the frontend belong to that design; this section owns only how the credentials get into the database, stay there, and are read.
 
 #### Problem
 
@@ -599,6 +599,16 @@ Each test sets the secret keys to a unique sentinel (for example `LEAKCHECK-<ran
 ---
 
 ## Part 2: Setup Task Checklist
+
+
+#### Amendments after build (v0.88.0)
+
+- **CHECKs use CASE.** `(is_secret AND managed_by IN (...)) OR (NOT is_secret AND managed_by IS NULL)` passes for a secret row with a NULL `managed_by` (a CHECK accepts NULL), so `instance_config_managed_by_check` and `instance_config_secret_display_check` are written as `CASE WHEN is_secret THEN x IS NOT NULL AND x IN (...) ELSE x IS NULL END`. The sentinel test caught it.
+- **The worker sends normalized values**: it strips the endpoint's trailing slash and trims, so `IS DISTINCT FROM` sees an unchanged value as unchanged and a restart moves nothing. `publish_deployment_config()` counts every row it updates as changed.
+- **The snapshot filter is in SQL and in Go**: the worker's query has `WHERE NOT is_secret`, and `build()` drops any row marked secret, so a fake or future query cannot reach templates. During a rolling update, a worker image older than v0.88.0 still reads every row; a secret reaches a template only if one names `.Config.s3_secret_access_key`, and only until the old pod stops.
+- **`/admin/translations` does not list secret keys' labels**: `get_translation_defaults()` is invoker and RLS hides secret rows from every API role. The migration seeds their labels in the six core locales; an integrator's own secret key needs its translations seeded the same way.
+- **Admin RPCs**: `set_instance_secret()` returns `{success: false, error}` for refusals, as `set_instance_config()` does, and re-raises unexpected errors without DETAIL.
+- **Tests**: `tests/functional/v0-88-0-instance-secrets-test.sh` (the sentinel suite, including a CREATEROLE non-superuser for `doadmin`'s shape and `authenticator`, plus the API bodies with real tokens), `services/consolidated-worker-go/s3_config_publisher_test.go` and `instance_config_test.go`, and the `/admin/config` specs.
 
 ### Tables
 
@@ -840,7 +850,7 @@ Changing `config_type` does not re-check `config_value` or `default_value`; assi
 **(revised in v0.80.2, issue #48: the first build left them English-only as a deliberate deferral)** The `public.instance_config` view returns `display_name`, `description`, `group_display_name` and `group_description` through `metadata.t()`, with the column value as the fallback, so the page shell and its labels now follow the same locale. Source types and keys: `instance_config_group` with `<group_key>.display_name` / `<group_key>.description`, and `instance_config` with `<config_key>.display_name` / `<config_key>.description`. The stored columns stay English, so English needs no rows and an untranslated key shows its column text. The migration seeds es/ar/fr/de/ps for the ten framework keys and four groups with `ON CONFLICT DO NOTHING`; integrator keys use the same two source types. The view keeps `security_invoker = true`, which `CREATE OR REPLACE` would otherwise reset. The frontend never matched on label text, so it needed no change.
 
 ### Secret Keys Live in instance_config, Published by the Worker
-**(designed for v0.88.0)** Secrets that SQL itself must use (first the S3 signing key) are instance_config rows with `is_secret`. They have one catalog with every other key, and RLS plus explicit filters in `get_config()`, the view and the worker's snapshot keep the value from every API surface. Reads go through owner-only functions. The S3 values are deployment-managed: the consolidated worker publishes the credentials it signs with at startup, so the database and the worker cannot disagree, and rotation means restarting the worker, as it already did. See [Secret Keys](#secret-keys-designed-for-v0880).
+**(v0.88.0)** Secrets that SQL itself must use (first the S3 signing key) are instance_config rows with `is_secret`. They have one catalog with every other key, and RLS plus explicit filters in `get_config()`, the view and the worker's snapshot keep the value from every API surface. Reads go through owner-only functions. The S3 values are deployment-managed: the consolidated worker publishes the credentials it signs with at startup, so the database and the worker cannot disagree, and rotation means restarting the worker, as it already did. See [Secret Keys](#secret-keys-v0880).
 
 ### Read-Only Deployment Section (Tier 1 Visibility)
 Tier 1 env vars that affect admin-visible behavior (PostgREST URL excluded, but `PWA_ENABLED`, `FAVICON_URL`, etc.) are surfaced as a read-only "Deployment" section on `/admin/config`. This gives admins the vocabulary to communicate with their deployer ("My PWA is disabled, can you enable it?") without exposing infrastructure topology or API keys.
@@ -913,12 +923,12 @@ INSERT INTO metadata.setup_tasks
 
 Seeding is not a migration: `docker/migrations/seed-instance-config.sh` runs after each deploy and fills only NULL values.
 
-### `v0-88-0-instance-secrets` (designed, not built)
+### `v0-88-0-instance-secrets` (built in v0.88.0)
 - `is_secret`, `managed_by`, `secret_display` columns and their CHECKs on `metadata.instance_config`; the three policies re-created with `NOT is_secret`
 - `get_config()` excludes secret keys; `public.instance_config` re-created (`security_invoker = true`, translated labels, value masked for secret rows); normalize trigger gains the S3 key rules
 - `file_storage` group and the five `s3_*` keys, with translations
 - `metadata.s3_signing_config()`, `metadata.get_instance_secret()`, `metadata.publish_deployment_config()`, `public.set_instance_secret()`, `public.get_instance_secret_status()`
-- See [Secret Keys](#secret-keys-designed-for-v0880) (Build Outline)
+- See [Secret Keys](#secret-keys-v0880) (Build Outline)
 
 ### `v0-XX-1-setup-wizard`
 - `metadata.setup_task_groups` + `metadata.setup_tasks` + `metadata.setup_task_completions` tables

@@ -451,12 +451,9 @@ Fields:
 
 **File Storage Architecture** (v0.10.0+):
 
-Civic OS provides a complete file upload workflow using **Go microservices** with River job queue:
+Civic OS provides a complete file upload workflow; the database signs uploads and file URLs, and the consolidated worker processes thumbnails:
 
-1. **S3 Signer Service**: Generates presigned upload URLs via PostgreSQL job queue
-   - Frontend calls `request_file_upload()` RPC which creates job in `metadata.river_job` table
-   - Go service polls for jobs, generates presigned S3 URLs, updates `file_upload_requests` table
-   - Provides at-least-once delivery with automatic retries and exponential backoff
+1. **Upload signing** (v0.88.0, in the database): the frontend calls `request_file_upload()`, which returns a presigned PUT synchronously, then `create_file_record()`, which accepts only an upload the database issued to the same user. Before v0.88.0 a worker job signed uploads and the frontend polled for the URL.
 
 2. **Thumbnail Worker**: Processes uploaded images and PDFs asynchronously
    - Listens for file creation events via PostgreSQL NOTIFY
@@ -471,7 +468,7 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
 
 **Deployment Requirements**:
 - S3-compatible storage (RustFS, MinIO, AWS S3, DigitalOcean Spaces)
-- Consolidated Worker container (handles S3 presigning, thumbnail generation, and notifications)
+- Consolidated Worker container (thumbnail generation, file reconcile, notifications; publishes the S3 settings the database signs with)
 - PostgreSQL with River tables (`metadata.river_job`, `metadata.river_leader`)
 - Environment variables: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `DB_MAX_CONNS`
 
@@ -479,7 +476,7 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
 
 **Implementation Guide**: See `docs/development/FILE_STORAGE.md` for complete setup instructions including adding file properties to your schema, validation configuration, and deployment examples.
 
-**Signed File Access URLs** (designed, ready to build): Currently, S3 files use `public-read` ACL and access relies on UUID obscurity. A planned upgrade will generate SigV4 presigned URLs directly in the `public.files` VIEW using `pgcrypto`, enforcing RLS before granting file access with 15-minute URL expiry. Private-by-default with opt-in `is_public` flag per file. Phase 2 will also move upload URL signing into PostgreSQL, eliminating the async polling workflow. See `docs/notes/SIGNED_FILE_URLS_DESIGN.md` for the full design and `docs/notes/SIGV4_SIGNING_REFERENCE.md` for the signing algorithm reference.
+**Signed File URLs and Private Files** (v0.88.0): files are private by default. `public.files` returns `url`, `thumb_small_url`, `thumb_medium_url`, `thumb_large_url` and `download_url`, signed in SQL for private files after RLS on `metadata.files` has filtered the rows, so a caller who cannot see a file gets no URL, and URLs expire (valid at least 15 minutes after they are read; a file keeps the same URL for 5 minutes, so browsers cache it). `download_url` downloads under the file's name. Only static assets are public (`is_public`, direct URLs and `public-read` objects), because emails and dashboards need stable addresses. To show a file to anonymous visitors, grant `read` on its entity to the `anonymous` role: they then get signed URLs for the rows RLS lets them read. Never build a URL from the `s3_*` key columns in custom SQL, templates or apps; read the view's URL columns. The worker publishes its S3 settings at startup (`/admin/config`, File storage); until then URLs are NULL and uploads fail with a translated "File storage is not set up yet". After upgrading, run `consolidated-worker privatize-acls` to make older objects private. See `docs/development/FILE_STORAGE.md` (Signed URLs and Private Files) and `docs/notes/SIGNED_FILE_URLS_DESIGN.md`.
 
 ---
 
@@ -5527,7 +5524,16 @@ Design: `docs/notes/TREE_LIST_VIEW_DESIGN.md` (Editing and cycle protection).
 
 `metadata.instance_config` is a key/value store for instance-wide settings: the app title, default theme and language, integration switches, and any keys your own modules need (an agency name, a support email). Admins edit the values at `/admin/config`; SQL reads them with `get_config()`. A NULL value means "not set": a framework key then falls back to the container's environment variable, and then to the built-in default, so an empty table behaves exactly like an instance before v0.79.0. A key you define falls back to its own `default_value`.
 
-**No secrets.** Every signed-in user can read every key, and keys marked `is_public` are readable without signing in. API secrets, SMTP passwords and Stripe *secret* keys stay in the environment or a secret store. A Stripe *publishable* key is fine here; it is made for the browser.
+**No secrets in ordinary keys.** Every signed-in user can read every key, and keys marked `is_public` are readable without signing in. API secrets, SMTP passwords and Stripe *secret* keys stay in the environment or a secret store. A Stripe *publishable* key is fine here; it is made for the browser.
+
+**Secret keys** (v0.88.0). A row with `is_secret = true` can be written but never read back through the API: RLS hides it from every API role (admins included), `get_config()` returns NULL for it in every context (inside definer functions and triggers too), `public.instance_config` masks its value, and notification templates never see it. Use one only for a secret that SQL itself must use, such as the S3 key that signs file URLs.
+
+- `managed_by = 'deployment'`: written only by the deployment role through `metadata.publish_deployment_config(jsonb)` (superuser or CREATEROLE session without a JWT). The five `s3_*` keys (group File storage) are of this kind: the consolidated worker publishes its S3 settings at startup, and rotation means changing the worker's environment and restarting it. `/admin/config` shows them read-only (Set or Missing, the last four characters of the key id, the region, endpoint and bucket, never the secret).
+- `managed_by = 'admin'`: written write-only by admins through `set_instance_secret(key, value)`; `/admin/config` shows a password field with Replace and Clear. No framework key uses this yet.
+- `secret_display` decides what `/admin/config` shows of a set value: `none`, `last4` or `full`. A secret row is a `string`, never `is_public`, and has no `default_value` (CHECK constraints).
+- Your own definer functions read a secret with `metadata.get_instance_secret('<key>')`, which only the migration role can execute. Such a function must return only what it computed from the secret (a signature, a URL, a yes/no), never the secret, and never let its caller choose which key it reads.
+
+Dumps and database backups contain secret values, so treat them as secrets. See `docs/notes/INSTANCE_SETUP_DESIGN.md` (Secret Keys).
 
 **Framework keys** (all NULL until seeded or set):
 
@@ -6901,7 +6907,6 @@ See `docs/deployment/PRODUCTION.md` for complete deployment guide including:
   - Low memory (512Mi): 2-3 workers
   - Medium (1Gi): 5-7 workers (default: 5)
   - High (2Gi): 10-12 workers
-- **S3 Signer**: Lightweight service, default settings typically sufficient
 - **River Job Queue**: Monitor `metadata.river_job` table for stuck jobs, configure retries
 
 ---
@@ -6936,7 +6941,6 @@ archive_command = 'cp %p /backup/wal/%f'
 - PostgREST: Request rate, error rate, response time
 - Frontend: Page load time, API call latency
 - File Storage Microservices (v0.10.0+):
-  - S3 Signer: Job queue depth, presigned URL generation time
   - Thumbnail Worker: Processing time per file, memory usage, failed jobs
   - River Queue: Monitor `metadata.river_job` for stuck jobs (state = 'running' for >10 min)
 

@@ -12,7 +12,7 @@ This spec defines a **reusable platform capability** — not event-specific plum
 
 1. Per-form integrator RPCs → **generic framework wrapper** (make it hard to mess up)
 2. CAPTCHA as future Phase 2 → **ALTCHA proof-of-work as built-in** (zero external dependencies, verifiable in SQL)
-3. Secret key storage as GUC → **Instance Config Store** (planned feature, natural home for server-side secrets)
+3. Secret key storage as GUC → **Instance Config Store secret keys** (built in v0.88.0: an `is_secret` row with `managed_by = 'admin'`, read with `metadata.get_instance_secret()`; see `INSTANCE_SETUP_DESIGN.md`, Secret Keys)
 
 ---
 
@@ -284,11 +284,7 @@ The wrapper reads the key via something like:
 v_secret := instance_config('altcha_secret_key');
 ```
 
-If the Instance Config Store isn't built yet at implementation time, a PostgreSQL GUC serves as a temporary bridge:
-```sql
-ALTER DATABASE civic_os_db SET app.altcha_secret = 'random-256-bit-key';
--- Read via: current_setting('app.altcha_secret')
-```
+Store it as an admin-managed secret key (v0.88.0): an `instance_config` row with `is_secret = true`, `managed_by = 'admin'`, `secret_display = 'none'`, set write-only on `/admin/config` (`set_instance_secret()`), read in definer code with `metadata.get_instance_secret('altcha_hmac_key')`. Not a GUC: any role reads a GUC with `current_setting()`.
 
 ### Challenge Generation RPC
 
@@ -314,8 +310,8 @@ BEGIN
         RETURN jsonb_build_object('error', 'Form not found or PoW not required');
     END IF;
 
-    -- Read secret from Instance Config Store (or GUC fallback)
-    v_secret := current_setting('app.altcha_secret', true);
+    -- Read the secret key (owner-only reader; v0.88.0)
+    v_secret := metadata.get_instance_secret('altcha_hmac_key');
     IF v_secret IS NULL THEN
         RETURN jsonb_build_object('error', 'PoW not configured');
     END IF;

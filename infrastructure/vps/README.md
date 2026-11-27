@@ -148,42 +148,40 @@ The vanity domain's DNS must have a CNAME (or A record) pointing to the droplet.
 
 ### 6. Configure S3 CORS (required for file uploads)
 
-File uploads use presigned URLs — the browser PUTs files directly to S3/Spaces. Without CORS, the browser blocks these requests.
+File uploads use presigned URLs — the browser PUTs files directly to S3/Spaces — and the static-assets cropper reads images into a canvas. Without CORS, the browser blocks these requests.
 
 In DigitalOcean console → Spaces → your bucket → Settings → CORS Configuration:
 
 | Origin | Allowed Methods | Allowed Headers | Max Age |
 |--------|----------------|-----------------|---------|
-| `https://{APP_DOMAIN}` | `GET, PUT` | `*` | `3600` |
+| `https://{APP_DOMAIN}` | `GET, PUT, HEAD` | `*` | `3600` |
 
 If using a vanity domain, add that origin too. If multiple instances share a bucket, include all origins in one CORS config (S3 replaces, not appends).
 
-### 7. Verify S3 Object ACLs (required for file display)
+### 7. Verify signed file URLs (v0.88.0)
 
-The consolidated worker sets `public-read` ACL on all uploaded objects (originals and thumbnails) so the frontend can display them via unsigned GET URLs. The bucket itself remains private (no directory listing).
+Files are private: the database signs every upload and file URL with the S3 key pair the consolidated worker publishes at startup, and only static assets are `public-read`. `S3_PUBLIC_ENDPOINT` must be the region endpoint (`https://nyc3.digitaloceanspaces.com`), not the bucket's own host name: URLs are path-style (`{endpoint}/{bucket}/{key}`).
 
 **Requirements:**
-- The S3 credentials (`S3_ACCESS_KEY_ID`) must have `s3:PutObjectAcl` permission
-- For DigitalOcean Spaces: the Spaces key must not be a read-only key
+- The S3 credentials must have `s3:PutObjectAcl` (static assets, `privatize-acls`) — a Spaces key that is not read-only.
 
-**Verify** by uploading a file through the app, then checking the object is publicly accessible:
-
-```bash
-# Should return 200 (not 403)
-curl -s -o /dev/null -w "%{http_code}" \
-  "https://{S3_PUBLIC_ENDPOINT}/{BUCKET}/{path-to-uploaded-file}"
-```
-
-If objects return 403, check that the worker is running with `s3:PutObjectAcl` permission. For existing objects uploaded before this fix, set ACLs retroactively:
+**Verify:**
+1. `docker compose logs consolidated-worker | grep S3Config` shows `published s3 config`.
+2. `/admin/config` → File storage shows all five values as Set.
+3. Upload an image through the app: it displays, and the request to the Space carries `X-Amz-Signature`. The same URL without its query string returns 403:
 
 ```bash
-aws --endpoint-url https://nyc3.digitaloceanspaces.com \
-  s3api list-objects-v2 --bucket YOUR_BUCKET --query 'Contents[].Key' --output text \
-  | tr '\t' '\n' | while read key; do
-    aws --endpoint-url https://nyc3.digitaloceanspaces.com \
-      s3api put-object-acl --bucket YOUR_BUCKET --key "$key" --acl public-read
-  done
+curl -s -o /dev/null -w "%{http_code}" "https://nyc3.digitaloceanspaces.com/{BUCKET}/{path-to-uploaded-file}"   # 403
 ```
+
+**After upgrading an existing instance**, make the objects it uploaded before v0.88.0 private. The command walks this instance's own file records, so other instances sharing the bucket are not touched:
+
+```bash
+docker compose run --rm consolidated-worker privatize-acls --dry-run
+docker compose run --rm consolidated-worker privatize-acls
+```
+
+Do **not** set ACLs across the whole bucket (`list-objects` loops): on a bucket several instances share, that would change every instance's objects. See `docs/deployment/PRODUCTION.md` (Upgrading to v0.88.0) for rollback and key rotation.
 
 ### 8. Configure Keycloak Realm Email (required for welcome emails and password resets)
 

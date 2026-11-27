@@ -515,9 +515,8 @@ The Docker Compose configuration includes:
 
 **File Storage Services (v0.10.0+):**
 - **S3 store (RustFS)** - S3-compatible object storage for local development
-- **S3 Signer** - Go microservice that generates presigned upload URLs
-- **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails
-- **S3 Init** - One-time setup container to create S3 bucket
+- **Consolidated worker** - Go service that generates image/PDF thumbnails and publishes the S3 settings the database signs upload and file URLs with (v0.88.0)
+- **S3 Init** - One-time setup container to create the S3 bucket (public read for `static_assets/` only, CORS)
 
 **Authentication (optional):**
 - **Keycloak** - Identity provider for RBAC (commented out by default)
@@ -603,7 +602,7 @@ consolidated-worker:
     - DB_MAX_CONNS=${DB_MAX_CONNS:-4}  # Total connections for all workers (default: 4)
     - DB_MIN_CONNS=${DB_MIN_CONNS:-1}
 
-    # S3 Configuration (for S3 Signer and Thumbnail Worker)
+    # S3 Configuration (thumbnails; published to the database for URL signing)
     - S3_ENDPOINT=http://s3:9000
     - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
     - S3_BUCKET=${S3_BUCKET:-civic-os-files}
@@ -783,8 +782,8 @@ File storage features (v0.10.0+) enable:
 The file storage system uses:
 1. **Frontend** - File upload UI component
 2. **metadata.files table** - Stores file metadata (UUID, size, MIME type, S3 key)
-3. **S3 Signer (Go)** - Generates presigned upload URLs via River jobs
-4. **Thumbnail Worker (Go)** - Processes uploaded files and generates thumbnails
+3. **PostgreSQL** - Signs uploads and file URLs (SigV4, v0.88.0) after RLS decides who may see a file
+4. **Consolidated worker (Go)** - Processes uploaded files and generates thumbnails
 5. **S3-compatible storage** - RustFS (local dev) or AWS S3/DigitalOcean Spaces (production)
 
 ### Adding File Properties to Your Schema

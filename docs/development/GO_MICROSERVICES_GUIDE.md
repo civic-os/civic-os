@@ -5,6 +5,8 @@
 
 > **⚠️ ARCHITECTURAL CHANGE (v0.11.0)**: The three separate Go microservices (S3 Signer, Thumbnail Worker, Notification Worker) have been consolidated into a single `consolidated-worker` service. This reduces database connections from 12 to 4, simplifies deployment from 3 containers to 1, and maintains all functionality with improved resource efficiency. The architecture documented below reflects this consolidated approach, though historical references to separate services remain for context. The `payment-worker` service (v0.13.0+) remains separate by design — it is optional, uses HTTP webhooks (different transport from River), and constitutes a distinct bounded context.
 
+> **v0.88.0**: the S3 Signer worker (`s3_presign` job, `s3_signer` queue) is gone. PostgreSQL signs upload and file URLs itself (`request_file_upload()`, the `public.files` URL columns) with the S3 settings the consolidated worker publishes at startup (`s3_config_publisher.go`). The worker also gained the operator command `consolidated-worker privatize-acls`. Diagrams below that show the S3 Signer describe earlier versions. See `docs/development/FILE_STORAGE.md` (Signed URLs and Private Files).
+
 ---
 
 ## Table of Contents
