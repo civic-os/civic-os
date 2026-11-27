@@ -114,16 +114,6 @@ describe('PhotoGalleryEditorComponent', () => {
         expect(component.lightboxIndex()).toBe(1);
     });
 
-    it('should generate S3 URL', () => {
-        const url = component.getS3Url('some/key.jpg');
-        expect(url).toContain('some/key.jpg');
-    });
-
-    it('should get thumbnail URL from file', () => {
-        const url = component.getThumbUrl(mockImages[0]);
-        expect(url).toContain('thumb_400.jpg');
-    });
-
     describe('Keyboard Reorder (move buttons)', () => {
         it('moveLater should reorder images, flag reorder dirty, and announce position', () => {
             component.moveLater(0); // Move first image later

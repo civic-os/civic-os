@@ -16,7 +16,7 @@ import { interval } from 'rxjs';
 import { takeWhile, switchMap } from 'rxjs/operators';
 import { FileReference } from '../../interfaces/entity';
 import { FileUploadService } from '../../services/file-upload.service';
-import { getS3Config } from '../../config/runtime';
+import { fileDisplayUrl } from '@civic-os/core';
 
 /**
  * Shared thumbnail display component for file references.
@@ -58,6 +58,7 @@ import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicato
         class="not-prose w-full h-full"
         [class.object-cover]="objectFit() === 'cover'"
         [class.object-contain]="objectFit() === 'contain'"
+        (error)="onImageError()"
       />
     } @else if (isLoading()) {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
@@ -112,7 +113,7 @@ export class FileThumbnailComponent {
     const status = f.thumbnail_status;
     // Only show spinner if there's no image at all to preview
     return (status === 'pending' || status === 'processing')
-      && !f.s3_thumbnail_medium_key && !f.s3_original_key;
+      && !f.thumb_medium_url && !f.url;
   });
 
   /** Computed: did thumbnail generation fail? */
@@ -120,30 +121,27 @@ export class FileThumbnailComponent {
     const f = this.displayFile();
     if (!f) return false;
     return f.thumbnail_status === 'failed'
-      && !f.s3_thumbnail_medium_key && !f.s3_original_key;
+      && !f.thumb_medium_url && !f.url;
   });
 
-  /** Computed: the best available URL to display */
-  thumbnailUrl = computed(() => {
+  /**
+   * Computed: the best available URL to display (the preferred size, else a larger one, else the
+   * original). The URL comes from the files view (signed for private files, v0.88.0); a file record
+   * without URLs (no S3 signing config) shows the placeholder.
+   */
+  thumbnailUrl = computed(() => fileDisplayUrl(this.displayFile(), this.preferredSize()));
+
+  /** One refetch per file when its image fails to load: a signed URL on a page left open expires. */
+  private refetchedFor: string | null = null;
+
+  onImageError(): void {
     const f = this.displayFile();
-    if (!f) return null;
-
-    const size = this.preferredSize();
-    let key: string | undefined;
-
-    if (size === 'small') {
-      key = f.s3_thumbnail_small_key || f.s3_thumbnail_medium_key || f.s3_original_key;
-    } else if (size === 'medium') {
-      key = f.s3_thumbnail_medium_key || f.s3_original_key;
-    } else {
-      key = f.s3_original_key;
-    }
-
-    if (!key) return null;
-
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
-  });
+    if (!f || this.refetchedFor === f.id) return;
+    this.refetchedFor = f.id;
+    this.fileUpload.getFile(f.id).then(updated => {
+      if (updated && this.displayFile()?.id === updated.id) this.displayFile.set(updated);
+    }).catch(() => undefined);
+  }
 
   constructor() {
     // Sync from input and start polling if needed

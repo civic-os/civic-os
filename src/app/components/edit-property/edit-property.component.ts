@@ -39,7 +39,6 @@ import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.compo
 import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor.component';
 import { PhotoGalleryEditorComponent } from '../photo-gallery-editor/photo-gallery-editor.component';
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
-import { getS3Config } from '../../config/runtime';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { HelpToggletipComponent } from '../help-toggletip/help-toggletip.component';
 import { TreeSelectComponent, TreeSelectOption } from '../tree-select/tree-select.component';
@@ -698,16 +697,6 @@ export class EditPropertyComponent {
     // e.g., 'image/jpeg' → 'image/jpeg'
     // e.g., 'image/*' → 'image/*'
     return fileType;
-  }
-
-  /**
-   * Generate S3 URL from key
-   */
-  getS3Url(s3Key: string | undefined): string | null {
-    if (!s3Key) return null;
-
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${s3Key}`;
   }
 
   /**

@@ -22,6 +22,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { FileUploadService } from './file-upload.service';
 import { FileReference } from '../interfaces/entity';
 import { advanceTime, useFakeTimeInEachTest } from '../testing/fake-time';
+import { provideTranslationTesting } from '../testing/translation-testing';
 
 describe('FileUploadService', () => {
     // Fixed real-time waits raced debounces, polling and change-detection
@@ -39,6 +40,7 @@ describe('FileUploadService', () => {
                 provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
+                provideTranslationTesting(),
                 FileUploadService
             ]
         });
@@ -162,278 +164,122 @@ describe('FileUploadService', () => {
         });
     });
 
-    describe('uploadFile - full workflow', () => {
-        it('should complete full upload workflow with thumbnails', async () => {
-            const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-            const entityType = 'Issue';
-            const entityId = '1';
-            const requestId = 'req-123';
-            const fileId = '019a1781-bc15-706b-99ee-6b62b24e223c';
-            const presignedUrl = 'http://localhost:9000/civic-os-files/Issue/1/019a1781-bc15-706b-99ee-6b62b24e223c/original.jpg?signature=abc';
-
-            const mockFileRef: FileReference = {
-                id: fileId,
-                entity_type: entityType,
-                entity_id: entityId,
-                file_name: 'test.jpg',
-                file_type: 'image/jpeg',
-                file_size: 4,
-                s3_bucket: 'civic-os-files',
-                s3_key_prefix: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223c',
-                s3_original_key: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223c/original.jpg',
-                s3_thumbnail_small_key: undefined,
-                s3_thumbnail_medium_key: undefined,
-                s3_thumbnail_large_key: undefined,
-                thumbnail_status: 'pending',
-                thumbnail_error: undefined,
-                created_at: '2025-01-15T10:30:00Z',
-                updated_at: '2025-01-15T10:30:00Z'
-            };
-
-            const updatedFileRef: FileReference = {
-                ...mockFileRef,
-                s3_thumbnail_small_key: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223c/thumb-small.jpg',
-                s3_thumbnail_medium_key: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223c/thumb-medium.jpg',
-                s3_thumbnail_large_key: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223c/thumb-large.jpg',
-                thumbnail_status: 'completed'
-            };
-
-            // Start the upload workflow
-            const promise = service.uploadFile(file, entityType, entityId, true);
-
-            // Small delay to let the first HTTP request initiate
-            await advanceTime(10);
-
-            // Step 1: Request presigned URL
-            const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
-            expect(reqUrl.request.method).toBe('POST');
-            reqUrl.flush(requestId);
-
-            // Small delay to let polling start
-            await advanceTime(10);
-
-            // Step 2: Poll for URL (first attempt returns pending)
-            const reqPoll1 = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-            reqPoll1.flush([{ status: 'pending', url: null, file_id: null, error: null }]);
-
-            // Wait for retry delay (500ms) + small buffer
-            await advanceTime(550);
-
-            // Second poll returns completed
-            const reqPoll2 = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-            reqPoll2.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-
-            // Small delay before S3 upload
-            await advanceTime(10);
-
-            // Step 3: Upload to S3
-            const reqS3 = httpMock.expectOne(presignedUrl);
-            expect(reqS3.request.method).toBe('PUT');
-            reqS3.flush({});
-
-            // Small delay before file creation
-            await advanceTime(10);
-
-            // Step 4: Create file record via RPC
-            const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
-            expect(reqCreate.request.method).toBe('POST');
-            reqCreate.flush(mockFileRef);
-
-            // Wait for interval polling to start (1000ms delay before first poll)
-            await advanceTime(1050);
-
-            // Step 5: Wait for thumbnails (first attempt returns processing)
-            const reqThumb1 = httpMock.expectOne(r => r.url.includes('thumbnail_status'));
-            reqThumb1.flush([{ thumbnail_status: 'processing' }]);
-
-            // Wait for second poll (1000ms interval)
-            await advanceTime(1050);
-
-            // Second attempt returns completed
-            const reqThumb2 = httpMock.expectOne(r => r.url.includes('thumbnail_status'));
-            reqThumb2.flush([{ thumbnail_status: 'completed' }]);
-
-            // Small delay before refetch
-            await advanceTime(10);
-
-            // Step 6: Refetch file record
-            const reqRefetch = httpMock.expectOne(r => r.url.includes('files?id=eq'));
-            reqRefetch.flush([updatedFileRef]);
-
-            const result = await promise;
-            expect(result).toEqual(updatedFileRef);
-            expect(result.thumbnail_status).toBe('completed');
-        }, 5000); // 5 second timeout for thumbnail workflow
-
-        it('should handle upload without waiting for thumbnails', async () => {
-            const file = new File(['test'], 'test.txt', { type: 'text/plain' });
-            const entityType = 'Issue';
-            const entityId = '1';
-            const requestId = 'req-456';
-            const fileId = '019a1781-bc15-706b-99ee-6b62b24e223d';
-            const presignedUrl = 'http://localhost:9000/civic-os-files/Issue/1/019a1781-bc15-706b-99ee-6b62b24e223d/original.txt?signature=def';
-
-            const mockFileRef: FileReference = {
-                id: fileId,
-                entity_type: entityType,
-                entity_id: entityId,
-                file_name: 'test.txt',
-                file_type: 'text/plain',
-                file_size: 4,
-                s3_bucket: 'civic-os-files',
-                s3_key_prefix: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223d',
-                s3_original_key: 'Issue/1/019a1781-bc15-706b-99ee-6b62b24e223d/original.txt',
-                s3_thumbnail_small_key: undefined,
-                s3_thumbnail_medium_key: undefined,
-                s3_thumbnail_large_key: undefined,
-                thumbnail_status: 'not_applicable',
-                thumbnail_error: undefined,
-                created_at: '2025-01-15T10:30:00Z',
-                updated_at: '2025-01-15T10:30:00Z'
-            };
-
-            const promise = service.uploadFile(file, entityType, entityId, false);
-            await advanceTime(10);
-
-            // Request presigned URL
-            const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
-            reqUrl.flush(requestId);
-            await advanceTime(10);
-
-            // Poll for URL
-            const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-            reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-            await advanceTime(10);
-
-            // Upload to S3
-            const reqS3 = httpMock.expectOne(presignedUrl);
-            reqS3.flush({});
-            await advanceTime(10);
-
-            // Create file record via RPC
-            const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
-            reqCreate.flush(mockFileRef);
-
-            const result = await promise;
-            expect(result).toEqual(mockFileRef);
-            expect(result.thumbnail_status).toBe('not_applicable');
+    describe('uploadFile - full workflow (v0.88.0: the database issues the upload)', () => {
+        const fileId = '019a1781-bc15-706b-99ee-6b62b24e223c';
+        const key = (ext: string, type = 'Issue', id = '1') => `${type}/${id}/${fileId}/original.${ext}`;
+        const issued = (ext: string, isPublic = false, type = 'Issue', id = '1') => ({
+            url: `http://localhost:9000/civic-os-files/${key(ext, type, id)}?X-Amz-Signature=abc`,
+            file_id: fileId, bucket: 'civic-os-files', key: key(ext, type, id), is_public: isPublic
+        });
+        const record = (ext: string, fileType: string, status: FileReference['thumbnail_status']): FileReference => ({
+            id: fileId, entity_type: 'Issue', entity_id: '1', file_name: `test.${ext}`, file_type: fileType, file_size: 4,
+            s3_bucket: 'civic-os-files', s3_key_prefix: `Issue/1/${fileId}`, s3_original_key: key(ext),
+            thumbnail_status: status, created_at: '2025-01-15T10:30:00Z', updated_at: '2025-01-15T10:30:00Z',
+            url: `http://localhost:9000/civic-os-files/${key(ext)}?X-Amz-Signature=view`
         });
 
-        it('should handle polling timeout', async () => {
+        it('issues, uploads, registers and waits for thumbnails, with no polling for the URL', async () => {
             const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-            const requestId = 'req-timeout';
+            const created = record('jpg', 'image/jpeg', 'pending');
+            const done: FileReference = { ...created, thumbnail_status: 'completed', thumb_small_url: 'http://s/small?sig' };
 
-            const promise = service.uploadFile(file, 'Issue', '1', false);
+            const promise = service.uploadFile(file, 'Issue', '1', true);
             await advanceTime(10);
 
-            // Request presigned URL
-            const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
-            reqUrl.flush(requestId);
+            const req = httpMock.expectOne(r => r.url.endsWith('rpc/request_file_upload'));
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({ p_entity_type: 'Issue', p_entity_id: '1', p_file_name: 'test.jpg', p_file_type: 'image/jpeg' });
+            req.flush(issued('jpg'));
+            await advanceTime(10);
 
-            // All 20 polling attempts return pending
-            for (let i = 0; i < 20; i++) {
-                await advanceTime(550);
-                const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-                reqPoll.flush([{ status: 'pending', url: null, file_id: null, error: null }]);
+            const put = httpMock.expectOne(issued('jpg').url);
+            expect(put.request.method).toBe('PUT');
+            expect(put.request.headers.get('Content-Type')).toBe('image/jpeg');
+            expect(put.request.headers.has('x-amz-acl')).toBe(false);
+            put.flush({});
+            await advanceTime(10);
+
+            const create = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
+            expect(create.request.body).toEqual(expect.objectContaining({
+                p_id: fileId, p_s3_bucket: 'civic-os-files', p_s3_original_key: key('jpg'), p_thumbnail_status: 'pending'
+            }));
+            create.flush(created);
+
+            await advanceTime(1050);
+            httpMock.expectOne(r => r.url.includes('thumbnail_status')).flush([{ thumbnail_status: 'processing' }]);
+            await advanceTime(1050);
+            httpMock.expectOne(r => r.url.includes('thumbnail_status')).flush([{ thumbnail_status: 'completed' }]);
+            await advanceTime(10);
+            httpMock.expectOne(r => r.url.includes('files?id=eq')).flush([done]);
+
+            expect(await promise).toEqual(done);
+            httpMock.expectNone(r => r.url.includes('get_upload_url') || r.url.includes('request_upload_url'));
+        }, 5000);
+
+        it('returns the registered record (with its URLs) when not waiting for thumbnails', async () => {
+            const file = new File(['test'], 'test.txt', { type: 'text/plain' });
+            const created = record('txt', 'text/plain', 'not_applicable');
+            const promise = service.uploadFile(file, 'Issue', '1', false);
+            await advanceTime(10);
+            httpMock.expectOne(r => r.url.endsWith('rpc/request_file_upload')).flush(issued('txt'));
+            await advanceTime(10);
+            httpMock.expectOne(issued('txt').url).flush({});
+            await advanceTime(10);
+            httpMock.expectOne(r => r.url.includes('rpc/create_file_record')).flush(created);
+
+            const result = await promise;
+            expect(result).toEqual(created);
+            expect(result.url).toContain('X-Amz-Signature');
+        });
+
+        it('sends x-amz-acl: public-read only for a public file (a static asset)', async () => {
+            const file = new File(['test'], 'logo.png', { type: 'image/png' });
+            const promise = service.uploadFile(file, 'static_assets', 'a1', false);
+            await advanceTime(10);
+            httpMock.expectOne(r => r.url.endsWith('rpc/request_file_upload')).flush(issued('png', true, 'static_assets', 'a1'));
+            await advanceTime(10);
+            const put = httpMock.expectOne(issued('png', true, 'static_assets', 'a1').url);
+            expect(put.request.headers.get('x-amz-acl')).toBe('public-read');
+            put.flush({});
+            await advanceTime(10);
+            httpMock.expectOne(r => r.url.includes('rpc/create_file_record')).flush(record('png', 'image/png', 'pending'));
+            await promise;
+        });
+
+        it('includes propertyName in the file record when provided, and omits it otherwise', async () => {
+            for (const propertyName of ['resume', undefined]) {
+                const file = new File(['test'], 'doc.pdf', { type: 'application/pdf' });
+                const promise = service.uploadFile(file, 'staff_documents', '5', false, propertyName);
+                await advanceTime(10);
+                httpMock.expectOne(r => r.url.endsWith('rpc/request_file_upload')).flush(issued('pdf', false, 'staff_documents', '5'));
+                await advanceTime(10);
+                httpMock.expectOne(issued('pdf', false, 'staff_documents', '5').url).flush({});
+                await advanceTime(10);
+                const create = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
+                expect(create.request.body.p_property_name).toBe(propertyName);
+                create.flush(record('pdf', 'application/pdf', 'pending'));
+                await promise;
             }
+        });
 
-            // The service gives up after the 500 ms wait that follows the 20th attempt.
-            const rejected = expect(promise).rejects.toThrowError('Timeout waiting for upload URL');
-            await advanceTime(500);
+        it('shows a translated message when the database has no S3 signing config', async () => {
+            const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+            const promise = service.uploadFile(file, 'Issue', '1', false);
+            const rejected = expect(promise).rejects.toThrowError('File storage is not set up yet');
+            await advanceTime(10);
+            httpMock.expectOne(r => r.url.endsWith('rpc/request_file_upload'))
+                .flush({ code: '55000', message: 'file_storage_not_configured' }, { status: 400, statusText: 'Bad Request' });
             await rejected;
         });
 
-        it('should include propertyName in file record when provided', async () => {
-            const file = new File(['test'], 'doc.pdf', { type: 'application/pdf' });
-            const entityType = 'staff_documents';
-            const entityId = '5';
-            const requestId = 'req-prop';
-            const fileId = '019b2222-aaaa-7777-bbbb-ccccddddeeee';
-            const presignedUrl = 'http://localhost:9000/civic-os-files/staff_documents/5/' + fileId + '/original.pdf?sig=x';
-
-            const mockFileRef: FileReference = {
-                id: fileId, entity_type: entityType, entity_id: entityId,
-                file_name: 'doc.pdf', file_type: 'application/pdf', file_size: 4,
-                s3_bucket: 'civic-os-files', s3_key_prefix: '', s3_original_key: 'key/original.pdf',
-                thumbnail_status: 'pending', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
-            };
-
-            const promise = service.uploadFile(file, entityType, entityId, false, 'resume');
-            await advanceTime(10);
-
-            const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
-            reqUrl.flush(requestId);
-            await advanceTime(10);
-
-            const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-            reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-            await advanceTime(10);
-
-            const reqS3 = httpMock.expectOne(presignedUrl);
-            reqS3.flush({});
-            await advanceTime(10);
-
-            const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
-            expect(reqCreate.request.body.p_property_name).toBe('resume');
-            reqCreate.flush(mockFileRef);
-
-            await promise;
-        });
-
-        it('should omit propertyName from file record when not provided', async () => {
-            const file = new File(['test'], 'doc.pdf', { type: 'application/pdf' });
-            const entityType = 'staff_documents';
-            const entityId = '5';
-            const requestId = 'req-noprop';
-            const fileId = '019b3333-aaaa-7777-bbbb-ccccddddeeee';
-            const presignedUrl = 'http://localhost:9000/civic-os-files/staff_documents/5/' + fileId + '/original.pdf?sig=y';
-
-            const mockFileRef: FileReference = {
-                id: fileId, entity_type: entityType, entity_id: entityId,
-                file_name: 'doc.pdf', file_type: 'application/pdf', file_size: 4,
-                s3_bucket: 'civic-os-files', s3_key_prefix: '', s3_original_key: 'key/original.pdf',
-                thumbnail_status: 'pending', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
-            };
-
-            const promise = service.uploadFile(file, entityType, entityId, false);
-            await advanceTime(10);
-
-            const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
-            reqUrl.flush(requestId);
-            await advanceTime(10);
-
-            const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-            reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
-            await advanceTime(10);
-
-            const reqS3 = httpMock.expectOne(presignedUrl);
-            reqS3.flush({});
-            await advanceTime(10);
-
-            const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
-            expect(reqCreate.request.body.p_property_name).toBeUndefined();
-            reqCreate.flush(mockFileRef);
-
-            await promise;
-        });
-
-        it('should handle presigned URL request failure', async () => {
+        it('passes other errors through', async () => {
             const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-            const requestId = 'req-fail';
-
             const promise = service.uploadFile(file, 'Issue', '1', false);
+            const rejected = expect(promise).rejects.toBeTruthy();
             await advanceTime(10);
-
-            // Request presigned URL
-            const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
-            reqUrl.flush(requestId);
-            await advanceTime(10);
-
-            // Poll returns failed status
-            const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
-            reqPoll.flush([{ status: 'failed', url: null, file_id: null, error: 'S3 error' }]);
-
-            await expect(promise).rejects.toThrowError('S3 error');
+            httpMock.expectOne(r => r.url.endsWith('rpc/request_file_upload'))
+                .flush({ code: '42501', message: 'Not authorized to upload static assets' }, { status: 403, statusText: 'Forbidden' });
+            await rejected;
         });
     });
 });

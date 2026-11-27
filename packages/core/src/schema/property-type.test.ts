@@ -183,9 +183,9 @@ describe('select string builders', () => {
     expect(propertyToSelectString(prop({ column_name: 'x', type: T.ManyToMany }))).toBe('x');
   });
 
-  const files = 'f:files!f(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)';
+  const files = 'f:files!f(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)';
   const payment = 'p:payment_transactions!p(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)';
-  const gallery = 'g:photo_galleries!g(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))';
+  const gallery = 'g:photo_galleries!g(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url)))';
 
   it('embedded system types', () => {
     for (const t of [T.File, T.FileImage, T.FilePDF]) {

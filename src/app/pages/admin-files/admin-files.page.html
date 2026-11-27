@@ -221,7 +221,7 @@
                 </td>
                 <!-- Filename -->
                 <td>
-                  <a [href]="getS3Url(file.s3_original_key)" target="_blank"
+                  <a [attr.href]="file.url ?? null" target="_blank" rel="noopener" (click)="openFile($event, file)"
                     class="link link-primary text-sm" [title]="file.file_name">
                     {{ file.file_name }}
                   </a>

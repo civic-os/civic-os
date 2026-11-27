@@ -2,9 +2,10 @@
  * Copyright (C) 2023-2025 Civic OS, L3C
  */
 
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FileReference } from '../../interfaces/entity';
-import { getS3Config } from '../../config/runtime';
+import { fileDisplayUrl } from '@civic-os/core';
+import { FileAccessService } from '../../services/file-access.service';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -17,6 +18,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   styleUrl: './image-viewer.component.css'
 })
 export class ImageViewerComponent {
+  private fileAccess = inject(FileAccessService);
+
   isOpen = signal(false);
   currentImage = signal<FileReference | null>(null);
   zoomed = signal(false);
@@ -54,62 +57,19 @@ export class ImageViewerComponent {
   }
 
   /**
-   * Download the original image file
-   * Fetches as blob to force download instead of navigation
+   * Download the original image under its name, with a URL read now (signed URLs expire, v0.88.0)
    */
   async downloadImage() {
     const img = this.currentImage();
     if (!img) return;
-
-    const url = this.getS3Url(img.s3_original_key);
-    const filename = this.getDownloadFilename();
-
-    try {
-      // Fetch the image as a blob
-      const response = await fetch(url);
-      const blob = await response.blob();
-
-      // Create a temporary blob URL
-      const blobUrl = URL.createObjectURL(blob);
-
-      // Create a temporary anchor element and click it
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-
-      // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error('Failed to download image:', error);
+    if (!(await this.fileAccess.download(img))) {
+      console.error('Failed to download image: no URL available');
     }
   }
 
   /**
-   * Get image URL (prefer large thumbnail, fallback to original)
+   * The image to show: the large thumbnail in the fitted view, the original when zoomed
+   * (computed, so the <img> keeps its src across change detection)
    */
-  getImageUrl(): string {
-    const img = this.currentImage();
-    if (!img) return '';
-
-    // For zoomed view, always use original
-    if (this.zoomed()) {
-      return this.getS3Url(img.s3_original_key);
-    }
-
-    // For fit view, use large thumbnail if available
-    return img.s3_thumbnail_large_key
-      ? this.getS3Url(img.s3_thumbnail_large_key)
-      : this.getS3Url(img.s3_original_key);
-  }
-
-  /**
-   * Construct S3 URL from key
-   */
-  private getS3Url(s3Key: string): string {
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${s3Key}`;
-  }
+  imageUrl = computed(() => fileDisplayUrl(this.currentImage(), this.zoomed() ? 'original' : 'large') ?? '');
 }

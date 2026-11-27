@@ -20,6 +20,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 import { StaticAsset, CropState, CropBreakpoint, CropPresetProfile } from '../interfaces/dashboard';
+import { FileReference } from '../interfaces/entity';
 import { FileUploadService } from './file-upload.service';
 import { AuthService } from './auth.service';
 
@@ -62,6 +63,18 @@ export const CROP_PRESET_PROFILES: CropPresetProfile[] = [
  * and cropped via an admin page, then referenced in dashboard image widgets
  * by their immutable slug.
  */
+/**
+ * A static asset with its embedded files. Static assets are public files (metadata.file_is_public), so
+ * each file's url and thumb_*_url are direct, stable URLs (v0.88.0).
+ */
+export type StaticAssetFile = Pick<FileReference, 'id' | 'thumbnail_status' | 'url' | 'thumb_small_url' | 'thumb_medium_url' | 'thumb_large_url'>;
+export type StaticAssetWithFiles = StaticAsset & {
+  original_file?: StaticAssetFile | null;
+  desktop_file?: StaticAssetFile | null;
+  tablet_file?: StaticAssetFile | null;
+  mobile_file?: StaticAssetFile | null;
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -83,16 +96,16 @@ export class StaticAssetsService {
    * Fetch all static assets, ordered by creation date.
    * Includes embedded file metadata for thumbnails via PostgREST resource embedding.
    */
-  getAll(): Observable<StaticAsset[]> {
+  getAll(): Observable<StaticAssetWithFiles[]> {
     const select = [
       '*',
-      'original_file:files!original_file_id(id,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,thumbnail_status)',
-      'desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
-      'tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
-      'mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
+      'original_file:files!original_file_id(id,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
     ].join(',');
 
-    return this.http.get<StaticAsset[]>(
+    return this.http.get<StaticAssetWithFiles[]>(
       `${getPostgrestUrl()}static_assets?select=${select}&order=created_at.desc`
     ).pipe(
       catchError(error => {
@@ -106,15 +119,15 @@ export class StaticAssetsService {
    * Fetch a single static asset by slug.
    * Used by the image widget to resolve asset data for display.
    */
-  getBySlug(slug: string): Observable<StaticAsset | null> {
+  getBySlug(slug: string): Observable<StaticAssetWithFiles | null> {
     const select = [
       '*',
-      'desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
-      'tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
-      'mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
+      'desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
     ].join(',');
 
-    return this.http.get<StaticAsset[]>(
+    return this.http.get<StaticAssetWithFiles[]>(
       `${getPostgrestUrl()}static_assets?select=${select}&slug=eq.${encodeURIComponent(slug)}&limit=1`
     ).pipe(
       map(results => results.length > 0 ? results[0] : null),
@@ -131,10 +144,10 @@ export class StaticAssetsService {
   getById(id: string): Observable<StaticAsset | null> {
     const select = [
       '*',
-      'original_file:files!original_file_id(id,s3_original_key,s3_thumbnail_medium_key,thumbnail_status)',
-      'desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
-      'tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
-      'mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)',
+      'original_file:files!original_file_id(id,s3_original_key,s3_thumbnail_medium_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'desktop_file:files!desktop_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'tablet_file:files!tablet_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
+      'mobile_file:files!mobile_file_id(id,s3_original_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,url,thumb_small_url,thumb_medium_url,thumb_large_url)',
     ].join(',');
 
     return this.http.get<StaticAsset[]>(

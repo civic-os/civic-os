@@ -23,7 +23,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { of, catchError, Subscription, combineLatest, map, switchMap, distinctUntilChanged, Subject, debounceTime } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { SchemaService } from '../../services/schema.service';
-import { getPostgrestUrl, getS3Config } from '../../config/runtime';
+import { getPostgrestUrl } from '../../config/runtime';
+import { FileAccessService } from '../../services/file-access.service';
 import { FileReference, EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
@@ -66,6 +67,7 @@ import { TranslationService } from '../../services/translation.service';
 })
 export class AdminFilesPage implements OnInit, OnDestroy {
   private http = inject(HttpClient);
+  private fileAccess = inject(FileAccessService);
   private auth = inject(AuthService);
   private schema = inject(SchemaService);
   private route = inject(ActivatedRoute);
@@ -658,16 +660,15 @@ export class AdminFilesPage implements OnInit, OnDestroy {
   // File Display Helpers
   // ──────────────────────────────────────────────
 
-  getS3Url(key: string): string {
-    const s3 = getS3Config();
-    return `${s3.endpoint}/${s3.bucket}/${key}`;
+  /** The small thumbnail's URL from the files view (signed for private files, v0.88.0). */
+  getThumbnailUrl(file: FileReference): string | null {
+    return file.thumbnail_status === 'completed' ? file.thumb_small_url ?? null : null;
   }
 
-  getThumbnailUrl(file: FileReference): string | null {
-    if (file.thumbnail_status === 'completed' && file.s3_thumbnail_small_key) {
-      return this.getS3Url(file.s3_thumbnail_small_key);
-    }
-    return null;
+  /** Opens the file in a new tab with a URL read now (signed URLs expire on a page left open). */
+  openFile(event: Event, file: FileReference) {
+    event.preventDefault();
+    void this.fileAccess.openInNewTab(file);
   }
 
   getFileIcon(fileType: string): string {
@@ -743,8 +744,9 @@ export class AdminFilesPage implements OnInit, OnDestroy {
   downloadSelected() {
     const selected = this.selectedFileIds();
     const filesToDownload = this.files().filter(f => selected.has(f.id));
+    // Each under its own name, with a URL read now
     for (const file of filesToDownload) {
-      window.open(this.getS3Url(file.s3_original_key), '_blank');
+      void this.fileAccess.download(file);
     }
   }
 

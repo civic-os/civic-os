@@ -91,6 +91,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.color_swatch': 'Color swatch',
   'a11y.color_value': 'Color: {{value}}',
   'a11y.admin_config.reset': 'Reset {{name}} to its inherited value',
+  'a11y.admin_config.secret_clear': 'Clear {{name}}',
   'a11y.subject_template': 'Subject template',
   'a11y.html_template': 'HTML template',
   'a11y.text_template': 'Text template',
@@ -256,6 +257,16 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'admin_config.deployment_pwa_app_name': 'PWA app name',
   'admin_config.deployment_uses_app_title': 'Uses the app title',
   'admin_config.deployment_map_tiles': 'Map tile provider',
+  // Secret keys (v0.88.0): values never reach the browser
+  'admin_config.secret.set': 'Set',
+  'admin_config.secret.missing': 'Missing',
+  'admin_config.secret.changed': 'Changed {{date}}',
+  'admin_config.secret.deployment_managed': 'Set by the deployment. It cannot be changed here.',
+  'admin_config.secret.replace': 'Replace',
+  'admin_config.secret.clear': 'Clear',
+  'admin_config.secret.new_value': 'Type a new value',
+  // File uploads (v0.88.0)
+  'file_upload.storage_not_configured': 'File storage is not set up yet. Try again in a minute, or ask an administrator.',
 
   // Translation Management page (/admin/translations). The Excel column headers stay English, so a
   // file exported in one language imports in any other.

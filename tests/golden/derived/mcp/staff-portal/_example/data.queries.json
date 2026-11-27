@@ -1594,13 +1594,13 @@
           "requests": [
             {
               "decoded": [
-                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/reimbursements?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,receipt:files!receipt(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),status_id:statuses!status_id(id,display_name,color,status_key),response_notes,responded_by:civic_os_users!responded_by(id,display_name,full_name,phone,email),responded_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Reimbursements."
@@ -2601,13 +2601,13 @@
           "requests": [
             {
               "decoded": [
-                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
+                "select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id",
                 "order=display_name.asc,id.asc",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
+              "url": "<PGRST>/staff_documents?select=display_name,staff_member_id:staff_members!staff_member_id(id,display_name),requirement_id:document_requirements!requirement_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),file:files!file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at,is_public,url,thumb_small_url,thumb_medium_url,thumb_large_url),reviewer_notes,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,created_at,updated_at,id&order=display_name.asc,id.asc&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Documents."

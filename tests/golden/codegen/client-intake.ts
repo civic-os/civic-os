@@ -68,6 +68,11 @@ export interface Database {
           thumbnail_status: string;
           thumbnail_error: string | null;
           created_at: string;
+          is_public: boolean;
+          url: string | null;
+          thumb_small_url: string | null;
+          thumb_medium_url: string | null;
+          thumb_large_url: string | null;
         } | null;
         method_id: {
           id: number;

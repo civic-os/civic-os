@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getPostgrestUrl, getKeycloakConfig, getMapConfig, getS3Config, getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './runtime';
+import { getPostgrestUrl, getKeycloakConfig, getMapConfig, getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './runtime';
 
 describe('Runtime Configuration Helpers', () => {
     let originalCivicOsConfig: typeof window.civicOsConfig;
@@ -115,27 +115,6 @@ describe('Runtime Configuration Helpers', () => {
             expect(config.attribution).toBe('Test Attribution');
             expect(config.defaultCenter).toEqual([42.5, -83.0]);
             expect(config.defaultZoom).toBe(12);
-        });
-    });
-
-    describe('getS3Config', () => {
-        it('should return S3 config from window.civicOsConfig in production mode', () => {
-            window.civicOsConfig = {
-                postgrestUrl: '',
-                swaggerUrl: '',
-                keycloak: { url: '', realm: '', clientId: '' },
-                map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
-                s3: {
-                    endpoint: 'https://s3.example.com',
-                    bucket: 'my-bucket'
-                },
-                stripe: { publishableKey: 'pk_test_mock' }
-            };
-
-            const config = getS3Config();
-
-            expect(config.endpoint).toBe('https://s3.example.com');
-            expect(config.bucket).toBe('my-bucket');
         });
     });
 

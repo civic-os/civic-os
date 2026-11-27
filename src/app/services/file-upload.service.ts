@@ -15,24 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, interval, takeWhile, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 import { FileReference } from '../interfaces/entity';
+import { TranslationService } from './translation.service';
 
-interface UploadUrlRequest {
-  p_entity_type: string;
-  p_entity_id: string;
-  p_file_name: string;
-  p_file_type: string;
-}
-
-interface UploadUrlResponse {
-  status: string;
+/** What `request_file_upload` returns (v0.88.0): the upload the database issued. */
+export interface IssuedUpload {
   url: string;
   file_id: string;
-  error: string | null;
+  bucket: string;
+  key: string;
+  is_public: boolean;
 }
 
 @Injectable({
@@ -45,15 +41,16 @@ export class FileUploadService {
   // Key format: "{entityType}:{entityId}:{fileName}"
   private inFlightUploads = new Map<string, Promise<FileReference>>();
 
+  private translation = inject(TranslationService);
+
   constructor(private http: HttpClient) {}
 
   /**
-   * Complete file upload workflow
-   * 1. Request presigned URL from PostgreSQL
-   * 2. Poll until URL is ready
-   * 3. Upload file directly to S3
-   * 4. Create file record in database
-   * 5. Optionally wait for thumbnails
+   * Complete file upload workflow (v0.88.0: the database signs the upload synchronously)
+   * 1. Ask the database to issue an upload (file id, key, presigned PUT)
+   * 2. Upload file directly to S3
+   * 3. Register the file record (only an upload issued to this user is accepted)
+   * 4. Optionally wait for thumbnails
    *
    * Includes duplicate prevention: if upload already in progress for same
    * entityType/entityId/fileName, returns the existing promise instead of
@@ -99,19 +96,17 @@ export class FileUploadService {
     waitForThumbnails: boolean,
     propertyName?: string
   ): Promise<FileReference> {
-    // Step 1: Request presigned upload URL
-    const requestId = await this.requestUploadUrl(file.name, file.type, entityType, entityId);
+    // Step 1: The database issues the upload: file id, key and a presigned PUT
+    const issued = await this.requestFileUpload(file.name, file.type, entityType, entityId);
 
-    // Step 2: Poll for presigned URL (max 10 seconds)
-    const { url, file_id } = await this.pollForUrl(requestId);
+    // Step 2: Upload file directly to S3
+    await this.uploadToS3(issued, file);
 
-    // Step 3: Upload file directly to S3
-    await this.uploadToS3(url, file);
+    // Step 3: Register the file record
+    const fileRecord = await this.createFileRecord(issued, file.name, file.type, file.size, entityType, entityId, propertyName);
+    const file_id = issued.file_id;
 
-    // Step 4: Create file record in database
-    const fileRecord = await this.createFileRecord(file_id, file.name, file.type, file.size, entityType, entityId, url, propertyName);
-
-    // Step 5: Optionally wait for thumbnail generation
+    // Step 4: Optionally wait for thumbnail generation
     if (waitForThumbnails && file.type.startsWith('image/')) {
       await this.waitForThumbnails(file_id);
       // Refetch the file record to get updated thumbnail_status and thumbnail keys
@@ -123,113 +118,67 @@ export class FileUploadService {
   }
 
   /**
-   * Request presigned URL from PostgreSQL via RPC
-   * Returns request ID for polling
+   * Ask the database to issue one upload (`request_file_upload`). Until the consolidated worker has
+   * published the S3 settings the RPC refuses with `file_storage_not_configured`, shown translated.
    */
-  private async requestUploadUrl(
+  private async requestFileUpload(
     fileName: string,
     fileType: string,
     entityType: string,
     entityId: string
-  ): Promise<string> {
-    const body: UploadUrlRequest = {
-      p_entity_type: entityType,
-      p_entity_id: entityId,
-      p_file_name: fileName,
-      p_file_type: fileType
-    };
-
-    const response = await firstValueFrom(
-      this.http.post<string>(`${this.apiUrl}rpc/request_upload_url`, body)
-    );
-
-    return response;
-  }
-
-  /**
-   * Poll for presigned URL completion
-   * Checks every 500ms for up to 10 seconds
-   */
-  private async pollForUrl(requestId: string): Promise<{ url: string; file_id: string }> {
-    const maxAttempts = 20;  // 20 attempts × 500ms = 10 seconds
-    let attempt = 0;
-
-    while (attempt < maxAttempts) {
-      const response = await firstValueFrom(
-        this.http.get<UploadUrlResponse[]>(
-          `${this.apiUrl}rpc/get_upload_url?p_request_id=${requestId}`
-        )
+  ): Promise<IssuedUpload> {
+    try {
+      return await firstValueFrom(
+        this.http.post<IssuedUpload>(`${this.apiUrl}rpc/request_file_upload`, {
+          p_entity_type: entityType,
+          p_entity_id: entityId,
+          p_file_name: fileName,
+          p_file_type: fileType
+        })
       );
-
-      const result = response[0];
-
-      if (result.status === 'completed') {
-        return { url: result.url, file_id: result.file_id };
-      } else if (result.status === 'failed') {
-        throw new Error(result.error || 'Failed to get upload URL');
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.error?.message === 'file_storage_not_configured') {
+        throw new Error(this.translation.get('file_upload.storage_not_configured'), { cause: error });
       }
-
-      // Wait 500ms before next attempt
-      await new Promise(resolve => setTimeout(resolve, 500));
-      attempt++;
+      throw error;
     }
-
-    throw new Error('Timeout waiting for upload URL');
   }
 
   /**
-   * Upload file directly to S3 using presigned URL.
-   * The x-amz-acl header must match what the worker signed into the presigned URL —
-   * without it, S3 rejects the PUT with a signature mismatch.
+   * Upload the file directly to S3 with the presigned URL. Only a public file (a static asset) has
+   * x-amz-acl: public-read signed into its URL, and S3 refuses an x-amz-* header that was not signed,
+   * so the header is sent exactly when the database says the file is public.
    */
-  private async uploadToS3(presignedUrl: string, file: File): Promise<void> {
-    await firstValueFrom(
-      this.http.put(presignedUrl, file, {
-        headers: {
-          'Content-Type': file.type,
-          'x-amz-acl': 'public-read'
-        }
-      })
-    );
+  private async uploadToS3(issued: IssuedUpload, file: File): Promise<void> {
+    const headers: Record<string, string> = { 'Content-Type': file.type };
+    if (issued.is_public) {
+      headers['x-amz-acl'] = 'public-read';
+    }
+    await firstValueFrom(this.http.put(issued.url, file, { headers }));
   }
 
   /**
-   * Create file record in database via RPC
-   * Extracts S3 key and bucket name from presigned URL.
-   * Uses create_file_record RPC (admin pattern: VIEWs for reads, RPCs for writes).
+   * Register the file via RPC with the bucket and key the database issued
+   * (admin pattern: VIEWs for reads, RPCs for writes).
    */
   private async createFileRecord(
-    fileId: string,
+    issued: IssuedUpload,
     fileName: string,
     fileType: string,
     fileSize: number,
     entityType: string,
     entityId: string,
-    presignedUrl: string,
     propertyName?: string
   ): Promise<FileReference> {
-    // Extract S3 bucket and key from presigned URL (before query params)
-    // For path-style URLs: http://host/bucket/key
-    const url = new URL(presignedUrl);
-    const pathWithoutLeadingSlash = url.pathname.substring(1);  // Remove leading /
-
-    // Split path: first segment is bucket, rest is key
-    // URL: http://localhost:9000/civic-os-files/Issue/1/.../file.png
-    // Bucket: civic-os-files
-    // Key: Issue/1/.../file.png
-    const pathParts = pathWithoutLeadingSlash.split('/');
-    const s3Bucket = pathParts[0];  // First segment is bucket name
-    const s3Key = pathParts.slice(1).join('/');  // Rest is the S3 key
-
     const body: Record<string, any> = {
-      p_id: fileId,
+      p_id: issued.file_id,
       p_entity_type: entityType,
       p_entity_id: entityId,
       p_file_name: fileName,
       p_file_type: fileType,
       p_file_size: fileSize,
-      p_s3_bucket: s3Bucket,
-      p_s3_original_key: s3Key,
+      p_s3_bucket: issued.bucket,
+      p_s3_original_key: issued.key,
       p_thumbnail_status: fileType.startsWith('image/') || fileType === 'application/pdf' ? 'pending' : 'not_applicable'
     };
 

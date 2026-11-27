@@ -6,9 +6,9 @@
 
   <!-- PDF Container (iframe for browser-native rendering) -->
   <div class="h-[60vh] overflow-hidden rounded-lg border">
-    @if (currentPdf()) {
+    @if (pdfUrl(); as src) {
       <iframe
-        [src]="getSanitizedPdfUrl()"
+        [src]="src"
         [title]="currentPdf()?.file_name || ('a11y.pdf_document' | translate)"
         class="w-full h-full"
         type="application/pdf">

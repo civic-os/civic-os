@@ -2,10 +2,10 @@
  * Copyright (C) 2023-2025 Civic OS, L3C
  */
 
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileReference } from '../../interfaces/entity';
-import { getS3Config } from '../../config/runtime';
+import { FileAccessService } from '../../services/file-access.service';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -18,6 +18,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   styleUrl: './pdf-viewer.component.css'
 })
 export class PdfViewerComponent {
+  private fileAccess = inject(FileAccessService);
+
   isOpen = signal(false);
   currentPdf = signal<FileReference | null>(null);
 
@@ -40,78 +42,30 @@ export class PdfViewerComponent {
   }
 
   /**
-   * Get sanitized PDF URL for iframe
-   * Angular security requires bypassing for blob/data URLs
+   * The PDF's URL for the iframe, from the files view (signed for private files, v0.88.0). Computed,
+   * so the iframe keeps one SafeResourceUrl instead of a new one per change detection.
    */
-  getSanitizedPdfUrl(): SafeResourceUrl {
-    const pdf = this.currentPdf();
-    if (!pdf) return '';
-
-    const url = this.getS3Url(pdf.s3_original_key);
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-  }
+  pdfUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.currentPdf()?.url;
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
   /**
-   * Get raw PDF URL for download link
-   */
-  getPdfUrl(): string {
-    const pdf = this.currentPdf();
-    return pdf ? this.getS3Url(pdf.s3_original_key) : '';
-  }
-
-  /**
-   * Open PDF in new tab with full browser controls
+   * Open PDF in new tab with full browser controls (with a URL read now: signed URLs expire)
    */
   openFullScreen() {
-    window.open(this.getPdfUrl(), '_blank');
+    const pdf = this.currentPdf();
+    if (pdf) void this.fileAccess.openInNewTab(pdf);
   }
 
   /**
-   * Get download filename
-   */
-  getDownloadFilename(): string {
-    return this.currentPdf()?.file_name || 'document.pdf';
-  }
-
-  /**
-   * Download the PDF file
-   * Fetches as blob to force download instead of browser PDF viewer
+   * Download the PDF under its name (a URL read now, signed with Content-Disposition: attachment)
    */
   async downloadPdf() {
     const pdf = this.currentPdf();
     if (!pdf) return;
-
-    const url = this.getS3Url(pdf.s3_original_key);
-    const filename = this.getDownloadFilename();
-
-    try {
-      // Fetch the PDF as a blob
-      const response = await fetch(url);
-      const blob = await response.blob();
-
-      // Create a temporary blob URL
-      const blobUrl = URL.createObjectURL(blob);
-
-      // Create a temporary anchor element and click it
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-
-      // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error('Failed to download PDF:', error);
+    if (!(await this.fileAccess.download(pdf))) {
+      console.error('Failed to download PDF: no URL available');
     }
-  }
-
-  /**
-   * Construct S3 URL from key
-   */
-  private getS3Url(s3Key: string): string {
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${s3Key}`;
   }
 }

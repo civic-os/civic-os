@@ -18,7 +18,6 @@ import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.c
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
-import { getS3Config } from '../../config/runtime';
 
 /**
  * Editor component for photo galleries — drag-drop upload, reorder, remove.
@@ -353,19 +352,6 @@ export class PhotoGalleryEditorComponent {
   openLightbox(index: number): void {
     this.lightboxIndex.set(index);
     this.lightboxOpen.set(true);
-  }
-
-  /** Get S3 URL for a thumbnail key */
-  getS3Url(key: string): string {
-    const s3Config = getS3Config();
-    return `${s3Config.endpoint}/${s3Config.bucket}/${key}`;
-  }
-
-  /** Get the medium thumbnail URL for an image */
-  getThumbUrl(image: GalleryImage): string {
-    if (!image.file) return '';
-    const key = image.file.s3_thumbnail_medium_key || image.file.s3_original_key;
-    return this.getS3Url(key);
   }
 
   /** Update a gallery image's embedded file reference when polling detects thumbnail completion */
